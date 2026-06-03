@@ -770,7 +770,7 @@ const T = {
     shiftReport:'Shift report',totalBox:'Total in drawer',
   }
 };
-let lang = localStorage.getItem('4kpos_lang') || '';
+let lang = '';
 function t(k){ return (T[lang]&&T[lang][k]) || T.es[k] || k; }
 
 // STATE
@@ -800,12 +800,19 @@ function pico(m){return m==='cash'?'💵':m==='card'?'💳':'📲';}
 
 // LANG
 function setLang(l){
-  lang=l; localStorage.setItem('4kpos_lang',l);
+  lang=l;
   el('lang-screen').style.display='none';
   el('splash').style.display='flex';
   setTimeout(function(){
     const s=el('splash'); s.style.opacity='0';
-    setTimeout(function(){s.style.display='none';loadDB().then(function(){el('login-screen').style.display='flex';applyLang();});
+    setTimeout(function(){
+      s.style.display='none';
+      loadDB().then(function(){
+        db._lang=l;
+        saveDB();
+        el('login-screen').style.display='flex';
+        applyLang();
+      });
     },600);
   },2000);
 }
@@ -946,6 +953,7 @@ async function loadDB(){
       if(d.payMethods)db.payMethods=Object.assign(db.payMethods,d.payMethods);
       if(d.drawerPort)db.drawerPort=d.drawerPort;
       if(d.drawerAuto!==undefined)db.drawerAuto=d.drawerAuto;
+      if(d._lang){db._lang=d._lang;lang=d._lang;}
     }
   }catch(e){console.error(e);}
 }
@@ -1593,25 +1601,30 @@ function calcPress(k){
 }
 
 // CHANGE LANG FROM CONFIG
-function changeLang(l){{
-  lang=l; localStorage.setItem('4kpos_lang',l);
+function changeLang(l){
+  lang=l; db._lang=l; saveDB();
   applyLang();
   el('lang-changed-msg').style.display='block';
   setTimeout(()=>el('lang-changed-msg').style.display='none',2000);
   toast(l==='en'?'✅ Language changed to English':'✅ Idioma cambiado a Español');
-}}
+}
 
 // INIT
 document.querySelectorAll('.ov').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m&&m.id!=='ov-pin')m.classList.remove('open');});});
 
-if(lang){
-  el('lang-screen').style.display='none';
-  el('splash').style.display='flex';
-  setTimeout(()=>{
-    const s=el('splash');s.style.opacity='0';
-    setTimeout(()=>{s.style.display='none';loadDB().then(()=>{el('login-screen').style.display='flex';applyLang();});},600);
-  },1800);
-}
+// Load data first to check saved language
+loadDB().then(function(){
+  if(lang){
+    // Language already set — skip lang screen
+    el('lang-screen').style.display='none';
+    el('splash').style.display='flex';
+    setTimeout(()=>{
+      const s=el('splash');s.style.opacity='0';
+      setTimeout(()=>{s.style.display='none';el('login-screen').style.display='flex';applyLang();},600);
+    },1800);
+  }
+  // else: show lang screen (default state)
+});
 </script>
 </body>
 </html>
