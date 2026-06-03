@@ -1078,14 +1078,14 @@ function renderCatList(){
   if(!db.categories.length){e2.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">Sin categorías.</div>';return;}
   e2.innerHTML=db.categories.map(c=>{
     const th=c.img?('<img src="'+c.img+'" style="width:100%;height:100%;object-fit:cover;border-radius:7px">'):c.name[0];
-    return '<div class="pli"><div class="pli-thumb">'+th+'</div><div class="pli-info"><div class="pli-name">'+c.name+'</div></div><button class="eb" onclick="editCat(''+c.id+'')">✏</button><button class="xb" onclick="delCat(''+c.id+'')">✕</button></div>';
+    return '<div class="pli"><div class="pli-thumb">'+th+'</div><div class="pli-info"><div class="pli-name">'+c.name+'</div></div><button class="eb" onclick="editCat(\''+c.id+'\')">✏</button><button class="xb" onclick="delCat(\''+c.id+'\')">✕</button></div>';
   }).join('');
 }
 function renderCats(){
-  let h='<div class="chip'+(curCat==='all'?' on':'')+'" onclick="filterCat('all',this)">'+t('all')+'</div>';
+  let h='<div class="chip'+(curCat==='all'?' on':'')+'" onclick="filterCat(\'all\',this)">'+t('all')+'</div>';
   db.categories.forEach(c=>{
     const ip=c.img?('<img src="'+c.img+'" style="width:17px;height:17px;border-radius:3px;object-fit:cover;vertical-align:middle;margin-right:4px">'):'';
-    h+='<div class="chip'+(curCat===c.id?' on':'')+'" onclick="filterCat(''+c.id+'',this)">'+ip+c.name+'</div>';
+    h+='<div class="chip'+(curCat===c.id?' on':'')+'" onclick="filterCat(\''+c.id+'\',this)">'+ip+c.name+'</div>';
   });
   el('cats').innerHTML=h;
 }
@@ -1117,7 +1117,7 @@ function renderProdList(){
   if(!db.products.length){e2.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('noProducts')+'</div>';return;}
   e2.innerHTML=db.products.map(p=>{
     const th=p.img?('<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;border-radius:7px">'):p.name[0];
-    return '<div class="pli"><div class="pli-thumb">'+th+'</div><div class="pli-info"><div class="pli-name">'+p.name+'</div><div class="pli-meta">'+dolr(p.price)+' · Stock: '+(p.stock||0)+(p.bc?' · #'+p.bc:'')+'</div></div><div class="pli-price">'+dolr(p.price)+'</div><div style="display:flex;gap:4px"><button class="eb" onclick="editProd(''+p.id+'')">✏</button><button class="xb" onclick="delProd(''+p.id+'')">✕</button></div></div>';
+    return '<div class="pli"><div class="pli-thumb">'+th+'</div><div class="pli-info"><div class="pli-name">'+p.name+'</div><div class="pli-meta">'+dolr(p.price)+' · Stock: '+(p.stock||0)+(p.bc?' · #'+p.bc:'')+'</div></div><div class="pli-price">'+dolr(p.price)+'</div><div style="display:flex;gap:4px"><button class="eb" onclick="editProd(\''+p.id+'\')">✏</button><button class="xb" onclick="delProd(\''+p.id+'\')">✕</button></div></div>';
   }).join('');
 }
 function renderProds(){
@@ -1149,7 +1149,7 @@ function renderInv(){
         +'<td style="padding:7px 4px;text-align:right;font-family:monospace;color:var(--gn)">'+dolr(p.price)+'</td>'
         +'<td style="padding:7px 4px;text-align:right;font-weight:700;color:'+(low?'var(--am)':'var(--tx)')+'">'+( p.stock||0)+'</td>'
         +'<td style="padding:7px 4px;text-align:right;font-family:monospace;color:var(--tx2)">'+dolr(p.price*(p.stock||0))+'</td>'
-        +'<td style="padding:7px 4px"><button class="eb" onclick="qkStock(''+p.id+'')">✏ Stock</button></td></tr>';
+        +'<td style="padding:7px 4px"><button class="eb" onclick="qkStock(\''+p.id+'\')">✏ Stock</button></td></tr>';
     }).join('')+'</table>';
 }
 function qkStock(id){
@@ -1182,7 +1182,7 @@ function delCust(id){confirm2('¿Eliminar cliente?',()=>{db.customers=db.custome
 function renderCustList(){
   const e2=el('cust-list');
   if(!db.customers.length){e2.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">Sin clientes.</div>';return;}
-  e2.innerHTML=db.customers.map(c=>'<div class="pli"><div class="pli-thumb" style="background:var(--acg);color:var(--ac)">'+c.name[0]+'</div><div class="pli-info"><div class="pli-name">'+c.name+'</div><div class="pli-meta">'+(c.phone||'')+(c.email?' · '+c.email:'')+'</div></div><button class="xb" onclick="delCust(''+c.id+'')">✕</button></div>').join('');
+  e2.innerHTML=db.customers.map(c=>'<div class="pli"><div class="pli-thumb" style="background:var(--acg);color:var(--ac)">'+c.name[0]+'</div><div class="pli-info"><div class="pli-name">'+c.name+'</div><div class="pli-meta">'+(c.phone||'')+(c.email?' · '+c.email:'')+'</div></div><button class="xb" onclick="delCust(\''+c.id+'\')">✕</button></div>').join('');
 }
 
 // CART
@@ -1205,7 +1205,7 @@ function renderCart(){
   cart.forEach(item=>{
     const div=document.createElement('div');div.className='citem';
     const th=item.img?('<img class="ci-img" src="'+item.img+'" alt="">'):('<div class="ci-ph">'+item.name[0]+'</div>');
-    div.innerHTML=th+'<div class="ci-inf"><div class="ci-name">'+item.name+'</div><div class="ci-uprice">'+dolr(item.price)+' c/u</div></div><div class="ci-qty"><button class="qb" onclick="changeQty(''+item.id+'',-1)">−</button><span class="qn">'+item.qty+'</span><button class="qb" onclick="changeQty(''+item.id+'',1)">+</button></div><div class="ci-tot">'+dolr(item.price*item.qty)+'</div><button class="ci-del" onclick="changeQty(''+item.id+'',-99)">✕</button>';
+    div.innerHTML=th+'<div class="ci-inf"><div class="ci-name">'+item.name+'</div><div class="ci-uprice">'+dolr(item.price)+' c/u</div></div><div class="ci-qty"><button class="qb" onclick="changeQty(\''+item.id+'\',-1)">−</button><span class="qn">'+item.qty+'</span><button class="qb" onclick="changeQty(\''+item.id+'\',1)">+</button></div><div class="ci-tot">'+dolr(item.price*item.qty)+'</div><button class="ci-del" onclick="changeQty(\''+item.id+'\',-99)">✕</button>';
     list.appendChild(div);
   });
   calcChange();
@@ -1420,7 +1420,7 @@ function saveUser(){
 function delUser(id){if(id==='1'){toast('⚠ No se puede eliminar el admin principal');return;}confirm2('¿Eliminar usuario?',()=>{db.users=db.users.filter(u=>u.id!==id);saveDB();renderUserList();});}
 function clearUser(){['u-name','u-user','u-pass'].forEach(id=>el(id).value='');el('ulimit-warn').style.display='none';}
 function renderUserList(){
-  el('user-list').innerHTML=db.users.map(u=>'<div class="pli"><div class="pli-thumb" style="background:var(--acg);color:var(--ac)">'+u.name[0]+'</div><div class="pli-info"><div class="pli-name">'+u.name+'</div><div class="pli-meta">'+u.user+' · '+(u.role==='admin'?'👑 Admin':'💰 Cajero')+'</div></div>'+(u.id!=='1'?'<button class="xb" onclick="delUser(''+u.id+'')">✕</button>':'')+'</div>').join('');
+  el('user-list').innerHTML=db.users.map(u=>'<div class="pli"><div class="pli-thumb" style="background:var(--acg);color:var(--ac)">'+u.name[0]+'</div><div class="pli-info"><div class="pli-name">'+u.name+'</div><div class="pli-meta">'+u.user+' · '+(u.role==='admin'?'👑 Admin':'💰 Cajero')+'</div></div>'+(u.id!=='1'?'<button class="xb" onclick="delUser(\''+u.id+'\')">✕</button>':'')+'</div>').join('');
 }
 
 // CONFIG
