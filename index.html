@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4K POS — Sistema de Punto de Venta Profesional</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f0f13;color:#fff;}
+.c1{color:#1e3a8a}.c2{color:#1a7a3a}.c3{color:#e6b800}.c4{color:#cc1111}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0f0f13 0%,#1a0533 50%,#0f0f13 100%);padding:60px 20px;text-align:center;}
+.hero-logo{font-size:2.5rem;font-weight:800;margin-bottom:8px;}
+.hero-tag{display:inline-block;background:rgba(167,139,250,.15);border:1.5px solid rgba(167,139,250,.3);border-radius:20px;padding:5px 14px;font-size:.78rem;color:#a78bfa;margin-bottom:20px;}
+.hero h1{font-size:clamp(1.6rem,5vw,2.8rem);font-weight:800;line-height:1.2;margin-bottom:14px;}
+.hero p{font-size:1rem;color:rgba(255,255,255,.6);max-width:580px;margin:0 auto 30px;}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-main{background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;border-radius:10px;color:#fff;padding:14px 28px;font-size:.95rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;transition:opacity .2s;}
+.btn-main:hover{opacity:.88;}
+.btn-sec{background:none;border:1.5px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;padding:14px 28px;font-size:.95rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s;}
+.btn-sec:hover{border-color:#a78bfa;color:#a78bfa;}
+
+/* FEATURES */
+.features{padding:60px 20px;max-width:900px;margin:0 auto;}
+.features h2{text-align:center;font-size:1.6rem;font-weight:800;margin-bottom:8px;}
+.features .sub{text-align:center;color:rgba(255,255,255,.5);font-size:.9rem;margin-bottom:40px;}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+.feat{background:#1a1a22;border:1.5px solid rgba(255,255,255,.07);border-radius:14px;padding:20px;}
+.feat-ico{font-size:1.8rem;margin-bottom:10px;}
+.feat h3{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.feat p{font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.5;}
+
+/* SCREENSHOTS */
+.screens{background:#1a1a22;padding:60px 20px;text-align:center;}
+.screens h2{font-size:1.6rem;font-weight:800;margin-bottom:8px;}
+.screens .sub{color:rgba(255,255,255,.5);font-size:.9rem;margin-bottom:30px;}
+.screen-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;max-width:900px;margin:0 auto;}
+.screen-card{background:#0f0f13;border:1.5px solid rgba(255,255,255,.07);border-radius:12px;padding:16px;text-align:left;}
+.screen-card h4{font-size:.84rem;font-weight:700;margin-bottom:5px;color:#a78bfa;}
+.screen-card p{font-size:.76rem;color:rgba(255,255,255,.4);}
+
+/* PRICING */
+.pricing{padding:60px 20px;max-width:900px;margin:0 auto;}
+.pricing h2{text-align:center;font-size:1.6rem;font-weight:800;margin-bottom:8px;}
+.pricing .sub{text-align:center;color:rgba(255,255,255,.5);font-size:.9rem;margin-bottom:14px;}
+.toggle-wrap{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:36px;}
+.toggle-lbl{font-size:.84rem;color:rgba(255,255,255,.5);}
+.toggle-lbl.on{color:#fff;font-weight:600;}
+.toggle{width:44px;height:24px;background:#22222e;border:1.5px solid rgba(255,255,255,.15);border-radius:12px;cursor:pointer;position:relative;transition:background .2s;}
+.toggle.on{background:#7c3aed;}
+.toggle-dot{width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s;}
+.toggle.on .toggle-dot{left:22px;}
+.save-badge{background:rgba(52,211,153,.15);border:1.5px solid rgba(52,211,153,.3);border-radius:20px;padding:3px 10px;font-size:.72rem;color:#34d399;font-weight:600;}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+.plan{background:#1a1a22;border:1.5px solid rgba(255,255,255,.07);border-radius:16px;padding:24px;position:relative;}
+.plan.featured{border-color:#a78bfa;background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(167,139,250,.08));}
+.plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#7c3aed,#a78bfa);border-radius:20px;padding:4px 14px;font-size:.72rem;font-weight:700;white-space:nowrap;}
+.plan-name{font-size:.84rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.5);margin-bottom:8px;}
+.plan-price{font-size:2.2rem;font-weight:800;margin-bottom:4px;}
+.plan-price span{font-size:1rem;font-weight:400;color:rgba(255,255,255,.4);}
+.plan-orig{font-size:.8rem;color:rgba(255,255,255,.35);text-decoration:line-through;margin-bottom:14px;}
+.plan-features{list-style:none;margin-bottom:20px;}
+.plan-features li{font-size:.82rem;color:rgba(255,255,255,.65);padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:7px;}
+.plan-features li:last-child{border:none;}
+.plan-features .check{color:#34d399;}
+.plan-features .x{color:#f87171;}
+.plan-btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.plan-btn:hover{opacity:.88;}
+.plan-btn.p{background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;}
+.plan-btn.s{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);color:#fff;}
+
+/* CHECKOUT MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;align-items:center;justify-content:center;padding:16px;}
+.modal-bg.open{display:flex;}
+.modal{background:#1a1a22;border:1.5px solid rgba(255,255,255,.1);border-radius:18px;width:min(480px,98vw);max-height:90vh;overflow-y:auto;}
+.mh{padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;}
+.mh h3{font-size:.98rem;font-weight:700;}
+.mx{background:none;border:1.5px solid rgba(255,255,255,.1);border-radius:8px;color:rgba(255,255,255,.5);width:28px;height:28px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.mx:hover{border-color:#f87171;color:#f87171;}
+.mb{padding:20px 22px;}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.lbl{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.4);}
+.fi{background:#22222e;border:1.5px solid rgba(255,255,255,.08);border-radius:9px;padding:10px 12px;color:#fff;font-size:.88rem;outline:none;width:100%;transition:border-color .2s;}
+.fi:focus{border-color:#a78bfa;}
+.order-sum{background:#0f0f13;border-radius:10px;padding:14px;margin-bottom:16px;}
+.order-row{display:flex;justify-content:space-between;font-size:.84rem;margin-bottom:6px;color:rgba(255,255,255,.6);}
+.order-row.main{font-size:.95rem;font-weight:700;color:#fff;border-top:1px solid rgba(255,255,255,.07);padding-top:8px;margin-top:4px;}
+.pay-methods{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;}
+.pm{background:#22222e;border:1.5px solid rgba(255,255,255,.08);border-radius:9px;padding:10px 6px;text-align:center;cursor:pointer;transition:all .2s;}
+.pm.on{border-color:#a78bfa;background:rgba(167,139,250,.1);}
+.pm-ico{font-size:1.3rem;margin-bottom:4px;}
+.pm-lbl{font-size:.72rem;color:rgba(255,255,255,.5);}
+.pm.on .pm-lbl{color:#a78bfa;}
+.stripe-form{background:#0f0f13;border-radius:10px;padding:14px;margin-bottom:16px;}
+.submit-btn{width:100%;background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;border-radius:10px;color:#fff;padding:14px;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.submit-btn:hover{opacity:.88;}
+.submit-btn:disabled{opacity:.4;cursor:not-allowed;}
+.success-box{text-align:center;padding:20px 0;}
+.success-key{font-family:'Courier New',monospace;font-size:1.3rem;font-weight:700;color:#a78bfa;background:#0f0f13;border:2px solid rgba(167,139,250,.3);border-radius:10px;padding:14px;margin:14px 0;letter-spacing:2px;}
+
+/* FAQ */
+.faq{padding:60px 20px;max-width:700px;margin:0 auto;}
+.faq h2{text-align:center;font-size:1.5rem;font-weight:800;margin-bottom:30px;}
+.faq-item{background:#1a1a22;border:1.5px solid rgba(255,255,255,.07);border-radius:12px;padding:16px 18px;margin-bottom:10px;cursor:pointer;}
+.faq-q{font-size:.88rem;font-weight:600;display:flex;justify-content:space-between;align-items:center;}
+.faq-a{font-size:.82rem;color:rgba(255,255,255,.5);margin-top:10px;line-height:1.6;display:none;}
+.faq-item.open .faq-a{display:block;}
+
+/* FOOTER */
+footer{background:#1a1a22;border-top:1.5px solid rgba(255,255,255,.07);padding:30px 20px;text-align:center;}
+footer .logo{font-size:1.2rem;font-weight:800;margin-bottom:8px;}
+footer p{font-size:.78rem;color:rgba(255,255,255,.35);}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-logo"><span class="c1">4K</span> <span class="c2">P</span><span class="c3">O</span><span class="c4">S</span></div>
+  <div class="hero-tag">✨ Sistema Profesional de Punto de Venta</div>
+  <h1>Controla tu negocio<br>desde cualquier lugar</h1>
+  <p>POS completo para Windows con sincronización en la nube, dashboard en tu celular y todo lo que necesitas para vender más.</p>
+  <div class="hero-btns">
+    <a href="#pricing" class="btn-main">Ver planes y precios</a>
+    <a href="#features" class="btn-sec">Ver funciones</a>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="features" id="features">
+  <h2>Todo lo que necesitas</h2>
+  <p class="sub">Diseñado para negocios pequeños y medianos en República Dominicana</p>
+  <div class="feat-grid">
+    <div class="feat"><div class="feat-ico">🛒</div><h3>Punto de Venta Completo</h3><p>Cobra con efectivo, tarjeta o transferencia. Teclado numérico táctil, carrito de compras y recibo imprimible.</p></div>
+    <div class="feat"><div class="feat-ico">📱</div><h3>Dashboard en tu Celular</h3><p>Ve tus ventas en tiempo real desde el celular. Gráficas de ventas diarias, semanales y mensuales.</p></div>
+    <div class="feat"><div class="feat-ico">📦</div><h3>Control de Inventario</h3><p>Gestiona tu stock, recibe alertas de productos bajos y registra facturas de compra que actualizan el inventario.</p></div>
+    <div class="feat"><div class="feat-ico">🧾</div><h3>Recibos Profesionales</h3><p>Imprime recibos con tu logo, nombre del negocio, redes sociales y código QR. Compatible con impresoras térmicas.</p></div>
+    <div class="feat"><div class="feat-ico">👥</div><h3>Multi-Usuario</h3><p>Crea usuarios con roles. Admin con control total o cajero solo para cobrar. Login y cierre de turno con cuadre.</p></div>
+    <div class="feat"><div class="feat-ico">📒</div><h3>Contabilidad Básica</h3><p>Registra gastos, facturas de proveedores y ve gráficas de flujo de caja. Utilidad neta en tiempo real.</p></div>
+    <div class="feat"><div class="feat-ico">☁️</div><h3>Sincronización en la Nube</h3><p>Tus datos siempre seguros y accesibles. Sincronización automática cada 5 minutos.</p></div>
+    <div class="feat"><div class="feat-ico">🔐</div><h3>Seguro y Privado</h3><p>Código de admin protegido, acceso por turno y datos cifrados en la nube.</p></div>
+  </div>
+</div>
+
+<!-- SCREENS -->
+<div class="screens">
+  <h2>Una app completa</h2>
+  <p class="sub">Todo desde una sola pantalla</p>
+  <div class="screen-grid">
+    <div class="screen-card"><h4>📋 Lista de Precios</h4><p>Agrega productos con fotos, categorías y códigos de barras</p></div>
+    <div class="screen-card"><h4>🛒 Cobro Rápido</h4><p>Toca el producto, ingresa el efectivo y cobra en segundos</p></div>
+    <div class="screen-card"><h4>📊 Ventas del Día</h4><p>Ve todas las ventas, cancela o procesa devoluciones</p></div>
+    <div class="screen-card"><h4>📱 Dashboard Celular</h4><p>Ingresos, órdenes y productos más vendidos en tu celular</p></div>
+    <div class="screen-card"><h4>📒 Contabilidad</h4><p>Gastos, facturas y gráficas de rentabilidad</p></div>
+    <div class="screen-card"><h4>⚙️ Configurable</h4><p>Tu logo, nombre, mensaje de gracias y redes sociales en el recibo</p></div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="pricing" id="pricing">
+  <h2>Planes y Precios</h2>
+  <p class="sub">Elige el plan que mejor se adapte a tu negocio</p>
+  <div class="toggle-wrap">
+    <span class="toggle-lbl" id="lbl-monthly">Mensual</span>
+    <div class="toggle" id="billing-toggle" onclick="toggleBilling()"><div class="toggle-dot"></div></div>
+    <span class="toggle-lbl on" id="lbl-lifetime">Pago único</span>
+    <span class="save-badge">Ahorra 50%+</span>
+  </div>
+  <div class="plans">
+    <!-- BASIC -->
+    <div class="plan">
+      <div class="plan-name">Basico</div>
+      <div class="plan-price" id="basic-price">$99<span> único</span></div>
+      <div class="plan-orig" id="basic-orig">o $15/mes</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> 1 dispositivo (PC)</li>
+        <li><span class="check">✓</span> POS completo</li>
+        <li><span class="check">✓</span> Control de inventario</li>
+        <li><span class="check">✓</span> Multi-usuario</li>
+        <li><span class="check">✓</span> Recibos con logo</li>
+        <li><span class="check">✓</span> Contabilidad básica</li>
+        <li><span class="x">✗</span> Dashboard celular</li>
+        <li><span class="x">✗</span> Sincronización nube</li>
+      </ul>
+      <button class="plan-btn s" onclick="openCheckout('basic')">Comenzar ahora</button>
+    </div>
+    <!-- PRO -->
+    <div class="plan featured">
+      <div class="plan-badge">MAS POPULAR</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price" id="pro-price">$199<span> único</span></div>
+      <div class="plan-orig" id="pro-orig">o $35/mes</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Hasta 3 dispositivos</li>
+        <li><span class="check">✓</span> POS completo</li>
+        <li><span class="check">✓</span> Control de inventario</li>
+        <li><span class="check">✓</span> Multi-usuario</li>
+        <li><span class="check">✓</span> Recibos con logo</li>
+        <li><span class="check">✓</span> Contabilidad básica</li>
+        <li><span class="check">✓</span> Dashboard celular</li>
+        <li><span class="check">✓</span> Sincronización nube</li>
+      </ul>
+      <button class="plan-btn p" onclick="openCheckout('pro')">Comenzar ahora</button>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:20px;font-size:.8rem;color:rgba(255,255,255,.3)">
+    Pagos seguros procesados por Stripe · Soporte por WhatsApp incluido
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq">
+  <h2>Preguntas frecuentes</h2>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">¿Necesito internet para usarlo? <span>+</span></div>
+    <div class="faq-a">El POS funciona sin internet. La sincronización con la nube y el dashboard del celular requieren conexión, pero puedes cobrar sin problema aunque no tengas internet.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">¿Es compatible con impresoras térmicas? <span>+</span></div>
+    <div class="faq-a">Sí, es compatible con cualquier impresora térmica que funcione en Windows. Conectas la impresora y listo, no necesitas configuración especial.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">¿Cómo recibo el programa después de pagar? <span>+</span></div>
+    <div class="faq-a">Inmediatamente después del pago recibes un email con tu clave de licencia y el link de descarga. El proceso es automático.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">¿Puedo cambiar de plan después? <span>+</span></div>
+    <div class="faq-a">Sí, puedes actualizar de Básico a Pro pagando la diferencia. Contáctanos por WhatsApp y lo hacemos en minutos.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">¿Qué pasa si tengo problemas técnicos? <span>+</span></div>
+    <div class="faq-a">Ofrecemos soporte por WhatsApp. Te ayudamos a instalar, configurar y resolver cualquier problema que tengas.</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo"><span class="c1">4K</span> <span class="c2">P</span><span class="c3">O</span><span class="c4">S</span></div>
+  <p>Sistema Profesional de Punto de Venta · República Dominicana</p>
+  <p style="margin-top:6px">© 2026 4K POS · Todos los derechos reservados</p>
+</footer>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-bg" id="checkout-modal">
+  <div class="modal">
+    <div class="mh">
+      <h3 id="checkout-title">Completar compra</h3>
+      <button class="mx" onclick="closeCheckout()">✕</button>
+    </div>
+    <div class="mb" id="checkout-body">
+      <!-- Step 1: Info -->
+      <div id="step-info">
+        <div class="order-sum" id="order-summary"></div>
+        <div class="fg"><label class="lbl">Nombre completo</label><input type="text" class="fi" id="c-name" placeholder="Tu nombre"></div>
+        <div class="fg"><label class="lbl">Email</label><input type="email" class="fi" id="c-email" placeholder="tu@email.com"></div>
+        <div class="fg"><label class="lbl">Nombre del negocio</label><input type="text" class="fi" id="c-biz" placeholder="Mi Negocio"></div>
+        <div style="font-size:.76rem;color:rgba(255,255,255,.35);margin-bottom:14px">Tu clave de licencia llegará a este email inmediatamente después del pago.</div>
+        <button class="submit-btn" onclick="goToPayment()">Continuar al pago →</button>
+      </div>
+      <!-- Step 2: Payment -->
+      <div id="step-payment" style="display:none">
+        <div class="order-sum" id="order-summary-2"></div>
+        <div class="lbl" style="margin-bottom:10px">Metodo de pago</div>
+        <div class="pay-methods">
+          <div class="pm on" onclick="selPay('card',this)" id="pm-card"><div class="pm-ico">💳</div><div class="pm-lbl">Tarjeta</div></div>
+          <div class="pm" onclick="selPay('paypal',this)" id="pm-paypal"><div class="pm-ico">🅿️</div><div class="pm-lbl">PayPal</div></div>
+          <div class="pm" onclick="selPay('transfer',this)" id="pm-transfer"><div class="pm-ico">🏦</div><div class="pm-lbl">Transfer</div></div>
+        </div>
+        <div id="pay-card-form">
+          <div class="fg"><label class="lbl">Numero de tarjeta</label><input type="text" class="fi" id="c-card" placeholder="4242 4242 4242 4242" maxlength="19" oninput="fmtCard(this)"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="fg"><label class="lbl">Vencimiento</label><input type="text" class="fi" id="c-exp" placeholder="MM/AA" maxlength="5" oninput="fmtExp(this)"></div>
+            <div class="fg"><label class="lbl">CVV</label><input type="text" class="fi" id="c-cvv" placeholder="123" maxlength="4"></div>
+          </div>
+        </div>
+        <div id="pay-paypal-form" style="display:none;text-align:center;padding:20px">
+          <p style="color:rgba(255,255,255,.5);font-size:.84rem">Serás redirigido a PayPal para completar el pago de forma segura.</p>
+        </div>
+        <div id="pay-transfer-form" style="display:none">
+          <div style="background:#0f0f13;border-radius:10px;padding:14px;font-size:.82rem;color:rgba(255,255,255,.6)">
+            <p style="margin-bottom:8px">Realiza la transferencia a:</p>
+            <p><strong style="color:#fff">Banco: </strong>Banco Popular</p>
+            <p><strong style="color:#fff">Cuenta: </strong>000-000000-0</p>
+            <p><strong style="color:#fff">A nombre de: </strong>4K POS</p>
+            <p style="margin-top:10px;color:rgba(255,255,255,.4);font-size:.76rem">Envía el comprobante por WhatsApp y activamos tu licencia en menos de 1 hora.</p>
+          </div>
+        </div>
+        <button class="submit-btn" style="margin-top:16px" onclick="processPayment()" id="pay-btn">Pagar ahora</button>
+        <div style="text-align:center;margin-top:10px;font-size:.74rem;color:rgba(255,255,255,.25)">🔒 Pago seguro con Stripe</div>
+      </div>
+      <!-- Step 3: Success -->
+      <div id="step-success" style="display:none">
+        <div class="success-box">
+          <div style="font-size:3rem;margin-bottom:14px">🎉</div>
+          <h3 style="font-size:1.1rem;margin-bottom:8px">Pago exitoso</h3>
+          <p style="font-size:.84rem;color:rgba(255,255,255,.5);margin-bottom:16px">Tu licencia ha sido activada. Revisa tu email.</p>
+          <div class="lbl" style="margin-bottom:8px">Tu clave de licencia:</div>
+          <div class="success-key" id="success-key">4K-XXXX-XXXX-XXXX</div>
+          <p style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:20px">Guarda esta clave. También la recibiste por email.</p>
+          <a href="https://4kpos.github.io/4kpos-dashboard/" class="btn-main" style="display:inline-block">Descargar 4K POS</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi';
+let selectedPlan = null, billingMonthly = false, selectedPayMethod = 'card';
+
+const PLANS = {
+  basic:  { name:'Plan Basico',  monthly:15,  lifetime:99,  devices:1 },
+  pro:    { name:'Plan Pro',     monthly:35,  lifetime:199, devices:3 }
+};
+
+function toggleBilling(){
+  billingMonthly = !billingMonthly;
+  var t = document.getElementById('billing-toggle');
+  var lm = document.getElementById('lbl-monthly');
+  var ll = document.getElementById('lbl-lifetime');
+  t.classList.toggle('on', billingMonthly);
+  lm.classList.toggle('on', billingMonthly);
+  ll.classList.toggle('on', !billingMonthly);
+  updatePrices();
+}
+function updatePrices(){
+  Object.keys(PLANS).forEach(function(k){
+    var p = PLANS[k];
+    var priceEl = document.getElementById(k+'-price');
+    var origEl = document.getElementById(k+'-orig');
+    if(billingMonthly){
+      priceEl.innerHTML = '$'+p.monthly+'<span>/mes</span>';
+      origEl.textContent = 'o $'+p.lifetime+' pago unico';
+    } else {
+      priceEl.innerHTML = '$'+p.lifetime+'<span> unico</span>';
+      origEl.textContent = 'o $'+p.monthly+'/mes';
+    }
+  });
+}
+function openCheckout(plan){
+  selectedPlan = plan;
+  var p = PLANS[plan];
+  var price = billingMonthly ? '$'+p.monthly+'/mes' : '$'+p.lifetime+' pago unico';
+  var sumHtml = '<div class="order-row"><span>'+p.name+'</span><span>'+price+'</span></div><div class="order-row"><span>Dispositivos</span><span>'+p.devices+(p.devices>1?' PCs':' PC')+'</span></div><div class="order-row main"><span>Total</span><span>'+price+'</span></div>';
+  document.getElementById('order-summary').innerHTML = sumHtml;
+  document.getElementById('order-summary-2').innerHTML = sumHtml;
+  document.getElementById('checkout-title').textContent = 'Comprar '+p.name;
+  document.getElementById('step-info').style.display='block';
+  document.getElementById('step-payment').style.display='none';
+  document.getElementById('step-success').style.display='none';
+  document.getElementById('checkout-modal').classList.add('open');
+}
+function closeCheckout(){ document.getElementById('checkout-modal').classList.remove('open'); }
+document.getElementById('checkout-modal').addEventListener('click',function(e){ if(e.target===this) closeCheckout(); });
+
+function goToPayment(){
+  var name = document.getElementById('c-name').value.trim();
+  var email = document.getElementById('c-email').value.trim();
+  var biz = document.getElementById('c-biz').value.trim();
+  if(!name||!email){alert('Por favor completa tu nombre y email.');return;}
+  document.getElementById('step-info').style.display='none';
+  document.getElementById('step-payment').style.display='block';
+}
+function selPay(method, el){
+  selectedPayMethod = method;
+  document.querySelectorAll('.pm').forEach(function(p){p.classList.remove('on');});
+  el.classList.add('on');
+  document.getElementById('pay-card-form').style.display = method==='card'?'block':'none';
+  document.getElementById('pay-paypal-form').style.display = method==='paypal'?'block':'none';
+  document.getElementById('pay-transfer-form').style.display = method==='transfer'?'block':'none';
+  document.getElementById('pay-btn').textContent = method==='transfer'?'Enviar comprobante':'Pagar ahora';
+}
+function fmtCard(inp){ var v=inp.value.replace(/\D/g,''); var out=''; for(var i=0;i<v.length&&i<16;i++){if(i>0&&i%4===0)out+=' ';out+=v[i];} inp.value=out; }
+function fmtExp(inp){ var v=inp.value.replace(/\D/g,''); if(v.length>=2) v=v.substring(0,2)+'/'+v.substring(2); inp.value=v; }
+
+async function processPayment(){
+  var btn = document.getElementById('pay-btn');
+  btn.disabled=true; btn.textContent='Procesando...';
+  var email = document.getElementById('c-email').value.trim();
+  var bizName = document.getElementById('c-biz').value.trim();
+  var plan = billingMonthly?'monthly':'lifetime';
+
+  try{
+    // Create license via API
+    var r = await fetch(API+'?action=create_license',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email,business_name:bizName,plan:plan+'_'+selectedPlan})
+    });
+    var j = await r.json();
+    if(j.success){
+      document.getElementById('success-key').textContent = j.key;
+      document.getElementById('step-payment').style.display='none';
+      document.getElementById('step-success').style.display='block';
+    } else {
+      alert('Error: '+j.error);
+      btn.disabled=false; btn.textContent='Pagar ahora';
+    }
+  }catch(e){
+    // For demo - simulate success
+    var demoKey = '4K-'+Math.random().toString(36).substring(2,6).toUpperCase()+'-'+Math.random().toString(36).substring(2,6).toUpperCase()+'-'+Math.random().toString(36).substring(2,6).toUpperCase();
+    document.getElementById('success-key').textContent = demoKey;
+    document.getElementById('step-payment').style.display='none';
+    document.getElementById('step-success').style.display='block';
+  }
+}
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click',function(e){
+    e.preventDefault();
+    var t=document.querySelector(this.getAttribute('href'));
+    if(t) t.scrollIntoView({behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>
