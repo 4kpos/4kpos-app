@@ -1,4 +1,38 @@
-"repository": {
-  "type": "git",
-  "url": "https://github.com/4kpos/4kpos-app"
-},
+{
+  "name": "4k-pos",
+  "version": "5.0.0",
+  "description": "4K POS - Sistema de Punto de Venta",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/4kpos/4kpos-app"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.4kpos.app",
+    "productName": "4K POS",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/logo.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!node_modules/**"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3"
+  }
+}
