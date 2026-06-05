@@ -22,8 +22,12 @@
       "icon": "assets/logo.ico"
     },
     "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+  "oneClick": false,
+  "allowToChangeInstallationDirectory": true,
+  "language": "3082",
+  "multiLanguageInstaller": true,
+  "installerLanguages": ["es_ES", "en_US"]
+}
     },
     "files": [
       "**/*",
