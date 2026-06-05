@@ -19,15 +19,16 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "assets/logo.ico"
+      "icon": "assets/logo.ico",
+      "requestedExecutionLevel": "requireAdministrator"
     },
     "nsis": {
-  "oneClick": false,
-  "allowToChangeInstallationDirectory": true,
-  "language": "3082",
-  "multiLanguageInstaller": true,
-  "installerLanguages": ["es_ES", "en_US"]
-}
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "language": "3082",
+      "multiLanguageInstaller": true,
+      "installerLanguages": ["es_ES", "en_US"],
+      "warningsAsErrors": false
     },
     "files": [
       "**/*",
