@@ -800,23 +800,31 @@ function pico(m){return m==='cash'?'💵':m==='card'?'💳':'📲';}
 
 // LANG
 function setLang(l){
-  lang=l;
-  el('lang-screen').style.display='none';
-  el('splash').style.display='flex';
-  setTimeout(function(){
-    const s=el('splash'); s.style.opacity='0';
-    setTimeout(function(){
-      s.style.display='none';
-      loadDB().then(function(){
-        db._lang=l;
-        saveDB();
-        el('login-screen').style.display='flex';
-        applyLang();
-      });
-    },600);
-  },2000);
+// Idioma fijo en español — pantalla de selección eliminada
+function setLang(l){
+  lang = 'es';
 }
 
+// Arrancar directo sin pantalla de idioma
+window.addEventListener('DOMContentLoaded', function(){
+  lang = 'es';
+  const splash = el('splash');
+  if(splash) {
+    splash.style.display = 'flex';
+    setTimeout(function(){
+      splash.style.opacity = '0';
+      setTimeout(function(){
+        splash.style.display = 'none';
+        loadDB().then(function(){
+          db._lang = 'es';
+          saveDB();
+          el('login-screen').style.display = 'flex';
+          applyLang();
+        });
+      }, 600);
+    }, 2000);
+  }
+});
 function applyLang(){
   el('srch').placeholder=t('srch');
   el('l-sub').textContent=t('loginTitle');
