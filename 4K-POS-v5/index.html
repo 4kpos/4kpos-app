@@ -947,7 +947,18 @@ async function loadDB(){
     }
   }catch(e){console.error(e);}
 }
-async function saveDB(){try{await ipcRenderer.invoke('save-data',db);}catch(e){}}
+async function saveDB(){
+  try{await ipcRenderer.invoke('save-data',db);}catch(e){}
+  try{
+    const licInfo = await ipcRenderer.invoke('get-license-info');
+    const licKey = licInfo&&licInfo.key ? licInfo.key : '';
+    await fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({license_key:licKey,data:db})
+    });
+  }catch(e){}
+}
 
 // PAY METHODS
 function savePayMethods(){
