@@ -286,7 +286,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <div style="font-size:1rem;font-weight:800;margin-bottom:4px;color:var(--tx)" id="so-title">Apertura de Turno</div>
     <div style="font-size:.82rem;color:var(--tx3);margin-bottom:14px" id="so-user">Bienvenido</div>
     <div style="font-size:.84rem;color:var(--tx2);margin-bottom:6px" id="so-flbl">Fondo de caja:</div>
-    <div style="font-family:Courier New,monospace;font-size:2rem;font-weight:700;color:var(--ac);margin-bottom:6px" id="so-fund">/bin/sh.00</div>
+    <div style="font-family:Courier New,monospace;font-size:2rem;font-weight:700;color:var(--ac);margin-bottom:6px" id="so-fund">$0.00</div>
     <div style="font-size:.78rem;color:var(--tx3);margin-bottom:16px" id="so-ctxt">Confirma que recibiste este monto</div>
     <button class="btn btn-p" style="width:100%;padding:13px;font-size:.92rem" id="so-btn" onclick="confirmShift()">✓ Confirmar y Abrir Turno</button>
   </div>
@@ -341,10 +341,10 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div class="cempty" id="cempty"><div class="cem-ico">🛍️</div><span id="empty-txt">Agrega productos</span></div>
     </div>
     <div class="cfoot">
-      <div class="trow"><span id="sub-lbl">Subtotal</span><span id="csub" style="font-family:Courier New,monospace">/bin/sh.00</span></div>
+      <div class="trow"><span id="sub-lbl">Subtotal</span><span id="csub" style="font-family:Courier New,monospace">$0.00</span></div>
       <div class="trow"><span id="items-lbl">Artículos</span><span id="citems">0</span></div>
       <div class="sep"></div>
-      <div class="trow main"><span>TOTAL</span><span class="amt" id="ctotal">/bin/sh.00</span></div>
+      <div class="trow main"><span>TOTAL</span><span class="amt" id="ctotal">$0.00</span></div>
       <div>
         <div class="plbl" style="margin-bottom:5px" id="pay-lbl">Método de pago</div>
         <div class="pbtns">
@@ -355,11 +355,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
       </div>
       <div id="cash-section">
         <div class="plbl" style="margin-bottom:5px" id="recv-lbl">Recibido</div>
-        <div class="npdisp"><div class="npval" id="npval">/bin/sh.00</div><div class="nphint" id="nphint">Ingresa el monto</div></div>
+        <div class="npdisp"><div class="npval" id="npval">$0.00</div><div class="nphint" id="nphint">Ingresa el monto</div></div>
         <div class="npgrid" id="npgrid"></div>
-        <div class="chgbox" id="chgbox">Vuelto: /bin/sh.00</div>
+        <div class="chgbox" id="chgbox">Vuelto: $0.00</div>
       </div>
-      <button class="cobrar" id="cobrar" onclick="checkout()" disabled>✓ Cobrar — /bin/sh.00</button>
+      <button class="cobrar" id="cobrar" onclick="checkout()" disabled>✓ Cobrar — $0.00</button>
     </div>
   </div>
 </div>
