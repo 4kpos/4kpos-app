@@ -953,7 +953,7 @@ async function saveDB(){
     const licInfo=await ipcRenderer.invoke('get-license-info');
     const licKey=licInfo&&licInfo.key?licInfo.key:'';
     if(licKey){
-      const slim={sales:db.sales||[],products:db.products||[],cfg:db.cfg||{}};
+      const slim={sales:db.sales||[],products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat};}),cfg:db.cfg||{}};
       fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({license_key:licKey,data:slim})}).catch(function(){});
     }
   }catch(e){}
