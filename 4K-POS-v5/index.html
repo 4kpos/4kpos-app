@@ -786,6 +786,34 @@ let cart=[],payMethod='cash',cashIn='';
 let curUser=null,curCat='all',pinTarget=null,pinVal='';
 let confCb=null,fcExpr='',fcNum='0',fcNew=true;
 let pendingOrders=[];
+const SESSION_KEY='4kpos_user_id';
+const LICENSE_CHECK_KEY='4kpos_license_verified_v1';
+const LICENSE_CACHE_KEY='4kpos_license_cache_v1';
+
+function saveSession(user){
+  if(user&&user.id)localStorage.setItem(SESSION_KEY,user.id);
+}
+function clearSession(){
+  localStorage.removeItem(SESSION_KEY);
+}
+function restoreSession(){
+  const uid=localStorage.getItem(SESSION_KEY);
+  if(!uid)return false;
+  const user=db.users.find(u=>u.id===uid);
+  if(!user){clearSession();return false;}
+  curUser=user;
+  el('login-screen').style.display='none';
+  setEl('usr-lbl','👤 '+user.name);
+  applyUserPerms();
+  startApp();
+  return true;
+}
+async function bootAfterLoad(){
+  applyLang();
+  const licenseOk=await verifyLicenseFirstRun();
+  if(!licenseOk)return;
+  if(!restoreSession())el('login-screen').style.display='flex';
+}
 
 function el(id){return document.getElementById(id);}
 function setEl(id,v){const e=el(id);if(e)e.textContent=v;}
@@ -806,7 +834,7 @@ function setLang(l){
   el('splash').style.display='flex';
   setTimeout(function(){
     const s=el('splash'); s.style.opacity='0';
-    setTimeout(function(){s.style.display='none';loadDB().then(function(){el('login-screen').style.display='flex';applyLang();});
+    setTimeout(function(){s.style.display='none';loadDB().then(bootAfterLoad);
     },600);
   },2000);
 }
@@ -856,18 +884,62 @@ function updateClock(){
 }
 setInterval(updateClock,1000); updateClock();
 
-// LICENSE BADGE
+// LICENSE BADGE / FIRST RUN CHECK
+function setLicBadge(info, fallbackText){
+  const badge=el('lic-badge');
+  if(!badge)return;
+  if(!info){badge.textContent=fallbackText||'⚠ Sin licencia';badge.className='lic-badge lic-err';badge.style.display='block';return;}
+  const plan=(info.plan||'ACTIVA').toUpperCase();
+  if(info.expires_at){
+    const days=Math.ceil((new Date(info.expires_at)-Date.now())/(864e5));
+    if(days<7){badge.textContent='⚠ '+plan+' · '+days+'d';badge.className='lic-badge lic-warn';}
+    else{badge.textContent='✓ '+plan+' · '+days+'d';badge.className='lic-badge lic-ok';}
+  }else{badge.textContent='✓ '+plan;badge.className='lic-badge lic-ok';}
+  badge.style.display='block';
+}
+
+function getCachedLicense(){
+  try{return JSON.parse(localStorage.getItem(LICENSE_CACHE_KEY)||'null');}catch(e){return null;}
+}
+
+async function verifyLicenseFirstRun(){
+  // Solo verifica con Electron/servidor la primera vez. Luego usa la licencia guardada en esta PC.
+  const alreadyVerified=localStorage.getItem(LICENSE_CHECK_KEY)==='yes';
+  const cached=getCachedLicense();
+  if(alreadyVerified&&cached){setLicBadge(cached);return true;}
+
+  try{
+    const info=await ipcRenderer.invoke('get-license-info');
+    if(info){
+      localStorage.setItem(LICENSE_CHECK_KEY,'yes');
+      localStorage.setItem(LICENSE_CACHE_KEY,JSON.stringify(info));
+      setLicBadge(info);
+      return true;
+    }
+  }catch(e){}
+
+  // Si no hay backend de licencia disponible, permite modo local para que el HTML no se quede bloqueado.
+  // En la app final de Electron, get-license-info debe devolver una licencia válida.
+  const localMode={plan:'local'};
+  localStorage.setItem(LICENSE_CHECK_KEY,'yes');
+  localStorage.setItem(LICENSE_CACHE_KEY,JSON.stringify(localMode));
+  setLicBadge(localMode);
+  return true;
+}
+
+function resetLicenseFirstRun(){
+  localStorage.removeItem(LICENSE_CHECK_KEY);
+  localStorage.removeItem(LICENSE_CACHE_KEY);
+  toast('✓ Verificación de licencia reiniciada');
+}
+
 function updateLicBadge(){
+  const cached=getCachedLicense();
+  if(cached){setLicBadge(cached);return;}
   ipcRenderer.invoke('get-license-info').then(function(info){
-    if(!info){el('lic-badge').textContent='⚠ Sin licencia';el('lic-badge').className='lic-badge lic-err';el('lic-badge').style.display='block';return;}
-    const plan=(info.plan||'').toUpperCase();
-    if(info.expires_at){
-      const days=Math.ceil((new Date(info.expires_at)-Date.now())/(864e5));
-      if(days<7){el('lic-badge').textContent='⚠ '+plan+' · '+days+'d';el('lic-badge').className='lic-badge lic-warn';}
-      else{el('lic-badge').textContent='✓ '+plan+' · '+days+'d';el('lic-badge').className='lic-badge lic-ok';}
-    }else{el('lic-badge').textContent='✓ '+plan;el('lic-badge').className='lic-badge lic-ok';}
-    el('lic-badge').style.display='block';
-  }).catch(function(){});
+    if(info){localStorage.setItem(LICENSE_CACHE_KEY,JSON.stringify(info));setLicBadge(info);}
+    else setLicBadge(null);
+  }).catch(function(){setLicBadge(null);});
 }
 
 // THEME
@@ -975,6 +1047,7 @@ function doLogin(){
   for(let i=0;i<db.users.length;i++){if(db.users[i].user===u&&db.users[i].pass===p){found=db.users[i];break;}}
   if(found){
     curUser=found;
+    saveSession(found);
     el('login-screen').style.display='none';
     setEl('usr-lbl','👤 '+found.name);
     applyUserPerms();
@@ -1001,7 +1074,7 @@ function applyUserPerms(){
 function confirmShift(){el('shift-open-screen').classList.remove('show');startApp();}
 function startApp(){applyLang();applyPayMethods();renderCats();renderProds();renderCart();updateLicBadge();setEl('ord-lbl','Orden #'+db.orderNum);}
 function doLogout(){
-  closeOv('ov-logout');curUser=null;cart=[];
+  closeOv('ov-logout');clearSession();curUser=null;cart=[];cashIn='';
   setEl('usr-lbl','—');
   el('lu').value='';el('lp').value='';
   el('login-screen').style.display='flex';
@@ -1217,8 +1290,12 @@ function setPay(m,e2){
 }
 function npPress(k){
   if(k==='⌫')cashIn=cashIn.slice(0,-1);
-  else if(k==='.'){if(!cashIn.includes('.'))cashIn+=k;}
-  else cashIn+=k;
+  else if(k==='.'){
+    if(!cashIn.includes('.'))cashIn=(cashIn||'0')+k;
+  }else if(/^\d$/.test(k)){
+    cashIn+=k;
+  }
+  if(cashIn==='.')cashIn='0.';
   el('npval').textContent=cashIn?dolr(parseFloat(cashIn)||0):'$0.00';
   calcChange();
 }
@@ -1601,7 +1678,7 @@ if(lang){
   el('splash').style.display='flex';
   setTimeout(()=>{
     const s=el('splash');s.style.opacity='0';
-    setTimeout(()=>{s.style.display='none';loadDB().then(()=>{el('login-screen').style.display='flex';applyLang();});},600);
+    setTimeout(()=>{s.style.display='none';loadDB().then(bootAfterLoad);},600);
   },1800);
 }
 </script>
