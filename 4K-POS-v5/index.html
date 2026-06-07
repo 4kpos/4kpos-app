@@ -246,30 +246,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
 </head>
 <body>
 
-<!-- LANG SELECT -->
-function setLang(l){
-  lang = 'es';
-  el('lang-screen') && (el('lang-screen').style.display='none');
-  el('splash').style.display='flex';
-  setTimeout(function(){
-    el('splash').style.opacity='0';
-    setTimeout(function(){
-      el('splash').style.display='none';
-      loadDB().then(function(){
-        db._lang='es';
-        saveDB();
-        el('login-screen').style.display='flex';
-        applyLang();
-      });
-    },600);
-  },2000);
-}
 
-// Arrancar directo sin pantalla de idioma
-window.addEventListener('DOMContentLoaded', function(){
-  if(el('lang-screen')) el('lang-screen').style.display='none';
-  setLang('es');
-});
+
 
 <!-- SPLASH -->
 <div id="splash">
