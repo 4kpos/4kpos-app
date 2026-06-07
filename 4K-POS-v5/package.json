@@ -11,13 +11,11 @@
     "start": "electron .",
     "dist": "electron-builder --win --x64"
   },
-  "build": {
-    "appId": "com.4kpos.app",
-    "productName": "4K POS",
-    "asar": false,
-    "directories": {
-      "output": "dist"
-    },
+  "win": {
+  "target": "nsis",
+  "icon": "assets/logo.ico",
+  "requestedExecutionLevel": "asInvoker"
+}
     "win": {
       "target": "nsis",
       "icon": "assets/logo.ico",
