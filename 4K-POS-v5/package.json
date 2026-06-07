@@ -14,6 +14,7 @@
   "build": {
     "appId": "com.4kpos.app",
     "productName": "4K POS",
+    "asar": false,
     "directories": {
       "output": "dist"
     },
