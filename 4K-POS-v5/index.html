@@ -9,12 +9,6 @@ body.light{--bg:#f0f2f5;--s1:#ffffff;--s2:#e8eaf0;--s3:#dde0ea;--b1:rgba(0,0,0,0
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:15px;}
 ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:var(--s2);}::-webkit-scrollbar-thumb{background:var(--ac);border-radius:3px;}
-#lang-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;}
-.lsbox{background:var(--s1);border:1.5px solid var(--b2);border-radius:16px;padding:36px 40px;width:360px;text-align:center;}
-.lsbox img{width:90px;height:90px;object-fit:contain;margin-bottom:16px;background:#fff;border-radius:12px;}
-.ls-btns{display:flex;gap:12px;justify-content:center;margin-top:20px;}
-.ls-btn{flex:1;padding:14px;border:1.5px solid var(--b2);border-radius:var(--rs);background:var(--s2);color:var(--tx);cursor:pointer;font-size:1rem;font-weight:700;transition:all .2s;}
-.ls-btn:hover{border-color:var(--ac);color:var(--ac);}
 #splash{position:fixed;inset:0;background:var(--bg);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .5s;}
 #splash img{width:110px;height:110px;border-radius:18px;object-fit:contain;background:#fff;}
 #splash h1{font-size:1.7rem;font-weight:800;}
