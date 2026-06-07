@@ -1588,14 +1588,18 @@ function calcPress(k){
 // INIT
 document.querySelectorAll('.ov').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m&&m.id!=='ov-pin')m.classList.remove('open');});});
 
-if(lang){
-  el('lang-screen').style.display='none';
-  el('splash').style.display='flex';
+el('lang-screen').style.display='none';
+el('splash').style.display='flex';
+setTimeout(()=>{
+  const s=el('splash');s.style.opacity='0';
   setTimeout(()=>{
-    const s=el('splash');s.style.opacity='0';
-    setTimeout(()=>{s.style.display='none';loadDB().then(()=>{el('login-screen').style.display='flex';applyLang();});},600);
-  },1800);
-}
+    s.style.display='none';
+    loadDB().then(()=>{
+      el('login-screen').style.display='flex';
+      applyLang();
+    });
+  },600);
+},1800);
 </script>
 </body>
 </html>
