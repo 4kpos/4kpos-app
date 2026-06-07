@@ -952,17 +952,14 @@ async function saveDB(){
   try{
     const licInfo = await ipcRenderer.invoke('get-license-info');
     const licKey = licInfo&&licInfo.key ? licInfo.key : '';
-    if(!licKey) return;
-    const slim = {
-      sales: db.sales||[],
-      products: db.products||[],
-      cfg: db.cfg||{}
-    };
-    await fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({license_key:licKey, data:slim})
-    });
+    if(licKey){
+      const slim = {sales:db.sales||[],products:db.products||[],cfg:db.cfg||{}};
+      fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({license_key:licKey,data:slim})
+      }).catch(function(){});
+    }
   }catch(e){}
 }
   }catch(e){}
