@@ -9,7 +9,7 @@ body.light{--bg:#f0f2f5;--s1:#ffffff;--s2:#e8eaf0;--s3:#dde0ea;--b1:rgba(0,0,0,0
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:15px;}
 ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:var(--s2);}::-webkit-scrollbar-thumb{background:var(--ac);border-radius:3px;}
-#lang-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;}
+#lang-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:none;align-items:center;justify-content:center;}
 .lsbox{background:var(--s1);border:1.5px solid var(--b2);border-radius:16px;padding:36px 40px;width:360px;text-align:center;}
 .lsbox img{width:90px;height:90px;object-fit:contain;margin-bottom:16px;background:#fff;border-radius:12px;}
 .ls-btns{display:flex;gap:12px;justify-content:center;margin-top:20px;}
@@ -771,7 +771,8 @@ const T = {
     shiftReport:'Shift report',totalBox:'Total in drawer',
   }
 };
-let lang = localStorage.getItem('4kpos_lang') || '';
+let lang = 'es';
+localStorage.setItem('4kpos_lang','es');
 function t(k){ return (T[lang]&&T[lang][k]) || T.es[k] || k; }
 
 // STATE
@@ -801,14 +802,10 @@ function pico(m){return m==='cash'?'💵':m==='card'?'💳':'📲';}
 
 // LANG
 function setLang(l){
-  lang=l; localStorage.setItem('4kpos_lang',l);
+  lang='es'; localStorage.setItem('4kpos_lang','es');
   el('lang-screen').style.display='none';
-  el('splash').style.display='flex';
-  setTimeout(function(){
-    const s=el('splash'); s.style.opacity='0';
-    setTimeout(function(){s.style.display='none';loadDB().then(function(){el('login-screen').style.display='flex';applyLang();});
-    },600);
-  },2000);
+  el('splash').style.display='none';
+  loadDB().then(function(){applyLang();el('login-screen').style.display='flex';});
 }
 
 function applyLang(){
@@ -1596,14 +1593,13 @@ function calcPress(k){
 // INIT
 document.querySelectorAll('.ov').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m&&m.id!=='ov-pin')m.classList.remove('open');});});
 
-if(lang){
-  el('lang-screen').style.display='none';
-  el('splash').style.display='flex';
-  setTimeout(()=>{
-    const s=el('splash');s.style.opacity='0';
-    setTimeout(()=>{s.style.display='none';loadDB().then(()=>{el('login-screen').style.display='flex';applyLang();});},600);
-  },1800);
-}
+// Iniciar directo en español y mostrar LOGIN sin preguntar idioma
+el('lang-screen').style.display='none';
+el('splash').style.display='none';
+loadDB().then(()=>{
+  applyLang();
+  el('login-screen').style.display='flex';
+});
 </script>
 </body>
 </html>
