@@ -4,7 +4,7 @@ const fs = require('fs')
 const { activateLicense, verifyLicense, getLicenseInfo, getHardwareId } = require('./license')
 
 // DevTools solo en desarrollo
-const isDev = !app.isPackaged
+const isDev = true
 
 // ── Datos del POS ──────────────────────────────
 const dataPath = path.join(app.getPath('userData'), '4kpos-v5.json')
@@ -41,7 +41,8 @@ function createWindow() {
     autoHideMenuBar: true
   })
 
-  win.loadFile('index.html')
+ win.loadFile('index.html')
+win.webContents.openDevTools()
   win.once('ready-to-show', () => win.show())
   win.setMenuBarVisibility(false)
 
