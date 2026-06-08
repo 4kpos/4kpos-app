@@ -946,7 +946,7 @@ async function loadDB(){
       if(d.drawerAuto!==undefined)db.drawerAuto=d.drawerAuto;
     }
  }catch(e){console.error(e);}
-  }
+
   try{const li=await ipcRenderer.invoke('get-license-info');if(li&&li.key)db._lic=li.key;}catch(e){}
 }
 async function saveDB(){
