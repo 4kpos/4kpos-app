@@ -785,6 +785,7 @@ let db={products:[],categories:[],sales:[],orderNum:1,adminCode:'1234',
   facturas:[],gastos_conta:[]};
 let cart=[],payMethod='cash',cashIn='';
 let curUser=null,curCat='all',pinTarget=null,pinVal='';
+let editingUserId=null;
 let confCb=null,fcExpr='',fcNum='0',fcNew=true;
 let pendingOrders=[];
 
@@ -1436,9 +1437,41 @@ function saveUser(){
   });
 }
 function delUser(id){if(id==='1'){toast('⚠ No se puede eliminar el admin principal');return;}confirm2('¿Eliminar usuario?',()=>{db.users=db.users.filter(u=>u.id!==id);saveDB();renderUserList();});}
+function editUser(id){
+  const u=db.users.find(x=>x.id===id);
+  if(!u)return;
+
+  editingUserId=id;
+
+  el('u-name').value=u.name;
+  el('u-user').value=u.user;
+  el('u-pass').value=u.pass;
+  el('u-role').value=u.role;
+
+  el('pm-adm').checked=!!u.perms.adm;
+  el('pm-ret').checked=!!u.perms.ret;
+  el('pm-can').checked=!!u.perms.can;
+  el('pm-sal').checked=!!u.perms.sal;
+  el('pm-conta').checked=!!u.perms.conta;
+  el('pm-fac').checked=!!u.perms.fac;
+  el('pm-gst').checked=!!u.perms.gst;
+
+  toast('✏️ Editando usuario: '+u.name);
+}
 function clearUser(){['u-name','u-user','u-pass'].forEach(id=>el(id).value='');el('ulimit-warn').style.display='none';}
 function renderUserList(){
-  el('user-list').innerHTML=db.users.map(u=>'<div class="pli"><div class="pli-thumb" style="background:var(--acg);color:var(--ac)">'+u.name[0]+'</div><div class="pli-info"><div class="pli-name">'+u.name+'</div><div class="pli-meta">'+u.user+' · '+(u.role==='admin'?'👑 Admin':'💰 Cajero')+'</div></div>'+(u.id!=='1'?'<button class="xb" onclick="delUser(\''+u.id+'\')">✕</button>':'')+'</div>').join('');
+  el('user-list').innerHTML=db.users.map(u=>
+    '<div class="pli">'+
+      '<div class="pli-thumb" style="background:var(--acg);color:var(--ac)">'+u.name[0]+'</div>'+
+      '<div class="pli-info">'+
+      '<div class="pli-name">'+u.name+'</div>'+
+      '<div class="pli-meta">'+u.user+' · '+u.role+'</div>'+
+      '</div>'+
+      (u.id!=='1'
+        ?'<button class="btn btn-s" onclick="editUser(\''+u.id+'\')">✏️</button><button class="xb" onclick="delUser(\''+u.id+'\')">✕</button>'
+        :'')+
+      '</div>'
+  ).join('');
 }
 
 // CONFIG
