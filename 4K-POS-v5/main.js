@@ -20,7 +20,6 @@ function createWindow() {
     backgroundColor: '#0f0f13', show: false, autoHideMenuBar: true
   })
  win.loadFile('index.html')
-win.webContents.openDevTools()
   win.once('ready-to-show', () => win.show())
   win.setMenuBarVisibility(false)
 }
