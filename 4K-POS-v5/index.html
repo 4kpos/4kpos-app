@@ -1009,7 +1009,7 @@ function confirmShift(){el('shift-open-screen').classList.remove('show');startAp
  function startApp(){applyLang();applyPayMethods();renderCats();renderProds();renderCart();updateLicBadge();setEl('ord-lbl','Orden #'+db.orderNum);}
 function doLogout(){
   closeOv('ov-logout');curUser=null;cart=[];cashIn='';
-  hideMainUI();
+  // hideMainUI();
   el('shift-open-screen').classList.remove('show');
   setEl('usr-lbl','—');
   el('lu').value='';el('lp').value='';
