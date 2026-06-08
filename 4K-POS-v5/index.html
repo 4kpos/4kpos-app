@@ -1733,7 +1733,7 @@ document.querySelectorAll('.ov').forEach(m=>{m.addEventListener('click',e=>{if(e
 // Iniciar directo en español y mostrar LOGIN sin preguntar idioma
 el('lang-screen').style.display='none';
 el('splash').style.display='none';
-hideMainUI();
+// hideMainUI();
 el('shift-open-screen').classList.remove('show');
 el('login-screen').style.display='flex';
 loadDB().then(()=>{
