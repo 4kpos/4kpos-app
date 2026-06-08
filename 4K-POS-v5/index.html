@@ -952,6 +952,11 @@ async function loadDB(){
 }
 async function saveDB(){
   try{
+    await ipcRenderer.invoke('save-data',db);
+  }catch(e){
+    localStorage.setItem('4kpos_db',JSON.stringify(db));
+  }
+}
    function doLogin(){
   const u=el('lu').value,p=el('lp').value;
   let found=null;
