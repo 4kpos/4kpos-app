@@ -993,21 +993,37 @@ function showMainUI(){
   el('botbar').style.display='flex';
 }
 function doLogin(){
-  const u=el('lu').value.trim(),p=el('lp').value;
+  const u=el('lu').value,p=el('lp').value;
   let found=null;
-  for(let i=0;i<db.users.length;i++){if(db.users[i].user===u&&db.users[i].pass===p){found=db.users[i];break;}}
+
+  for(let i=0;i<db.users.length;i++){
+    if(db.users[i].user===u&&db.users[i].pass===p){
+      found=db.users[i];
+      break;
+    }
+  }
+
   if(found){
     curUser=found;
     el('login-screen').style.display='none';
     setEl('usr-lbl','👤 '+found.name);
     applyUserPerms();
+
     if(db.fundAmount>0){
+      function renderLoginUsers(){
+  if(!el('lu'))return;
+
+  el('lu').innerHTML=db.users.map(u=>
+    '<option value="'+u.user+'">'+u.name+'</option>'
+  ).join('');
+}
       setEl('so-fund',dolr(db.fundAmount));
       setEl('so-user',t('shiftWelcome')+', '+found.name);
       el('shift-open-screen').classList.add('show');
     }else startApp();
   }else{
-    el('lerr').style.display='block';el('lp').value='';
+    el('lerr').style.display='block';
+    el('lp').value='';
     setTimeout(()=>el('lerr').style.display='none',2500);
   }
 }
@@ -1428,12 +1444,12 @@ function saveUser(){
     if(db.users.find(u=>u.user===user)){toast('⚠ Usuario ya existe');return;}
     const perms={adm:el('pm-adm').checked,ret:el('pm-ret').checked,can:el('pm-can').checked,sal:el('pm-sal').checked,conta:el('pm-conta').checked,fac:el('pm-fac').checked,gst:el('pm-gst').checked};
     db.users.push({id:Date.now().toString(),name,user,pass,role,perms});
-    saveDB();renderUserList();clearUser();toast('✓ Usuario: '+name);
+   saveDB();renderUserList();renderLoginUsers();clearUser();
   }).catch(function(){
     if(db.users.find(u=>u.user===user)){toast('⚠ Usuario ya existe');return;}
     const perms={adm:el('pm-adm').checked,ret:el('pm-ret').checked,can:el('pm-can').checked,sal:el('pm-sal').checked,conta:el('pm-conta').checked,fac:el('pm-fac').checked,gst:el('pm-gst').checked};
     db.users.push({id:Date.now().toString(),name,user,pass,role,perms});
-    saveDB();renderUserList();clearUser();toast('✓ Usuario: '+name);
+   saveDB();renderUserList();renderLoginUsers();clearUser();
   });
 }
 function saveUser(){
