@@ -1741,9 +1741,12 @@ el('shift-open-screen').classList.remove('show');
 el('login-screen').style.display='flex';
 loadDB().then(()=>{
   applyLang();
+  renderLoginUsers();
+  el('lang-screen').style.display='none';
+  el('splash').style.display='none';
+  el('shift-open-screen').classList.remove('show');
   el('login-screen').style.display='flex';
-}); 
-}                      
+});
 </script>
 </body>
 </html>
