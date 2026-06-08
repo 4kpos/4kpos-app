@@ -948,10 +948,14 @@ async function loadDB(){
  try{const li=await ipcRenderer.invoke('get-license-info');if(li&&li.key)db._lic=li.key;}catch(e){}
 }
 async function saveDB(){
-  try{await ipcRenderer.invoke('save-data',db);}catch(e){}
+  try{
+    await ipcRenderer.invoke('save-data',db);
+  }catch(e){}
+
   try{
     const licKey=db._lic||'';
     console.log('LIC KEY:', licKey);
+
     if(licKey){
       console.log('ENTERING SUPABASE SAVE');
       const slim={sales:db.sales||[],products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat};}),cfg:db.cfg||{}};
