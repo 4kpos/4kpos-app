@@ -56,7 +56,28 @@ app.whenReady().then(async () => {
  
 // ── IPC: datos del POS (sin cambios) ────────────────────────
 ipcMain.handle('load-data', () => loadData())
-ipcMain.handle('save-data', (_, data) => { saveData(data); return true })
+ipcMain.handle('save-data', async (_, data) => {
+  saveData(data)
+
+  try {
+    const lic = getLicenseInfo()
+
+    if (lic && lic.key) {
+      await fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          license_key: lic.key,
+          data
+        })
+      })
+    }
+  } catch (e) {
+    console.log('No se pudo sincronizar con Supabase:', e.message)
+  }
+
+  return true
+})
  
 // ── IPC: licencia (NUEVO) ────────────────────────────────────
 ipcMain.handle('activate-license', async (_, licenseKey) => {
