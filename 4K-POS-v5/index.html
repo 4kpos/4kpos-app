@@ -1006,7 +1006,7 @@ function applyUserPerms(){
   el('hm-conta').style.display=(isAdm||pm.conta)?'flex':'none';
 }
 function confirmShift(){el('shift-open-screen').classList.remove('show');startApp();}
- function startApp(){applyLang();applyPayMethods();renderCats();renderProds();renderCart();updateLicBadge();setEl('ord-lbl','Orden #'+db.orderNum);}
+ function startApp(){applyLang()// applyPayMethods();renderCats();renderProds();renderCart();updateLicBadge();setEl('ord-lbl','Orden #'+db.orderNum);}
 function doLogout(){
   closeOv('ov-logout');curUser=null;cart=[];cashIn='';
   // hideMainUI();
