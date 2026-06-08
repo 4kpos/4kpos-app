@@ -19,7 +19,8 @@ function createWindow() {
     title: '4K POS', icon: path.join(__dirname, 'assets', 'logo.ico'),
     backgroundColor: '#0f0f13', show: false, autoHideMenuBar: true
   })
-  win.loadFile('index.html')
+ win.loadFile('index.html')
+win.webContents.openDevTools()
   win.once('ready-to-show', () => win.show())
   win.setMenuBarVisibility(false)
 }
@@ -55,7 +56,6 @@ app.whenReady().then(async () => {
 })
  
 // ── IPC: datos del POS (sin cambios) ────────────────────────
-ipcMain.handle('load-data', () => loadData())
 ipcMain.handle('save-data', async (_, data) => {
   saveData(data)
 
@@ -63,17 +63,26 @@ ipcMain.handle('save-data', async (_, data) => {
     const lic = getLicenseInfo()
 
     if (lic && lic.key) {
-      await fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          license_key: lic.key,
-          data
-        })
-      })
+      const res = await fetch(
+        'https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            license_key: lic.key,
+            data
+          })
+        }
+      )
+
+      const json = await res.json()
+      console.log('Supabase sync:', json)
     }
+
   } catch (e) {
-    console.log('No se pudo sincronizar con Supabase:', e.message)
+    console.log('No se pudo sincronizar con Supabase:', e)
   }
 
   return true
