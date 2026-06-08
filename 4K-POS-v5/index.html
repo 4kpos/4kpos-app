@@ -273,7 +273,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;color:var(--tx)">4K POS</h2>
     <p id="l-sub" style="font-size:.8rem;color:var(--tx3);margin-bottom:20px">Ingresa tus credenciales</p>
     <div class="lerr" id="lerr">Usuario o contraseña incorrectos</div>
-    <input type="text" class="lfi" id="lu" placeholder="Usuario" autocomplete="off">
+    <select class="lfi" id="lu"></select>
     <input type="password" class="lfi" id="lp" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="lbtn" id="l-btn" onclick="doLogin()">Entrar al turno</button>
   </div>
