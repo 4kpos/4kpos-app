@@ -959,16 +959,11 @@ async function saveDB(){
     if(licKey){
       console.log('ENTERING SUPABASE SAVE');
       const slim={sales:db.sales||[],products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat};}),cfg:db.cfg||{}};
+
       fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({license_key:licKey,data:slim})}).catch(function(){});
     }
   }catch(e){}
 }
-
-// PAY METHODS
-function savePayMethods(){
-  db.payMethods.card=el('cfg-card').checked;
-  db.payMethods.transf=el('cfg-transf').checked;
-  saveDB();applyPayMethods();
 }
 function applyPayMethods(){
   el('pb-card').classList.toggle('hidden',!db.payMethods.card);
