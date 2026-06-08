@@ -951,11 +951,14 @@ async function loadDB(){
   try{const li=await ipcRenderer.invoke('get-license-info');if(li&&li.key)db._lic=li.key;}catch(e){}
 }
 async function saveDB(){
+  try{await ipcRenderer.invoke('save-data',db);}catch(e){}
   try{
-    await ipcRenderer.invoke('save-data',db);
-  }catch(e){
-    localStorage.setItem('4kpos_db',JSON.stringify(db));
-  }
+    const licKey=db._lic||'';
+    if(licKey){
+      const slim={sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat};}),cfg:{bizName:(db.cfg||{}).bizName||''}};
+      fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({license_key:licKey,data:slim})}).catch(function(){});
+    }
+  }catch(e){}
 }
    function doLogin(){
   const u=el('lu').value,p=el('lp').value;
