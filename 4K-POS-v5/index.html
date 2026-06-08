@@ -1731,7 +1731,13 @@ function calcPress(k){
 }
 
 // INIT
-document.querySelectorAll('.ov').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m&&m.id!=='ov-pin')m.classList.remove('open');});});
+document.querySelectorAll('.ov').forEach(m=>{
+  m.addEventListener('click', e=>{
+    if(e.target===m && m.id!=='ov-pin'){
+      m.classList.remove('open');
+    }
+  });
+});
 
 // Iniciar directo en español y mostrar LOGIN sin preguntar idioma
 el('lang-screen').style.display='none';
