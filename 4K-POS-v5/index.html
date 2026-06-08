@@ -952,47 +952,7 @@ async function loadDB(){
 }
 async function saveDB(){
   try{
-    await ipcRenderer.invoke('save-data',db);
-  }catch(e){}
-
-  try{
-    const licKey=db._lic||'';
-    console.log('LIC KEY:', licKey);
-
-    if(licKey){
-      console.log('ENTERING SUPABASE SAVE');
-      const slim={sales:db.sales||[],products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat};}),cfg:db.cfg||{}};
-      fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({license_key:licKey,data:slim})}).catch(function(){});
-    }
-  }catch(e){}
-}
-function savePayMethods(){
-  db.payMethods.card=el('cfg-card').checked;
-  db.payMethods.transf=el('cfg-transf').checked;
-  saveDB();
-  applyPayMethods();
-}
-function applyPayMethods(){
-  el('pb-card').classList.toggle('hidden',!db.payMethods.card);
-  el('pb-transf').classList.toggle('hidden',!db.payMethods.transf);
-  if(payMethod==='card'&&!db.payMethods.card)setPay('cash',el('pb-cash'));
-  if(payMethod==='transf'&&!db.payMethods.transf)setPay('cash',el('pb-cash'));
-}
-  // DRAWER CONFIG
-function saveCfgDrawer(){db.drawerPort=el('cfg-drawer-port').value||'COM3';db.drawerAuto=el('cfg-drawer-auto').checked;saveDB();toast('✅ Registradora guardada');}
-
-// AUTH
-function hideMainUI(){
-  el('topbar').style.display='none';
-  el('app-main').style.display='none';
-  el('botbar').style.display='none';
-}
-function showMainUI(){
-  el('topbar').style.display='flex';
-  el('app-main').style.display='flex';
-  el('botbar').style.display='flex';
-}
-function doLogin(){
+   function doLogin(){
   const u=el('lu').value,p=el('lp').value;
   let found=null;
 
@@ -1010,13 +970,6 @@ function doLogin(){
     applyUserPerms();
 
     if(db.fundAmount>0){
-      function renderLoginUsers(){
-  if(!el('lu'))return;
-
-  el('lu').innerHTML=db.users.map(u=>
-    '<option value="'+u.user+'">'+u.name+'</option>'
-  ).join('');
-}
       setEl('so-fund',dolr(db.fundAmount));
       setEl('so-user',t('shiftWelcome')+', '+found.name);
       el('shift-open-screen').classList.add('show');
@@ -1027,6 +980,16 @@ function doLogin(){
     setTimeout(()=>el('lerr').style.display='none',2500);
   }
 }
+
+function renderLoginUsers(){
+  if(!el('lu'))return;
+
+  el('lu').innerHTML=db.users.map(u=>
+    '<option value="'+u.user+'">'+u.name+'</option>'
+  ).join('');
+}
+
+setTimeout(renderLoginUsers,500);
 function applyUserPerms(){
   if(!curUser)return;
   const pm=curUser.perms||{adm:true,ret:true,can:true,sal:true,conta:true,fac:true,gst:true};
