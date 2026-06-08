@@ -1436,8 +1436,95 @@ function saveUser(){
     saveDB();renderUserList();clearUser();toast('✓ Usuario: '+name);
   });
 }
-function delUser(id){if(id==='1'){toast('⚠ No se puede eliminar el admin principal');return;}confirm2('¿Eliminar usuario?',()=>{db.users=db.users.filter(u=>u.id!==id);saveDB();renderUserList();});}
-function editUser(id){
+function saveUser(){
+  const name=el('u-name').value.trim(),
+        user=el('u-user').value.trim(),
+        pass=el('u-pass').value,
+        role=el('u-role').value.trim();
+
+  if(!name||!user||!pass||!role){
+    toast('⚠ Todos los campos requeridos');
+    return;
+  }
+
+  const duplicate=db.users.find(u=>u.user===user && u.id!==editingUserId);
+  if(duplicate){
+    toast('⚠ Usuario ya existe');
+    return;
+  }
+
+  const perms={
+    adm:el('pm-adm').checked,
+    ret:el('pm-ret').checked,
+    can:el('pm-can').checked,
+    sal:el('pm-sal').checked,
+    conta:el('pm-conta').checked,
+    fac:el('pm-fac').checked,
+    gst:el('pm-gst').checked
+  };
+
+  if(editingUserId){
+    const u=db.users.find(x=>x.id===editingUserId);
+    if(!u){
+      toast('⚠ Usuario no encontrado');
+      return;
+    }
+
+    u.name=name;
+    u.user=user;
+    u.pass=pass;
+    u.role=role;
+    u.perms=perms;
+
+    toast('✓ Usuario actualizado: '+name);
+  }else{
+    ipcRenderer.invoke('get-license-info').then(function(info){
+      const planLimit=(info&&info.plan==='pro')?10:3;
+      const cnt=db.users.filter(u=>u.id!=='1').length;
+
+      if(cnt>=planLimit-1){
+        el('ulimit-warn').style.display='block';
+        el('ulimit-warn').textContent='⚠ Límite de plan alcanzado ('+planLimit+' usuarios). Actualiza a Pro para agregar más.';
+        return;
+      }
+
+      db.users.push({
+        id:Date.now().toString(),
+        name,
+        user,
+        pass,
+        role,
+        perms
+      });
+
+      saveDB();
+      renderUserList();
+      clearUser();
+      toast('✓ Usuario: '+name);
+    }).catch(function(){
+      db.users.push({
+        id:Date.now().toString(),
+        name,
+        user,
+        pass,
+        role,
+        perms
+      });
+
+      saveDB();
+      renderUserList();
+      clearUser();
+      toast('✓ Usuario: '+name);
+    });
+
+    return;
+  }
+
+  saveDB();
+  renderUserList();
+  clearUser();
+}
+  function editUser(id){
   const u=db.users.find(x=>x.id===id);
   if(!u)return;
 
@@ -1458,7 +1545,11 @@ function editUser(id){
 
   toast('✏️ Editando usuario: '+u.name);
 }
-function clearUser(){['u-name','u-user','u-pass'].forEach(id=>el(id).value='');el('ulimit-warn').style.display='none';}
+function clearUser(){
+  ['u-name','u-user','u-pass','u-role'].forEach(id=>el(id).value='');
+  editingUserId=null;
+  el('ulimit-warn').style.display='none';
+}
 function renderUserList(){
   el('user-list').innerHTML=db.users.map(u=>
     '<div class="pli">'+
@@ -1467,9 +1558,10 @@ function renderUserList(){
       '<div class="pli-name">'+u.name+'</div>'+
       '<div class="pli-meta">'+u.user+' · '+u.role+'</div>'+
       '</div>'+
-      (u.id!=='1'
-        ?'<button class="btn btn-s" onclick="editUser(\''+u.id+'\')">✏️</button><button class="xb" onclick="delUser(\''+u.id+'\')">✕</button>'
-        :'')+
+      '<button class="btn btn-s" onclick="editUser(\''+u.id+'\')">🖊️</button>'+
+(u.id!=='1'
+ ?'<button class="xb" onclick="delUser(\''+u.id+'\')">✕</button>'
+ :'')+
       '</div>'
   ).join('');
 }
