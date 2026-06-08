@@ -55,6 +55,12 @@ app.whenReady().then(async () => {
 })
  
 // ── IPC: datos del POS (sin cambios) ────────────────────────
+// ── IPC: datos del POS ────────────────────────
+
+ipcMain.handle('load-data', () => {
+  return loadData()
+})
+
 ipcMain.handle('save-data', (_, data) => {
   saveData(data)
   return true
