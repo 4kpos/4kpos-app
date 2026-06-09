@@ -1031,7 +1031,7 @@ function applyUserPerms(){
 function confirmShift(){el('shift-open-screen').classList.remove('show');startApp();}
 function startApp(){
   applyLang();
-
+  applyPayMethods();
   el('login-screen').style.display='none';
   el('topbar').style.display='flex';
   el('app-main').style.display='flex';
@@ -1254,7 +1254,24 @@ function updateCobrar(){
 }
 
 // PAYMENT
-function setPay(m,e2){
+function applyPayMethods(){
+  el('pb-card').style.display =
+    db.payMethods && db.payMethods.card === false ? 'none' : 'flex';
+
+  el('pb-transf').style.display =
+    db.payMethods && db.payMethods.transf === false ? 'none' : 'flex';
+}
+
+function savePayMethods(){
+  db.payMethods.card = el('cfg-card').checked;
+  db.payMethods.transf = el('cfg-transf').checked;
+
+  saveDB();
+  applyPayMethods();
+
+  toast('✅ Métodos de pago actualizados');
+}
+  function setPay(m,e2){
   payMethod=m;cashIn='';
   document.querySelectorAll('.pbtn').forEach(b=>b.classList.remove('on'));e2.classList.add('on');
   el('cash-section').style.display=m==='cash'?'block':'none';
