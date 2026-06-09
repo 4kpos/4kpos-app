@@ -878,12 +878,14 @@ document.addEventListener('click',function(e){if(!el('hmenu').contains(e.target)
 
 // PENDING ORDERS
 function pendingButton(){
+  toast('Botón cuenta presionado');
+
   if(cart.length){
     savePending();
   }else{
     togglePending();
   }
-}  
+}
 function togglePending(){el('pending-panel').classList.toggle('open');renderPendingPanel();}
 function renderPendingPanel(){
   const list=el('pp-list');
