@@ -305,7 +305,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
   </div>
   <div style="display:flex;gap:5px">
     <div style="position:relative">
-      <button class="tbtn" onclick="togglePending()" title="Cuentas pendientes" id="btn-pending">⏳</button>
+      <button class="tbtn" onclick="togglePending()" title="Cuentas pendientes" id="btn-pending">📖</button>
       <div class="pbadge-dot" id="pending-dot">0</div>
     </div>
     <button class="tbtn" onclick="toggleCalc()">🧮</button>
@@ -360,9 +360,6 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="chgbox" id="chgbox">Vuelto: $0.00</div>
       </div>
       <button class="cobrar" id="cobrar" onclick="checkout()" disabled>✓ Cobrar — $0.00</button>
-   <button class="btn btn-s" onclick="saveOpenAccount()" style="width:100%;margin-top:8px">
-  📖 Cuenta Abierta
-</button>
     </div>
   </div>
 </div>
@@ -896,11 +893,24 @@ function renderPendingPanel(){
   dot.textContent=pendingOrders.length;
 }
 function savePending(){
-  if(!cart.length){toast('⚠ Carrito vacío');return;}
-  const name=prompt(lang==='en'?'Customer name (optional):':'Nombre del cliente (opcional):','');
-  pendingOrders.push({name:name||'',items:JSON.parse(JSON.stringify(cart))});
-  cart=[];renderCart();renderProds();renderPendingPanel();
-  toast('✓ Cuenta guardada como pendiente');
+ if(!cart.length){toast('⚠ Carrito vacío');return;}
+
+const name=prompt('Nombre o Mesa:','');
+if(!name || !name.trim())return;
+
+pendingOrders.push({
+  name:name.trim(),
+  items:JSON.parse(JSON.stringify(cart)),
+  date:new Date().toISOString(),
+  cashier:curUser ? curUser.name : ''
+});
+
+cart=[];
+cashIn='';
+renderCart();
+renderProds();
+renderPendingPanel();
+toast('✓ Cuenta guardada: '+name);
 }
 function loadPending(i){
   if(cart.length&&!confirm(lang==='en'?'Replace current cart?':'¿Reemplazar carrito actual?'))return;
