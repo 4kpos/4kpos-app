@@ -1009,7 +1009,14 @@ function applyUserPerms(){
   el('hm-conta').style.display=(isAdm||pm.conta)?'flex':'none';
 }
 function confirmShift(){el('shift-open-screen').classList.remove('show');startApp();}
- function startApp(){applyLang()// applyPayMethods();renderCats();renderProds();renderCart();updateLicBadge();setEl('ord-lbl','Orden #'+db.orderNum);}
+function startApp(){
+  applyLang();
+  renderCats();
+  renderProds();
+  renderCart();
+  updateLicBadge();
+  setEl('ord-lbl','Orden # '+db.orderNum);
+} 
 function doLogout(){
   closeOv('ov-logout');curUser=null;cart=[];cashIn='';
   // hideMainUI();
@@ -1722,11 +1729,36 @@ function toggleCalc(){el('fcalc').classList.toggle('open');}
 })();
 function calcPress(k){
   const dv=el('fc-num'),ex=el('fc-expr');
-  if(k==='C'){fcNum='0';fcExpr='';fcNew=true;}
-  else if(k==='⌫')fcNum=fcNum.length>1?fcNum.slice(0,-1):'0';
-  else if(k==='='){try{const expr=fcExpr+fcNum;ex.textContent=expr+' =';const r=Function('"use strict";return('+expr.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-')+')')();fcNum=isNaN(r)?'Err':Number(r).toFixed(2);fcExpr='';fcNew=true;}catch(e){fcNum='Err';}}
-  else if(['+','−','×','÷'].includes(k)){fcExpr+=fcNum+' '+k+' ';fcNew=true;ex.textContent=fcExpr;fcNum='0';}
-  else{if(fcNew){fcNum=k==='.'?'0.':k;fcNew=false;}else{fcNum=fcNum==='0'&&k!=='.'?k:fcNum+k;}}
+
+  if(k==='C'){
+    fcNum='0';fcExpr='';fcNew=true;
+  }else if(k==='⌫'){
+    fcNum=fcNum.length>1?fcNum.slice(0,-1):'0';
+  }else if(k==='='){
+    try{
+      const expr=fcExpr+fcNum;
+      ex.textContent=expr+' =';
+      const r=Function('"use strict";return('+expr.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-')+')')();
+      fcNum=isNaN(r)?'Err':Number(r).toFixed(2);
+      fcExpr='';
+      fcNew=true;
+    }catch(e){
+      fcNum='Err';
+    }
+  }else if(['+','−','×','÷'].includes(k)){
+    fcExpr+=fcNum+' '+k+' ';
+    fcNew=true;
+    ex.textContent=fcExpr;
+    fcNum='0';
+  }else{
+    if(fcNew){
+      fcNum=k==='.'?'0.':k;
+      fcNew=false;
+    }else{
+      fcNum=fcNum==='0'&&k!=='.'?k:fcNum+k;
+    }
+  }
+
   dv.textContent=fcNum;
 }
 
