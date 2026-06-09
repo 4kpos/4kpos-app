@@ -305,8 +305,6 @@ select.fi option{background:var(--s2);color:var(--tx);}
   </div>
   <div style="display:flex;gap:5px">
     <div style="position:relative">
-      <button class="tbtn" onclick="pendingButton()" title="Cuentas pendientes" id="btn-pending">📖</button>
-      <div class="pbadge-dot" id="pending-dot">0</div>
     </div>
     <button class="tbtn" onclick="toggleCalc()">🧮</button>
     <button class="tbtn" onclick="toggleTheme()" id="tbtn-theme">🌙</button>
@@ -350,7 +348,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="pbtns">
           <button class="pbtn on" id="pb-cash" onclick="setPay('cash',this)">💵 <span id="pb-cash-txt">Efectivo</span></button>
           <button class="pbtn" id="pb-card" onclick="setPay('card',this)">💳 <span id="pb-card-txt">Tarjeta</span></button>
-          <button class="pbtn" id="pb-transf" onclick="setPay('transf',this)">📲 <span id="pb-transf-txt">Transfer</span></button>
+          <button class="pbtn" id="pb-transf" onclick="savePending()">📖 <span id="pb-transf-txt">Cuenta Abierta</span></button>
         </div>
       </div>
       <div id="cash-section">
@@ -830,7 +828,7 @@ function applyLang(){
   el('pay-lbl').textContent=t('payMethod');
   el('pb-cash-txt').textContent=t('cash');
   el('pb-card-txt').textContent=t('card');
-  el('pb-transf-txt').textContent=t('transfer');
+  el('pb-transf-txt').textContent='Cuenta Abierta';
   el('recv-lbl').textContent=t('received');
   el('nphint').textContent=t('enterAmt');
   el('pp-title').textContent='⏳ '+t('pendingTitle');
