@@ -360,6 +360,9 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="chgbox" id="chgbox">Vuelto: $0.00</div>
       </div>
       <button class="cobrar" id="cobrar" onclick="checkout()" disabled>✓ Cobrar — $0.00</button>
+   <button class="btn btn-s" onclick="saveOpenAccount()" style="width:100%;margin-top:8px">
+  📖 Cuenta Abierta
+</button>
     </div>
   </div>
 </div>
@@ -1261,7 +1264,7 @@ function calcChange(){
   });
 })();
 
-// CHECKOUT
+// CHECKOUTD
 function checkout(){
   if(!cart.length)return;
   const total=cart.reduce((s,c)=>s+c.price*c.qty,0);
@@ -1277,7 +1280,37 @@ function checkout(){
   setEl('ord-lbl','Orden #'+db.orderNum);
   if(db.drawerAuto)openDrawer();
 }
-function showRcpt(sale){
+function saveOpenAccount(){
+  if(!cart.length){
+    toast('⚠ No hay productos');
+    return;
+  }
+
+  const ref=prompt('Nombre o Mesa:');
+  if(!ref || !ref.trim()) return;
+
+  const total=cart.reduce((s,c)=>s+c.price*c.qty,0);
+
+  db.openAccounts.push({
+    id:Date.now().toString(),
+    ref:ref.trim(),
+    date:new Date().toISOString(),
+    items:JSON.parse(JSON.stringify(cart)),
+    total:total,
+    cashier:curUser ? curUser.name : ''
+  });
+
+  saveDB();
+
+  cart=[];
+  cashIn='';
+
+  renderCart();
+  renderProds();
+
+  toast('📖 Cuenta guardada: '+ref);
+}
+  function showRcpt(sale){
   const c=db.cfg;
   el('r-logo').src=c.logo||LOGO;
   setEl('r-biz',c.bizName||'4K Negocio');
