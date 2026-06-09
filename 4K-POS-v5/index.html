@@ -878,7 +878,7 @@ document.addEventListener('click',function(e){if(!el('hmenu').contains(e.target)
 
 // PENDING ORDERS
 function pendingButton(){
-  toast('Botón cuenta presionado');
+  toast('Carrito tiene: '+cart.length);
 
   if(cart.length){
     savePending();
