@@ -902,7 +902,7 @@ function renderPendingPanel(){
 function savePending(){
  if(!cart.length){toast('⚠ Carrito vacío');return;}
 
-const name=prompt('Nombre o Mesa:','');
+const name=window.prompt('Nombre o Mesa:','');
 if(!name || !name.trim())return;
 
 pendingOrders.push({
