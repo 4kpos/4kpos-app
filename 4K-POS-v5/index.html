@@ -1011,12 +1011,18 @@ function applyUserPerms(){
 function confirmShift(){el('shift-open-screen').classList.remove('show');startApp();}
 function startApp(){
   applyLang();
+
+  el('login-screen').style.display='none';
+  el('topbar').style.display='flex';
+  el('app-main').style.display='flex';
+  el('botbar').style.display='flex';
+
   renderCats();
   renderProds();
   renderCart();
   updateLicBadge();
   setEl('ord-lbl','Orden # '+db.orderNum);
-} 
+}
 function doLogout(){
   closeOv('ov-logout');curUser=null;cart=[];cashIn='';
   // hideMainUI();
