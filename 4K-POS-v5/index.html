@@ -900,9 +900,7 @@ function renderPendingPanel(){
 function savePending(){
  if(!cart.length){toast('⚠ Carrito vacío');return;}
 
-const name=window.prompt('Nombre o Mesa:','');
-if(!name || !name.trim())return;
-
+const name = 'Mesa ' + (pendingOrders.length + 1);
 pendingOrders.push({
   name:name.trim(),
   items:JSON.parse(JSON.stringify(cart)),
