@@ -901,8 +901,9 @@ function savePending(){
  if(!cart.length){toast('⚠ Carrito vacío');return;}
 
 const name = 'Mesa ' + (pendingOrders.length + 1);
+
 pendingOrders.push({
-  name:name.trim(),
+  name,
   items:JSON.parse(JSON.stringify(cart)),
   date:new Date().toISOString(),
   cashier:curUser ? curUser.name : ''
