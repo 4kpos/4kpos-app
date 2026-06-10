@@ -306,7 +306,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div style="display:flex;gap:5px">
     <div style="position:relative">
     </div>
-    <button class="bbtn" onclick="refreshPOS()">🔄</button>
+    <button class="bbtn" onclick="togglePending()">
+  📖 <span id="open-count">0</span>
+</button>
+    
+    <button class="tbtn" onclick="refreshPOS()">🔄</button>
     <button class="tbtn" onclick="toggleCalc()">🧮</button>
     <button class="tbtn" onclick="toggleTheme()" id="tbtn-theme">🌙</button>
     <button class="tbtn" onclick="openLogout()" style="color:var(--rd)" title="Cerrar turno">🚪</button>
@@ -349,9 +353,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="pbtns">
           <button class="pbtn on" id="pb-cash" onclick="setPay('cash',this)">💵 <span id="pb-cash-txt">Efectivo</span></button>
           <button class="pbtn" id="pb-card" onclick="setPay('card',this)">💳 <span id="pb-card-txt">Tarjeta</span></button>
-         <button class="pbtn" id="pb-transf" onclick="pendingButton()">📖<span id="pb-transf-txt">Cuenta Abierta</span></button>
-        </div>
-      </div>
+        <button class="pbtn" id="pb-transf" onclick="savePending()">📖<span id="pb-transf-txt">Cuenta Abierta</span></button>
       <div id="cash-section">
         <div class="plbl" style="margin-bottom:5px" id="recv-lbl">Recibido</div>
         <div class="npdisp"><div class="npval" id="npval">$0.00</div><div class="nphint" id="nphint">Ingresa el monto</div></div>
@@ -370,9 +372,6 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <span class="usr-lbl" id="usr-lbl">—</span>
   </div>
   <div>
-    <button class="bbtn" onclick="togglePending()">
-  📋 <span id="open-count">0</span>
-</button>
     <button class="hamburger-btn" onclick="toggleHMenu()">☰</button>
   </div>
 </div>
@@ -501,7 +500,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:10px">
           <div class="tog"><span class="tog-label">💵 Efectivo</span><label class="tog-sw"><input type="checkbox" id="cfg-cash" checked disabled><span class="slider"></span></label></div>
           <div class="tog"><span class="tog-label">💳 Tarjeta</span><label class="tog-sw"><input type="checkbox" id="cfg-card" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
-          <div class="tog"><span class="tog-label">📲 Transferencia</span><label class="tog-sw"><input type="checkbox" id="cfg-transf" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label">📖 Transferencia</span><label class="tog-sw"><input type="checkbox" id="cfg-transf" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
         </div>
         <div class="sep-line"></div>
         <div class="slbl">Registradora</div>
@@ -801,7 +800,7 @@ function closeOv(id){el(id).classList.remove('open');}
 function confirm2(msg,cb){confCb=cb;el('conf-msg').textContent=msg;el('confov').classList.add('open');}
 function confYes(){el('confov').classList.remove('open');if(confCb)confCb();confCb=null;}
 function confNo(){el('confov').classList.remove('open');confCb=null;}
-function pico(m){return m==='cash'?'💵':m==='card'?'💳':'📲';}
+function pico(m){return m==='cash'?'💵':m==='card'?'💳':'📖';}
 
 // LANG
 function setLang(l){
