@@ -354,7 +354,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <button class="pbtn on" id="pb-cash" onclick="setPay('cash',this)">💵 <span id="pb-cash-txt">Efectivo</span></button>
           <button class="pbtn" id="pb-card" onclick="setPay('card',this)">💳 <span id="pb-card-txt">Tarjeta</span></button>
        <button class="pbtn" id="pb-transf" onclick="savePending()">📖<span id="pb-transf-txt">Cuenta Abierta</span></button>
-        <div class="plbl" style="margin-bottom:5px" id="recv-lbl">Recibido</div>
+        </div>
+          <div class="plbl" style="margin-bottom:5px" id="recv-lbl">Recibido</div>
         <div class="npdisp"><div class="npval" id="npval">$0.00</div><div class="nphint" id="nphint">Ingresa el monto</div></div>
         <div class="npgrid" id="npgrid"></div>
         <div class="chgbox" id="chgbox">Vuelto: $0.00</div>
@@ -911,6 +912,7 @@ function refreshPOS(){
   dot.textContent=pendingOrders.length;
 }
 function savePending(){
+ alert('cart length: ' + cart.length); 
   if(!cart.length){toast('⚠ Carrito vacío');return;}
 
   let name = prompt('Nombre o Mesa');
@@ -1284,16 +1286,17 @@ function savePayMethods(){
   toast('✅ Métodos de pago actualizados');
 }
   function setPay(m,e2){
-  payMethod=m;cashIn='';
-  document.querySelectorAll('.pbtn').forEach(b=>b.classList.remove('on'));e2.classList.add('on');
-  el('cash-section').style.display=m==='cash'?'block':'none';
-  el('npval').textContent='$0.00';calcChange();
-}
-function npPress(k){
-  if(k==='⌫')cashIn=cashIn.slice(0,-1);
-  else if(k==='.'){if(!cashIn.includes('.'))cashIn+=k;}
-  else cashIn+=k;
-  el('npval').textContent=cashIn?dolr(parseFloat(cashIn)||0):'$0.00';
+  payMethod=m;
+  cashIn='';
+
+  document.querySelectorAll('.pbtn').forEach(b=>b.classList.remove('on'));
+
+  if(e2) e2.classList.add('on');
+
+  const cs = el('cash-section');
+  if(cs) cs.style.display = m==='cash' ? 'block' : 'none';
+
+  el('npval').textContent='$0.00';
   calcChange();
 }
 function calcChange(){
