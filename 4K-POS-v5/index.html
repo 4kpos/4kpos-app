@@ -318,12 +318,6 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <span id="pp-title" style="font-size:.85rem;font-weight:700;color:var(--tx)">⏳ Cuentas pendientes</span>
     <button class="mx" onclick="document.getElementById('pending-panel').classList.remove('open')">✕</button>
   </div>
- <div style="padding:8px">
-  <input
-    id="pending-name"
-    class="sinp"
-    placeholder="Nombre o Mesa">
-</div>
   <div style="padding:8px" id="pp-list"></div>
 </div>
 
@@ -376,7 +370,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
   </div>
   <div>
     <button class="bbtn" onclick="togglePending()">
-  📖 <span id="open-count">0</span>
+  📋 <span id="open-count">0</span>
 </button>
     <button class="hamburger-btn" onclick="toggleHMenu()">☰</button>
   </div>
@@ -915,13 +909,13 @@ function togglePending(){el('pending-panel').classList.toggle('open');renderPend
 function savePending(){
  if(!cart.length){toast('⚠ Carrito vacío');return;}
 
-const txt = el('pending-name');
+let name = prompt('Nombre o Mesa');
 
-const name =
-(txt && txt.value.trim())
-? txt.value.trim()
-: 'Mesa ' + (pendingOrders.length + 1);
-
+if(!name || !name.trim()){
+  name = 'Mesa ' + (pendingOrders.length + 1);
+}else{
+  name = name.trim();
+}
 pendingOrders.push({
   name,
   items:JSON.parse(JSON.stringify(cart)),
@@ -931,7 +925,6 @@ pendingOrders.push({
 
   db.pendingOrders = pendingOrders;
 saveDB();
-if(txt) txt.value='';
 cart=[];
 cashIn='';
 renderCart();
