@@ -369,6 +369,9 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <span class="usr-lbl" id="usr-lbl">—</span>
   </div>
   <div>
+    <button class="bbtn" onclick="togglePending()">
+  📖 <span id="open-count">0</span>
+</button>
     <button class="hamburger-btn" onclick="toggleHMenu()">☰</button>
   </div>
 </div>
@@ -780,7 +783,7 @@ let db={products:[],categories:[],sales:[],orderNum:1,adminCode:'1234',
   fundAmount:0,customers:[],payMethods:{cash:true,card:true,transf:true},
   drawerPort:'COM3',drawerAuto:true,
   cfg:{bizName:'4K Negocio',bizSub:'',thanks:'¡Gracias por tu compra! 💕',phone:'',s1:'',s2:'',qr:'',logo:''},
-  facturas:[],gastos_conta:[]};
+  facturas:[],gastos_conta:[],pendingOrders:[]};
 let cart=[],payMethod='cash',cashIn='';
 let curUser=null,curCat='all',pinTarget=null,pinVal='';
 let editingUserId=null;
@@ -883,11 +886,17 @@ function pendingButton(){
   }
 }
 function togglePending(){el('pending-panel').classList.toggle('open');renderPendingPanel();}
-function renderPendingPanel(){
+
+  function renderPendingPanel(){
+  const c = el('open-count');
+
+    if(c) c.textContent = pendingOrders.length;
   const list=el('pp-list');
-  if(!pendingOrders.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 4px">Sin cuentas pendientes.</div>';return;}
+ 
+    if(!pendingOrders.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 4px">Sin cuentas pendientes.</div>';return;}
   list.innerHTML=pendingOrders.map(function(o,i){
     const total=o.items.reduce(function(s,c){return s+c.price*c.qty;},0);
+    
     return '<div class="pp-item" onclick="loadPending('+i+')">'
       +'<div style="display:flex;justify-content:space-between"><span style="font-size:.82rem;font-weight:700;color:var(--tx)">'+(o.name||t('order')+' #'+(i+1))+'</span>'
       +'<span style="font-family:monospace;color:var(--am);font-size:.85rem">'+dolr(total)+'</span></div>'
@@ -909,6 +918,8 @@ pendingOrders.push({
   cashier:curUser ? curUser.name : ''
 });
 
+  db.pendingOrders = pendingOrders;
+saveDB();
 cart=[];
 cashIn='';
 renderCart();
@@ -920,7 +931,13 @@ function loadPending(i){
   if(cart.length&&!confirm(lang==='en'?'Replace current cart?':'¿Reemplazar carrito actual?'))return;
   cart=JSON.parse(JSON.stringify(pendingOrders[i].items));
   pendingOrders.splice(i,1);
-  renderCart();renderProds();renderPendingPanel();
+
+db.pendingOrders = pendingOrders;
+saveDB();
+
+renderCart();
+renderProds();
+renderPendingPanel();
   el('pending-panel').classList.remove('open');
   toast('✓ Cuenta cargada');
 }
@@ -962,6 +979,7 @@ async function loadDB(){
       if(d.payMethods)db.payMethods=Object.assign(db.payMethods,d.payMethods);
       if(d.drawerPort)db.drawerPort=d.drawerPort;
       if(d.drawerAuto!==undefined)db.drawerAuto=d.drawerAuto;
+      if(d.pendingOrders)pendingOrders=d.pendingOrders;
     }
  }catch(e){console.error(e);}
 
