@@ -125,8 +125,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .hmi:last-child{border-bottom:none;}
 .hmi:hover{background:var(--s2);}
 .hmi.adm{color:var(--ac)}.hmi.ret{color:var(--am)}.hmi.can{color:var(--rd)}.hmi.sal{color:var(--gn)}.hmi.conta{color:var(--bl)}.hmi.exit{color:var(--rd)}
-.pending-panel{position:fixed;top:60px;right:60px;width:290px;background:var(--s1);border:1.5px solid var(--b2);border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:650;display:none;}
-.pending-panel.open{display:block;}
 .pp-hd{padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;}
 .pp-item{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--rs);padding:9px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s;}
 .pp-item:hover{border-color:var(--ac);}
@@ -306,25 +304,14 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div style="display:flex;gap:5px">
     <div style="position:relative">
     </div>
-    <button class="bbtn" onclick="togglePending()">
-  📖 <span id="open-count">0</span>
-</button>
+  
+
     
-    <button class="tbtn" onclick="refreshPOS()">🔄</button>
-   
+     <button class="tbtn" onclick="refreshPOS()">🔄</button>
     <button class="tbtn" onclick="toggleCalc()">🧮</button>
     <button class="tbtn" onclick="toggleTheme()" id="tbtn-theme">🌙</button>
     <button class="tbtn" onclick="openLogout()" style="color:var(--rd)" title="Cerrar turno">🚪</button>
   </div>
-</div>
-
-<!-- PENDING PANEL -->
-<div class="pending-panel" id="pending-panel">
-  <div class="pp-hd">
-    <span id="pp-title" style="font-size:.85rem;font-weight:700;color:var(--tx)">⏳ Cuentas pendientes</span>
-    <button class="mx" onclick="document.getElementById('pending-panel').classList.remove('open')">✕</button>
-  </div>
-  <div style="padding:8px" id="pp-list"></div>
 </div>
 
 <!-- APP -->
@@ -354,7 +341,6 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="pbtns">
           <button class="pbtn on" id="pb-cash" onclick="setPay('cash',this)">💵 <span id="pb-cash-txt">Efectivo</span></button>
           <button class="pbtn" id="pb-card" onclick="setPay('card',this)">💳 <span id="pb-card-txt">Tarjeta</span></button>
-       <button class="pbtn" id="pb-transf" onclick="alert('ANTES'); savePending();">📖<span id="pb-transf-txt">Cuenta Abierta</span></button>
         </div>
            <div id="cash-section">
 
@@ -765,7 +751,6 @@ const T = {
     loginTitle:'Ingresa tus credenciales',loginBtn:'Entrar al turno',loginErr:'Usuario o contraseña incorrectos',
     shiftOpen:'Apertura de Turno',shiftWelcome:'Bienvenido',shiftFund:'Fondo de caja:',shiftConfirm:'Confirma que recibiste este monto',shiftBtn:'✓ Confirmar y Abrir Turno',
     pinTitle:'Código de acceso',pinErr:'Código incorrecto',admTitle:'Administración',logoutTitle:'Cerrar Turno',
-    pendingTitle:'Cuentas pendientes',pendingNew:'+ Nueva cuenta',
     adm:'Administración',ret:'Devoluciones',can:'Cancelar Venta',sal:'Ventas del día',conta:'Contabilidad',drawer:'Abrir Registradora',exit:'Salir del programa',
     payLabel:'Pago',cashier:'Cajero',cancelledLbl:'cancelada',returnedLbl:'devuelta',
     shiftReport:'Reporte del turno',totalBox:'Total en caja',
@@ -776,7 +761,6 @@ const T = {
     loginTitle:'Enter your credentials',loginBtn:'Start shift',loginErr:'Incorrect user or password',
     shiftOpen:'Shift Opening',shiftWelcome:'Welcome',shiftFund:'Cash fund:',shiftConfirm:'Confirm you received this amount',shiftBtn:'✓ Confirm & Open Shift',
     pinTitle:'Access code',pinErr:'Incorrect code',admTitle:'Administration',logoutTitle:'Close Shift',
-    pendingTitle:'Pending accounts',pendingNew:'+ New account',
     adm:'Administration',ret:'Returns',can:'Cancel Sale',sal:'Today Sales',conta:'Accounting',drawer:'Open Drawer',exit:'Exit program',
     payLabel:'Payment',cashier:'Cashier',cancelledLbl:'cancelled',returnedLbl:'returned',
     shiftReport:'Shift report',totalBox:'Total in drawer',
@@ -798,7 +782,7 @@ let cart=[],payMethod='cash',cashIn='';
 let curUser=null,curCat='all',pinTarget=null,pinVal='';
 let editingUserId=null;
 let confCb=null,fcExpr='',fcNum='0',fcNew=true;
-let pendingOrders=[];
+
 
 function el(id){return document.getElementById(id);}
 function setEl(id,v){const e=el(id);if(e)e.textContent=v;}
@@ -886,71 +870,6 @@ function toggleTheme(){dark=!dark;document.body.classList.toggle('light',!dark);
 function toggleHMenu(){el('hmenu').classList.toggle('open');}
 function closeHMenu(){el('hmenu').classList.remove('open');}
 document.addEventListener('click',function(e){if(!el('hmenu').contains(e.target)&&!e.target.classList.contains('hamburger-btn'))closeHMenu();});
-
-// PENDING ORDERS
-function pendingButton(){
-  if(cart.length){
-    savePending();
-  }else{
-    togglePending();
-  }
-}
-function togglePending(){el('pending-panel').classList.toggle('open');renderPendingPanel();}
-function refreshPOS(){
-  renderCart();
-  renderProds();
-  renderPendingPanel();
-  toast('✓ Actualizado');
-}
-  function renderPendingPanel(){
-  const c = el('open-count');
-
-    if(c) c.textContent = pendingOrders.length;
-  const list=el('pp-list');
- 
-    if(!pendingOrders.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 4px">Sin cuentas pendientes.</div>';return;}
-  list.innerHTML=pendingOrders.map(function(o,i){
-    const total=o.items.reduce(function(s,c){return s+c.price*c.qty;},0);
-    
-    return '<div class="pp-item" onclick="loadPending('+i+')">'
-      +'<div style="display:flex;justify-content:space-between"><span style="font-size:.82rem;font-weight:700;color:var(--tx)">'+(o.name||t('order')+' #'+(i+1))+'</span>'
-      +'<span style="font-family:monospace;color:var(--am);font-size:.85rem">'+dolr(total)+'</span></div>'
-      +'<div style="font-size:.72rem;color:var(--tx3)">'+o.items.length+' '+t('items').toLowerCase()+'</div></div>';
-  }).join('')+'<button class="pp-new" onclick="savePending()">'+t('pendingNew')+'</button>';
-  const dot=el('pending-dot');
-  dot.style.display=pendingOrders.length?'flex':'none';
-  dot.textContent=pendingOrders.length;
-}
-function savePending(){
- 
-  if(!cart.length){toast('⚠ Carrito vacío');return;}
-
-  let name = prompt('Nombre o Mesa');
-
-  if(!name || !name.trim()){
-    name = 'Mesa ' + (pendingOrders.length + 1);
-  }else{
-    name = name.trim();
-  }
-
-  pendingOrders.push({
-    name,
-    items:JSON.parse(JSON.stringify(cart)),
-    date:new Date().toISOString(),
-    cashier:curUser ? curUser.name : ''
-  });
-
-  db.pendingOrders = pendingOrders;
-  saveDB();
-cart=[];
-cashIn='';
-
-renderCart();
-renderProds();
-renderPendingPanel();
-
-toast('✓ Cuenta guardada: '+name);
-}
  
 // DRAWER
 function openDrawer(){
@@ -989,7 +908,6 @@ async function loadDB(){
       if(d.payMethods)db.payMethods=Object.assign(db.payMethods,d.payMethods);
       if(d.drawerPort)db.drawerPort=d.drawerPort;
       if(d.drawerAuto!==undefined)db.drawerAuto=d.drawerAuto;
-      if(d.pendingOrders)pendingOrders=d.pendingOrders;
     }
  }catch(e){console.error(e);}
 
