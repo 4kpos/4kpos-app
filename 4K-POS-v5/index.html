@@ -311,6 +311,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 </button>
     
     <button class="tbtn" onclick="refreshPOS()">🔄</button>
+   
     <button class="tbtn" onclick="toggleCalc()">🧮</button>
     <button class="tbtn" onclick="toggleTheme()" id="tbtn-theme">🌙</button>
     <button class="tbtn" onclick="openLogout()" style="color:var(--rd)" title="Cerrar turno">🚪</button>
@@ -353,13 +354,22 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="pbtns">
           <button class="pbtn on" id="pb-cash" onclick="setPay('cash',this)">💵 <span id="pb-cash-txt">Efectivo</span></button>
           <button class="pbtn" id="pb-card" onclick="setPay('card',this)">💳 <span id="pb-card-txt">Tarjeta</span></button>
-       <button class="pbtn" id="pb-transf" onclick="savePending()">📖<span id="pb-transf-txt">Cuenta Abierta</span></button>
+       <button class="pbtn" id="pb-transf" onclick="alert('ANTES'); savePending();">📖<span id="pb-transf-txt">Cuenta Abierta</span></button>
         </div>
-          <div class="plbl" style="margin-bottom:5px" id="recv-lbl">Recibido</div>
-        <div class="npdisp"><div class="npval" id="npval">$0.00</div><div class="nphint" id="nphint">Ingresa el monto</div></div>
-        <div class="npgrid" id="npgrid"></div>
-        <div class="chgbox" id="chgbox">Vuelto: $0.00</div>
-      </div>
+           <div id="cash-section">
+
+  <div class="plbl" style="margin-bottom:5px" id="recv-lbl">Recibido</div>
+
+  <div class="npdisp">
+    <div class="npval" id="npval">$0.00</div>
+    <div class="nphint" id="nphint">Ingresa el monto</div>
+  </div>
+
+  <div class="npgrid" id="npgrid"></div>
+
+  <div class="chgbox" id="chgbox">Vuelto: $0.00</div>
+
+</div>
       <button class="cobrar" id="cobrar" onclick="checkout()" disabled>✓ Cobrar — $0.00</button>
     </div>
   </div>
@@ -912,7 +922,7 @@ function refreshPOS(){
   dot.textContent=pendingOrders.length;
 }
 function savePending(){
- alert('cart length: ' + cart.length); 
+ 
   if(!cart.length){toast('⚠ Carrito vacío');return;}
 
   let name = prompt('Nombre o Mesa');
@@ -932,7 +942,15 @@ function savePending(){
 
   db.pendingOrders = pendingOrders;
   saveDB();
+cart=[];
+cashIn='';
 
+renderCart();
+renderProds();
+renderPendingPanel();
+
+toast('✓ Cuenta guardada: '+name);
+}
   cart=[];
   cashIn='';
   renderCart();
@@ -1285,12 +1303,11 @@ function savePayMethods(){
 
   toast('✅ Métodos de pago actualizados');
 }
-  function setPay(m,e2){
+ function setPay(m,e2){
   payMethod=m;
   cashIn='';
 
   document.querySelectorAll('.pbtn').forEach(b=>b.classList.remove('on'));
-
   if(e2) e2.classList.add('on');
 
   const cs = el('cash-section');
