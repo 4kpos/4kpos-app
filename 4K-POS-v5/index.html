@@ -1220,11 +1220,9 @@ function updateCobrar(){
 
 // PAYMENT
 function applyPayMethods(){
-  el('pb-card').style.display =
-    db.payMethods && db.payMethods.card === false ? 'none' : 'flex';
-
-  el('pb-transf').style.display =
-    db.payMethods && db.payMethods.transf === false ? 'none' : 'flex';
+  const card=el('pb-card'),transf=el('pb-transf');
+  if(card) card.style.display = db.payMethods&&db.payMethods.card===false ? 'none' : 'flex';
+  if(transf) transf.style.display = db.payMethods&&db.payMethods.transf===false ? 'none' : 'flex';
 }
 
 function savePayMethods(){
