@@ -777,7 +777,7 @@ let db={products:[],categories:[],sales:[],orderNum:1,adminCode:'1234',
   fundAmount:0,customers:[],payMethods:{cash:true,card:true,transf:true},
   drawerPort:'COM3',drawerAuto:true,
   cfg:{bizName:'4K Negocio',bizSub:'',thanks:'¡Gracias por tu compra! 💕',phone:'',s1:'',s2:'',qr:'',logo:''},
-  facturas:[],gastos_conta:[],pendingOrders:[]};
+  facturas:[],gastos_conta:[]};
 let cart=[],payMethod='cash',cashIn='';
 let curUser=null,curCat='all',pinTarget=null,pinVal='';
 let editingUserId=null;
@@ -825,7 +825,6 @@ function applyLang(){
   el('pay-lbl').textContent=t('payMethod');
   el('pb-cash-txt').textContent=t('cash');
   el('pb-card-txt').textContent=t('card');
-  el('pb-transf-txt').textContent='Cuenta Abierta';
   el('recv-lbl').textContent=t('received');
   el('nphint').textContent=t('enterAmt');
   el('pp-title').textContent='⏳ '+t('pendingTitle');
