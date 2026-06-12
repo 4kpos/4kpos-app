@@ -882,36 +882,36 @@ function setLang(l){
 }
 
 function applyLang(){
-  el('srch').placeholder=t('srch');
-  el('l-sub').textContent=t('loginTitle');
-  el('l-btn').textContent=t('loginBtn');
-  el('lerr').textContent=t('loginErr');
-  el('so-title').textContent=t('shiftOpen');
-  el('so-flbl').textContent=t('shiftFund');
-  el('so-ctxt').textContent=t('shiftConfirm');
-  el('so-btn').textContent=t('shiftBtn');
-  el('pin-title').textContent=t('pinTitle');
-  el('pin-err').textContent='❌ '+t('pinErr');
-  el('adm-title').textContent=t('admTitle');
-  el('lo-title').textContent='🚪 '+t('logoutTitle');
-  el('cart-ttl-txt').textContent=t('order');
-  el('clr-btn').textContent=t('clear');
-  el('empty-txt').textContent=t('addProducts');
-  el('sub-lbl').textContent=t('subtotal');
-  el('items-lbl').textContent=t('items');
-  el('pay-lbl').textContent=t('payMethod');
-  el('pb-cash-txt').textContent=t('cash');
-  el('pb-card-txt').textContent=t('card');
-  el('recv-lbl').textContent=t('received');
-  el('nphint').textContent=t('enterAmt');
-  el('hm-adm-txt').textContent=t('adm');
-  el('hm-ret-txt').textContent=t('ret');
-  el('hm-can-txt').textContent=t('can');
-  el('hm-sal-txt').textContent=t('sal');
-  el('hm-conta-txt').textContent=t('conta');
-  el('hm-drawer-txt').textContent=t('drawer');
-  el('hm-exit-txt').textContent=t('exit');
-  el('r-pay-lbl').textContent=t('payLabel');
+  const _srch=el('srch');if(_srch)_srch.placeholder=t('srch');
+  const _lsub=el('l-sub');if(_lsub)_lsub.textContent=t('loginTitle');
+  const _lbtn=el('l-btn');if(_lbtn)_lbtn.textContent=t('loginBtn');
+  const _lerr=el('lerr');if(_lerr)_lerr.textContent=t('loginErr');
+  const _sotitle=el('so-title');if(_sotitle)_sotitle.textContent=t('shiftOpen');
+  const _soflbl=el('so-flbl');if(_soflbl)_soflbl.textContent=t('shiftFund');
+  const _soctxt=el('so-ctxt');if(_soctxt)_soctxt.textContent=t('shiftConfirm');
+  const _sobtn=el('so-btn');if(_sobtn)_sobtn.textContent=t('shiftBtn');
+  const _pintitle=el('pin-title');if(_pintitle)_pintitle.textContent=t('pinTitle');
+  const _pinerr=el('pin-err');if(_pinerr)_pinerr.textContent='❌ '+t('pinErr');
+  const _admtitle=el('adm-title');if(_admtitle)_admtitle.textContent=t('admTitle');
+  const _lotitle=el('lo-title');if(_lotitle)_lotitle.textContent='🚪 '+t('logoutTitle');
+  const _cartttl=el('cart-ttl-txt');if(_cartttl)_cartttl.textContent=t('order');
+  const _clrbtn=el('clr-btn');if(_clrbtn)_clrbtn.textContent=t('clear');
+  const _emptytxt=el('empty-txt');if(_emptytxt)_emptytxt.textContent=t('addProducts');
+  const _sublbl=el('sub-lbl');if(_sublbl)_sublbl.textContent=t('subtotal');
+  const _itemslbl=el('items-lbl');if(_itemslbl)_itemslbl.textContent=t('items');
+  const _paylbl=el('pay-lbl');if(_paylbl)_paylbl.textContent=t('payMethod');
+  const _pbcashtxt=el('pb-cash-txt');if(_pbcashtxt)_pbcashtxt.textContent=t('cash');
+  const _pbcardtxt=el('pb-card-txt');if(_pbcardtxt)_pbcardtxt.textContent=t('card');
+  const _recvlbl=el('recv-lbl');if(_recvlbl)_recvlbl.textContent=t('received');
+  const _nphint=el('nphint');if(_nphint)_nphint.textContent=t('enterAmt');
+  const _hmadm=el('hm-adm-txt');if(_hmadm)_hmadm.textContent=t('adm');
+  const _hmret=el('hm-ret-txt');if(_hmret)_hmret.textContent=t('ret');
+  const _hmcan=el('hm-can-txt');if(_hmcan)_hmcan.textContent=t('can');
+  const _hmsal=el('hm-sal-txt');if(_hmsal)_hmsal.textContent=t('sal');
+  const _hmconta=el('hm-conta-txt');if(_hmconta)_hmconta.textContent=t('conta');
+  const _hmdrawer=el('hm-drawer-txt');if(_hmdrawer)_hmdrawer.textContent=t('drawer');
+  const _hmexit=el('hm-exit-txt');if(_hmexit)_hmexit.textContent=t('exit');
+  const _rpaylbl=el('r-pay-lbl');if(_rpaylbl)_rpaylbl.textContent=t('payLabel');
   updateCobrar(); renderCats(); renderProds();
 }
 
