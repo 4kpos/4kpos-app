@@ -45,6 +45,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .lic-err{background:var(--rdb);border-color:var(--rd);color:var(--rd);}
 .tbtn{background:var(--s2);border:1.5px solid var(--b1);color:var(--tx2);width:34px;height:34px;border-radius:var(--rs);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;position:relative;}
 .tbtn:hover{border-color:var(--ac);color:var(--ac);}
+#tb-user,#tb-user *{color:#fff!important;}
 .pbadge-dot{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--rd);color:#fff;border-radius:50%;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;}
 .app{display:flex;flex:1;overflow:hidden;}
 .ppanel{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:2px solid var(--b1);}
@@ -319,7 +320,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
   
 
     
-     <button class="tbtn" id="oa-counter-btn" onclick="openOAManager()" title="Cuentas abiertas" style="position:relative;display:none;background:var(--ac);border-color:var(--ac);color:#fff;font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;padding:4px 8px;gap:5px" id="oa-counter-btn"><span id="oa-counter-txt">Cuentas</span><span id="oa-badge" style="background:#f44;color:#fff;border-radius:50%;font-size:.6rem;font-weight:800;min-width:17px;height:17px;display:inline-flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">0</span></button>
+     <button class="tbtn" id="oa-counter-btn" onclick="openOAManager()" title="Cuentas abiertas" style="position:relative;display:none;background:var(--ac);border-color:var(--ac);color:#fff;font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;padding:8px 14px;gap:4px;width:auto;height:auto;min-width:80px"><span id="oa-counter-txt">Cuentas</span><span id="oa-badge" style="display:none;position:absolute;top:-7px;right:-7px;background:#f44;color:#fff;border-radius:50%;font-size:.6rem;font-weight:800;min-width:18px;height:18px;align-items:center;justify-content:center;padding:0 3px;line-height:1;box-shadow:0 0 0 2px var(--bg)">0</span></button>
      <button class="tbtn" onclick="refreshPOS()" title="Actualizar datos">🔄</button>
     <button class="tbtn" id="lang-toggle-btn" onclick="switchLang()" title="Cambiar idioma / Switch language">🌐</button>
     <button class="tbtn" onclick="toggleCalc()">🧮</button>
@@ -664,6 +665,21 @@ select.fi option{background:var(--s2);color:var(--tx);}
   </div>
 </div>
 
+<!-- BLOQUEO LOGOUT POR CUENTAS ABIERTAS -->
+<div class="ov" id="ov-oa-block">
+  <div class="modal mnarrow">
+    <div class="mh"><h3>⚠ Cuentas abiertas</h3><button class="mx" onclick="closeOv('ov-oa-block')">✕</button></div>
+    <div class="mb">
+      <div id="oa-block-msg" style="margin-bottom:10px"></div>
+      <div id="oa-block-list" style="max-height:180px;overflow-y:auto;border:1.5px solid var(--b1);border-radius:var(--rs);margin-bottom:14px"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-s" style="flex:1" onclick="closeOv('ov-oa-block');openOAManager()">📖 Ver cuentas</button>
+        <button class="btn btn-d" style="flex:1" onclick="forceLogout()">🔑 Forzar cierre</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- CONTABILIDAD -->
 <div class="ov" id="ov-conta">
   <div class="modal mwide">
@@ -870,7 +886,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div style="font-size:1.4rem;font-weight:800;color:var(--am)" id="credit-total-amt">$0.00</div>
       </div>
       <div style="margin-bottom:8px;font-size:.82rem;font-weight:700;color:var(--tx2)" id="credit-select-lbl">Seleccionar cliente registrado</div>
-      <div style="max-height:200px;overflow-y:auto;margin-bottom:10px;border:1.5px solid var(--b1);border-radius:var(--rs)" id="credit-cust-list"></div>
+      <input type="text" class="fi" id="credit-cust-srch" placeholder="🔍 Buscar por nombre o cédula..." oninput="renderCreditCustList(this.value)" style="margin-bottom:8px;font-size:.83rem">
+      <div style="max-height:180px;overflow-y:auto;margin-bottom:10px;border:1.5px solid var(--b1);border-radius:var(--rs)" id="credit-cust-list"></div>
       <div style="font-size:.8rem;color:var(--tx3);margin-bottom:8px;text-align:center">— o —</div>
       <button class="btn btn-s" style="width:100%;font-size:.8rem" onclick="showAddCustInline()">➕ <span id="credit-add-cust-btn-txt">Agregar nuevo cliente</span></button>
       <div id="credit-add-cust-form" style="display:none;margin-top:10px;border-top:1.5px solid var(--b1);padding-top:10px">
@@ -879,10 +896,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="fg" style="margin-bottom:8px"><label class="lbl">Teléfono</label><input type="text" class="fi" id="nc-phone" placeholder="(opcional)"></div>
         <button class="btn btn-p" style="width:100%" onclick="saveNewCustAndSelect()">💾 Guardar y seleccionar</button>
       </div>
-      <div id="credit-selected-cust" style="display:none;margin-top:10px;background:var(--acg);border:1.5px solid var(--ac);border-radius:var(--rs);padding:10px">
+      <div id="credit-selected-cust" style="display:none;margin-top:10px;background:var(--acg);border:1.5px solid var(--ac);border-radius:var(--rs);padding:10px;position:relative">
         <div style="font-size:.8rem;color:var(--tx3)">Cliente seleccionado:</div>
         <div style="font-weight:700;color:var(--tx)" id="credit-sel-name">—</div>
         <div style="font-size:.75rem;color:var(--tx3)" id="credit-sel-cedula"></div>
+        <button onclick="deselectCreditCust()" style="position:absolute;top:8px;right:8px;background:var(--rdb);border:1px solid var(--rd);color:var(--rd);border-radius:6px;padding:2px 8px;cursor:pointer;font-size:.75rem;font-weight:700">✕ Cambiar</button>
       </div>
       <div class="frow" style="margin-top:14px"><button class="btn btn-p" style="width:100%;background:var(--amb);border-color:var(--am);color:var(--am)" onclick="confirmCreditSale()" id="credit-confirm-btn">✓ Registrar crédito</button></div>
     </div>
@@ -992,7 +1010,7 @@ const T = {
     stockAdjusted:'✅ Stock ajustado según conteo',invalidValue:'⚠ Valor inválido',
     // Admin tabs
     tabProds:'Productos',tabCats:'Categorías',tabUsers:'Usuarios',tabCfg:'Config',tabInv:'Inventario',tabCust:'Clientes',tabCredits:'Créditos',
-    accounts:'Cuentas',openAccShort:'Cta. Abierta',cedula:'Cédula / ID',
+    accounts:'Cuentas',openAccShort:'Cta. Abierta',cedula:'Cédula / ID',invValue:'Valor',
     // Product form
     fldName:'Nombre',fldCategory:'Categoría',fldPrice:'Precio ($)',fldCostPrice:'Precio de compra ($)',
     fldProfitMargin:'Margen de ganancia',fldStock:'Stock',fldMinStock:'Stock mínimo',fldBarcode:'Código de barras',
@@ -1062,7 +1080,7 @@ const T = {
     stockAdjusted:'✅ Stock adjusted to count',invalidValue:'⚠ Invalid value',
     // Admin tabs
     tabProds:'Products',tabCats:'Categories',tabUsers:'Users',tabCfg:'Config',tabInv:'Inventory',tabCust:'Customers',tabCredits:'Credits',
-    accounts:'Accounts',openAccShort:'Open Acct.',cedula:'ID / Cedula',
+    accounts:'Accounts',openAccShort:'Open Acct.',cedula:'ID / Cedula',invValue:'Value',
     // Product form
     fldName:'Name',fldCategory:'Category',fldPrice:'Price ($)',fldCostPrice:'Cost price ($)',
     fldProfitMargin:'Profit margin',fldStock:'Stock',fldMinStock:'Min stock',fldBarcode:'Barcode',
@@ -1462,6 +1480,16 @@ function runTarget(t2){
   else if(t2==='cancel'){renderActions('cancel');openOv('ov-actions');}
   else if(t2==='sales'){renderSales();openOv('ov-sales');}
   else if(t2==='conta'){loadContaPerms();renderConta();openOv('ov-conta');}
+  else if(t2==='force-logout'){_execForceLogout();}
+}
+function forceLogout(){
+  closeOv('ov-oa-block');
+  if(curUser&&curUser.role==='admin'){_execForceLogout();return;}
+  pinTarget='force-logout';pinVal='';updatePinDisp();el('pin-err').style.display='none';openOv('ov-pin');
+}
+function _execForceLogout(){
+  closeOv('ov-oa-block');
+  doLogout();
 }
 function updatePinDisp(){el('pin-disp').textContent=pinVal.length?'●'.repeat(pinVal.length):'_ _ _ _';}
 function pinPress(k){
@@ -1591,7 +1619,7 @@ function renderInv(){
     +'<tr style="border-bottom:2px solid var(--b2);color:var(--tx3)"><th style="text-align:left;padding:6px 4px">'+t('product')+'</th>'
     +costCol+priceCol
     +'<th style="text-align:right;padding:6px 4px">'+t('stock')+'</th>'
-    +'<th style="text-align:right;padding:6px 4px">Valor</th><th></th></tr>'
+    +'<th style="text-align:right;padding:6px 4px">'+t('invValue')+'</th><th></th></tr>'
     +list.map(p=>{
       const low=p.stock<=(p.minStock||5);
       const costTd=isAdm?('<td style="padding:7px 4px;text-align:right;font-family:monospace;color:var(--tx2)">'+(p.cost?dolr(p.cost):'—')+'</td><td style="padding:7px 4px;text-align:right;font-family:monospace;color:var(--gn)">'+dolr(p.price)+'</td>'):'';
@@ -1941,7 +1969,7 @@ function checkout(){
   cart.forEach(item=>{const p=db.products.find(x=>x.id===item.id);if(p)p.stock=Math.max(0,(p.stock||0)-item.qty);});
   const rnum=String(db.orderNum).padStart(6,'0');
   const rcode='4K-'+rnum+'-'+Date.now().toString(36).toUpperCase();
-  const payLabels={cash:t('cash'),card:t('card'),transf:t('transfer'),split:'Split'};
+  const payLabels={cash:t('cash'),card:t('card'),transf:t('transfer'),split:t('split')};
   const sale={id:db.orderNum,date:new Date().toISOString(),items:JSON.parse(JSON.stringify(cart)),total,recv,change:chg,payMethod,payLabel:payLabels[payMethod]||payMethod,splitCash:splitCash||undefined,splitCard:splitCard||undefined,status:'active',rnum,rcode,cashier:curUser?curUser.name:'—'};
   db.sales.push(sale);db.orderNum++;
   saveDB();
@@ -2048,8 +2076,13 @@ function updateOACounter(){
   const list=_loadOAs();
   const btn=el('oa-counter-btn'),badge=el('oa-badge');
   if(!btn)return;
-  if(list.length>0){btn.style.display='flex';badge.textContent=list.length;}
-  else{btn.style.display='none';}
+  if(list.length>0){
+    btn.style.display='flex';
+    if(badge){badge.textContent=list.length;badge.style.display='flex';}
+  }else{
+    btn.style.display='none';
+    if(badge)badge.style.display='none';
+  }
 }
 
 // DESCUENTO
@@ -2088,14 +2121,20 @@ function openCreditSale(){
   const sel=el('credit-selected-cust');if(sel)sel.style.display='none';
   const form=el('credit-add-cust-form');if(form)form.style.display='none';
   ['nc-name','nc-cedula','nc-phone'].forEach(id=>{const e=el(id);if(e)e.value='';});
-  renderCreditCustList();
+  const srch=el('credit-cust-srch');if(srch)srch.value='';
+  renderCreditCustList('');
   openOv('ov-credit-sale');
 }
-function renderCreditCustList(){
+function renderCreditCustList(q){
   const list=el('credit-cust-list');if(!list)return;
-  if(!db.customers.length){list.innerHTML='<div style="padding:12px;text-align:center;color:var(--tx3);font-size:.82rem">Sin clientes registrados</div>';return;}
-  list.innerHTML=db.customers.map(c=>'<div onclick="selectCreditCust(\''+c.id+'\')" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:8px;transition:background .15s" onmouseover="this.style.background=\'var(--s3)\'" onmouseout="this.style.background=\'\'">'
-    +'<div style="width:32px;height:32px;border-radius:50%;background:var(--acg);color:var(--ac);display:flex;align-items:center;justify-content:center;font-weight:700">'+c.name[0]+'</div>'
+  const f=(q||'').toLowerCase().trim();
+  const filtered=!f?db.customers:db.customers.filter(c=>(c.name||'').toLowerCase().includes(f)||(c.cedula||'').toLowerCase().includes(f));
+  if(!filtered.length){
+    list.innerHTML='<div style="padding:12px;text-align:center;color:var(--tx3);font-size:.82rem">'+(db.customers.length?'Sin resultados':'Sin clientes registrados')+'</div>';
+    return;
+  }
+  list.innerHTML=filtered.map(c=>'<div onclick="selectCreditCust(\''+c.id+'\')" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:8px;transition:background .15s" onmouseover="this.style.background=\'var(--s3)\'" onmouseout="this.style.background=\'\'">'
+    +'<div style="width:32px;height:32px;border-radius:50%;background:var(--acg);color:var(--ac);display:flex;align-items:center;justify-content:center;font-weight:700">'+c.name[0].toUpperCase()+'</div>'
     +'<div><div style="font-weight:600;font-size:.87rem">'+c.name+'</div>'
     +'<div style="font-size:.72rem;color:var(--tx3)">🪪 '+(c.cedula||'—')+(c.phone?' · '+c.phone:'')+'</div></div>'
     +'</div>').join('');
@@ -2107,6 +2146,12 @@ function selectCreditCust(id){
   const sc=el('credit-sel-cedula');if(sc)sc.textContent='🪪 '+c.cedula+(c.phone?' · 📞 '+c.phone:'');
   const sel=el('credit-selected-cust');if(sel)sel.style.display='block';
   const form=el('credit-add-cust-form');if(form)form.style.display='none';
+}
+function deselectCreditCust(){
+  _creditSelectedCustId=null;
+  const sel=el('credit-selected-cust');if(sel)sel.style.display='none';
+  const srch=el('credit-cust-srch');if(srch){srch.value='';setTimeout(()=>srch.focus(),50);}
+  renderCreditCustList('');
 }
 function showAddCustInline(){
   const form=el('credit-add-cust-form');if(form){form.style.display=form.style.display==='none'?'block':'none';}
@@ -2398,6 +2443,16 @@ function renderSales(){
 
 // LOGOUT
 function openLogout(){
+  const oas=_loadOAs();
+  if(oas.length>0){
+    const plural=oas.length>1;
+    const msg=el('oa-block-msg');
+    if(msg)msg.innerHTML='<div style="background:var(--rdb);border:1.5px solid var(--rd);border-radius:var(--rs);padding:10px;color:var(--rd);font-size:.85rem">⚠ No puedes cerrar sesión con <strong>'+oas.length+'</strong> cuenta'+(plural?'s':'')+' abierta'+(plural?'s':'')+' pendiente'+(plural?'s':'')+'. Cierra o cobra las cuentas primero.</div>';
+    const bl=el('oa-block-list');
+    if(bl)bl.innerHTML=oas.map(oa=>'<div style="padding:8px 12px;border-bottom:1px solid var(--b1);display:flex;justify-content:space-between;align-items:center"><span style="font-weight:600;font-size:.87rem">📖 '+oa.name+'</span><span style="color:var(--am);font-family:monospace;font-size:.83rem">'+dolr(oa.total||0)+'</span></div>').join('');
+    openOv('ov-oa-block');
+    return;
+  }
   const today=new Date().toDateString();
   const active=db.sales.filter(s=>new Date(s.date).toDateString()===today&&s.status==='active');
   const inc=active.reduce((s,x)=>s+x.total,0);
