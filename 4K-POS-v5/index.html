@@ -128,7 +128,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .usr-lbl{font-size:.72rem;color:var(--tx3);}
 .hamburger-btn{background:var(--s2);border:1.5px solid var(--b1);color:var(--tx2);padding:8px 13px;border-radius:var(--rs);cursor:pointer;font-size:1.1rem;transition:all .2s;}
 .hamburger-btn:hover{border-color:var(--ac);color:var(--ac);}
-.hmenu{position:fixed;bottom:52px;right:16px;background:var(--s1);border:1.5px solid var(--b2);border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:700;display:none;min-width:210px;overflow:hidden;}
+.hmenu{position:fixed;top:56px;right:16px;background:var(--s1);border:1.5px solid var(--b2);border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:700;display:none;min-width:210px;overflow:hidden;}
 .hmenu.open{display:block;}
 .hmi{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;transition:background .15s;font-size:.85rem;font-weight:600;border-bottom:1px solid var(--b1);}
 .hmi:last-child{border-bottom:none;}
@@ -340,7 +340,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
   </div>
   <div class="cart">
     <div class="cart-hd">
-      <div class="cart-ttl">🛒 <span id="cart-ttl-txt">Orden</span> <span class="ccnt" id="ccnt">0</span></div>
+      <div class="cart-ttl">🛒 <span id="cart-ttl-txt">Orden</span>&nbsp;<span id="ord-lbl" style="font-size:.76rem;color:var(--tx3);font-weight:600">#1</span>&nbsp;<span class="ccnt" id="ccnt">0</span></div>
+      <button class="hamburger-btn" onclick="toggleHMenu()" style="padding:5px 11px;font-size:.95rem;margin-left:auto;margin-right:8px">☰</button>
       <button class="clrbtn" id="clr-btn" onclick="clearCart()">Limpiar</button>
     </div>
     <div class="clist" id="clist">
@@ -369,13 +370,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 
 <!-- BOTTOM BAR -->
 <div id="botbar" style="display:none">
-  <div class="bot-left">
-    <span class="ord-lbl" id="ord-lbl">Orden #1</span>
-    <span class="usr-lbl" id="usr-lbl">—</span>
-  </div>
-  <div>
-    <button class="hamburger-btn" onclick="toggleHMenu()">☰</button>
-  </div>
+  <span id="usr-lbl" style="display:none">—</span>
 </div>
 
 <!-- HAMBURGER MENU -->
@@ -533,6 +528,18 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="fg"><label class="lbl">URL QR</label><input type="text" class="fi" id="cfg-qr"></div>
         <div class="frow"><button class="btn btn-p" onclick="saveCfg()">💾 Guardar Config</button></div>
         <div id="cfg-msg" style="font-size:.8rem;color:var(--gn);margin-top:7px;display:none">✅ Guardado</div>
+        <div class="sep-line"></div>
+        <div class="slbl">Datos</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-s" onclick="exportDB()" style="width:100%">📤 Exportar datos (JSON)</button>
+          <button class="btn btn-s" onclick="el('import-file').click()" style="width:100%">📥 Importar datos (JSON)</button>
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="importDB(this)">
+        </div>
+        <div class="sep-line"></div>
+        <div class="slbl">Backups automáticos</div>
+        <div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px">Automático cada 5 min · 3 copias rotativas</div>
+        <button class="btn btn-s" onclick="toggleBackupList()" style="width:100%">🗄️ Ver backups guardados</button>
+        <div id="backup-list" style="display:none;margin-top:8px"></div>
       </div>
       <!-- INVENTORY -->
       <div id="t-inv" style="display:none">
@@ -987,6 +994,8 @@ async function loadDB(){
     }
  }catch(e){console.error(e);}
 
+  if(!db.products.length&&!db.sales.length){_restoredFromBackup=restoreFromBackup();}
+
   try{const li=await ipcRenderer.invoke('get-license-info');if(li&&li.key)db._lic=li.key;}catch(e){}
 }
 async function saveDB(){
@@ -1054,13 +1063,13 @@ function startApp(){
   el('login-screen').style.display='none';
   el('topbar').style.display='flex';
   el('app-main').style.display='flex';
-  el('botbar').style.display='flex';
 
   showCategories();
   renderCart();
   updateLicBadge();
   updateOACounter();
-  setEl('ord-lbl','Orden # '+db.orderNum);
+  setEl('ord-lbl','#'+db.orderNum);
+  if(_restoredFromBackup){toast('🔄 Datos restaurados del backup automático');_restoredFromBackup=false;}
 }
 function doLogout(){
   closeOv('ov-logout');curUser=null;cart=[];cashIn='';
@@ -1411,7 +1420,7 @@ function checkout(){
   if(editingAccountId){const ls=_loadOAs().filter(x=>x.id!==editingAccountId);_saveOAs(ls);editingAccountId=null;}
   closeOv('ov-checkout');
   showRcpt(sale);
-  setEl('ord-lbl','Orden #'+db.orderNum);
+  setEl('ord-lbl','#'+db.orderNum);
   if(db.drawerAuto)openDrawer();
 }
 // CUENTAS ABIERTAS
@@ -1419,6 +1428,98 @@ function _oaKey(){return '4kpos_open_accounts';}
 function _loadOAs(){try{return JSON.parse(localStorage.getItem(_oaKey())||'[]');}catch(e){return[];}}
 function _saveOAs(list){localStorage.setItem(_oaKey(),JSON.stringify(list));updateOACounter();}
 
+// BACKUP AUTOMÁTICO
+let _restoredFromBackup=false;
+function toastQuick(m){const e=el('toast');if(!e)return;e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2000);}
+function doAutoBackup(){
+  if(!db||(!db.products.length&&!db.sales.length))return;
+  try{
+    const snap=JSON.stringify({ts:new Date().toISOString(),db:JSON.parse(JSON.stringify(db))});
+    localStorage.setItem('4kpos_backup_3',localStorage.getItem('4kpos_backup_2')||'');
+    localStorage.setItem('4kpos_backup_2',localStorage.getItem('4kpos_backup_1')||'');
+    localStorage.setItem('4kpos_backup_1',snap);
+    toastQuick('Backup guardado ✓');
+  }catch(e){}
+}
+setInterval(doAutoBackup,5*60*1000);
+function restoreFromBackup(){
+  for(const key of['4kpos_backup_1','4kpos_backup_2','4kpos_backup_3']){
+    try{
+      const raw=localStorage.getItem(key);if(!raw)continue;
+      const saved=JSON.parse(raw);
+      if(saved&&saved.db&&(saved.db.products||[]).length>0){Object.assign(db,saved.db);return true;}
+    }catch(e){}
+  }
+  return false;
+}
+function exportDB(){
+  const data=JSON.stringify({ts:new Date().toISOString(),version:'4kpos-v5',db:db},null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='4kpos-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+  toast('✅ Datos exportados');
+}
+function importDB(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const parsed=JSON.parse(ev.target.result);
+      const data=parsed.db||parsed;
+      if(!data.products&&!data.sales){toast('⚠ Archivo inválido');return;}
+      confirm2('¿Restaurar datos desde este archivo? Se perderán cambios no guardados.',function(){
+        if(data.products)db.products=data.products;
+        if(data.categories)db.categories=data.categories;
+        if(data.sales)db.sales=data.sales;
+        if(data.orderNum)db.orderNum=data.orderNum;
+        if(data.cfg)db.cfg=Object.assign(db.cfg,data.cfg);
+        if(data.users&&data.users.length)db.users=data.users;
+        if(data.openAccounts)db.openAccounts=data.openAccounts;
+        if(data.customers)db.customers=data.customers;
+        if(data.payMethods)db.payMethods=Object.assign(db.payMethods,data.payMethods);
+        saveDB();showCategories();renderCart();
+        toast('✅ Datos importados correctamente');
+      });
+    }catch(err){toast('⚠ Error al leer archivo');}
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+function toggleBackupList(){
+  const list=el('backup-list');if(!list)return;
+  const visible=list.style.display!=='none';
+  list.style.display=visible?'none':'';
+  if(visible)return;
+  const keys=['4kpos_backup_1','4kpos_backup_2','4kpos_backup_3'];
+  let html='';
+  keys.forEach((k,i)=>{
+    try{
+      const raw=localStorage.getItem(k);
+      if(!raw){html+='<div style="font-size:.75rem;color:var(--tx3);padding:4px 0">'+(i+1)+'. Sin backup</div>';return;}
+      const saved=JSON.parse(raw);
+      const d=new Date(saved.ts);
+      const lbl=d.toLocaleString('es',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      const cnt=(saved.db&&saved.db.products||[]).length;
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--b1)">'
+        +'<div><div style="font-size:.78rem;color:var(--tx)">'+(i+1)+'. '+lbl+'</div>'
+        +'<div style="font-size:.7rem;color:var(--tx3)">'+cnt+' productos</div></div>'
+        +'<button class="btn btn-s" style="font-size:.72rem;padding:3px 8px" onclick="restoreBackup(\''+k+'\')">Restaurar</button></div>';
+    }catch(e){html+='<div style="font-size:.75rem;color:var(--tx3);padding:4px 0">'+(i+1)+'. Error</div>';}
+  });
+  list.innerHTML=html||'<div style="font-size:.75rem;color:var(--tx3)">No hay backups</div>';
+}
+function restoreBackup(key){
+  try{
+    const raw=localStorage.getItem(key);if(!raw){toast('⚠ Backup no encontrado');return;}
+    const saved=JSON.parse(raw);if(!saved||!saved.db){toast('⚠ Backup inválido');return;}
+    confirm2('¿Restaurar este backup? Se perderán los cambios actuales.',function(){
+      Object.assign(db,saved.db);saveDB();showCategories();renderCart();
+      toast('✅ Backup restaurado');
+    });
+  }catch(e){toast('⚠ Error al restaurar');}
+}
 function refreshPOS(){
   renderCats();renderProds();renderCart();updateOACounter();
   toast('🔄 Actualizado');
