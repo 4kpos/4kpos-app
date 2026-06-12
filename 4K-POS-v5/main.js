@@ -35,7 +35,7 @@ function createWindow() {
       devTools: isDev
     },
     title: '4K POS',
-    icon: path.join(__dirname, 'assets', 'logo.ico'),
+    icon: path.join(__dirname, 'assets', 'logo.ico'), // TODO: regenerar logo.ico con fondo blanco
     backgroundColor: '#0f0f13',
     show: false,
     autoHideMenuBar: true
@@ -80,7 +80,7 @@ function createActivationWindow(reason) {
       devTools: isDev
     },
     title: '4K POS - Activación',
-    icon: path.join(__dirname, 'assets', 'logo.ico'),
+    icon: path.join(__dirname, 'assets', 'logo.ico'), // TODO: regenerar logo.ico con fondo blanco
     backgroundColor: '#0a0a0f',
     show: false,
     autoHideMenuBar: true
