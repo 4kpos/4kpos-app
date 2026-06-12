@@ -361,6 +361,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <button class="pbtn on" id="pb-cash" onclick="setPay('cash',this)">💵 <span id="pb-cash-txt">Efectivo</span></button>
           <button class="pbtn" id="pb-card" onclick="setPay('card',this)">💳 <span id="pb-card-txt">Tarjeta</span></button>
           <button class="pbtn" id="pb-oa" onclick="openSaveOA()" style="color:var(--ac);border-color:var(--ac)">📖 Cuenta Abierta</button>
+          <button class="pbtn" id="pb-credit" onclick="openCreditSale()" style="color:var(--am);border-color:var(--am);display:none">💳 Crédito</button>
         </div>
 
 
@@ -410,25 +411,26 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <button class="btn btn-s" onclick="admTab('t-cfg',this)">⚙️ <span id="tab-cfg-txt">Config</span></button>
         <button class="btn btn-s" onclick="admTab('t-inv',this)">📋 <span id="tab-inv-txt">Inventario</span></button>
         <button class="btn btn-s" onclick="admTab('t-cust',this)">👥 <span id="tab-cust-txt">Clientes</span></button>
+        <button class="btn btn-s" onclick="admTab('t-credits',this)" id="tab-credits-btn">💳 <span id="tab-credits-txt">Créditos</span></button>
       </div>
       <!-- PRODUCTS -->
       <div id="t-prods">
         <input type="hidden" id="p-eid">
         <div class="g2">
-          <div class="fg"><label class="lbl">Nombre</label><input type="text" class="fi" id="p-name" placeholder="Nombre del producto"></div>
-          <div class="fg"><label class="lbl">Categoría</label><select class="fi" id="p-cat"></select></div>
-          <div class="fg"><label class="lbl">Precio ($)</label><input type="number" class="fi" id="p-price" placeholder="0.00" step="0.01" oninput="calcMargin()"></div>
-          <div class="fg adm-only"><label class="lbl">Precio de compra ($)</label><input type="number" class="fi" id="p-cost" placeholder="0.00" step="0.01" oninput="calcMargin()"></div>
-          <div class="fg adm-only" id="p-margin-row" style="display:none"><label class="lbl">Margen de ganancia</label><div class="fi" id="p-margin" style="background:var(--s2);display:flex;align-items:center;font-weight:700">—</div></div>
-          <div class="fg"><label class="lbl">Stock</label><input type="number" class="fi" id="p-stock" placeholder="0" min="0"></div>
-          <div class="fg"><label class="lbl">Stock mínimo</label><input type="number" class="fi" id="p-minstock" placeholder="5" min="0"></div>
-          <div class="fg"><label class="lbl">Código de barras</label><input type="text" class="fi" id="p-bc" placeholder="123456789"></div>
+          <div class="fg"><label class="lbl" id="lbl-p-name">Nombre</label><input type="text" class="fi" id="p-name" placeholder="Nombre del producto"></div>
+          <div class="fg"><label class="lbl" id="lbl-p-cat">Categoría</label><select class="fi" id="p-cat"></select></div>
+          <div class="fg"><label class="lbl" id="lbl-p-price">Precio ($)</label><input type="number" class="fi" id="p-price" placeholder="0.00" step="0.01" oninput="calcMargin()"></div>
+          <div class="fg adm-only"><label class="lbl" id="lbl-p-cost">Precio de compra ($)</label><input type="number" class="fi" id="p-cost" placeholder="0.00" step="0.01" oninput="calcMargin()"></div>
+          <div class="fg adm-only" id="p-margin-row" style="display:none"><label class="lbl" id="lbl-p-margin">Margen de ganancia</label><div class="fi" id="p-margin" style="background:var(--s2);display:flex;align-items:center;font-weight:700">—</div></div>
+          <div class="fg"><label class="lbl" id="lbl-p-stock">Stock</label><input type="number" class="fi" id="p-stock" placeholder="0" min="0"></div>
+          <div class="fg"><label class="lbl" id="lbl-p-minstock">Stock mínimo</label><input type="number" class="fi" id="p-minstock" placeholder="5" min="0"></div>
+          <div class="fg"><label class="lbl" id="lbl-p-bc">Código de barras</label><input type="text" class="fi" id="p-bc" placeholder="123456789"></div>
         </div>
-        <div class="fg"><label class="lbl">Foto del producto</label>
+        <div class="fg"><label class="lbl" id="lbl-p-photo">Foto del producto</label>
           <div class="img-upload-row">
             <input type="file" accept="image/*" id="p-file" style="display:none" onchange="imgLoad(this,'p-prev','p-data')">
-            <button class="btn btn-s" onclick="el('p-file').click()">📁 Subir imagen</button>
-            <button class="btn btn-s" onclick="imgClear('p-prev','p-data','p-file')">✕ Quitar</button>
+            <button class="btn btn-s" id="btn-upload-img" onclick="el('p-file').click()">📁 Subir imagen</button>
+            <button class="btn btn-s" id="btn-remove-img" onclick="imgClear('p-prev','p-data','p-file')">✕ Quitar</button>
             <div class="img-preview" id="p-prev">📷</div>
           </div>
         </div>
@@ -437,7 +439,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <button class="btn btn-p" onclick="saveProd()">💾 Guardar</button>
           <button class="btn btn-s" onclick="clearProd()">↺</button>
         </div>
-        <div class="slbl">Productos registrados</div>
+        <div class="slbl" id="slbl-prod-list">Productos registrados</div>
         <div id="prod-list"></div>
       </div>
       <!-- CATS -->
@@ -504,6 +506,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <div class="tog"><span class="tog-label">💳 Tarjeta</span><label class="tog-sw"><input type="checkbox" id="cfg-card" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
           <div class="tog"><span class="tog-label">📖 Transferencia</span><label class="tog-sw"><input type="checkbox" id="cfg-transf" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
           <div class="tog"><span class="tog-label">📋 Cuentas Abiertas</span><label class="tog-sw"><input type="checkbox" id="cfg-oa" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label">💳 Crédito</span><label class="tog-sw"><input type="checkbox" id="cfg-credit" onchange="savePayMethods()"><span class="slider"></span></label></div>
         </div>
         <div class="sep-line"></div>
         <div class="slbl">Registradora</div>
@@ -572,6 +575,14 @@ select.fi option{background:var(--s2);color:var(--tx);}
         </div>
         <div class="frow"><button class="btn btn-p" onclick="saveCust()">💾 Guardar</button><button class="btn btn-s" onclick="clearCust()">↺</button></div>
         <div class="slbl">Clientes</div><div id="cust-list"></div>
+      <!-- CREDITS -->
+      <div id="t-credits" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div class="slbl" style="margin:0" id="slbl-credits">Créditos pendientes</div>
+          <div style="font-size:.85rem;color:var(--am);font-weight:700" id="credits-total-lbl"></div>
+        </div>
+        <div id="adm-credits-list"></div>
+      </div>
       </div>
     </div>
   </div>
@@ -611,6 +622,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="rtr main"><span>TOTAL</span><span class="amt" id="r-total"></span></div>
       </div>
       <div class="rchg" id="r-chg" style="display:none"></div>
+      <div style="font-size:.75rem;color:var(--tx3);text-align:center;margin-top:6px" id="r-cashier"></div>
       <div class="rbc" id="r-bc"></div>
       <div class="rty" id="r-ty">¡Gracias por tu compra! 💕</div>
     </div>
@@ -638,6 +650,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div style="display:flex;justify-content:space-between;font-weight:700;color:var(--tx);border-top:1px solid var(--b1);padding-top:6px;margin-top:6px"><span id="lo-t-lbl">Total en caja</span><span style="font-family:Courier New,monospace;color:var(--gn)" id="lo-t">$0.00</span></div>
       </div>
       <div id="lo-report" style="font-size:.8rem;margin-bottom:13px"></div>
+      <div style="background:var(--s1);border-radius:var(--rs);padding:11px;margin-bottom:10px;border:1.5px solid var(--b2)">
+        <div style="font-weight:700;font-size:.85rem;margin-bottom:8px;color:var(--tx)" id="lo-cash-close-lbl">Efectivo en caja</div>
+        <div class="fg"><label class="lbl" id="lo-declared-lbl">Efectivo declarado</label><input type="number" class="fi" id="lo-declared-cash" placeholder="0.00" step="0.01" oninput="calcCashDiff()"></div>
+        <div style="margin-top:8px;font-size:.85rem" id="lo-cash-diff-box"></div>
+      </div>
       <div style="display:flex;gap:8px;margin-bottom:8px">
         <button class="btn btn-s" style="flex:1" onclick="printShiftReport()" id="lo-print-btn">🖨️ Imprimir Reporte</button>
       </div>
@@ -842,6 +859,46 @@ select.fi option{background:var(--s2);color:var(--tx);}
   </div>
 </div>
 
+<!-- VENTA A CRÉDITO -->
+<div class="ov" id="ov-credit-sale">
+  <div class="modal mnarrow">
+    <div class="mh"><h3 id="credit-sale-title">💳 Venta a Crédito</h3><button class="mx" onclick="closeOv('ov-credit-sale')">✕</button></div>
+    <div class="mb">
+      <div style="background:var(--s2);border-radius:var(--rs);padding:10px;margin-bottom:12px;text-align:center">
+        <div style="font-size:.8rem;color:var(--tx3)" id="credit-total-lbl">Total a crédito</div>
+        <div style="font-size:1.4rem;font-weight:800;color:var(--am)" id="credit-total-amt">$0.00</div>
+      </div>
+      <div class="fg"><label class="lbl" id="credit-client-lbl">Nombre del cliente</label><input type="text" class="fi" id="credit-client-name" placeholder="Ej: Juan Pérez"></div>
+      <div class="frow" style="margin-top:14px"><button class="btn btn-p" style="width:100%;background:var(--amb);border-color:var(--am);color:var(--am)" onclick="confirmCreditSale()" id="credit-confirm-btn">✓ Registrar crédito</button></div>
+    </div>
+  </div>
+</div>
+<!-- CRÉDITOS PENDIENTES (admin) -->
+<div class="ov" id="ov-credits">
+  <div class="modal mwide">
+    <div class="mh"><h3 id="credits-title">💳 Créditos Pendientes</h3><button class="mx" onclick="closeOv('ov-credits')">✕</button></div>
+    <div class="mb">
+      <div style="font-size:.8rem;color:var(--tx3);margin-bottom:10px" id="credits-summary"></div>
+      <div id="credits-list"></div>
+    </div>
+  </div>
+</div>
+<!-- PAGO PARCIAL CRÉDITO -->
+<div class="ov" id="ov-credit-pay">
+  <div class="modal mnarrow">
+    <div class="mh"><h3 id="cpay-title">💵 Recibir Pago</h3><button class="mx" onclick="closeOv('ov-credit-pay')">✕</button></div>
+    <div class="mb">
+      <div style="font-weight:700;color:var(--tx);margin-bottom:4px" id="cpay-client"></div>
+      <div style="font-size:.8rem;color:var(--tx3);margin-bottom:10px"><span id="cpay-pending-lbl">Pendiente</span>: <span id="cpay-pending" style="color:var(--am);font-weight:700">$0.00</span></div>
+      <div class="fg"><label class="lbl" id="cpay-amount-lbl">Monto a pagar</label><input type="number" class="fi" id="cpay-amount" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="frow" style="margin-top:12px;gap:8px">
+        <button class="btn btn-p" onclick="doCreditPayment(false)" id="cpay-partial-btn">✓ Parcial</button>
+        <button class="btn btn-g" onclick="doCreditPayment(true)" id="cpay-full-btn">✓ Total</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- GESTOR DE CUENTAS ABIERTAS -->
 <div class="ov" id="ov-oa-mgr">
   <div class="modal">
@@ -918,6 +975,35 @@ const T = {
     returns:'Devoluciones',cancelSale:'Cancelar Venta',alreadyCancelled:'Ya cancelado',
     enterAtLeastOne:'Ingresa al menos un conteo',noDataToAdjust:'Sin datos para ajustar',
     stockAdjusted:'✅ Stock ajustado según conteo',invalidValue:'⚠ Valor inválido',
+    // Admin tabs
+    tabProds:'Productos',tabCats:'Categorías',tabUsers:'Usuarios',tabCfg:'Config',tabInv:'Inventario',tabCust:'Clientes',
+    // Product form
+    fldName:'Nombre',fldCategory:'Categoría',fldPrice:'Precio ($)',fldCostPrice:'Precio de compra ($)',
+    fldProfitMargin:'Margen de ganancia',fldStock:'Stock',fldMinStock:'Stock mínimo',fldBarcode:'Código de barras',
+    fldPhoto:'Foto del producto',uploadImg:'Subir imagen',removeImg:'Quitar',
+    registeredProducts:'Productos registrados',noCategory:'Sin categoría',
+    // Category form
+    fldCatName:'Nombre categoría',fldCatPhoto:'Foto (opcional)',registeredCats:'Categorías',
+    // User form
+    fldUserName:'Nombre',fldUsername:'Usuario',fldPassword:'Contraseña',fldRole:'Rol',
+    permissionsLbl:'Permisos',registeredUsers:'Usuarios',
+    // Config form
+    adminCodeLbl:'Código Admin',currentCode:'Código actual',newCode:'Nuevo código',changeLbl:'🔑 Cambiar',
+    cashFundConfig:'Fondo de Caja',amountLbl:'Monto ($)',payMethodsLbl:'Métodos de Pago',
+    cashDrawer:'Registradora',comPortLbl:'Puerto COM',autoOpenDrawer:'Abrir automáticamente al cobrar',
+    receiptLbl:'Recibo',logoLbl:'Logo',bizNameLbl:'Nombre del negocio',bizSubLbl:'Subtítulo',
+    thanksLbl:'Mensaje gracias',phoneLbl:'Teléfono',socialLbl:'Red social',qrLbl:'URL QR',
+    // Credit
+    credit:'Crédito',creditSale:'Venta a Crédito',creditEnabled:'Venta a crédito',
+    creditClientName:'Nombre del cliente',creditAmount:'Monto',creditPending:'Pendiente',
+    creditPaid:'Pagado',markPaid:'Marcar pagado',creditHistory:'Historial de créditos',
+    pendingCredits:'Créditos pendientes',noPendingCredits:'Sin créditos pendientes',
+    partialPayment:'Pago parcial',
+    // Cashier on receipt
+    attendedBy:'Atendido por',
+    // Cash close
+    declaredCash:'Efectivo declarado',cashDiff:'Diferencia',closeAnyway:'¿Cerrar de todos modos?',
+    forceClose:'Forzar cierre (Admin)',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -958,6 +1044,35 @@ const T = {
     returns:'Returns',cancelSale:'Cancel Sale',alreadyCancelled:'Already cancelled',
     enterAtLeastOne:'Enter at least one count',noDataToAdjust:'No data to adjust',
     stockAdjusted:'✅ Stock adjusted to count',invalidValue:'⚠ Invalid value',
+    // Admin tabs
+    tabProds:'Products',tabCats:'Categories',tabUsers:'Users',tabCfg:'Config',tabInv:'Inventory',tabCust:'Customers',
+    // Product form
+    fldName:'Name',fldCategory:'Category',fldPrice:'Price ($)',fldCostPrice:'Cost price ($)',
+    fldProfitMargin:'Profit margin',fldStock:'Stock',fldMinStock:'Min stock',fldBarcode:'Barcode',
+    fldPhoto:'Product photo',uploadImg:'Upload image',removeImg:'Remove',
+    registeredProducts:'Registered products',noCategory:'No category',
+    // Category form
+    fldCatName:'Category name',fldCatPhoto:'Photo (optional)',registeredCats:'Categories',
+    // User form
+    fldUserName:'Name',fldUsername:'Username',fldPassword:'Password',fldRole:'Role',
+    permissionsLbl:'Permissions',registeredUsers:'Users',
+    // Config form
+    adminCodeLbl:'Admin Code',currentCode:'Current code',newCode:'New code',changeLbl:'🔑 Change',
+    cashFundConfig:'Cash Fund',amountLbl:'Amount ($)',payMethodsLbl:'Payment Methods',
+    cashDrawer:'Cash Drawer',comPortLbl:'COM Port',autoOpenDrawer:'Auto-open when charging',
+    receiptLbl:'Receipt',logoLbl:'Logo',bizNameLbl:'Business name',bizSubLbl:'Subtitle',
+    thanksLbl:'Thank you message',phoneLbl:'Phone',socialLbl:'Social media',qrLbl:'QR URL',
+    // Credit
+    credit:'Credit',creditSale:'Credit Sale',creditEnabled:'Credit sales',
+    creditClientName:'Customer name',creditAmount:'Amount',creditPending:'Pending',
+    creditPaid:'Paid',markPaid:'Mark paid',creditHistory:'Credit history',
+    pendingCredits:'Pending credits',noPendingCredits:'No pending credits',
+    partialPayment:'Partial payment',
+    // Cashier on receipt
+    attendedBy:'Attended by',
+    // Cash close
+    declaredCash:'Declared cash',cashDiff:'Difference',closeAnyway:'Close anyway?',
+    forceClose:'Force close (Admin)',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -967,7 +1082,7 @@ function t(k){ return (T[lang]&&T[lang][k]) || T.es[k] || k; }
 let dark=true;
 let db={products:[],categories:[],sales:[],orderNum:1,adminCode:'1234',
   users:[{id:'1',name:'Admin',user:'admin',pass:'1234',role:'admin',perms:{adm:true,ret:true,can:true,sal:true,conta:true,fac:true,gst:true}}],
-  fundAmount:0,customers:[],payMethods:{cash:true,card:true,transf:true},
+  fundAmount:0,customers:[],credits:[],payMethods:{cash:true,card:true,transf:true,openAccounts:true,credit:false},
   drawerPort:'COM3',drawerAuto:true,
   cfg:{bizName:'4K Negocio',bizSub:'',thanks:'¡Gracias por tu compra! 💕',phone:'',s1:'',s2:'',qr:'',logo:''},
   facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true};
@@ -989,7 +1104,7 @@ function closeOv(id){el(id).classList.remove('open');}
 function confirm2(msg,cb){confCb=cb;el('conf-msg').textContent=msg;el('confov').classList.add('open');}
 function confYes(){el('confov').classList.remove('open');if(confCb)confCb();confCb=null;}
 function confNo(){el('confov').classList.remove('open');confCb=null;}
-function pico(m){return m==='cash'?'💵':m==='card'?'💳':m==='transf'?'📲':m==='split'?'⚡':'📖';}
+function pico(m){return m==='cash'?'💵':m==='card'?'💳':m==='transf'?'📲':m==='split'?'⚡':m==='credit'?'💳':'📖';}
 
 // LANG
 function setLang(l){
@@ -1097,6 +1212,26 @@ function applyLang(){
   // Lang toggle topbar title
   const _langBtn=el('lang-toggle-btn');
   if(_langBtn)_langBtn.title=lang==='es'?'Switch to English':'Cambiar a Español';
+  // Admin tabs
+  const _tabProds=el('tab-prods-txt');if(_tabProds)_tabProds.textContent=t('tabProds');
+  const _tabCats=el('tab-cats-txt');if(_tabCats)_tabCats.textContent=t('tabCats');
+  const _tabUsers=el('tab-users-txt');if(_tabUsers)_tabUsers.textContent=t('tabUsers');
+  const _tabCfg=el('tab-cfg-txt');if(_tabCfg)_tabCfg.textContent=t('tabCfg');
+  const _tabInv=el('tab-inv-txt');if(_tabInv)_tabInv.textContent=t('tabInv');
+  const _tabCust=el('tab-cust-txt');if(_tabCust)_tabCust.textContent=t('tabCust');
+  // Product form labels
+  const _lblPN=el('lbl-p-name');if(_lblPN)_lblPN.textContent=t('fldName');
+  const _lblPCat=el('lbl-p-cat');if(_lblPCat)_lblPCat.textContent=t('fldCategory');
+  const _lblPPrice=el('lbl-p-price');if(_lblPPrice)_lblPPrice.textContent=t('fldPrice');
+  const _lblPCost=el('lbl-p-cost');if(_lblPCost)_lblPCost.textContent=t('fldCostPrice');
+  const _lblPMargin=el('lbl-p-margin');if(_lblPMargin)_lblPMargin.textContent=t('fldProfitMargin');
+  const _lblPStock=el('lbl-p-stock');if(_lblPStock)_lblPStock.textContent=t('fldStock');
+  const _lblPMinStock=el('lbl-p-minstock');if(_lblPMinStock)_lblPMinStock.textContent=t('fldMinStock');
+  const _lblPBC=el('lbl-p-bc');if(_lblPBC)_lblPBC.textContent=t('fldBarcode');
+  const _lblPPhoto=el('lbl-p-photo');if(_lblPPhoto)_lblPPhoto.textContent=t('fldPhoto');
+  const _btnUpload=el('btn-upload-img');if(_btnUpload)_btnUpload.textContent='📁 '+t('uploadImg');
+  const _btnRemove=el('btn-remove-img');if(_btnRemove)_btnRemove.textContent='✕ '+t('removeImg');
+  const _slblProdList=el('slbl-prod-list');if(_slblProdList)_slblProdList.textContent=t('registeredProducts');
   updateCobrar(); renderCats(); renderProds();
 }
 function switchLang(){
@@ -1259,6 +1394,20 @@ function startApp(){
   setEl('ord-lbl','#'+db.orderNum);
   if(_restoredFromBackup){toast('🔄 Datos restaurados del backup automático');_restoredFromBackup=false;}
 }
+function calcCashDiff(){
+  const today=new Date().toDateString();
+  const active=db.sales.filter(s=>new Date(s.date).toDateString()===today&&s.status==='active');
+  const cashSales=active.filter(s=>s.payMethod==='cash').reduce((s,x)=>s+x.total,0);
+  const declared=parseFloat(el('lo-declared-cash').value)||0;
+  const expected=cashSales+db.fundAmount;
+  const diff=declared-expected;
+  const box=el('lo-cash-diff-box');
+  if(!box)return;
+  if(!declared){box.innerHTML='';return;}
+  const color=diff===0?'var(--gn)':diff<0?'var(--rd)':'var(--am)';
+  const icon=diff===0?'✅':diff<0?'⚠️ '+t('missing'):'⚠️ '+t('surplus');
+  box.innerHTML='<div style="display:flex;justify-content:space-between"><span style="color:var(--tx3)">'+t('cashDiff')+'</span><span style="font-weight:700;color:'+color+'">'+icon+' '+dolr(Math.abs(diff))+'</span></div>';
+}
 function doLogout(){
   closeOv('ov-logout');curUser=null;cart=[];cashIn='';
   // hideMainUI();
@@ -1403,13 +1552,20 @@ function renderProds(){
 function renderInv(){
   const q=(el('inv-srch').value||'').toLowerCase();
   const list=db.products.filter(p=>!q||p.name.toLowerCase().includes(q));
+  const isAdm=curUser&&curUser.role==='admin';
+  const costCol=isAdm?('<th style="text-align:right;padding:6px 4px">'+t('fldCostPrice')+'</th>'):'';
+  const priceCol=isAdm?('<th style="text-align:right;padding:6px 4px">'+t('fldPrice')+'</th>'):'';
   el('inv-list').innerHTML='<table style="width:100%;border-collapse:collapse;font-size:.83rem">'
-    +'<tr style="border-bottom:2px solid var(--b2);color:var(--tx3)"><th style="text-align:left;padding:6px 4px">Producto</th><th style="text-align:right;padding:6px 4px">Precio</th><th style="text-align:right;padding:6px 4px">Stock</th><th style="text-align:right;padding:6px 4px">Valor</th><th></th></tr>'
+    +'<tr style="border-bottom:2px solid var(--b2);color:var(--tx3)"><th style="text-align:left;padding:6px 4px">'+t('product')+'</th>'
+    +costCol+priceCol
+    +'<th style="text-align:right;padding:6px 4px">'+t('stock')+'</th>'
+    +'<th style="text-align:right;padding:6px 4px">Valor</th><th></th></tr>'
     +list.map(p=>{
       const low=p.stock<=(p.minStock||5);
+      const costTd=isAdm?('<td style="padding:7px 4px;text-align:right;font-family:monospace;color:var(--tx2)">'+(p.cost?dolr(p.cost):'—')+'</td><td style="padding:7px 4px;text-align:right;font-family:monospace;color:var(--gn)">'+dolr(p.price)+'</td>'):'';
       return '<tr style="border-bottom:1px solid var(--b1)'+(low?';background:rgba(251,191,36,.05)':'')+'">'
         +'<td style="padding:7px 4px;font-weight:600;color:var(--tx)">'+p.name+'</td>'
-        +'<td style="padding:7px 4px;text-align:right;font-family:monospace;color:var(--gn)">'+dolr(p.price)+'</td>'
+        +costTd
         +'<td style="padding:7px 4px;text-align:right;font-weight:700;color:'+(low?'var(--am)':'var(--tx)')+'">'+( p.stock||0)+'</td>'
         +'<td style="padding:7px 4px;text-align:right;font-family:monospace;color:var(--tx2)">'+dolr(p.price*(p.stock||0))+'</td>'
         +'<td style="padding:7px 4px;display:flex;gap:4px"><button class="eb" onclick="editProd(\''+p.id+'\')">✏</button><button class="eb" onclick="qkStockModal(\''+p.id+'\')">📦</button></td></tr>';
@@ -1612,6 +1768,9 @@ function applyPayMethods(){
   if(pbOa) pbOa.style.display=oaOn?'':'none';
   if(!oaOn){const oaBtn=el('oa-counter-btn');if(oaBtn)oaBtn.style.display='none';}
   else updateOACounter();
+  const creditOn=!(db.payMethods&&db.payMethods.credit===false)&&db.payMethods.credit===true;
+  const pbCredit=el('pb-credit');
+  if(pbCredit)pbCredit.style.display=creditOn?'':'none';
   const db2=el('disc-btn');if(db2)db2.style.display=db.discountEnabled!==false?'':'none';
 }
 
@@ -1619,6 +1778,7 @@ function savePayMethods(){
   db.payMethods.card = el('cfg-card').checked;
   db.payMethods.transf = el('cfg-transf').checked;
   db.payMethods.openAccounts = el('cfg-oa').checked;
+  db.payMethods.credit = el('cfg-credit')?el('cfg-credit').checked:false;
   saveDB();
   applyPayMethods();
   toast('✅ Métodos de pago actualizados');
@@ -1862,6 +2022,113 @@ function clearDiscount(){
   renderCart();updateCobrar();closeOv('ov-discount');toast('✕ '+t('removeDiscount'));
 }
 
+function openCreditSale(){
+  if(!cart.length){toast('⚠ '+t('addProducts'));return;}
+  const total=getFinalTotal();
+  const cs=el('credit-total-amt');if(cs)cs.textContent=dolr(total);
+  el('credit-client-name').value='';
+  openOv('ov-credit-sale');
+  setTimeout(()=>{const i=el('credit-client-name');if(i)i.focus();},120);
+}
+function confirmCreditSale(){
+  const name=(el('credit-client-name').value||'').trim();
+  if(!name){toast('⚠ '+t('creditClientName'));return;}
+  const total=getFinalTotal();
+  cart.forEach(item=>{const p=db.products.find(x=>x.id===item.id);if(p)p.stock=Math.max(0,(p.stock||0)-item.qty);});
+  const rnum=String(db.orderNum).padStart(6,'0');
+  const rcode='4K-'+rnum+'-'+Date.now().toString(36).toUpperCase();
+  const sale={id:db.orderNum,date:new Date().toISOString(),items:JSON.parse(JSON.stringify(cart)),
+    total,recv:0,change:0,payMethod:'credit',payLabel:t('credit'),
+    status:'active',rnum,rcode,cashier:curUser?curUser.name:'—',creditClient:name};
+  db.sales.push(sale);
+  if(!db.credits)db.credits=[];
+  db.credits.push({id:Date.now().toString(),saleId:db.orderNum,client:name,total,paid:0,date:new Date().toISOString(),payments:[]});
+  db.orderNum++;
+  saveDB();
+  if(editingAccountId){const ls=_loadOAs().filter(x=>x.id!==editingAccountId);_saveOAs(ls);editingAccountId=null;}
+  closeOv('ov-credit-sale');
+  showRcpt(sale);
+  setEl('ord-lbl','#'+db.orderNum);
+  renderCart();
+  toast('✓ '+t('credit')+': '+name);
+}
+function openCreditsPanel(){
+  renderCreditsPanel();
+  openOv('ov-credits');
+}
+function renderCreditsPanel(){
+  if(!db.credits)db.credits=[];
+  const pending=db.credits.filter(c=>c.paid<c.total);
+  const totalOwed=pending.reduce((s,c)=>s+(c.total-c.paid),0);
+  const sl=el('credits-summary');
+  if(sl)sl.textContent=pending.length+' '+t('pendingCredits')+' — '+t('creditAmount')+': '+dolr(totalOwed);
+  const list=el('credits-list');
+  if(!list)return;
+  if(!pending.length){list.innerHTML='<p style="color:var(--tx3)">'+t('noPendingCredits')+'</p>';return;}
+  list.innerHTML=pending.map(c=>{
+    const owed=c.total-c.paid;
+    return '<div style="background:var(--s2);border-radius:var(--rs);padding:11px;margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+      +'<div style="font-weight:700;color:var(--tx)">'+c.client+'</div>'
+      +'<div style="color:var(--am);font-family:monospace;font-weight:700">'+dolr(owed)+'</div></div>'
+      +'<div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px">'+new Date(c.date).toLocaleDateString()
+      +(c.paid>0?' · '+t('creditPaid')+': '+dolr(c.paid):'')+'</div>'
+      +'<div style="display:flex;gap:6px">'
+      +'<button class="btn btn-s" style="font-size:.75rem" onclick="openCreditPay(\''+c.id+'\')">💵 '+t('partialPayment')+'</button>'
+      +'<button class="btn btn-g" style="font-size:.75rem" onclick="payCreditFull(\''+c.id+'\')">✅ '+t('markPaid')+'</button>'
+      +'</div></div>';
+  }).join('');
+}
+function renderAdmCredits(){
+  if(!db.credits)db.credits=[];
+  const pending=db.credits.filter(c=>c.paid<c.total);
+  const totalOwed=pending.reduce((s,c)=>s+(c.total-c.paid),0);
+  const lbl=el('credits-total-lbl');if(lbl)lbl.textContent=dolr(totalOwed);
+  const list=el('adm-credits-list');if(!list)return;
+  if(!pending.length){list.innerHTML='<p style="color:var(--tx3)">'+t('noPendingCredits')+'</p>';return;}
+  list.innerHTML=pending.map(c=>{
+    const owed=c.total-c.paid;
+    return '<div style="background:var(--s2);border-radius:var(--rs);padding:11px;margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+      +'<span style="font-weight:700">'+c.client+'</span><span style="color:var(--am);font-family:monospace">'+dolr(owed)+'</span></div>'
+      +'<div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px">'+new Date(c.date).toLocaleDateString()
+      +(c.paid>0?' · '+t('creditPaid')+': '+dolr(c.paid):'')+'</div>'
+      +'<div style="display:flex;gap:6px">'
+      +'<button class="btn btn-s" style="font-size:.75rem" onclick="openCreditPay(\''+c.id+'\')">💵 '+t('partialPayment')+'</button>'
+      +'<button class="btn btn-g" style="font-size:.75rem" onclick="payCreditFull(\''+c.id+'\')">✅ '+t('markPaid')+'</button>'
+      +'</div></div>';
+  }).join('');
+}
+let _cpayId=null;
+function openCreditPay(id){
+  const c=(db.credits||[]).find(x=>x.id===id);if(!c)return;
+  _cpayId=id;
+  const owed=c.total-c.paid;
+  const cl=el('cpay-client');if(cl)cl.textContent=c.client;
+  const pe=el('cpay-pending');if(pe)pe.textContent=dolr(owed);
+  const amt=el('cpay-amount');if(amt){amt.value='';amt.max=owed;}
+  openOv('ov-credit-pay');
+  setTimeout(()=>{const i=el('cpay-amount');if(i){i.focus();i.select();}},120);
+}
+function doCreditPayment(full){
+  const c=(db.credits||[]).find(x=>x.id===_cpayId);if(!c)return;
+  const owed=c.total-c.paid;
+  const amt=full?owed:(parseFloat(el('cpay-amount').value)||0);
+  if(!amt||amt<=0){toast('⚠ '+t('amountLbl'));return;}
+  const actual=Math.min(amt,owed);
+  c.paid+=actual;
+  c.payments.push({date:new Date().toISOString(),amount:actual});
+  saveDB();
+  closeOv('ov-credit-pay');
+  renderCreditsPanel();
+  renderAdmCredits();
+  toast('✓ '+dolr(actual)+' '+t('creditPaid'));
+}
+function payCreditFull(id){
+  const c=(db.credits||[]).find(x=>x.id===id);if(!c)return;
+  _cpayId=id;doCreditPayment(true);
+}
+
 function openSaveOA(){
   if(!cart.length){toast('⚠ No hay productos en el carrito');return;}
   el('oa-name').value='';el('oa-table').value='';
@@ -1959,6 +2226,7 @@ function deleteOA(id){
   if(sale.payMethod==='cash'){chg.style.display='block';chg.textContent=t('change')+': '+dolr(sale.change);}
   else chg.style.display='none';
   setEl('r-bc',sale.rcode);
+  const rcash=el('r-cashier');if(rcash)rcash.textContent=sale.cashier?(t('attendedBy')+': '+sale.cashier):'';
   openOv('ov-rcpt');
 }
 function doPrint(){
@@ -1970,7 +2238,7 @@ function doPrint(){
   if(c.s2)contact+='<div>'+c.s2+'</div>';
   if(c.qr)contact+='<div>🔗 '+c.qr+'</div>';
   const lines=Array.from(el('r-lines').children).map(l=>'<div style="display:flex;justify-content:space-between"><span>'+l.querySelector('.rl').textContent+'</span><span>'+l.querySelector('.ra').textContent+'</span></div>').join('');
-  el('parea').innerHTML='<div style="text-align:center;padding:8px">'+logoH+'<b>'+el('r-biz').textContent+'</b><br><small>'+el('r-sub').textContent+'</small>'+contact+'<hr style="border:1px dashed #000;margin:5px 0">'+el('r-num').textContent+' — '+el('r-date').textContent+'<hr style="border:1px dashed #000;margin:5px 0">'+lines+'<hr style="border:1px dashed #000;margin:5px 0"><div style="display:flex;justify-content:space-between;font-weight:800"><span>TOTAL</span><span>'+el('r-total').textContent+'</span></div><div>'+el('r-pay-val').textContent+'</div>'+(el('r-chg').style.display!=='none'?('<div>'+el('r-chg').textContent+'</div>'):'')+'<hr style="border:1px dashed #000;margin:5px 0"><small style="letter-spacing:2px">'+el('r-bc').textContent+'</small><br><small>'+el('r-ty').textContent+'</small></div>';
+  el('parea').innerHTML='<div style="text-align:center;padding:8px">'+logoH+'<b>'+el('r-biz').textContent+'</b><br><small>'+el('r-sub').textContent+'</small>'+contact+'<hr style="border:1px dashed #000;margin:5px 0">'+el('r-num').textContent+' — '+el('r-date').textContent+'<hr style="border:1px dashed #000;margin:5px 0">'+lines+'<hr style="border:1px dashed #000;margin:5px 0"><div style="display:flex;justify-content:space-between;font-weight:800"><span>TOTAL</span><span>'+el('r-total').textContent+'</span></div><div>'+el('r-pay-val').textContent+'</div>'+(el('r-chg').style.display!=='none'?('<div>'+el('r-chg').textContent+'</div>'):'')+(el('r-cashier')&&el('r-cashier').textContent?('<div style="font-size:10px;text-align:center">'+el('r-cashier').textContent+'</div>'):'')+'<hr style="border:1px dashed #000;margin:5px 0"><small style="letter-spacing:2px">'+el('r-bc').textContent+'</small><br><small>'+el('r-ty').textContent+'</small></div>';
   window.print();
 }
 function newOrder(){closeOv('ov-rcpt');cart=[];cashIn='';discount={type:'pct',value:0,active:false};editingAccountId=null;renderCart();renderProds();calcChange();}
@@ -2040,13 +2308,14 @@ function openLogout(){
   const allToday=db.sales.filter(s=>new Date(s.date).toDateString()===today);
   const can=allToday.filter(s=>s.status==='cancelled');
   const ret=allToday.filter(s=>s.status==='returned');
-  const byPay={cash:0,card:0,transf:0};
+  const byPay={cash:0,card:0,transf:0,credit:0};
   active.forEach(s=>byPay[s.payMethod]=(byPay[s.payMethod]||0)+s.total);
   let report='<div style="background:var(--s2);border-radius:var(--rs);padding:11px;font-size:.8rem">';
   report+='<div style="font-weight:700;margin-bottom:8px;color:var(--tx)">'+t('shiftReport')+(curUser?' — '+curUser.name:'')+'</div>';
   if(byPay.cash)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">💵 Efectivo</span><span style="font-family:monospace;color:var(--gn)">'+dolr(byPay.cash)+'</span></div>';
   if(byPay.card)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">💳 Tarjeta</span><span style="font-family:monospace;color:var(--bl)">'+dolr(byPay.card)+'</span></div>';
   if(byPay.transf)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">📲 Transferencia</span><span style="font-family:monospace;color:var(--ac)">'+dolr(byPay.transf)+'</span></div>';
+  if(byPay.credit)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">💳 '+t('credit')+'</span><span style="font-family:monospace;color:var(--am)">'+dolr(byPay.credit)+'</span></div>';
   if(can.length)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--rd)">❌ Cancelaciones: '+can.length+'</span><span style="font-family:monospace;color:var(--rd)">'+dolr(can.reduce((s,x)=>s+x.total,0))+'</span></div>';
   if(ret.length)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--am)">🔄 Devoluciones: '+ret.length+'</span><span style="font-family:monospace;color:var(--am)">'+dolr(ret.reduce((s,x)=>s+x.total,0))+'</span></div>';
   report+='</div>';
@@ -2062,7 +2331,7 @@ function printShiftReport(){
   const can=allToday.filter(s=>s.status==='cancelled');
   const ret=allToday.filter(s=>s.status==='returned');
   const inc=active.reduce((s,x)=>s+x.total,0);
-  const byPay={cash:0,card:0,transf:0};
+  const byPay={cash:0,card:0,transf:0,credit:0};
   active.forEach(s=>byPay[s.payMethod]=(byPay[s.payMethod]||0)+s.total);
   const rows=allToday.slice().reverse().map(s=>{
     const xmark=s.status==='cancelled'?'[X] ':s.status==='returned'?'[R] ':'';
@@ -2240,15 +2509,17 @@ function loadAdminModal(){
   el('cfg-fund').value=db.fundAmount||'';el('cfg-biz-name').value=db.cfg.bizName||'';el('cfg-biz-sub').value=db.cfg.bizSub||'';
   el('cfg-thanks').value=db.cfg.thanks||'';el('cfg-phone').value=db.cfg.phone||'';el('cfg-s1').value=db.cfg.s1||'';el('cfg-s2').value=db.cfg.s2||'';el('cfg-qr').value=db.cfg.qr||'';
   el('cfg-card').checked=db.payMethods.card!==false;el('cfg-transf').checked=db.payMethods.transf!==false;el('cfg-oa').checked=db.payMethods.openAccounts!==false;
+  if(el('cfg-credit'))el('cfg-credit').checked=db.payMethods.credit===true;
   el('cfg-drawer-port').value=db.drawerPort||'COM3';el('cfg-drawer-auto').checked=db.drawerAuto!==false;
   if(db.cfg.logo)el('logo-prev').innerHTML='<img src="'+db.cfg.logo+'" style="width:100%;height:100%;object-fit:contain">';
 }
 function admTab(tab,e2){
-  ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust'].forEach(t=>el(t).style.display='none');
+  ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits'].forEach(t=>{const el2=el(t);if(el2)el2.style.display='none';});
   el(tab).style.display='block';
   document.querySelectorAll('#adm-tabs .btn').forEach(b=>b.className='btn btn-s');
   if(e2)e2.className='btn btn-p';
   if(tab==='t-inv')renderInv();
+  if(tab==='t-credits')renderAdmCredits();
 }
 
 // CONTABILIDAD
@@ -2450,6 +2721,37 @@ loadDB().then(()=>{
   el('splash').style.display='none';
   el('shift-open-screen').classList.remove('show');
   el('login-screen').style.display='flex';
+});
+
+// KEYBOARD SUPPORT
+document.addEventListener('keydown',function(e){
+  const key=e.key;
+  // Numpad digits and period in checkout
+  if(el('ov-checkout')&&el('ov-checkout').classList.contains('open')){
+    const payM=payMethod;
+    if(payM==='cash'||payM==='split'){
+      if((key>='0'&&key<='9')||key==='NumpadEnter'||(key>='Numpad0'&&key<='Numpad9')||key==='.'){
+        if(payM==='cash'){
+          const numKey=key.startsWith('Numpad')?key.replace('Numpad',''):key;
+          if(numKey>='0'&&numKey<='9')npPress(numKey);
+          else if(numKey==='.')npPress('.');
+        }
+      }
+      if(key==='Backspace'&&payM==='cash'){e.preventDefault();npPress('⌫');}
+    }
+    if(key==='Enter'||key==='NumpadEnter'){e.preventDefault();checkout();return;}
+  }
+  // Login: Enter key
+  if(el('login-screen')&&el('login-screen').style.display!=='none'){
+    if(key==='Enter'){e.preventDefault();doLogin();return;}
+  }
+  // Product search
+  if(key==='Enter'&&document.activeElement&&document.activeElement.id==='srch'){
+    e.preventDefault();
+    const first=db.products.find(p=>p.name.toLowerCase().includes((el('srch').value||'').toLowerCase()));
+    if(first)addToCart(first.id);
+    return;
+  }
 });
 </script>
 </body>
