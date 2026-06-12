@@ -260,8 +260,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <h2 style="font-size:1.2rem;font-weight:800;margin-bottom:6px;">4K POS</h2>
     <p style="font-size:.85rem;color:var(--tx3)">Select your language / Selecciona tu idioma</p>
     <div class="ls-btns">
-      <button class="ls-btn" onclick="setLang('es')">🇪🇸 Español</button>
-      <button class="ls-btn" onclick="setLang('en')">🇺🇸 English</button>
+      <button class="ls-btn" onclick="initLang('es')">🇪🇸 Español</button>
+      <button class="ls-btn" onclick="initLang('en')">🇺🇸 English</button>
     </div>
   </div>
 </div>
@@ -535,24 +535,30 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="frow"><button class="btn btn-p" onclick="saveCfg()">💾 Guardar Config</button></div>
         <div id="cfg-msg" style="font-size:.8rem;color:var(--gn);margin-top:7px;display:none">✅ Guardado</div>
         <div class="sep-line"></div>
-        <div class="slbl">Datos</div>
+        <div class="slbl" id="cfg-lang-lbl">Idioma</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <button class="btn btn-p" id="cfg-lang-es" onclick="setLang('es')" style="flex:1">🇪🇸 Español</button>
+          <button class="btn btn-s" id="cfg-lang-en" onclick="setLang('en')" style="flex:1">🇺🇸 English</button>
+        </div>
+        <div class="sep-line"></div>
+        <div class="slbl" id="cfg-data-lbl">Datos</div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <button class="btn btn-s" onclick="exportDB()" style="width:100%">📤 Exportar datos (JSON)</button>
-          <button class="btn btn-s" onclick="el('import-file').click()" style="width:100%">📥 Importar datos (JSON)</button>
+          <button class="btn btn-s" id="cfg-export-btn" onclick="exportDB()" style="width:100%">📤 Exportar datos (JSON)</button>
+          <button class="btn btn-s" id="cfg-import-btn" onclick="el('import-file').click()" style="width:100%">📥 Importar datos (JSON)</button>
           <input type="file" id="import-file" accept=".json" style="display:none" onchange="importDB(this)">
         </div>
         <div class="sep-line"></div>
-        <div class="slbl">Backups automáticos</div>
-        <div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px">Automático cada 5 min · 3 copias rotativas</div>
-        <button class="btn btn-s" onclick="toggleBackupList()" style="width:100%">🗄️ Ver backups guardados</button>
+        <div class="slbl" id="cfg-backup-lbl">Backups automáticos</div>
+        <div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px" id="cfg-backup-info">Automático cada 5 min</div>
+        <button class="btn btn-s" onclick="toggleBackupList()" style="width:100%" id="cfg-view-backups-btn">🗄️ Ver backups guardados</button>
         <div id="backup-list" style="display:none;margin-top:8px"></div>
       </div>
       <!-- INVENTORY -->
       <div id="t-inv" style="display:none">
         <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
           <input type="text" class="sinp" id="inv-srch" placeholder="🔍 Buscar..." oninput="renderInv()" style="max-width:220px">
-          <button class="btn btn-g" onclick="exportCSV()">📥 Exportar CSV</button>
-          <button class="btn btn-p" onclick="openInvCount()">📋 Contar Inventario</button>
+          <button class="btn btn-g" onclick="exportCSV()" id="inv-export-csv-btn">📥 Exportar CSV</button>
+          <button class="btn btn-p" onclick="openInvCount()" id="inv-count-btn">📋 Contar Inventario</button>
         </div>
         <div id="inv-list"></div>
       </div>
@@ -621,21 +627,21 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <div class="mh"><h3 id="lo-title">🚪 Cerrar Turno</h3><button class="mx" onclick="closeOv('ov-logout')">✕</button></div>
     <div class="mb">
       <div class="sg">
-        <div class="sc gn"><div class="sclbl">Ventas</div><div class="scval" id="lo-sales">$0.00</div></div>
-        <div class="sc ac"><div class="sclbl">Órdenes</div><div class="scval" id="lo-orders">0</div></div>
-        <div class="sc am"><div class="sclbl">Fondo</div><div class="scval" id="lo-fund">$0.00</div></div>
+        <div class="sc gn"><div class="sclbl" id="lo-sales-lbl">Ventas</div><div class="scval" id="lo-sales">$0.00</div></div>
+        <div class="sc ac"><div class="sclbl" id="lo-orders-lbl">Órdenes</div><div class="scval" id="lo-orders">0</div></div>
+        <div class="sc am"><div class="sclbl" id="lo-fund-lbl">Fondo</div><div class="scval" id="lo-fund">$0.00</div></div>
       </div>
       <div style="background:var(--s2);border-radius:var(--rs);padding:11px;margin-bottom:13px;font-size:.83rem">
-        <div style="font-weight:700;margin-bottom:6px;color:var(--tx)">Cuadre de caja</div>
-        <div style="display:flex;justify-content:space-between;color:var(--tx2);margin-bottom:4px"><span>Ventas del turno</span><span style="font-family:Courier New,monospace;color:var(--gn)" id="lo-v">$0.00</span></div>
-        <div style="display:flex;justify-content:space-between;color:var(--tx2);margin-bottom:4px"><span>Fondo de caja</span><span style="font-family:Courier New,monospace;color:var(--am)" id="lo-f">$0.00</span></div>
-        <div style="display:flex;justify-content:space-between;font-weight:700;color:var(--tx);border-top:1px solid var(--b1);padding-top:6px;margin-top:6px"><span>Total en caja</span><span style="font-family:Courier New,monospace;color:var(--gn)" id="lo-t">$0.00</span></div>
+        <div style="font-weight:700;margin-bottom:6px;color:var(--tx)" id="lo-reconcile-lbl">Cuadre de caja</div>
+        <div style="display:flex;justify-content:space-between;color:var(--tx2);margin-bottom:4px"><span id="lo-v-lbl">Ventas del turno</span><span style="font-family:Courier New,monospace;color:var(--gn)" id="lo-v">$0.00</span></div>
+        <div style="display:flex;justify-content:space-between;color:var(--tx2);margin-bottom:4px"><span id="lo-f-lbl">Fondo de caja</span><span style="font-family:Courier New,monospace;color:var(--am)" id="lo-f">$0.00</span></div>
+        <div style="display:flex;justify-content:space-between;font-weight:700;color:var(--tx);border-top:1px solid var(--b1);padding-top:6px;margin-top:6px"><span id="lo-t-lbl">Total en caja</span><span style="font-family:Courier New,monospace;color:var(--gn)" id="lo-t">$0.00</span></div>
       </div>
       <div id="lo-report" style="font-size:.8rem;margin-bottom:13px"></div>
       <div style="display:flex;gap:8px;margin-bottom:8px">
-        <button class="btn btn-s" style="flex:1" onclick="printShiftReport()">🖨️ Imprimir Reporte</button>
+        <button class="btn btn-s" style="flex:1" onclick="printShiftReport()" id="lo-print-btn">🖨️ Imprimir Reporte</button>
       </div>
-      <button class="btn btn-d" style="width:100%;padding:12px" onclick="doLogout()">🚪 Confirmar cierre de turno</button>
+      <button class="btn btn-d" style="width:100%;padding:12px" onclick="doLogout()" id="lo-confirm-btn">🚪 Confirmar cierre de turno</button>
     </div>
   </div>
 </div>
@@ -741,11 +747,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div class="modal mnarrow" style="max-height:90vh;overflow-y:auto">
     <div class="mh"><h3 id="ck-title">✓ Cobrar</h3><button class="mx" onclick="closeOv('ov-checkout')">✕</button></div>
     <div class="mb">
-      <div class="slbl" style="margin-bottom:8px">Método de pago</div>
+      <div class="slbl" style="margin-bottom:8px" id="ck-method-lbl">Método de pago</div>
       <div class="pbtns" style="margin-bottom:14px">
-        <button class="pbtn on" id="ck-cash" onclick="ckSetPay('cash',this)">💵 Efectivo</button>
-        <button class="pbtn" id="ck-card" onclick="ckSetPay('card',this)">💳 Tarjeta</button>
-        <button class="pbtn" id="ck-split" onclick="ckSetPay('split',this)">⚡ Split</button>
+        <button class="pbtn on" id="ck-cash" onclick="ckSetPay('cash',this)"><span id="ck-cash-ico">💵</span> <span id="ck-cash-txt">Efectivo</span></button>
+        <button class="pbtn" id="ck-card" onclick="ckSetPay('card',this)"><span id="ck-card-ico">💳</span> <span id="ck-card-txt">Tarjeta</span></button>
+        <button class="pbtn" id="ck-split" onclick="ckSetPay('split',this)">⚡ <span id="ck-split-txt">Dividir</span></button>
       </div>
       <div id="ck-split-section" style="display:none;margin-bottom:10px">
         <div style="display:flex;gap:8px;margin-bottom:6px">
@@ -755,7 +761,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="chgbox" id="split-chgbox">Ingresa los montos</div>
       </div>
       <div id="ck-cash-section">
-        <div class="plbl" style="margin-bottom:5px">Recibido</div>
+        <div class="plbl" style="margin-bottom:5px" id="ck-recv-lbl">Recibido</div>
         <div class="npdisp">
           <div class="npval" id="npval">$0.00</div>
           <div class="nphint" id="nphint">Ingresa el monto recibido</div>
@@ -764,10 +770,10 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="chgbox" id="chgbox">Vuelto: $0.00</div>
       </div>
       <div id="ck-discount-row" style="margin:10px 0;padding:10px;background:var(--s2);border-radius:var(--rs);display:none">
-        <div style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--tx3)"><span>Descuento</span><span id="ck-disc-amt" style="color:var(--rd)">-$0.00</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--tx3)"><span id="ck-disc-lbl">Descuento</span><span id="ck-disc-amt" style="color:var(--rd)">-$0.00</span></div>
       </div>
       <div style="margin:12px 0;padding:12px;background:var(--s2);border-radius:var(--rs)">
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:.85rem;color:var(--tx3)"><span>Subtotal</span><span id="ck-sub">$0.00</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:.85rem;color:var(--tx3)"><span id="ck-sub-lbl">Subtotal</span><span id="ck-sub">$0.00</span></div>
         <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1.1rem;color:var(--tx)"><span>TOTAL</span><span id="ck-total" style="color:var(--ac)">$0.00</span></div>
       </div>
       <button class="cobrar" id="ck-confirm" onclick="checkout()" style="width:100%">✓ Confirmar pago — $0.00</button>
@@ -778,16 +784,16 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <!-- MODAL DESCUENTO -->
 <div class="ov" id="ov-discount">
   <div class="modal mnarrow">
-    <div class="mh"><h3>% Descuento</h3><button class="mx" onclick="closeOv('ov-discount')">✕</button></div>
+    <div class="mh"><h3 id="disc-modal-title">% Descuento</h3><button class="mx" onclick="closeOv('ov-discount')">✕</button></div>
     <div class="mb">
       <div class="pbtns" style="margin-bottom:12px">
-        <button class="pbtn on" id="disc-pct-btn" onclick="discSetType('pct',this)">% Porcentaje</button>
-        <button class="pbtn" id="disc-fix-btn" onclick="discSetType('fix',this)">$ Monto fijo</button>
+        <button class="pbtn on" id="disc-pct-btn" onclick="discSetType('pct',this)">% <span id="disc-pct-txt">Porcentaje</span></button>
+        <button class="pbtn" id="disc-fix-btn" onclick="discSetType('fix',this)">$ <span id="disc-fix-txt">Monto fijo</span></button>
       </div>
       <div class="fg"><label class="lbl" id="disc-lbl">Porcentaje (%)</label><input type="number" class="fi" id="disc-val" min="0" max="100" placeholder="0" step="0.1"></div>
       <div class="frow" style="margin-top:14px;gap:8px">
-        <button class="btn btn-s" onclick="clearDiscount()">✕ Quitar descuento</button>
-        <button class="btn btn-p" onclick="applyDiscount()">✓ Aplicar</button>
+        <button class="btn btn-s" onclick="clearDiscount()" id="disc-clear-btn">✕ Quitar descuento</button>
+        <button class="btn btn-p" onclick="applyDiscount()" id="disc-apply-btn">✓ Aplicar</button>
       </div>
     </div>
   </div>
@@ -796,42 +802,42 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <!-- MODAL CONTEO INVENTARIO -->
 <div class="ov" id="ov-inv-count">
   <div class="modal" style="max-height:90vh;display:flex;flex-direction:column">
-    <div class="mh"><h3>📋 Conteo de Inventario</h3><button class="mx" onclick="closeOv('ov-inv-count')">✕</button></div>
+    <div class="mh"><h3 id="inv-count-title">📋 Conteo de Inventario</h3><button class="mx" onclick="closeOv('ov-inv-count')">✕</button></div>
     <div class="mb" style="flex:1;overflow-y:auto" id="inv-count-body"></div>
     <div style="padding:12px 16px;border-top:1.5px solid var(--b1);display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-s" onclick="showInvCountResult()">📊 Ver Resultado</button>
-      <button class="btn btn-p" onclick="applyInvCount()">✅ Ajustar Stock</button>
-      <button class="btn btn-s" onclick="closeOv('ov-inv-count')">Cerrar</button>
+      <button class="btn btn-s" onclick="showInvCountResult()" id="inv-view-result-btn">📊 Ver Resultado</button>
+      <button class="btn btn-p" onclick="applyInvCount()" id="inv-adjust-btn">✅ Ajustar Stock</button>
+      <button class="btn btn-s" onclick="closeOv('ov-inv-count')" id="inv-close-btn">Cerrar</button>
     </div>
   </div>
 </div>
 <!-- MODAL RESULTADO CONTEO -->
 <div class="ov" id="ov-inv-result">
   <div class="modal" style="max-height:90vh;display:flex;flex-direction:column">
-    <div class="mh"><h3>📊 Resultado del Conteo</h3><button class="mx" onclick="closeOv('ov-inv-result')">✕</button></div>
+    <div class="mh"><h3 id="inv-result-title">📊 Resultado del Conteo</h3><button class="mx" onclick="closeOv('ov-inv-result')">✕</button></div>
     <div class="mb" style="flex:1;overflow-y:auto" id="inv-result-body"></div>
   </div>
 </div>
 <!-- MODAL STOCK RÁPIDO -->
 <div class="ov" id="ov-qk-stock">
   <div class="modal mnarrow">
-    <div class="mh"><h3>📦 Ajustar Stock</h3><button class="mx" onclick="closeOv('ov-qk-stock')">✕</button></div>
+    <div class="mh"><h3 id="qks-title">📦 Ajustar Stock</h3><button class="mx" onclick="closeOv('ov-qk-stock')">✕</button></div>
     <div class="mb">
       <div style="font-weight:700;color:var(--tx);margin-bottom:8px" id="qks-name"></div>
-      <div style="font-size:.8rem;color:var(--tx3);margin-bottom:10px">Stock actual: <span id="qks-cur" style="font-weight:700;color:var(--ac)">0</span></div>
-      <div class="fg"><label class="lbl">Nuevo stock</label><input type="number" class="fi" id="qks-val" min="0" placeholder="0"></div>
-      <div class="frow" style="margin-top:14px"><button class="btn btn-p" style="width:100%" onclick="doQkStock()">💾 Guardar</button></div>
+      <div style="font-size:.8rem;color:var(--tx3);margin-bottom:10px"><span id="qks-cur-lbl">Stock actual</span>: <span id="qks-cur" style="font-weight:700;color:var(--ac)">0</span></div>
+      <div class="fg"><label class="lbl" id="qks-new-lbl">Nuevo stock</label><input type="number" class="fi" id="qks-val" min="0" placeholder="0"></div>
+      <div class="frow" style="margin-top:14px"><button class="btn btn-p" style="width:100%" onclick="doQkStock()" id="qks-save-btn">💾 Guardar</button></div>
     </div>
   </div>
 </div>
 <!-- GUARDAR CUENTA ABIERTA -->
 <div class="ov" id="ov-save-oa">
   <div class="modal mnarrow">
-    <div class="mh"><h3>📖 Guardar Cuenta</h3><button class="mx" onclick="closeOv('ov-save-oa')">✕</button></div>
+    <div class="mh"><h3 id="oa-save-title">📖 Guardar Cuenta</h3><button class="mx" onclick="closeOv('ov-save-oa')">✕</button></div>
     <div class="mb">
-      <div class="fg"><label class="lbl">Nombre del cliente</label><input type="text" class="fi" id="oa-name" placeholder="Ej: Juan"></div>
-      <div class="fg" style="margin-top:8px"><label class="lbl">Mesa / Referencia</label><input type="text" class="fi" id="oa-table" placeholder="Ej: Mesa 3"></div>
-      <div class="frow" style="margin-top:14px"><button class="btn btn-p" style="width:100%" onclick="doSaveOA()">💾 Guardar Cuenta Abierta</button></div>
+      <div class="fg"><label class="lbl" id="oa-name-lbl">Nombre del cliente</label><input type="text" class="fi" id="oa-name" placeholder="Ej: Juan"></div>
+      <div class="fg" style="margin-top:8px"><label class="lbl" id="oa-table-lbl">Mesa / Referencia</label><input type="text" class="fi" id="oa-table" placeholder="Ej: Mesa 3"></div>
+      <div class="frow" style="margin-top:14px"><button class="btn btn-p" style="width:100%" onclick="doSaveOA()" id="oa-save-btn">💾 Guardar Cuenta Abierta</button></div>
     </div>
   </div>
 </div>
@@ -839,7 +845,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <!-- GESTOR DE CUENTAS ABIERTAS -->
 <div class="ov" id="ov-oa-mgr">
   <div class="modal">
-    <div class="mh"><h3>📖 Cuentas Abiertas</h3><button class="mx" onclick="closeOv('ov-oa-mgr')">✕</button></div>
+    <div class="mh"><h3 id="oa-mgr-title">📖 Cuentas Abiertas</h3><button class="mx" onclick="closeOv('ov-oa-mgr')">✕</button></div>
     <div class="mb" id="oa-list"></div>
   </div>
 </div>
@@ -873,29 +879,88 @@ const LOGO = 'data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJ
 
 // I18N
 const T = {
-  es:{srch:'🔍 Buscar o escanear...',all:'Todo',cobrar:'✓ Cobrar',cash:'Efectivo',card:'Tarjeta',transfer:'Transferencia',
-    subtotal:'Subtotal',items:'Artículos',payMethod:'Método de pago',received:'Recibido',change:'Vuelto',enterAmt:'Ingresa el monto',
-    order:'Orden',addProducts:'Agrega productos',clear:'Limpiar',noProducts:'Sin productos.',outOfStock:'Sin stock',stock:'Stock',
+  es:{
+    srch:'🔍 Buscar o escanear...',all:'Todo',cobrar:'✓ Cobrar',cash:'Efectivo',card:'Tarjeta',transfer:'Transferencia',split:'Dividir',
+    subtotal:'Subtotal',items:'Artículos',payMethod:'Método de pago',received:'Recibido',change:'Vuelto',enterAmt:'Ingresa el monto recibido',
+    order:'Orden',addProducts:'Agrega productos al carrito',clear:'Limpiar',noProducts:'Sin productos.',outOfStock:'Sin stock',stock:'Stock',
     loginTitle:'Ingresa tus credenciales',loginBtn:'Entrar al turno',loginErr:'Usuario o contraseña incorrectos',
     shiftOpen:'Apertura de Turno',shiftWelcome:'Bienvenido',shiftFund:'Fondo de caja:',shiftConfirm:'Confirma que recibiste este monto',shiftBtn:'✓ Confirmar y Abrir Turno',
     pinTitle:'Código de acceso',pinErr:'Código incorrecto',admTitle:'Administración',logoutTitle:'Cerrar Turno',
     adm:'Administración',ret:'Devoluciones',can:'Cancelar Venta',sal:'Ventas del día',conta:'Contabilidad',drawer:'Abrir Registradora',exit:'Salir del programa',
     payLabel:'Pago',cashier:'Cajero',cancelledLbl:'cancelada',returnedLbl:'devuelta',
     shiftReport:'Reporte del turno',totalBox:'Total en caja',
+    // Pago / checkout
+    discount:'Descuento',percentage:'Porcentaje',fixedAmount:'Monto fijo',
+    enterAmounts:'Ingresa los montos',cashChange:'Vuelto efectivo',missingAmt:'Faltan',
+    confirmPayment:'Confirmar pago',removeDiscount:'Quitar descuento',apply:'✓ Aplicar',
+    // Cuentas abiertas
+    openAccounts:'Cuentas Abiertas',saveOpenAccount:'Guardar Cuenta Abierta',openAccountsManager:'Cuentas Abiertas',
+    tableName:'Mesa / Nombre',accountName:'Nombre de la cuenta',
+    // Inventario
+    countInventory:'Contar Inventario',invCountTitle:'Conteo de Inventario',invResultTitle:'Resultado del Conteo',
+    adjustStock:'Ajustar Stock',adjustStockConfirm:'¿Ajustar el stock según el conteo físico?',
+    viewResult:'Ver Resultado',curStock:'Stock actual',newStock:'Nuevo stock',
+    correct:'✅ Correcto',missing:'⚠️ Faltante',surplus:'⚠️ Sobrante',
+    product:'Producto',system:'Sistema',count:'Conteo',diff:'Dif.',
+    exportCSV:'Exportar CSV',exportData:'Exportar datos (JSON)',importData:'Importar datos (JSON)',
+    // Config
+    language:'Idioma',save:'💾 Guardar',close:'Cerrar',cancel:'Cancelar',restore:'Restaurar',
+    backups:'Backups automáticos',viewBackups:'Ver backups guardados',backupSaved:'Backup guardado ✓',
+    autoBackupInfo:'Automático cada 5 min',
+    lowStock:'Stock bajo',costPrice:'Precio de compra',profitMargin:'Margen de ganancia',
+    minStock:'Stock mínimo',
+    // Logout modal
+    salesLbl:'Ventas',ordersLbl:'Órdenes',fundLbl:'Fondo',
+    cashReconciliation:'Cuadre de caja',shiftSalesTxt:'Ventas del turno',cashFundTxt:'Fondo de caja',
+    printReport:'🖨️ Imprimir Reporte',closeShiftConfirm:'🚪 Confirmar cierre de turno',
+    // Misc
+    noSalesToday:'Sin ventas hoy.',today:'Hoy',thisWeek:'Esta semana',thisMonth:'Este mes',
+    returns:'Devoluciones',cancelSale:'Cancelar Venta',alreadyCancelled:'Ya cancelado',
+    enterAtLeastOne:'Ingresa al menos un conteo',noDataToAdjust:'Sin datos para ajustar',
+    stockAdjusted:'✅ Stock ajustado según conteo',invalidValue:'⚠ Valor inválido',
   },
-  en:{srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',
-    subtotal:'Subtotal',items:'Items',payMethod:'Payment method',received:'Received',change:'Change',enterAmt:'Enter amount',
-    order:'Order',addProducts:'Add products',clear:'Clear',noProducts:'No products.',outOfStock:'Out of stock',stock:'Stock',
+  en:{
+    srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
+    subtotal:'Subtotal',items:'Items',payMethod:'Payment method',received:'Received',change:'Change',enterAmt:'Enter amount received',
+    order:'Order',addProducts:'Add products to cart',clear:'Clear',noProducts:'No products.',outOfStock:'Out of stock',stock:'Stock',
     loginTitle:'Enter your credentials',loginBtn:'Start shift',loginErr:'Incorrect user or password',
     shiftOpen:'Shift Opening',shiftWelcome:'Welcome',shiftFund:'Cash fund:',shiftConfirm:'Confirm you received this amount',shiftBtn:'✓ Confirm & Open Shift',
     pinTitle:'Access code',pinErr:'Incorrect code',admTitle:'Administration',logoutTitle:'Close Shift',
     adm:'Administration',ret:'Returns',can:'Cancel Sale',sal:'Today Sales',conta:'Accounting',drawer:'Open Drawer',exit:'Exit program',
     payLabel:'Payment',cashier:'Cashier',cancelledLbl:'cancelled',returnedLbl:'returned',
     shiftReport:'Shift report',totalBox:'Total in drawer',
+    // Payment / checkout
+    discount:'Discount',percentage:'Percentage',fixedAmount:'Fixed amount',
+    enterAmounts:'Enter amounts',cashChange:'Cash change',missingAmt:'Missing',
+    confirmPayment:'Confirm payment',removeDiscount:'Remove discount',apply:'✓ Apply',
+    // Open accounts
+    openAccounts:'Open Accounts',saveOpenAccount:'Save Open Account',openAccountsManager:'Open Accounts',
+    tableName:'Table / Name',accountName:'Account name',
+    // Inventory
+    countInventory:'Count Inventory',invCountTitle:'Inventory Count',invResultTitle:'Count Result',
+    adjustStock:'Adjust Stock',adjustStockConfirm:'Adjust system stock to physical count?',
+    viewResult:'View Result',curStock:'Current stock',newStock:'New stock',
+    correct:'✅ Correct',missing:'⚠️ Missing',surplus:'⚠️ Surplus',
+    product:'Product',system:'System',count:'Count',diff:'Diff.',
+    exportCSV:'Export CSV',exportData:'Export data (JSON)',importData:'Import data (JSON)',
+    // Config
+    language:'Language',save:'💾 Save',close:'Close',cancel:'Cancel',restore:'Restore',
+    backups:'Auto backups',viewBackups:'View saved backups',backupSaved:'Backup saved ✓',
+    autoBackupInfo:'Automatic every 5 min',
+    lowStock:'Low stock',costPrice:'Cost price',profitMargin:'Profit margin',
+    minStock:'Min stock',
+    // Logout modal
+    salesLbl:'Sales',ordersLbl:'Orders',fundLbl:'Fund',
+    cashReconciliation:'Cash reconciliation',shiftSalesTxt:'Shift sales',cashFundTxt:'Cash fund',
+    printReport:'🖨️ Print Report',closeShiftConfirm:'🚪 Confirm shift close',
+    // Misc
+    noSalesToday:'No sales today.',today:'Today',thisWeek:'This week',thisMonth:'This month',
+    returns:'Returns',cancelSale:'Cancel Sale',alreadyCancelled:'Already cancelled',
+    enterAtLeastOne:'Enter at least one count',noDataToAdjust:'No data to adjust',
+    stockAdjusted:'✅ Stock adjusted to count',invalidValue:'⚠ Invalid value',
   }
 };
-let lang = 'es';
-localStorage.setItem('4kpos_lang','es');
+let lang = localStorage.getItem('4kpos_lang')||'es';
 function t(k){ return (T[lang]&&T[lang][k]) || T.es[k] || k; }
 
 // STATE
@@ -928,13 +993,18 @@ function pico(m){return m==='cash'?'💵':m==='card'?'💳':m==='transf'?'📲':
 
 // LANG
 function setLang(l){
-  lang='es'; localStorage.setItem('4kpos_lang','es');
+  lang=l; localStorage.setItem('4kpos_lang',l);
+  applyLang();
+}
+function initLang(l){
+  lang=l; localStorage.setItem('4kpos_lang',l);
   el('lang-screen').style.display='none';
   el('splash').style.display='none';
   loadDB().then(function(){applyLang();el('login-screen').style.display='flex';});
 }
 
 function applyLang(){
+  // Login / shift
   const _srch=el('srch');if(_srch)_srch.placeholder=t('srch');
   const _lsub=el('l-sub');if(_lsub)_lsub.textContent=t('loginTitle');
   const _lbtn=el('l-btn');if(_lbtn)_lbtn.textContent=t('loginBtn');
@@ -943,10 +1013,22 @@ function applyLang(){
   const _soflbl=el('so-flbl');if(_soflbl)_soflbl.textContent=t('shiftFund');
   const _soctxt=el('so-ctxt');if(_soctxt)_soctxt.textContent=t('shiftConfirm');
   const _sobtn=el('so-btn');if(_sobtn)_sobtn.textContent=t('shiftBtn');
+  // PIN / admin
   const _pintitle=el('pin-title');if(_pintitle)_pintitle.textContent=t('pinTitle');
   const _pinerr=el('pin-err');if(_pinerr)_pinerr.textContent='❌ '+t('pinErr');
   const _admtitle=el('adm-title');if(_admtitle)_admtitle.textContent=t('admTitle');
+  // Logout modal
   const _lotitle=el('lo-title');if(_lotitle)_lotitle.textContent='🚪 '+t('logoutTitle');
+  const _loSalesLbl=el('lo-sales-lbl');if(_loSalesLbl)_loSalesLbl.textContent=t('salesLbl');
+  const _loOrdersLbl=el('lo-orders-lbl');if(_loOrdersLbl)_loOrdersLbl.textContent=t('ordersLbl');
+  const _loFundLbl=el('lo-fund-lbl');if(_loFundLbl)_loFundLbl.textContent=t('fundLbl');
+  const _loReconcile=el('lo-reconcile-lbl');if(_loReconcile)_loReconcile.textContent=t('cashReconciliation');
+  const _loVLbl=el('lo-v-lbl');if(_loVLbl)_loVLbl.textContent=t('shiftSalesTxt');
+  const _loFLbl=el('lo-f-lbl');if(_loFLbl)_loFLbl.textContent=t('cashFundTxt');
+  const _loTLbl=el('lo-t-lbl');if(_loTLbl)_loTLbl.textContent=t('totalBox');
+  const _loPrint=el('lo-print-btn');if(_loPrint)_loPrint.textContent=t('printReport');
+  const _loConfirm=el('lo-confirm-btn');if(_loConfirm)_loConfirm.textContent=t('closeShiftConfirm');
+  // Cart
   const _cartttl=el('cart-ttl-txt');if(_cartttl)_cartttl.textContent=t('order');
   const _clrbtn=el('clr-btn');if(_clrbtn)_clrbtn.textContent=t('clear');
   const _emptytxt=el('empty-txt');if(_emptytxt)_emptytxt.textContent=t('addProducts');
@@ -955,8 +1037,23 @@ function applyLang(){
   const _paylbl=el('pay-lbl');if(_paylbl)_paylbl.textContent=t('payMethod');
   const _pbcashtxt=el('pb-cash-txt');if(_pbcashtxt)_pbcashtxt.textContent=t('cash');
   const _pbcardtxt=el('pb-card-txt');if(_pbcardtxt)_pbcardtxt.textContent=t('card');
+  // Checkout modal
+  const _ckMethodLbl=el('ck-method-lbl');if(_ckMethodLbl)_ckMethodLbl.textContent=t('payMethod');
+  const _ckCashTxt=el('ck-cash-txt');if(_ckCashTxt)_ckCashTxt.textContent=t('cash');
+  const _ckCardTxt=el('ck-card-txt');if(_ckCardTxt)_ckCardTxt.textContent=t('card');
+  const _ckSplitTxt=el('ck-split-txt');if(_ckSplitTxt)_ckSplitTxt.textContent=t('split');
+  const _ckRecvLbl=el('ck-recv-lbl');if(_ckRecvLbl)_ckRecvLbl.textContent=t('received');
   const _recvlbl=el('recv-lbl');if(_recvlbl)_recvlbl.textContent=t('received');
   const _nphint=el('nphint');if(_nphint)_nphint.textContent=t('enterAmt');
+  const _ckDiscLbl=el('ck-disc-lbl');if(_ckDiscLbl)_ckDiscLbl.textContent=t('discount');
+  const _ckSubLbl=el('ck-sub-lbl');if(_ckSubLbl)_ckSubLbl.textContent=t('subtotal');
+  // Discount modal
+  const _discModalTitle=el('disc-modal-title');if(_discModalTitle)_discModalTitle.textContent='% '+t('discount');
+  const _discPctTxt=el('disc-pct-txt');if(_discPctTxt)_discPctTxt.textContent=t('percentage');
+  const _discFixTxt=el('disc-fix-txt');if(_discFixTxt)_discFixTxt.textContent=t('fixedAmount');
+  const _discClearBtn=el('disc-clear-btn');if(_discClearBtn)_discClearBtn.textContent='✕ '+t('removeDiscount');
+  const _discApplyBtn=el('disc-apply-btn');if(_discApplyBtn)_discApplyBtn.textContent=t('apply');
+  // Hamburger menu
   const _hmadm=el('hm-adm-txt');if(_hmadm)_hmadm.textContent=t('adm');
   const _hmret=el('hm-ret-txt');if(_hmret)_hmret.textContent=t('ret');
   const _hmcan=el('hm-can-txt');if(_hmcan)_hmcan.textContent=t('can');
@@ -964,15 +1061,46 @@ function applyLang(){
   const _hmconta=el('hm-conta-txt');if(_hmconta)_hmconta.textContent=t('conta');
   const _hmdrawer=el('hm-drawer-txt');if(_hmdrawer)_hmdrawer.textContent=t('drawer');
   const _hmexit=el('hm-exit-txt');if(_hmexit)_hmexit.textContent=t('exit');
+  // Receipt
   const _rpaylbl=el('r-pay-lbl');if(_rpaylbl)_rpaylbl.textContent=t('payLabel');
+  // qkStock modal
+  const _qksTitle=el('qks-title');if(_qksTitle)_qksTitle.textContent='📦 '+t('adjustStock');
+  const _qksCurLbl=el('qks-cur-lbl');if(_qksCurLbl)_qksCurLbl.textContent=t('curStock');
+  const _qksNewLbl=el('qks-new-lbl');if(_qksNewLbl)_qksNewLbl.textContent=t('newStock');
+  const _qksSaveBtn=el('qks-save-btn');if(_qksSaveBtn)_qksSaveBtn.textContent=t('save');
+  // Inventory count modal
+  const _invCountTitle=el('inv-count-title');if(_invCountTitle)_invCountTitle.textContent='📋 '+t('invCountTitle');
+  const _invResultTitle=el('inv-result-title');if(_invResultTitle)_invResultTitle.textContent='📊 '+t('invResultTitle');
+  const _invViewResult=el('inv-view-result-btn');if(_invViewResult)_invViewResult.textContent='📊 '+t('viewResult');
+  const _invAdjust=el('inv-adjust-btn');if(_invAdjust)_invAdjust.textContent='✅ '+t('adjustStock');
+  const _invClose=el('inv-close-btn');if(_invClose)_invClose.textContent=t('close');
+  const _invCountBtn=el('inv-count-btn');if(_invCountBtn)_invCountBtn.textContent='📋 '+t('countInventory');
+  const _invExportCsv=el('inv-export-csv-btn');if(_invExportCsv)_invExportCsv.textContent='📥 '+t('exportCSV');
+  // Open Accounts modal
+  const _oaMgrTitle=el('oa-mgr-title');if(_oaMgrTitle)_oaMgrTitle.textContent='📖 '+t('openAccountsManager');
+  const _oaSaveTitle=el('oa-save-title');if(_oaSaveTitle)_oaSaveTitle.textContent='📖 '+t('saveOpenAccount');
+  const _oaNameLbl=el('oa-name-lbl');if(_oaNameLbl)_oaNameLbl.textContent=t('accountName');
+  const _oaTableLbl=el('oa-table-lbl');if(_oaTableLbl)_oaTableLbl.textContent=t('tableName');
+  const _oaSaveBtn=el('oa-save-btn');if(_oaSaveBtn)_oaSaveBtn.textContent='💾 '+t('saveOpenAccount');
+  // Config panel lang section
+  const _cfgLangLbl=el('cfg-lang-lbl');if(_cfgLangLbl)_cfgLangLbl.textContent=t('language');
+  const _cfgDataLbl=el('cfg-data-lbl');if(_cfgDataLbl)_cfgDataLbl.textContent=lang==='es'?'Datos':'Data';
+  const _cfgExportBtn=el('cfg-export-btn');if(_cfgExportBtn)_cfgExportBtn.textContent='📤 '+t('exportData');
+  const _cfgImportBtn=el('cfg-import-btn');if(_cfgImportBtn)_cfgImportBtn.textContent='📥 '+t('importData');
+  const _cfgBackupLbl=el('cfg-backup-lbl');if(_cfgBackupLbl)_cfgBackupLbl.textContent=t('backups');
+  const _cfgBackupInfo=el('cfg-backup-info');if(_cfgBackupInfo)_cfgBackupInfo.textContent=t('autoBackupInfo');
+  const _cfgViewBackups=el('cfg-view-backups-btn');if(_cfgViewBackups)_cfgViewBackups.textContent='🗄️ '+t('viewBackups');
+  // Highlight active lang button
+  const btnEs=el('cfg-lang-es'),btnEn=el('cfg-lang-en');
+  if(btnEs)btnEs.className=lang==='es'?'btn btn-p':'btn btn-s';
+  if(btnEn)btnEn.className=lang==='en'?'btn btn-p':'btn btn-s';
+  // Lang toggle topbar title
+  const _langBtn=el('lang-toggle-btn');
+  if(_langBtn)_langBtn.title=lang==='es'?'Switch to English':'Cambiar a Español';
   updateCobrar(); renderCats(); renderProds();
 }
 function switchLang(){
-  lang=lang==='es'?'en':'es';
-  localStorage.setItem('4kpos_lang',lang);
-  applyLang();
-  const btn=el('lang-toggle-btn');
-  if(btn)btn.title=lang==='es'?'Switch to English':'Cambiar a Español';
+  setLang(lang==='es'?'en':'es');
 }
 
 // CLOCK
@@ -1296,7 +1424,7 @@ function qkStockModal(id){
 }
 function doQkStock(){
   const id=el('qks-val').dataset.pid;const p=db.products.find(x=>x.id===id);if(!p)return;
-  const n=parseInt(el('qks-val').value);if(isNaN(n)||n<0){toast('⚠ Valor inválido');return;}
+  const n=parseInt(el('qks-val').value);if(isNaN(n)||n<0){toast(t('invalidValue'));return;}
   p.stock=n;saveDB();renderInv();renderProds();closeOv('ov-qk-stock');toast('✓ Stock: '+p.name+' → '+n);
 }
 // CANTIDAD EDITABLE EN CARRITO
@@ -1342,15 +1470,15 @@ function _readInvCountInputs(){
 }
 function showInvCountResult(){
   const counted=_readInvCountInputs();
-  if(!Object.keys(counted).length){toast('⚠ Ingresa al menos un conteo');return;}
+  if(!Object.keys(counted).length){toast('⚠ '+t('enterAtLeastOne'));return;}
   _invCountData=counted;
-  let html='<div style="font-size:.78rem;color:var(--tx3);margin-bottom:10px">'+new Date().toLocaleString('es')+'</div>'
+  let html='<div style="font-size:.78rem;color:var(--tx3);margin-bottom:10px">'+new Date().toLocaleString(lang)+'</div>'
     +'<table style="width:100%;border-collapse:collapse;font-size:.83rem">'
-    +'<tr style="border-bottom:2px solid var(--b2);color:var(--tx3)"><th style="text-align:left;padding:6px 4px">Producto</th><th style="text-align:right;padding:6px 4px">Sistema</th><th style="text-align:right;padding:6px 4px">Conteo</th><th style="text-align:right;padding:6px 4px">Dif.</th></tr>';
+    +'<tr style="border-bottom:2px solid var(--b2);color:var(--tx3)"><th style="text-align:left;padding:6px 4px">'+t('product')+'</th><th style="text-align:right;padding:6px 4px">'+t('system')+'</th><th style="text-align:right;padding:6px 4px">'+t('count')+'</th><th style="text-align:right;padding:6px 4px">'+t('diff')+'</th></tr>';
   db.products.filter(p=>counted[p.id]!==undefined).forEach(p=>{
     const sys=p.stock||0,cnt=counted[p.id],diff=cnt-sys;
     const color=diff===0?'var(--gn)':diff<0?'var(--rd)':'var(--am)';
-    const icon=diff===0?'✅':diff<0?'⚠️ Faltante':'⚠️ Sobrante';
+    const icon=diff===0?t('correct'):diff<0?t('missing'):t('surplus');
     html+='<tr style="border-bottom:1px solid var(--b1)">'
       +'<td style="padding:7px 4px;font-weight:600;color:var(--tx)">'+icon+' '+p.name+'</td>'
       +'<td style="padding:7px 4px;text-align:right;color:var(--tx2)">'+sys+'</td>'
@@ -1364,12 +1492,12 @@ function showInvCountResult(){
 }
 function applyInvCount(){
   const counted=_readInvCountInputs();
-  if(!Object.keys(counted).length){toast('⚠ Sin datos para ajustar');return;}
-  confirm2('¿Ajustar el stock del sistema según el conteo físico?',function(){
+  if(!Object.keys(counted).length){toast('⚠ '+t('noDataToAdjust'));return;}
+  confirm2(t('adjustStockConfirm'),function(){
     db.products.forEach(p=>{if(counted[p.id]!==undefined)p.stock=counted[p.id];});
     saveDB();renderInv();renderProds();
     closeOv('ov-inv-count');closeOv('ov-inv-result');
-    toast('✅ Stock ajustado según conteo');
+    toast(t('stockAdjusted'));
   });
 }
 function exportCSV(){
@@ -1541,7 +1669,7 @@ function ckSetPay(m,btn){
   btn.classList.add('on');
   el('ck-cash-section').style.display=m==='cash'?'':'none';
   el('ck-split-section').style.display=m==='split'?'':'none';
-  if(m==='split'){el('split-cash').value='';el('split-card').value='';el('split-chgbox').textContent='Ingresa los montos';}
+  if(m==='split'){el('split-cash').value='';el('split-card').value='';el('split-chgbox').textContent=t('enterAmounts');}
   calcChange();
 }
 function calcSplitChange(){
@@ -1549,9 +1677,9 @@ function calcSplitChange(){
   const c=parseFloat(el('split-cash').value)||0;
   const k=parseFloat(el('split-card').value)||0;
   const sum=c+k,box=el('split-chgbox');
-  if(!c&&!k){box.textContent='Ingresa los montos';box.className='chgbox';return;}
-  if(sum<total){box.textContent='⚠ Faltan '+dolr(total-sum);box.className='chgbox neg';return;}
-  box.textContent='Vuelto efectivo: '+dolr(c-(total-k));box.className='chgbox';
+  if(!c&&!k){box.textContent=t('enterAmounts');box.className='chgbox';return;}
+  if(sum<total){box.textContent='⚠ '+t('missingAmt')+' '+dolr(total-sum);box.className='chgbox neg';return;}
+  box.textContent=t('cashChange')+': '+dolr(c-(total-k));box.className='chgbox';
 }
 function getCartTotal(){return cart.reduce((s,c)=>s+c.price*c.qty,0);}
 function getDiscountAmt(){
@@ -1620,7 +1748,7 @@ function doAutoBackup(){
   try{
     const snap=JSON.stringify({ts:new Date().toISOString(),db:JSON.parse(JSON.stringify(db))});
     localStorage.setItem('4kpos_backup',snap);
-    toastQuick('Backup guardado ✓');
+    toastQuick(t('backupSaved'));
   }catch(e){}
 }
 setInterval(doAutoBackup,5*60*1000);
@@ -1713,25 +1841,25 @@ function openDiscountModal(){
   el('disc-val').value=d.active?d.value:'';
   document.querySelectorAll('#ov-discount .pbtn').forEach(b=>b.classList.remove('on'));
   el(d.type==='fix'?'disc-fix-btn':'disc-pct-btn').classList.add('on');
-  el('disc-lbl').textContent=d.type==='fix'?'Monto fijo ($)':'Porcentaje (%)';
+  el('disc-lbl').textContent=(d.type==='fix'?t('fixedAmount'):t('percentage'))+' ('+(d.type==='fix'?'$':'%')+')';
   openOv('ov-discount');
 }
 function discSetType(t2,btn){
   discount.type=t2;
   document.querySelectorAll('#ov-discount .pbtn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
-  el('disc-lbl').textContent=t2==='fix'?'Monto fijo ($)':'Porcentaje (%)';
+  el('disc-lbl').textContent=(t2==='fix'?t('fixedAmount'):t('percentage'))+' ('+(t2==='fix'?'$':'%')+')';
 }
 function applyDiscount(){
   const v=parseFloat(el('disc-val').value)||0;
   discount={type:discount.type,value:v,active:v>0};
   renderCart();updateCobrar();closeOv('ov-discount');
-  toast(v>0?'✓ Descuento aplicado':'✕ Descuento eliminado');
+  toast(v>0?'✓ '+t('discount')+' '+t('apply'):'✕ '+t('removeDiscount'));
 }
 function clearDiscount(){
   discount={type:'pct',value:0,active:false};
   el('disc-val').value='';
-  renderCart();updateCobrar();closeOv('ov-discount');toast('✕ Descuento eliminado');
+  renderCart();updateCobrar();closeOv('ov-discount');toast('✕ '+t('removeDiscount'));
 }
 
 function openSaveOA(){
@@ -1849,11 +1977,11 @@ function newOrder(){closeOv('ov-rcpt');cart=[];cashIn='';discount={type:'pct',va
 
 // ACTIONS
 function renderActions(mode){
-  setEl('act-title',mode==='returns'?'🔄 Devoluciones':'❌ Cancelar Venta');
+  setEl('act-title',mode==='returns'?'🔄 '+t('returns'):'❌ '+t('cancelSale'));
   const today=new Date().toDateString();
   const ts=db.sales.filter(s=>new Date(s.date).toDateString()===today);
   const body=el('act-body');
-  if(!ts.length){body.innerHTML='<p style="color:var(--tx3)">Sin ventas hoy.</p>';return;}
+  if(!ts.length){body.innerHTML='<p style="color:var(--tx3)">'+t('noSalesToday')+'</p>';return;}
   body.innerHTML=ts.slice().reverse().map(s=>{
     const active=s.status==='active';
     const stxt=s.status==='returned'?'🔄':s.status==='cancelled'?'❌':'';
@@ -1861,7 +1989,7 @@ function renderActions(mode){
     const payIco=pico(s.payMethod);
     const btnHtml=mode==='returns'
       ?('<button style="width:100%;padding:7px;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;background:'+(active?'var(--amb)':'var(--s3)')+';border:none;color:'+(active?'#000':'var(--tx3)')+'" '+(active?'onclick="doReturn('+s.id+')"':'disabled')+'>↩ '+(active?'Devolver '+dolr(s.total):'Ya devuelto')+'</button>')
-      :('<button style="width:100%;padding:7px;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;background:'+(active?'var(--rdb)':'var(--s3)')+';border:1.5px solid '+(active?'rgba(248,113,113,.3)':'var(--b1)')+';color:'+(active?'var(--rd)':'var(--tx3)')+'" '+(active?'onclick="doCancel('+s.id+')"':'disabled')+'>✕ '+(active?'Cancelar '+dolr(s.total):'Ya cancelado')+'</button>');
+      :('<button style="width:100%;padding:7px;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;background:'+(active?'var(--rdb)':'var(--s3)')+';border:1.5px solid '+(active?'rgba(248,113,113,.3)':'var(--b1)')+';color:'+(active?'var(--rd)':'var(--tx3)')+'" '+(active?'onclick="doCancel('+s.id+')"':'disabled')+'>✕ '+(active?t('cancelSale')+' '+dolr(s.total):t('alreadyCancelled'))+'</button>');
     const rowCls='srow'+(s.status==='cancelled'?' cancelled':'');
     return '<div class="'+rowCls+'"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-weight:700;font-size:.83rem;color:var(--ac)">Orden #'+(s.rnum||s.id)+' '+stxt+'</span><span style="font-size:.72rem;color:var(--tx3)">'+timeStr+' '+payIco+'</span></div><div style="font-size:.77rem;color:var(--tx2);margin-bottom:6px">'+s.items.map(i=>i.name+' ×'+i.qty).join(', ')+(s.cashier?' · '+s.cashier:'')+'</div>'+btnHtml+'</div>';
   }).join('');
