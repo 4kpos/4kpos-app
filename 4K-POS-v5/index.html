@@ -1350,7 +1350,7 @@ async function loadDB(){
     if(d){
       if(d.products&&d.products.length)db.products=d.products;
       if(d.categories&&d.categories.length)db.categories=d.categories;
-      if(d.sales&&d.sales.length)db.sales=d.sales;
+      if(d.sales&&d.sales.length){db.sales=d.sales;db.sales.forEach(function(s){const n=_normPayLabel(s);if(n!==s.payLabel)s.payLabel=n;});}
       if(d.orderNum)db.orderNum=d.orderNum;
       if(d.adminCode)db.adminCode=d.adminCode;
       if(d.fundAmount!==undefined)db.fundAmount=d.fundAmount;
@@ -1370,12 +1370,20 @@ async function loadDB(){
 
   try{const li=await ipcRenderer.invoke('get-license-info');if(li&&li.key)db._lic=li.key;}catch(e){}
 }
+function _normPayLabel(s){
+  const abbr={Ef:'Efectivo',Tj:'Tarjeta',Efe:'Efectivo',Tar:'Tarjeta',Trf:'Transferencia',Div:'Dividido',Cred:'Crédito','Cta.':'Cuenta Abierta',OA:'Cuenta Abierta',Sp:'Dividido'};
+  const raw=(s.payLabel||'').trim();
+  if(abbr[raw])return abbr[raw];
+  if(raw.length>4)return raw;
+  const byMethod={cash:'Efectivo',card:'Tarjeta',transf:'Transferencia',split:'Dividido',credit:'Crédito',openAccount:'Cuenta Abierta'};
+  return byMethod[s.payMethod]||raw||s.payMethod||'';
+}
 async function saveDB(){
   try{await ipcRenderer.invoke('save-data',db);}catch(e){}
   try{
     const licKey=db._lic||'';
     if(licKey){
-      const slim={sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat};}),cfg:{bizName:(db.cfg||{}).bizName||''}};
+      const slim={sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,payLabel:_normPayLabel(s),cashier:s.cashier||'',items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat};}),cfg:{bizName:(db.cfg||{}).bizName||''}};
       fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({license_key:licKey,data:slim})}).catch(function(){});
     }
   }catch(e){}
