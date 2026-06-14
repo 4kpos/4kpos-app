@@ -314,7 +314,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div class="top-mid">
     <div class="clk" id="clk-date">Lun 01</div>
     <div class="clk" id="clk">00:00:00</div>
-    <span id="wifi-dot" style="font-size:13px;flex-shrink:0;margin:0 1px;align-self:center;line-height:1;cursor:default" title="Conectado">📶</span>
+    <span id="wifi-dot" style="display:flex;align-items:center;flex-shrink:0;margin:0 2px;align-self:center;color:#22c55e;transition:color .4s;cursor:default" title="Conectado"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></span>
     <div class="lic-badge lic-ok" id="lic-badge" style="display:none">✓</div>
   </div>
   <div style="display:flex;gap:5px">
@@ -1377,15 +1377,18 @@ setInterval(updateClock,1000); updateClock();
 // WIFI INDICATOR
 function setConnDot(ok){
   const d=el('wifi-dot');if(!d)return;
-  d.textContent=ok?'📶':'📵';
+  d.style.color=ok?'#22c55e':'#ef4444';
   d.title=ok?(lang==='en'?'Connected':'Conectado'):(lang==='en'?'No connection':'Sin conexión');
 }
 function checkConn(){
   if(!navigator.onLine){setConnDot(false);return;}
-  const hdrs={'apikey':SUPA_KEY||'placeholder'};
+  if(!SUPA_KEY){setConnDot(false);return;}
   const sig=typeof AbortSignal!=='undefined'&&AbortSignal.timeout?AbortSignal.timeout(5000):undefined;
-  fetch(SUPA_URL+'/rest/v1/',{method:'HEAD',headers:hdrs,signal:sig})
-    .then(r=>setConnDot(r.ok||r.status===400||r.status===401)).catch(()=>setConnDot(false));
+  fetch(SUPA_URL+'/rest/v1/pos_data?select=id&limit=1',{
+    method:'GET',
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},
+    signal:sig
+  }).then(r=>setConnDot(r.ok||r.status===404||r.status===406)).catch(()=>setConnDot(false));
 }
 window.addEventListener('online',()=>setConnDot(true));
 window.addEventListener('offline',()=>setConnDot(false));
@@ -1448,18 +1451,18 @@ async function sendDashboardMessage(){
   const pri=(el('msg-priority').value)||'normal';
   const lic=db._lic||'';
   if(!lic){toast('⚠ '+(lang==='en'?'No active license':'Sin licencia activa'));return;}
-  if(!SUPA_KEY){toast('⚠ '+(lang==='en'?'Configure SUPA_KEY in index.html':'Configura la clave SUPA_KEY en index.html'));console.warn('sendDashboardMessage: SUPA_KEY is empty. Get it from Supabase → Settings → API → anon public');return;}
   const btn=el('msg-send-btn');if(btn)btn.disabled=true;
+  console.log('SUPA_URL:',SUPA_URL,'SUPA_KEY:',SUPA_KEY?'exists':'MISSING');
+  if(!SUPA_KEY){toast('⚠ '+(lang==='en'?'SUPA_KEY not configured':'SUPA_KEY no configurada — ver index.html'));console.warn('sendDashboardMessage: SUPA_KEY is empty. Get it from Supabase → Settings → API → anon public');if(btn)btn.disabled=false;return;}
   try{
-    console.log('sendDashboardMessage: sending to Supabase REST API...');
-    const r=await fetch(SUPA_URL+'/rest/v1/messages',{
+    const res=await fetch(SUPA_URL+'/rest/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
-      body:JSON.stringify({text:txt,from_user:curUser?curUser.name:'POS',priority:pri,license_key:lic,read:false})
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({text:txt,from_user:curUser?curUser.name:'Admin',priority:pri,license_key:db.licenseKey||db._lic||lic})
     });
-    console.log('sendDashboardMessage: HTTP',r.status,r.statusText);
-    if(r.ok||r.status===201){toast(t('msgSent'));closeOv('ov-msg');}
-    else{const body=await r.text().catch(()=>'');console.error('sendDashboardMessage error body:',body);toast(t('msgErr')+': HTTP '+r.status);}
+    console.log('Response:',res.status,await res.clone().text().catch(()=>''));
+    if(res.ok||res.status===201){toast(t('msgSent'));closeOv('ov-msg');}
+    else{const body=await res.text().catch(()=>'');console.error('sendDashboardMessage error:',res.status,body);toast(t('msgErr')+': HTTP '+res.status);}
   }catch(e){console.error('sendDashboardMessage network error:',e);toast(t('msgNoConn'));}
   finally{if(btn)btn.disabled=false;}
 }
