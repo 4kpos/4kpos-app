@@ -121,9 +121,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .npbtn.del{background:var(--acg);border-color:var(--ac);color:var(--ac);}
 .chgbox{background:var(--gnb);border:1.5px solid rgba(52,211,153,.25);border-radius:var(--rs);padding:7px 11px;font-family:Courier New,monospace;font-size:.92rem;color:var(--gn);text-align:center;font-weight:600;}
 .chgbox.neg{background:var(--rdb);border-color:rgba(248,113,113,.25);color:var(--rd);}
-.cobrar{background:linear-gradient(135deg,#1e3a8a,#3b82f6);border:none;border-radius:var(--r);color:#fff;padding:14px;font-size:18px;font-weight:800;cursor:pointer;width:100%;letter-spacing:.3px;transition:all .2s;text-transform:uppercase;}
-.btn-orange.btn-p{background:#f59e0b!important;border-color:#f59e0b!important;color:#fff!important;}
-.btn-orange.btn-s{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.3)!important;color:#f59e0b!important;}
+.cobrar{background:linear-gradient(135deg,#1e3a8a,#3b82f6);border:none;border-radius:var(--r);color:#fff;padding:12px 10px;font-size:15px;font-weight:800;cursor:pointer;width:100%;letter-spacing:.3px;transition:all .2s;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.btn-red-soft.btn-p{background:#f87171!important;border-color:#f87171!important;color:#fff!important;}
+.btn-red-soft.btn-s{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.3)!important;color:#f87171!important;}
 .cobrar:hover{opacity:.88;}
 .cobrar:disabled{opacity:.3;cursor:not-allowed;}
 #botbar{background:var(--s1);border-top:1.5px solid var(--b1);display:flex;align-items:center;justify-content:space-between;padding:6px 16px;flex-shrink:0;}
@@ -314,7 +314,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div class="top-mid">
     <div class="clk" id="clk-date">Lun 01</div>
     <div class="clk" id="clk">00:00:00</div>
-    <div id="wifi-dot" style="width:9px;height:9px;border-radius:50%;background:#34d399;flex-shrink:0;margin:0 2px;align-self:center;transition:background .4s" title="Conectado"></div>
+    <span id="wifi-dot" style="font-size:13px;flex-shrink:0;margin:0 1px;align-self:center;line-height:1;cursor:default" title="Conectado">📶</span>
     <div class="lic-badge lic-ok" id="lic-badge" style="display:none">✓</div>
   </div>
   <div style="display:flex;gap:5px">
@@ -370,9 +370,9 @@ select.fi option{background:var(--s2);color:var(--tx);}
         </div>
 
 
-      <div style="display:flex;gap:8px;align-items:stretch">
-        <button class="pbtn" id="disc-btn" onclick="openDiscountModal()" style="display:none;flex:0 0 30%;min-width:70px;padding:8px 4px;font-size:10px;border-radius:var(--r)"><span class="pico" style="font-size:1.2rem">%</span><span id="disc-btn-txt">Descuento</span></button>
-        <button class="cobrar" id="cobrar" onclick="openCheckoutModal()" disabled style="flex:1;width:auto">✓ Cobrar — $0.00</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="pbtn" id="disc-btn" onclick="openDiscountModal()" style="display:none;flex:0 0 29%;min-width:62px;max-width:90px;padding:7px 3px;font-size:10px;border-radius:var(--r);align-self:stretch"><span class="pico" style="font-size:1.1rem">%</span><span id="disc-btn-txt">Dcto</span></button>
+        <button class="cobrar" id="cobrar" onclick="openCheckoutModal()" disabled style="flex:1;width:auto;min-width:0">✓ COBRAR $0.00</button>
       </div>
     </div>
   </div>
@@ -675,6 +675,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <button class="btn btn-s" style="flex:1" onclick="printShiftReport()" id="lo-print-btn">🖨️ Imprimir Reporte</button>
       </div>
       <button class="btn btn-d" style="width:100%;padding:12px" onclick="doLogout()" id="lo-confirm-btn" disabled>🚪 Confirmar cierre de turno</button>
+      <button class="btn btn-d" style="width:100%;padding:10px;margin-top:6px;display:none;background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.3);color:var(--am)" onclick="forceAdminLogout()" id="lo-force-btn">⚠️ Forzar cierre (solo admin)</button>
     </div>
   </div>
 </div>
@@ -702,7 +703,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div style="display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap" id="conta-tabs">
         <button class="btn btn-p" onclick="contaTab('ct-res',this)">📊 Resumen</button>
         <button class="btn btn-s" onclick="contaTab('ct-fac',this)">🧾 Facturas</button>
-        <button class="btn btn-s btn-orange" data-extra-class="btn-orange" onclick="contaTab('ct-gst',this)">💸 Gastos</button>
+        <button class="btn btn-s btn-red-soft" data-extra-class="btn-red-soft" onclick="contaTab('ct-gst',this)">💸 Gastos</button>
         <button class="btn btn-s" onclick="contaTab('ct-graf',this)">📈 Gráfica</button>
       </div>
       <div id="ct-res">
@@ -998,7 +999,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 
 <script>
 // Supabase anon key — get it from: Supabase dashboard → Settings → API → Project API keys → "anon public"
-const SUPA_ANON = '';
+const SUPA_KEY = '';
 const SUPA_URL = 'https://izalnhluwtyotuxwkqrh.supabase.co';
 let ipcRenderer = { invoke: async function(){ return null; } };
 try {
@@ -1197,8 +1198,7 @@ function pico(m){return m==='cash'?'💵':m==='card'?'💳':m==='transf'?'📲':
 function fmtTime(dateStr){
   const d=dateStr?new Date(dateStr):new Date();
   const h12=(db.cfg&&db.cfg.timeFormat)!=='24h';
-  let s=d.toLocaleTimeString(lang==='en'?'en-US':'es',{hour:'2-digit',minute:'2-digit',hour12:h12});
-  return s.replace(/\ba\.m\./gi,'AM').replace(/\bp\.m\./gi,'PM').replace(/\bam\b/gi,'AM').replace(/\bpm\b/gi,'PM');
+  return d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:h12});
 }
 
 // LANG
@@ -1377,13 +1377,15 @@ setInterval(updateClock,1000); updateClock();
 // WIFI INDICATOR
 function setConnDot(ok){
   const d=el('wifi-dot');if(!d)return;
-  d.style.background=ok?'#34d399':'#f87171';
+  d.textContent=ok?'📶':'📵';
   d.title=ok?(lang==='en'?'Connected':'Conectado'):(lang==='en'?'No connection':'Sin conexión');
 }
 function checkConn(){
   if(!navigator.onLine){setConnDot(false);return;}
-  fetch(SUPA_URL+'/functions/v1/posapi?action=ping',{method:'HEAD',signal:AbortSignal.timeout?AbortSignal.timeout(5000):undefined})
-    .then(()=>setConnDot(true)).catch(()=>setConnDot(false));
+  const hdrs={'apikey':SUPA_KEY||'placeholder'};
+  const sig=typeof AbortSignal!=='undefined'&&AbortSignal.timeout?AbortSignal.timeout(5000):undefined;
+  fetch(SUPA_URL+'/rest/v1/',{method:'HEAD',headers:hdrs,signal:sig})
+    .then(r=>setConnDot(r.ok||r.status===400||r.status===401)).catch(()=>setConnDot(false));
 }
 window.addEventListener('online',()=>setConnDot(true));
 window.addEventListener('offline',()=>setConnDot(false));
@@ -1446,13 +1448,13 @@ async function sendDashboardMessage(){
   const pri=(el('msg-priority').value)||'normal';
   const lic=db._lic||'';
   if(!lic){toast('⚠ '+(lang==='en'?'No active license':'Sin licencia activa'));return;}
-  if(!SUPA_ANON){toast('⚠ '+(lang==='en'?'Configure SUPA_ANON key in index.html':'Configura la clave SUPA_ANON en index.html'));console.warn('sendDashboardMessage: SUPA_ANON is empty. Get it from Supabase → Settings → API → anon public');return;}
+  if(!SUPA_KEY){toast('⚠ '+(lang==='en'?'Configure SUPA_KEY in index.html':'Configura la clave SUPA_KEY en index.html'));console.warn('sendDashboardMessage: SUPA_KEY is empty. Get it from Supabase → Settings → API → anon public');return;}
   const btn=el('msg-send-btn');if(btn)btn.disabled=true;
   try{
     console.log('sendDashboardMessage: sending to Supabase REST API...');
     const r=await fetch(SUPA_URL+'/rest/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,'Prefer':'return=minimal'},
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
       body:JSON.stringify({text:txt,from_user:curUser?curUser.name:'POS',priority:pri,license_key:lic,read:false})
     });
     console.log('sendDashboardMessage: HTTP',r.status,r.statusText);
@@ -1606,20 +1608,32 @@ function calcCashDiff(){
   const cashSales=active.filter(s=>s.payMethod==='cash').reduce((s,x)=>s+x.total,0);
   const declared=parseFloat(el('lo-declared-cash').value)||0;
   const expected=cashSales+db.fundAmount;
-  const diff=declared-expected;
+  const diff=Math.round((declared-expected)*100)/100;
   const box=el('lo-cash-diff-box');
   const confirmBtn=el('lo-confirm-btn');
+  const forceBtn=el('lo-force-btn');
   if(!box)return;
-  if(!declared){box.innerHTML='';if(confirmBtn)confirmBtn.disabled=true;return;}
-  const color=diff===0?'var(--gn)':diff<0?'var(--rd)':'var(--am)';
-  const icon=diff===0?'✅':diff<0?'⚠️ '+t('missing'):'⚠️ '+t('surplus');
-  box.innerHTML='<div style="display:flex;justify-content:space-between"><span style="color:var(--tx3)">'+t('cashDiff')+'</span><span style="font-weight:700;color:'+color+'">'+icon+' '+dolr(Math.abs(diff))+'</span></div>';
+  if(!declared){
+    box.innerHTML='';
+    if(confirmBtn)confirmBtn.disabled=true;
+    if(forceBtn)forceBtn.style.display='none';
+    return;
+  }
   const isAdmin=curUser&&curUser.role==='admin';
-  if(confirmBtn){
-    if(diff!==0&&!isAdmin){
-      confirmBtn.disabled=true;
-      if(!box.querySelector('.diff-warn'))box.innerHTML+='<div class="diff-warn" style="margin-top:5px;font-size:.78rem;color:var(--rd)">⛔ '+(lang==='en'?'Difference found — only admin can close shift':'Diferencia encontrada — solo admin puede cerrar turno')+'</div>';
-    }else{confirmBtn.disabled=false;}
+  const color=diff===0?'var(--gn)':diff<0?'var(--rd)':'var(--am)';
+  const diffTxt=diff===0
+    ?'✅ '+(lang==='en'?'Cash matches':'Cuadre correcto')
+    :(diff<0?'⬇ ':('+⬆ '))+(lang==='en'?'Difference':'Diferencia')+': '+dolr(Math.abs(diff));
+  box.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+(lang==='en'?'Expected':'Esperado')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(expected)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+(lang==='en'?'Declared':'Declarado')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(declared)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;padding-top:5px;border-top:1px solid var(--b1)"><span style="color:var(--tx3)">'+(lang==='en'?'Difference':'Diferencia')+'</span><span style="font-weight:700;color:'+color+'">'+diffTxt+'</span></div>';
+  if(diff===0){
+    if(confirmBtn)confirmBtn.disabled=false;
+    if(forceBtn)forceBtn.style.display='none';
+  }else{
+    if(confirmBtn)confirmBtn.disabled=true;
+    if(forceBtn)forceBtn.style.display=isAdmin?'block':'none';
+    if(!isAdmin){box.innerHTML+='<div style="margin-top:5px;font-size:.78rem;color:var(--rd)">⛔ '+(lang==='en'?'Cash does not match — correct before closing':'El efectivo no cuadra — corrígelo antes de cerrar')+'</div>';}
   }
 }
 function doLogout(){
@@ -1631,6 +1645,10 @@ function doLogout(){
   el('lu').value='';el('lp').value='';
   el('login-screen').style.display='flex';
   renderCart();
+}
+function forceAdminLogout(){
+  if(!curUser||curUser.role!=='admin'){toast('⚠ '+(lang==='en'?'Admin only':'Solo administrador'));return;}
+  confirm2(lang==='en'?'Force close shift with cash difference?':'¿Forzar cierre con diferencia de efectivo?',doLogout);
 }
 
 // PIN
@@ -2003,7 +2021,7 @@ function renderCart(){
   calcChange();
 }
 function updateCobrar(){
-  el('cobrar').textContent=t('cobrar')+' — '+dolr(getFinalTotal());
+  el('cobrar').textContent=t('cobrar')+' '+dolr(getFinalTotal());
 }
 
 // CATEGORY NAVIGATION
@@ -2716,8 +2734,9 @@ function openLogout(){
   const active=db.sales.filter(s=>new Date(s.date).toDateString()===today&&s.status==='active');
   const inc=active.reduce((s,x)=>s+x.total,0);
   setEl('lo-sales',dolr(inc));setEl('lo-orders',active.length.toString());setEl('lo-fund',dolr(db.fundAmount));
-  const byPay2={cash:0,card:0,transf:0,credit:0};
-  active.forEach(s=>byPay2[s.payMethod]=(byPay2[s.payMethod]||0)+s.total);
+  const byPay2={cash:0,card:0,transf:0,credit:0,split:0,openAccount:0};
+  const byCnt2={cash:0,card:0,transf:0,credit:0,split:0,openAccount:0};
+  active.forEach(s=>{const m=s.payMethod||'cash';byPay2[m]=(byPay2[m]||0)+s.total;byCnt2[m]=(byCnt2[m]||0)+1;});
   const cashSales=byPay2.cash||0;
   const cardSales=(byPay2.card||0)+(byPay2.transf||0);
   const credSales=byPay2.credit||0;
@@ -2732,15 +2751,25 @@ function openLogout(){
   const allToday=db.sales.filter(s=>new Date(s.date).toDateString()===today);
   const can=allToday.filter(s=>s.status==='cancelled');
   const ret=allToday.filter(s=>s.status==='returned');
+  const retTotal=ret.reduce((s,x)=>s+x.total,0);
+  function rRow(icon,lbl,val,cnt,color){return '<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">'+icon+' '+lbl+(cnt?' <span style="color:var(--tx3);font-size:.75rem">('+cnt+')</span>':'')+'</span><span style="font-family:monospace;color:'+color+'">'+dolr(val)+'</span></div>';}
   let report='<div style="background:var(--s2);border-radius:var(--rs);padding:11px;font-size:.8rem">';
   report+='<div style="font-weight:700;margin-bottom:8px;color:var(--tx)">'+t('shiftReport')+(curUser?' — '+curUser.name:'')+'</div>';
-  if(byPay2.cash)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">💵 Efectivo</span><span style="font-family:monospace;color:var(--gn)">'+dolr(byPay2.cash)+'</span></div>';
-  if(byPay2.card)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">💳 Tarjeta</span><span style="font-family:monospace;color:var(--bl)">'+dolr(byPay2.card)+'</span></div>';
-  if(byPay2.transf)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">📲 Transferencia</span><span style="font-family:monospace;color:var(--ac)">'+dolr(byPay2.transf)+'</span></div>';
-  if(byPay2.credit)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">💳 '+t('credit')+'</span><span style="font-family:monospace;color:var(--am)">'+dolr(byPay2.credit)+'</span></div>';
-  if(ret.length){const retTotal=ret.reduce((s,x)=>s+x.total,0);report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px;padding:4px 0;border-top:1px solid var(--b1)"><span style="color:var(--am)">🔄 Devoluciones ('+ret.length+')</span><span style="font-family:monospace;color:var(--am)">-'+dolr(retTotal)+'</span></div>';}
-  if(can.length)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--rd)">❌ Cancelaciones: '+can.length+'</span><span style="font-family:monospace;color:var(--rd)">'+dolr(can.reduce((s,x)=>s+x.total,0))+'</span></div>';
-  report+='</div>';
+  report+='<div style="font-weight:600;font-size:.75rem;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Ventas del día</div>';
+  if(byPay2.cash)report+=rRow('💵','Efectivo',byPay2.cash,byCnt2.cash,'var(--gn)');
+  if(byPay2.card)report+=rRow('💳','Tarjeta',byPay2.card,byCnt2.card,'var(--bl)');
+  if(byPay2.transf)report+=rRow('📲','Transferencia',byPay2.transf,byCnt2.transf,'var(--ac)');
+  if(byPay2.split)report+=rRow('⚡','Mixto',byPay2.split,byCnt2.split,'var(--bl)');
+  if(byPay2.credit)report+=rRow('🏷️','Crédito',byPay2.credit,byCnt2.credit,'var(--am)');
+  if(byPay2.openAccount)report+=rRow('📖','Cta. Abierta',byPay2.openAccount,byCnt2.openAccount,'var(--am)');
+  report+='<div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--b1);padding-top:5px;margin:5px 0"><span style="color:var(--tx)">Total ventas</span><span style="font-family:monospace;color:var(--gn)">'+dolr(inc)+'</span></div>';
+  if(ret.length)report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--am)">🔄 Devoluciones ('+ret.length+')</span><span style="font-family:monospace;color:var(--am)">-'+dolr(retTotal)+'</span></div>';
+  if(can.length)report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--rd)">❌ Cancelaciones: '+can.length+'</span><span style="font-family:monospace;color:var(--rd)">'+dolr(can.reduce((s,x)=>s+x.total,0))+'</span></div>';
+  report+='<div style="border-top:1px solid var(--b1);margin-top:5px;padding-top:6px">';
+  report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">💵 Efectivo en ventas</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(cashSales)+'</span></div>';
+  report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">🗃️ Fondo de caja</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(db.fundAmount)+'</span></div>';
+  report+='<div style="display:flex;justify-content:space-between;font-weight:700"><span style="color:var(--tx)">💵 Efectivo esperado</span><span style="font-family:monospace;color:var(--gn)">'+dolr(cashSales+db.fundAmount)+'</span></div>';
+  report+='</div></div>';
   el('lo-report').innerHTML=report;
   const cashFld=el('lo-declared-cash');if(cashFld)cashFld.value='';
   const cashDiffBox=el('lo-cash-diff-box');if(cashDiffBox)cashDiffBox.innerHTML='';
@@ -2755,15 +2784,48 @@ function printShiftReport(){
   const allToday=db.sales.filter(s=>new Date(s.date).toDateString()===today);
   const can=allToday.filter(s=>s.status==='cancelled');
   const ret=allToday.filter(s=>s.status==='returned');
+  const retTotal=ret.reduce((s,x)=>s+x.total,0);
   const inc=active.reduce((s,x)=>s+x.total,0);
-  const byPay={cash:0,card:0,transf:0,credit:0};
-  active.forEach(s=>byPay[s.payMethod]=(byPay[s.payMethod]||0)+s.total);
+  const byPay={cash:0,card:0,transf:0,credit:0,split:0,openAccount:0};
+  const byCnt={cash:0,card:0,transf:0,credit:0,split:0,openAccount:0};
+  active.forEach(s=>{const m=s.payMethod||'cash';byPay[m]=(byPay[m]||0)+s.total;byCnt[m]=(byCnt[m]||0)+1;});
+  const cashSales=byPay.cash||0;
+  const declared=parseFloat((el('lo-declared-cash')||{}).value)||0;
+  const expected=cashSales+db.fundAmount;
+  const diff=Math.round((declared-expected)*100)/100;
+  const diffTxt=declared>0?(diff===0?'Cuadre correcto ✅':(diff>0?'+':'')+dolr(diff)):'—';
+  const now=new Date();
+  function pr(icon,lbl,val,cnt){return cnt?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>'+icon+' '+lbl+' ('+cnt+')</span><span>'+dolr(val)+'</span></div>':'';}
   const rows=allToday.slice().reverse().map(s=>{
     const xmark=s.status==='cancelled'?'[X] ':s.status==='returned'?'[R] ':'';
-    const timeStr=fmtTime(s.date);
-    return '<div style="display:flex;justify-content:space-between;font-size:11px;border-bottom:1px dashed #ccc;padding:3px 0"><span>'+xmark+'#'+s.rnum+' '+timeStr+' '+pico(s.payMethod)+'</span><span>'+dolr(s.total)+'</span></div>';
+    return '<div style="display:flex;justify-content:space-between;font-size:10px;border-bottom:1px dashed #ccc;padding:2px 0"><span>'+xmark+'#'+s.rnum+' '+fmtTime(s.date)+' '+pico(s.payMethod)+'</span><span>'+dolr(s.total)+'</span></div>';
   }).join('');
-  el('parea').innerHTML='<div style="text-align:center;padding:6px">'+logoH+'<b>'+(c.bizName||'4K Negocio')+'</b><br><small>REPORTE DE TURNO</small><br><small>'+new Date().toLocaleDateString()+' '+new Date().toLocaleTimeString()+'</small>'+(curUser?'<br><small>Cajero: '+curUser.name+'</small>':'')+'<hr style="border:1px dashed #000;margin:4px 0">'+rows+'<hr style="border:1px dashed #000;margin:4px 0"><div style="font-size:11px;display:flex;justify-content:space-between"><span>💵 Efectivo</span><span>'+dolr(byPay.cash)+'</span></div><div style="font-size:11px;display:flex;justify-content:space-between"><span>💳 Tarjeta</span><span>'+dolr(byPay.card)+'</span></div><div style="font-size:11px;display:flex;justify-content:space-between"><span>📲 Transferencia</span><span>'+dolr(byPay.transf)+'</span></div><hr style="border:1px dashed #000;margin:4px 0"><div style="font-size:12px;display:flex;justify-content:space-between;font-weight:bold"><span>TOTAL VENTAS</span><span>'+dolr(inc)+'</span></div><div style="font-size:11px;display:flex;justify-content:space-between"><span>Fondo</span><span>'+dolr(db.fundAmount)+'</span></div><div style="font-size:12px;display:flex;justify-content:space-between;font-weight:bold"><span>TOTAL EN CAJA</span><span>'+dolr(inc+db.fundAmount)+'</span></div>'+(can.length?'<div style="font-size:11px">Cancelaciones: '+can.length+'</div>':'')+(ret.length?'<div style="font-size:11px">Devoluciones: '+ret.length+'</div>':'')+'</div>';
+  el('parea').innerHTML='<div style="text-align:center;padding:6px;font-family:monospace">'
+    +logoH+'<b>'+(c.bizName||'4K Negocio')+'</b><br>'
+    +'<small>REPORTE DE TURNO</small><br>'
+    +'<small>'+now.toLocaleDateString()+' '+now.toLocaleTimeString()+'</small>'
+    +(curUser?'<br><small>Cajero: '+curUser.name+'</small>':'')
+    +'<hr style="border:1px dashed #000;margin:4px 0">'
+    +rows
+    +'<hr style="border:1px dashed #000;margin:4px 0">'
+    +'<div style="font-size:11px;font-weight:bold;margin-bottom:3px">DESGLOSE POR MÉTODO DE PAGO</div>'
+    +pr('💵','Efectivo',byPay.cash,byCnt.cash)
+    +pr('💳','Tarjeta',byPay.card,byCnt.card)
+    +pr('📲','Transferencia',byPay.transf,byCnt.transf)
+    +pr('⚡','Mixto/Split',byPay.split,byCnt.split)
+    +pr('🏷️','Crédito',byPay.credit,byCnt.credit)
+    +pr('📖','Cta. Abierta',byPay.openAccount,byCnt.openAccount)
+    +(ret.length?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>🔄 Devoluciones ('+ret.length+')</span><span>-'+dolr(retTotal)+'</span></div>':'')
+    +(can.length?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>❌ Cancelaciones: '+can.length+'</span><span>'+dolr(can.reduce((s,x)=>s+x.total,0))+'</span></div>':'')
+    +'<hr style="border:1px dashed #000;margin:4px 0">'
+    +'<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:bold"><span>TOTAL VENTAS</span><span>'+dolr(inc)+'</span></div>'
+    +'<hr style="border:1px dashed #000;margin:4px 0">'
+    +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>💵 Efectivo ventas</span><span>'+dolr(cashSales)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>🗃️ Fondo de caja</span><span>'+dolr(db.fundAmount)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:bold;padding:3px 0"><span>EFECTIVO ESPERADO</span><span>'+dolr(expected)+'</span></div>'
+    +(declared?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>Efectivo declarado</span><span>'+dolr(declared)+'</span></div>':'')
+    +(declared?'<div style="display:flex;justify-content:space-between;font-size:11px;font-weight:bold;padding:2px 0"><span>Diferencia</span><span>'+diffTxt+'</span></div>':'')
+    +'</div>';
   window.print();
 }
 
@@ -3042,7 +3104,7 @@ function renderGraf(){
   ctx.clearRect(0,0,cssW,cssH);
   ctx.fillStyle=dark?'#22222e':'#e8eaf0';ctx.fillRect(0,0,cssW,cssH);
   const txC=dark?'#9090a8':'#555575',gridC=dark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.08)';
-  const pad={t:20,r:20,b:50,l:60},W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
+  const pad={t:20,r:20,b:65,l:60},W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
   if(type==='ventas-dia'){
     const dr=getDaysRange(days);
     const data=dr.map(d=>{const next=new Date(d);next.setDate(next.getDate()+1);return db.sales.filter(s=>s.status==='active'&&new Date(s.date)>=d&&new Date(s.date)<next).reduce((s,x)=>s+x.total,0);});
@@ -3067,14 +3129,19 @@ function renderGraf(){
 function drawBar(ctx,labels,data,pad,W,H,color,txC,gridC){
   if(!data.length)return;
   const max=Math.max(...data)||1,barW=Math.max(4,W/data.length*0.6),gap=W/data.length;
-  const skip=data.length>20?5:data.length>10?2:1;
+  const skip=data.length>20?5:data.length>12?3:data.length>7?2:1;
   for(let i=0;i<=4;i++){const y=pad.t+H-(H/4*i);ctx.strokeStyle=gridC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+W,y);ctx.stroke();ctx.fillStyle=txC;ctx.font='11px Segoe UI';ctx.textAlign='right';ctx.fillText(dolr(max/4*i),pad.l-5,y+4);}
   data.forEach((v,i)=>{
     const x=pad.l+gap*i+(gap-barW)/2,bH=Math.max(v>0?2:0,H*(v/max)),y=pad.t+H-bH;
     ctx.globalAlpha=v>0?1:0.2;ctx.fillStyle=color;ctx.beginPath();
     if(ctx.roundRect)ctx.roundRect(x,y,barW,bH,3);else ctx.rect(x,y,barW,bH);
     ctx.fill();ctx.globalAlpha=1;
-    if(i%skip===0){ctx.fillStyle=txC;ctx.font='10px Segoe UI';ctx.textAlign='center';const lbl=labels[i]||'';ctx.fillText(lbl.length>5?lbl.substring(0,5):lbl,x+barW/2,pad.t+H+14);}
+    if(i%skip===0){
+      const lbl=labels[i]||'';const cx=pad.l+gap*i+gap/2;
+      ctx.save();ctx.fillStyle=txC;ctx.font='10px Segoe UI';ctx.textAlign='right';
+      ctx.translate(cx,pad.t+H+6);ctx.rotate(-Math.PI/4);
+      ctx.fillText(lbl,0,0);ctx.restore();
+    }
   });
 }
 function drawLine(ctx,labels,d1,d2,pad,W,H,txC,gridC){
