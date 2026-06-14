@@ -129,7 +129,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 #botbar{background:var(--s1);border-top:1.5px solid var(--b1);display:flex;align-items:center;justify-content:space-between;padding:6px 16px;flex-shrink:0;}
 .bot-left{display:flex;flex-direction:column;gap:1px;}
 .ord-lbl{font-size:.8rem;color:var(--tx2);}
-.usr-lbl{font-size:.72rem;color:var(--tx3);}
+.usr-lbl{font-size:.72rem;color:#fff!important;}
 .hamburger-btn{background:var(--s2);border:1.5px solid var(--b1);color:var(--tx2);padding:8px 13px;border-radius:var(--rs);cursor:pointer;font-size:1.1rem;transition:all .2s;}
 .hamburger-btn:hover{border-color:var(--ac);color:var(--ac);}
 .hmenu{position:fixed;top:60px;left:0;background:var(--s1);border:1.5px solid var(--b2);border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:700;display:none;min-width:210px;overflow:hidden;}
@@ -1027,7 +1027,7 @@ const T = {
     fldName:'Nombre',fldCategory:'Categoría',fldPrice:'Precio ($)',fldCostPrice:'Precio de compra ($)',
     fldProfitMargin:'Margen de ganancia',fldStock:'Stock',fldMinStock:'Stock mínimo',fldBarcode:'Código de barras',
     fldPhoto:'Foto del producto',uploadImg:'Subir imagen',removeImg:'Quitar',
-    registeredProducts:'Productos registrados',noCategory:'Sin categoría',product:'producto',products:'productos',
+    registeredProducts:'Productos registrados',noCategory:'Sin categoría',noCats:'Sin categorías.',product:'producto',products:'productos',
     // Category form
     fldCatName:'Nombre categoría',fldCatPhoto:'Foto (opcional)',registeredCats:'Categorías',
     // User form
@@ -1099,7 +1099,7 @@ const T = {
     fldName:'Name',fldCategory:'Category',fldPrice:'Price ($)',fldCostPrice:'Cost price ($)',
     fldProfitMargin:'Profit margin',fldStock:'Stock',fldMinStock:'Min stock',fldBarcode:'Barcode',
     fldPhoto:'Product photo',uploadImg:'Upload image',removeImg:'Remove',
-    registeredProducts:'Registered products',noCategory:'No category',product:'product',products:'products',
+    registeredProducts:'Registered products',noCategory:'No category',noCats:'No categories.',product:'product',products:'products',
     // Category form
     fldCatName:'Category name',fldCatPhoto:'Photo (optional)',registeredCats:'Categories',
     // User form
@@ -1633,7 +1633,7 @@ function editCat(id){const c=db.categories.find(x=>x.id===id);if(!c)return;el('c
 function delCat(id){confirm2('¿Eliminar categoría?',()=>{db.categories=db.categories.filter(x=>x.id!==id);saveDB();renderCatList();renderCats();updatePCat();});}
 function renderCatList(){
   const e2=el('cat-list');
-  if(!db.categories.length){e2.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">Sin categorías.</div>';return;}
+  if(!db.categories.length){e2.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('noCats')+'</div>';return;}
   e2.innerHTML=db.categories.map(c=>{
     const th=c.img?('<img src="'+c.img+'" style="width:100%;height:100%;object-fit:cover;border-radius:7px">'):c.name[0];
     return '<div class="pli"><div class="pli-thumb">'+th+'</div><div class="pli-info"><div class="pli-name">'+c.name+'</div></div><button class="eb" onclick="editCat(\''+c.id+'\')">✏</button><button class="xb" onclick="delCat(\''+c.id+'\')">✕</button></div>';
@@ -2412,7 +2412,7 @@ function payCreditFull(id){
 }
 
 function openSaveOA(){
-  if(!cart.length){toast('⚠ No hay productos en el carrito');return;}
+  if(!cart.length){toast('⚠ '+t('addProducts'));return;}
   el('oa-name').value='';el('oa-table').value='';
   openOv('ov-save-oa');
   setTimeout(()=>el('oa-name').focus(),120);
