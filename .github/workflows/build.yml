@@ -37,5 +37,7 @@ jobs:
           tag_name: latest
           name: "4K POS — Última versión"
           body: "Descarga e instala 4K POS en tu PC con Windows."
-          files: 4K-POS-v5/dist/*.exe
+          files: |
+            4K-POS-v5/dist/*.exe
+            4K-POS-v5/dist/*.yml
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -11,10 +11,20 @@
     "start": "electron .",
     "dist": "electron-builder --win --x64"
   },
+  "dependencies": {
+    "electron-updater": "^6.1.0"
+  },
   "build": {
     "appId": "com.4kpos.app",
     "productName": "4K POS",
     "asar": false,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "4kpos",
+        "repo": "4kpos-app"
+      }
+    ],
     "directories": {
       "output": "dist"
     },

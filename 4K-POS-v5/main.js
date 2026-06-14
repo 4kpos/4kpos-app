@@ -1,10 +1,25 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
 const fs = require('fs')
+const os = require('os')
+const crypto = require('crypto')
 const { activateLicense, verifyLicense, getLicenseInfo, getHardwareId } = require('./license')
+
+let autoUpdater
+try {
+  autoUpdater = require('electron-updater').autoUpdater
+} catch(e) {
+  console.log('electron-updater no disponible, actualizaciones desactivadas:', e.message)
+}
 
 // DevTools solo en desarrollo
 const isDev = true
+
+// ── ID único de máquina ────────────────────────
+function getMachineId() {
+  const info = os.hostname() + os.platform() + os.arch() + (os.cpus()[0]?.model || '')
+  return crypto.createHash('sha256').update(info).digest('hex').substring(0, 32)
+}
 
 // ── Datos del POS ──────────────────────────────
 const dataPath = path.join(app.getPath('userData'), '4kpos-v5.json')
@@ -41,8 +56,8 @@ function createWindow() {
     autoHideMenuBar: true
   })
 
- win.loadFile('index.html')
-win.webContents.openDevTools()
+  win.loadFile('index.html')
+  win.webContents.openDevTools()
   win.once('ready-to-show', () => win.show())
   win.setMenuBarVisibility(false)
 
@@ -50,7 +65,6 @@ win.webContents.openDevTools()
   if (!isDev) {
     win.webContents.on('before-input-event', (event, input) => {
       const key = input.key.toLowerCase()
-
       if (
         input.key === 'F12' ||
         (input.control && input.shift && key === 'i') ||
@@ -64,6 +78,24 @@ win.webContents.openDevTools()
     win.webContents.on('devtools-opened', () => {
       win.webContents.closeDevTools()
     })
+  }
+
+  // ── Auto-updater ──────────────────────────────
+  if (autoUpdater) {
+    try {
+      autoUpdater.checkForUpdatesAndNotify()
+      autoUpdater.on('update-available', () => {
+        win.webContents.send('update-msg', 'downloading')
+      })
+      autoUpdater.on('update-downloaded', () => {
+        win.webContents.send('update-msg', 'ready')
+      })
+      autoUpdater.on('error', (err) => {
+        console.log('AutoUpdater error:', err)
+      })
+    } catch(e) {
+      console.log('AutoUpdater init error:', e)
+    }
   }
 }
 
@@ -97,7 +129,6 @@ function createActivationWindow(reason) {
   if (!isDev) {
     win.webContents.on('before-input-event', (event, input) => {
       const key = input.key.toLowerCase()
-
       if (
         input.key === 'F12' ||
         (input.control && input.shift && key === 'i') ||
@@ -149,6 +180,20 @@ ipcMain.handle('activate-license', async (_, licenseKey) => {
 
 ipcMain.handle('get-license-info', () => getLicenseInfo())
 ipcMain.handle('get-hardware-id', () => getHardwareId())
+ipcMain.handle('get-machine-id', () => getMachineId())
+
+// ── IPC: cerrar app ────────────────────────────
+ipcMain.handle('exit-app', () => { app.quit() })
+
+// ── IPC: reiniciar para instalar actualización ─
+ipcMain.on('restart-app', () => {
+  if (autoUpdater) {
+    try { autoUpdater.quitAndInstall() } catch(e) { app.relaunch(); app.exit(0) }
+  } else {
+    app.relaunch()
+    app.exit(0)
+  }
+})
 
 // ── Cerrar app ─────────────────────────────────
 app.on('window-all-closed', () => {
