@@ -98,9 +98,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .trow.main .amt{font-family:Courier New,monospace;color:var(--gn);font-size:1.15rem;}
 .sep{height:1px;background:var(--b1);}
 .plbl{font-size:.7rem;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;}
-.pbtns{display:flex;gap:5px;flex-wrap:wrap;}
-.pbtn{flex:1;min-width:0;padding:12px 6px;border-radius:var(--rs);border:1.5px solid var(--b1);background:var(--s2);color:#fff;cursor:pointer;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;transition:all .2s;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;line-height:1;white-space:nowrap;}
-.pbtn .pico{font-size:1.1rem;line-height:1;flex-shrink:0;}
+.pbtns{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.pbtn{padding:10px 6px;border-radius:var(--rs);border:1.5px solid var(--b1);background:var(--s2);color:#fff;cursor:pointer;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1;white-space:nowrap;width:100%;box-sizing:border-box;}
+.pbtn .pico{font-size:1rem;line-height:1;flex-shrink:0;}
 .pbtn.on{background:var(--ac);border-color:var(--ac);color:#fff;}
 .pbtn.hidden{display:none!important;}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;padding:10px;}
@@ -388,6 +388,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div class="hmi sal" id="hm-sal" onclick="closeHMenu();reqPin('sales')">📊 <span id="hm-sal-txt">Ventas del día</span></div>
   <div class="hmi conta" id="hm-conta" onclick="closeHMenu();reqPin('conta')">📒 <span id="hm-conta-txt">Contabilidad</span></div>
   <div class="hmi" style="color:var(--tx3)" onclick="closeHMenu();openDrawer()">🗃️ <span id="hm-drawer-txt">Abrir Registradora</span></div>
+  <div class="hmi" onclick="closeHMenu();openMsgModal()">📩 <span id="hm-msg-txt">Enviar mensaje</span></div>
   <div class="hmi exit" onclick="closeHMenu();exitApp()">🚪 <span id="hm-exit-txt">Salir del programa</span></div>
 </div>
 
@@ -440,7 +441,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
         </div>
         <input type="hidden" id="p-data">
         <div class="frow">
-          <button class="btn btn-p" onclick="saveProd()">💾 Guardar</button>
+          <button class="btn btn-p" id="prod-save-btn" onclick="saveProd()">💾 Guardar</button>
           <button class="btn btn-s" onclick="clearProd()">↺</button>
         </div>
         <div class="slbl" id="slbl-prod-list">Productos registrados</div>
@@ -461,7 +462,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
           </div>
         </div>
         <input type="hidden" id="cat-data">
-        <div class="frow"><button class="btn btn-p" onclick="saveCat()">💾 Guardar</button><button class="btn btn-s" onclick="clearCat()">↺</button></div>
+        <div class="frow"><button class="btn btn-p" id="cat-save-btn" onclick="saveCat()">💾 Guardar</button><button class="btn btn-s" onclick="clearCat()">↺</button></div>
         <div class="slbl">Categorías</div><div id="cat-list"></div>
       </div>
       <!-- USERS -->
@@ -488,7 +489,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <div class="tog"><span class="tog-label">🧾 Facturas</span><label class="tog-sw"><input type="checkbox" id="pm-fac" checked><span class="slider"></span></label></div>
           <div class="tog"><span class="tog-label">💸 Gastos</span><label class="tog-sw"><input type="checkbox" id="pm-gst" checked><span class="slider"></span></label></div>
         </div>
-        <div class="frow"><button class="btn btn-p" onclick="saveUser()">💾 Guardar</button><button class="btn btn-s" onclick="clearUser()">↺</button></div>
+        <div class="frow"><button class="btn btn-p" id="user-save-btn" onclick="saveUser()">💾 Guardar</button><button class="btn btn-s" onclick="clearUser()">↺</button></div>
         <div class="slbl">Usuarios</div><div id="user-list"></div>
       </div>
       <!-- CONFIG -->
@@ -502,7 +503,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="sep-line"></div>
         <div class="slbl">Fondo de Caja</div>
         <div class="fg"><label class="lbl">Monto ($)</label><input type="number" class="fi" id="cfg-fund" placeholder="50.00" step="0.01"></div>
-        <div class="frow"><button class="btn btn-p" onclick="saveFund()">💾 Guardar</button></div>
+        <div class="frow"><button class="btn btn-p" id="fund-save-btn" onclick="saveFund()">💾 Guardar</button></div>
         <div class="sep-line"></div>
         <div class="slbl">Métodos de Pago</div>
         <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:10px">
@@ -515,7 +516,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="slbl">Registradora</div>
         <div class="fg"><label class="lbl">Puerto COM</label><input type="text" class="fi" id="cfg-drawer-port" placeholder="COM3"></div>
         <div class="tog" style="margin-top:8px"><span class="tog-label">Abrir automáticamente al cobrar</span><label class="tog-sw"><input type="checkbox" id="cfg-drawer-auto" checked><span class="slider"></span></label></div>
-        <div class="frow"><button class="btn btn-s" onclick="openDrawer()">🗃️ Probar</button><button class="btn btn-p" onclick="saveCfgDrawer()">💾 Guardar</button></div>
+        <div class="frow"><button class="btn btn-s" onclick="openDrawer()">🗃️ Probar</button><button class="btn btn-p" id="cfg-drawer-save-btn" onclick="saveCfgDrawer()">💾 Guardar</button></div>
         <div class="sep-line"></div>
         <div class="slbl">Recibo</div>
         <div class="fg"><label class="lbl">Logo</label>
@@ -538,7 +539,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <div class="fg"><label class="lbl">Red social 2</label><input type="text" class="fi" id="cfg-s2"></div>
         </div>
         <div class="fg"><label class="lbl">URL QR</label><input type="text" class="fi" id="cfg-qr"></div>
-        <div class="frow"><button class="btn btn-p" onclick="saveCfg()">💾 Guardar Config</button></div>
+        <div class="frow"><button class="btn btn-p" id="cfg-save-btn" onclick="saveCfg()">💾 Guardar Config</button></div>
         <div id="cfg-msg" style="font-size:.8rem;color:var(--gn);margin-top:7px;display:none">✅ Guardado</div>
         <div class="sep-line"></div>
         <div class="slbl" id="cfg-lang-lbl">Idioma</div>
@@ -578,7 +579,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <div class="fg"><label class="lbl">Notas</label><input type="text" class="fi" id="cust-notes"></div>
         </div>
         <input type="hidden" id="cust-eid">
-        <div class="frow"><button class="btn btn-p" onclick="saveCust()">💾 Guardar</button><button class="btn btn-s" onclick="clearCust()">↺</button></div>
+        <div class="frow"><button class="btn btn-p" id="cust-save-btn" onclick="saveCust()">💾 Guardar</button><button class="btn btn-s" onclick="clearCust()">↺</button></div>
         <div class="slbl" id="slbl-customers">Clientes</div><div id="cust-list"></div>
       <!-- CREDITS -->
       <div id="t-credits" style="display:none">
@@ -926,6 +927,29 @@ select.fi option{background:var(--s2);color:var(--tx);}
     </div>
   </div>
 </div>
+<!-- MENSAJE AL DASHBOARD -->
+<div class="ov" id="ov-msg">
+  <div class="modal mnarrow">
+    <div class="mh"><h3 id="msg-modal-title">📩 Mensaje al Dashboard</h3><button class="mx" onclick="closeOv('ov-msg')">✕</button></div>
+    <div class="mb">
+      <div class="fg" style="margin-bottom:12px">
+        <textarea id="msg-text" class="fi" placeholder="Escribe tu mensaje..." rows="4" style="resize:vertical;min-height:90px;font-family:inherit;font-size:.9rem"></textarea>
+      </div>
+      <div class="fg" style="margin-bottom:14px">
+        <label class="lbl" id="msg-priority-lbl">Prioridad</label>
+        <select id="msg-priority" class="fi">
+          <option value="normal">Normal</option>
+          <option value="urgent">🔴 Urgente</option>
+        </select>
+      </div>
+      <div class="frow">
+        <button class="btn btn-s" style="flex:1" onclick="closeOv('ov-msg')">✕ Cancelar</button>
+        <button class="btn btn-p" style="flex:1" id="msg-send-btn" onclick="sendDashboardMessage()">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- PAGO PARCIAL CRÉDITO -->
 <div class="ov" id="ov-credit-pay">
   <div class="modal mnarrow">
@@ -1048,6 +1072,11 @@ const T = {
     // Cash close
     declaredCash:'Efectivo declarado',cashDiff:'Diferencia',closeAnyway:'¿Cerrar de todos modos?',
     forceClose:'Forzar cierre (Admin)',
+    // Placeholders
+    pNamePh:'Nombre del producto',saveConfig:'💾 Guardar Config',
+    // Dashboard message
+    sendMsg:'📩 Enviar mensaje',msgTitle:'Mensaje al Dashboard',msgPlaceholder:'Escribe tu mensaje...',
+    msgPriority:'Prioridad',msgNormal:'Normal',msgUrgent:'Urgente',msgSend:'Enviar',msgSent:'✅ Mensaje enviado',msgErr:'⚠ Error al enviar',msgNoConn:'⚠ Sin conexión',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -1118,6 +1147,11 @@ const T = {
     // Cash close
     declaredCash:'Declared cash',cashDiff:'Difference',closeAnyway:'Close anyway?',
     forceClose:'Force close (Admin)',
+    // Placeholders
+    pNamePh:'Product name',saveConfig:'💾 Save Config',
+    // Dashboard message
+    sendMsg:'📩 Send message',msgTitle:'Message to Dashboard',msgPlaceholder:'Type your message...',
+    msgPriority:'Priority',msgNormal:'Normal',msgUrgent:'Urgent',msgSend:'Send',msgSent:'✅ Message sent',msgErr:'⚠ Error sending',msgNoConn:'⚠ No connection',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -1291,7 +1325,24 @@ function applyLang(){
   const _lblcustedula=el('lbl-cust-cedula');if(_lblcustedula)_lblcustedula.innerHTML=t('cedula')+' <span style="color:var(--rd)">*</span>';
   const _lblcustphone=el('lbl-cust-phone');if(_lblcustphone)_lblcustphone.textContent=t('phoneLbl');
   const _tabcredits=el('tab-credits-txt');if(_tabcredits)_tabcredits.textContent=t('tabCredits');
-  updateCobrar(); renderCats(); renderProds();
+  // Admin save buttons
+  const _prodSave=el('prod-save-btn');if(_prodSave)_prodSave.innerHTML=t('save');
+  const _catSave=el('cat-save-btn');if(_catSave)_catSave.innerHTML=t('save');
+  const _userSave=el('user-save-btn');if(_userSave)_userSave.innerHTML=t('save');
+  const _fundSave=el('fund-save-btn');if(_fundSave)_fundSave.innerHTML=t('save');
+  const _cfgDrawerSave=el('cfg-drawer-save-btn');if(_cfgDrawerSave)_cfgDrawerSave.innerHTML=t('save');
+  const _cfgSave=el('cfg-save-btn');if(_cfgSave)_cfgSave.innerHTML=t('saveConfig');
+  const _custSave=el('cust-save-btn');if(_custSave)_custSave.innerHTML=t('save');
+  // Placeholders
+  const _pNameInput=el('p-name');if(_pNameInput)_pNameInput.placeholder=t('pNamePh');
+  // Hamburger message item
+  const _hmMsgTxt=el('hm-msg-txt');if(_hmMsgTxt)_hmMsgTxt.textContent=t('sendMsg');
+  // Message modal
+  const _msgModalTitle=el('msg-modal-title');if(_msgModalTitle)_msgModalTitle.textContent=t('msgTitle');
+  const _msgTextArea=el('msg-text');if(_msgTextArea)_msgTextArea.placeholder=t('msgPlaceholder');
+  const _msgPriLbl=el('msg-priority-lbl');if(_msgPriLbl)_msgPriLbl.textContent=t('msgPriority');
+  const _msgSendBtn=el('msg-send-btn');if(_msgSendBtn)_msgSendBtn.textContent=t('msgSend');
+  updateCobrar(); renderCats(); renderProds(); updatePCat();
 }
 function switchLang(){
   setLang(lang==='es'?'en':'es');
@@ -1352,6 +1403,30 @@ function exitApp(){
   confirm2(lang==='en'?'Exit program?':'¿Salir del programa?',function(){
     try{ipcRenderer.invoke('exit-app');}catch(e){window.close();}
   });
+}
+function openMsgModal(){
+  const ta=el('msg-text');if(ta)ta.value='';
+  const sel=el('msg-priority');if(sel)sel.value='normal';
+  openOv('ov-msg');
+  setTimeout(function(){if(ta)ta.focus();},120);
+}
+async function sendDashboardMessage(){
+  const txt=(el('msg-text').value||'').trim();
+  if(!txt){toast('⚠ '+(lang==='en'?'Write a message':'Escribe un mensaje'));return;}
+  const pri=(el('msg-priority').value)||'normal';
+  const lic=db._lic||'';
+  if(!lic){toast('⚠ '+(lang==='en'?'No active license':'Sin licencia activa'));return;}
+  const btn=el('msg-send-btn');if(btn)btn.disabled=true;
+  try{
+    const r=await fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=send-message',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({license_key:lic,message:{text:txt,from_user:curUser?curUser.name:'POS',priority:pri}})
+    });
+    const j=await r.json();
+    if(j.success){toast(t('msgSent'));closeOv('ov-msg');}
+    else toast(t('msgErr')+': '+(j.error||''));
+  }catch(e){toast(t('msgNoConn'));}
+  finally{if(btn)btn.disabled=false;}
 }
 
 // DATA
@@ -1439,8 +1514,8 @@ async function saveDB(){
   if(found){
     curUser=found;
     el('login-screen').style.display='none';
-    setEl('usr-lbl','👤 '+found.name);
-    const tbu=el('tb-user');if(tbu){const sn=found.name.replace(/</g,'&lt;');const ini=found.name.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('');tbu.innerHTML='<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#fff;color:#1e3a8a;font-size:10px;font-weight:800;flex-shrink:0;vertical-align:middle">'+ini+'</span> '+sn;tbu.style.display='';};
+    const _usrLblEl=el('usr-lbl');if(_usrLblEl){const _uln=found.name.replace(/</g,'&lt;');_usrLblEl.innerHTML='<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#1e3a8a;color:#fff;font-size:9px;font-weight:800;vertical-align:middle">'+found.name.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('')+'</span> '+_uln;}
+    const tbu=el('tb-user');if(tbu){const sn=found.name.replace(/</g,'&lt;');const ini=found.name.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('');tbu.innerHTML='<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#1e3a8a;border:1.5px solid rgba(255,255,255,.4);font-size:10px;font-weight:800;flex-shrink:0;vertical-align:middle;color:#fff">'+ini+'</span> '+sn;tbu.style.display='';};
     applyUserPerms();
 
     if(db.fundAmount>0){
@@ -1594,7 +1669,7 @@ function renderCatList(){
 }
 function renderCats(){renderCategories();}
 function filterCat(id,e2){curCat=id;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));if(e2)e2.classList.add('on');renderProds();}
-function updatePCat(){el('p-cat').innerHTML='<option value="">— Sin categoría —</option>'+db.categories.map(c=>'<option value="'+c.id+'">'+c.name+'</option>').join('');}
+function updatePCat(){el('p-cat').innerHTML='<option value="">— '+t('noCategory')+' —</option>'+db.categories.map(c=>'<option value="'+c.id+'">'+c.name+'</option>').join('');}
 
 // PRODUCTS
 function calcMargin(){
