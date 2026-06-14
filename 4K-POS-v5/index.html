@@ -648,34 +648,25 @@ select.fi option{background:var(--s2);color:var(--tx);}
 
 <!-- LOGOUT -->
 <div class="ov" id="ov-logout">
-  <div class="modal mnarrow">
+  <div class="modal mnarrow" style="display:flex;flex-direction:column;overflow-y:hidden">
     <div class="mh"><h3 id="lo-title">🚪 Cerrar Turno</h3><button class="mx" onclick="closeOv('ov-logout')">✕</button></div>
-    <div class="mb">
-      <div class="sg">
+    <div class="mb" style="flex:1;overflow-y:auto;padding-bottom:8px">
+      <div class="sg" style="margin-bottom:12px">
         <div class="sc gn"><div class="sclbl" id="lo-sales-lbl">Ventas</div><div class="scval" id="lo-sales">$0.00</div></div>
         <div class="sc ac"><div class="sclbl" id="lo-orders-lbl">Órdenes</div><div class="scval" id="lo-orders">0</div></div>
         <div class="sc am"><div class="sclbl" id="lo-fund-lbl">Fondo</div><div class="scval" id="lo-fund">$0.00</div></div>
       </div>
-      <div style="background:var(--s2);border-radius:var(--rs);padding:11px;margin-bottom:13px;font-size:.83rem">
-        <div style="font-weight:700;margin-bottom:7px;color:var(--tx)" id="lo-reconcile-lbl">Cuadre de caja</div>
-        <div style="display:flex;justify-content:space-between;color:var(--tx2);margin-bottom:3px"><span>💵 <span id="lo-v-lbl">Ventas efectivo</span></span><span style="font-family:Courier New,monospace;color:var(--gn)" id="lo-v">$0.00</span></div>
-        <div style="display:flex;justify-content:space-between;color:var(--tx2);margin-bottom:3px" id="lo-card-row"><span>💳 <span id="lo-card-lbl">Tarjeta</span></span><span style="font-family:Courier New,monospace;color:var(--bl)" id="lo-card">$0.00</span></div>
-        <div style="display:flex;justify-content:space-between;color:var(--tx2);margin-bottom:3px" id="lo-cred-row"><span>💰 <span id="lo-cred-lbl">Crédito / Cta.</span></span><span style="font-family:Courier New,monospace;color:var(--am)" id="lo-cred">$0.00</span></div>
-        <div style="display:flex;justify-content:space-between;color:var(--tx3);margin-bottom:4px;border-top:1px solid var(--b1);padding-top:5px;margin-top:5px"><span id="lo-day-lbl">Total del día</span><span style="font-family:Courier New,monospace" id="lo-day">$0.00</span></div>
-        <div style="display:flex;justify-content:space-between;color:var(--tx2);margin-bottom:4px"><span id="lo-f-lbl">Fondo de caja</span><span style="font-family:Courier New,monospace;color:var(--am)" id="lo-f">$0.00</span></div>
-        <div style="display:flex;justify-content:space-between;font-weight:700;color:var(--tx);border-top:1px solid var(--b1);padding-top:6px;margin-top:5px"><span id="lo-t-lbl">💵 Efectivo esperado</span><span style="font-family:Courier New,monospace;color:var(--gn)" id="lo-t">$0.00</span></div>
-      </div>
-      <div id="lo-report" style="font-size:.8rem;margin-bottom:13px"></div>
-      <div style="background:var(--s1);border-radius:var(--rs);padding:11px;margin-bottom:10px;border:1.5px solid var(--b2)">
+      <div id="lo-report" style="font-size:.8rem;margin-bottom:12px"></div>
+      <div style="background:var(--s1);border-radius:var(--rs);padding:11px;border:1.5px solid var(--b2)">
         <div style="font-weight:700;font-size:.85rem;margin-bottom:8px;color:var(--tx)" id="lo-cash-close-lbl">Efectivo en caja</div>
         <div class="fg"><label class="lbl" id="lo-declared-lbl">Efectivo declarado</label><input type="number" class="fi" id="lo-declared-cash" placeholder="0.00" step="0.01" oninput="calcCashDiff()"></div>
         <div style="margin-top:8px;font-size:.85rem" id="lo-cash-diff-box"></div>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:8px">
-        <button class="btn btn-s" style="flex:1" onclick="printShiftReport()" id="lo-print-btn">🖨️ Imprimir Reporte</button>
-      </div>
-      <button class="btn btn-d" style="width:100%;padding:12px" onclick="doLogout()" id="lo-confirm-btn" disabled>🚪 Confirmar cierre de turno</button>
-      <button class="btn btn-d" style="width:100%;padding:10px;margin-top:6px;display:none;background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.3);color:var(--am)" onclick="forceAdminLogout()" id="lo-force-btn">⚠️ Forzar cierre (solo admin)</button>
+    </div>
+    <div style="padding:10px 16px 14px;border-top:1.5px solid var(--b1);background:var(--s1);display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+      <button class="btn btn-s" onclick="printShiftReport()" id="lo-print-btn">🖨️ Imprimir Reporte</button>
+      <button class="btn btn-d" style="padding:12px" onclick="doLogout()" id="lo-confirm-btn" disabled>🚪 Confirmar cierre de turno</button>
+      <button class="btn btn-d" style="display:none;background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.3);color:var(--am)" onclick="forceAdminLogout()" id="lo-force-btn">⚠️ Forzar cierre (solo admin)</button>
     </div>
   </div>
 </div>
@@ -1232,13 +1223,6 @@ function applyLang(){
   const _loSalesLbl=el('lo-sales-lbl');if(_loSalesLbl)_loSalesLbl.textContent=t('salesLbl');
   const _loOrdersLbl=el('lo-orders-lbl');if(_loOrdersLbl)_loOrdersLbl.textContent=t('ordersLbl');
   const _loFundLbl=el('lo-fund-lbl');if(_loFundLbl)_loFundLbl.textContent=t('fundLbl');
-  const _loReconcile=el('lo-reconcile-lbl');if(_loReconcile)_loReconcile.textContent=t('cashReconciliation');
-  const _loVLbl=el('lo-v-lbl');if(_loVLbl)_loVLbl.textContent=t('shiftSalesTxt');
-  const _loCardLbl=el('lo-card-lbl');if(_loCardLbl)_loCardLbl.textContent=t('cashCardTxt');
-  const _loCredLbl=el('lo-cred-lbl');if(_loCredLbl)_loCredLbl.textContent=t('cashCredTxt');
-  const _loDayLbl=el('lo-day-lbl');if(_loDayLbl)_loDayLbl.textContent=t('cashDayTxt');
-  const _loFLbl=el('lo-f-lbl');if(_loFLbl)_loFLbl.textContent=t('cashFundTxt');
-  const _loTLbl=el('lo-t-lbl');if(_loTLbl)_loTLbl.textContent=t('totalBox');
   const _loPrint=el('lo-print-btn');if(_loPrint)_loPrint.textContent=t('printReport');
   const _loConfirm=el('lo-confirm-btn');if(_loConfirm)_loConfirm.textContent=t('closeShiftConfirm');
   // Cart
@@ -1447,18 +1431,17 @@ async function sendDashboardMessage(){
   const lic=db._lic||'';
   if(!lic){toast('⚠ '+(lang==='en'?'No active license':'Sin licencia activa'));return;}
   const btn=el('msg-send-btn');if(btn)btn.disabled=true;
-  console.log('SUPA_URL:',SUPA_URL,'SUPA_KEY:',SUPA_KEY?'exists':'MISSING');
-  if(!SUPA_KEY){toast('⚠ '+(lang==='en'?'SUPA_KEY not configured':'SUPA_KEY no configurada — ver index.html'));console.warn('sendDashboardMessage: SUPA_KEY is empty. Get it from Supabase → Settings → API → anon public');if(btn)btn.disabled=false;return;}
   try{
-    const res=await fetch(SUPA_URL+'/rest/v1/messages',{
+    const res=await fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=send-message',{
       method:'POST',
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({text:txt,from_user:curUser?curUser.name:'Admin',priority:pri,license_key:db.licenseKey||db._lic||lic})
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({license_key:lic,message:{text:txt,from_user:curUser?curUser.name:'POS',priority:pri}})
     });
-    console.log('Response:',res.status,await res.clone().text().catch(()=>''));
-    if(res.ok||res.status===201){toast(t('msgSent'));closeOv('ov-msg');}
-    else{const body=await res.text().catch(()=>'');console.error('sendDashboardMessage error:',res.status,body);toast(t('msgErr')+': HTTP '+res.status);}
-  }catch(e){console.error('sendDashboardMessage network error:',e);toast(t('msgNoConn'));}
+    const j=await res.json().catch(()=>({}));
+    console.log('sendMessage:',res.status,j);
+    if(j.success){toast(t('msgSent'));closeOv('ov-msg');}
+    else toast(t('msgErr')+': '+(j.error||'Error en servidor'));
+  }catch(e){console.error('sendMessage error:',e);toast(t('msgNoConn'));}
   finally{if(btn)btn.disabled=false;}
 }
 
@@ -2736,16 +2719,6 @@ function openLogout(){
   const byCnt2={cash:0,card:0,transf:0,credit:0,split:0,openAccount:0};
   active.forEach(s=>{const m=s.payMethod||'cash';byPay2[m]=(byPay2[m]||0)+s.total;byCnt2[m]=(byCnt2[m]||0)+1;});
   const cashSales=byPay2.cash||0;
-  const cardSales=(byPay2.card||0)+(byPay2.transf||0);
-  const credSales=byPay2.credit||0;
-  setEl('lo-v',dolr(cashSales));
-  setEl('lo-card',dolr(cardSales));
-  setEl('lo-cred',dolr(credSales));
-  setEl('lo-day',dolr(inc));
-  setEl('lo-f',dolr(db.fundAmount));
-  setEl('lo-t',dolr(cashSales+db.fundAmount));
-  const loCardRow=el('lo-card-row');if(loCardRow)loCardRow.style.display=cardSales>0?'':'none';
-  const loCredRow=el('lo-cred-row');if(loCredRow)loCredRow.style.display=credSales>0?'':'none';
   const allToday=db.sales.filter(s=>new Date(s.date).toDateString()===today);
   const can=allToday.filter(s=>s.status==='cancelled');
   const ret=allToday.filter(s=>s.status==='returned');
@@ -2772,6 +2745,7 @@ function openLogout(){
   const cashFld=el('lo-declared-cash');if(cashFld)cashFld.value='';
   const cashDiffBox=el('lo-cash-diff-box');if(cashDiffBox)cashDiffBox.innerHTML='';
   const confirmBtn=el('lo-confirm-btn');if(confirmBtn)confirmBtn.disabled=true;
+  const forceBtn=el('lo-force-btn');if(forceBtn)forceBtn.style.display='none';
   openOv('ov-logout');
 }
 function printShiftReport(){
