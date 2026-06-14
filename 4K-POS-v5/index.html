@@ -383,8 +383,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <!-- HAMBURGER MENU -->
 <div class="hmenu" id="hmenu">
   <div class="hmi adm" id="hm-adm" onclick="closeHMenu();reqPin('admin')">🔐 <span id="hm-adm-txt">Administración</span></div>
-  <div class="hmi ret" id="hm-ret" onclick="closeHMenu();reqPin('returns')">↩️ <span id="hm-ret-txt">Devoluciones</span></div>
-  <div class="hmi can" id="hm-can" onclick="closeHMenu();reqPin('cancel')">❌ <span id="hm-can-txt">Cancelar Venta</span></div>
+  <div class="hmi ret" id="hm-ret" onclick="closeHMenu();reqPin('returns')">🔄 <span id="hm-ret-txt">Devoluciones</span></div>
   <div class="hmi sal" id="hm-sal" onclick="closeHMenu();reqPin('sales')">📊 <span id="hm-sal-txt">Ventas del día</span></div>
   <div class="hmi conta" id="hm-conta" onclick="closeHMenu();reqPin('conta')">📒 <span id="hm-conta-txt">Contabilidad</span></div>
   <div class="hmi" style="color:var(--tx3)" onclick="closeHMenu();openDrawer()">🗃️ <span id="hm-drawer-txt">Abrir Registradora</span></div>
@@ -510,7 +509,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <div class="tog"><span class="tog-label">💵 Efectivo</span><label class="tog-sw"><input type="checkbox" id="cfg-cash" checked disabled><span class="slider"></span></label></div>
           <div class="tog"><span class="tog-label">💳 Tarjeta</span><label class="tog-sw"><input type="checkbox" id="cfg-card" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
           <div class="tog"><span class="tog-label">📋 Cuentas Abiertas</span><label class="tog-sw"><input type="checkbox" id="cfg-oa" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
-          <div class="tog"><span class="tog-label">💳 Crédito</span><label class="tog-sw"><input type="checkbox" id="cfg-credit" onchange="savePayMethods()"><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label">🏷️ Crédito</span><label class="tog-sw"><input type="checkbox" id="cfg-credit" onchange="savePayMethods()"><span class="slider"></span></label></div>
         </div>
         <div class="sep-line"></div>
         <div class="slbl">Registradora</div>
@@ -518,6 +517,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="tog" style="margin-top:8px"><span class="tog-label">Abrir automáticamente al cobrar</span><label class="tog-sw"><input type="checkbox" id="cfg-drawer-auto" checked><span class="slider"></span></label></div>
         <div class="frow"><button class="btn btn-s" onclick="openDrawer()">🗃️ Probar</button><button class="btn btn-p" id="cfg-drawer-save-btn" onclick="saveCfgDrawer()">💾 Guardar</button></div>
         <div class="sep-line"></div>
+        <div class="slbl" id="cfg-time-lbl">Formato de hora</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <button id="cfg-time-12h" class="btn btn-p" onclick="setTimeFormat('12h')">🕐 12h (AM/PM)</button>
+          <button id="cfg-time-24h" class="btn btn-s" onclick="setTimeFormat('24h')">🕐 24h</button>
+        </div>
         <div class="slbl">Recibo</div>
         <div class="fg"><label class="lbl">Logo</label>
           <div class="img-upload-row">
@@ -1159,11 +1163,11 @@ function t(k){ return (T[lang]&&T[lang][k]) || T.es[k] || k; }
 
 // STATE
 let dark=true;
-let db={products:[],categories:[],sales:[],orderNum:1,adminCode:'1234',
+let db={products:[],categories:[],sales:[],returns:[],orderNum:1,adminCode:'1234',
   users:[{id:'1',name:'Admin',user:'admin',pass:'1234',role:'admin',perms:{adm:true,ret:true,can:true,sal:true,conta:true,fac:true,gst:true}}],
   fundAmount:0,customers:[],credits:[],payMethods:{cash:true,card:true,transf:true,openAccounts:true,credit:false},
   drawerPort:'COM3',drawerAuto:true,
-  cfg:{bizName:'4K Negocio',bizSub:'',thanks:'¡Gracias por tu compra! 💕',phone:'',s1:'',s2:'',qr:'',logo:''},
+  cfg:{bizName:'4K Negocio',bizSub:'',thanks:'¡Gracias por tu compra! 💕',phone:'',s1:'',s2:'',qr:'',logo:'',timeFormat:'12h'},
   facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true};
 let cart=[],payMethod='cash',cashIn='',discount={type:'pct',value:0,active:false};
 let currentView='categories',currentCategory=null;
@@ -1183,7 +1187,12 @@ function closeOv(id){el(id).classList.remove('open');}
 function confirm2(msg,cb){confCb=cb;el('conf-msg').textContent=msg;el('confov').classList.add('open');}
 function confYes(){el('confov').classList.remove('open');if(confCb)confCb();confCb=null;}
 function confNo(){el('confov').classList.remove('open');confCb=null;}
-function pico(m){return m==='cash'?'💵':m==='card'?'💳':m==='transf'?'📲':m==='split'?'⚡':m==='credit'?'💳':'📖';}
+function pico(m){return m==='cash'?'💵':m==='card'?'💳':m==='transf'?'📲':m==='split'?'⚡':m==='credit'?'🏷️':'📖';}
+function fmtTime(dateStr){
+  const d=dateStr?new Date(dateStr):new Date();
+  const h12=(db.cfg&&db.cfg.timeFormat)!=='24h';
+  return d.toLocaleTimeString(lang==='en'?'en-US':'es',{hour:'2-digit',minute:'2-digit',hour12:h12});
+}
 
 // LANG
 function setLang(l){
@@ -1253,7 +1262,6 @@ function applyLang(){
   // Hamburger menu
   const _hmadm=el('hm-adm-txt');if(_hmadm)_hmadm.textContent=t('adm');
   const _hmret=el('hm-ret-txt');if(_hmret)_hmret.textContent=t('ret');
-  const _hmcan=el('hm-can-txt');if(_hmcan)_hmcan.textContent=t('can');
   const _hmsal=el('hm-sal-txt');if(_hmsal)_hmsal.textContent=t('sal');
   const _hmconta=el('hm-conta-txt');if(_hmconta)_hmconta.textContent=t('conta');
   const _hmdrawer=el('hm-drawer-txt');if(_hmdrawer)_hmdrawer.textContent=t('drawer');
@@ -1351,7 +1359,7 @@ function switchLang(){
 // CLOCK
 function updateClock(){
   const n=new Date();
-  el('clk').textContent=n.toLocaleTimeString(lang==='en'?'en-US':'es');
+  el('clk').textContent=fmtTime();
   const daysEs=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const daysEn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const days=lang==='en'?daysEn:daysEs;
@@ -1449,6 +1457,7 @@ async function loadDB(){
       if(d.drawerPort)db.drawerPort=d.drawerPort;
       if(d.drawerAuto!==undefined)db.drawerAuto=d.drawerAuto;
       if(d.openAccounts)db.openAccounts=d.openAccounts;
+      if(d.returns)db.returns=d.returns;
     }
  }catch(e){console.error(e);}
 
@@ -1476,6 +1485,7 @@ async function loadDB(){
         sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,payLabel:_normPayLabel(s),cashier:s.cashier||'',items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),
         products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat,minStock:p.minStock||5};}),
         categories:(db.categories||[]).map(function(c){return {id:c.id,name:c.name};}),
+        returns:(db.returns||[]).map(function(r){return {id:r.id,originalSaleId:r.originalSaleId,rnum:r.rnum,total:r.total,user:r.user,date:r.date,payMethod:r.payMethod};}),
         cfg:{bizName:(db.cfg||{}).bizName||''}
       };
       fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({license_key:db._lic,data:slim})}).catch(function(){});
@@ -1545,7 +1555,6 @@ function applyUserPerms(){
   const isAdm=curUser.role==='admin';
   el('hm-adm').style.display=(isAdm||pm.adm)?'flex':'none';
   el('hm-ret').style.display=(isAdm||pm.ret)?'flex':'none';
-  el('hm-can').style.display=(isAdm||pm.can)?'flex':'none';
   el('hm-sal').style.display=(isAdm||pm.sal)?'flex':'none';
   el('hm-conta').style.display=(isAdm||pm.conta)?'flex':'none';
 }
@@ -2471,7 +2480,7 @@ function renderOAList(){
   if(!list.length){box.innerHTML='<p style="color:var(--tx3);text-align:center;padding:16px">No hay cuentas abiertas</p>';return;}
   box.innerHTML=list.map(oa=>{
     const d=new Date(oa.date);
-    const time=d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+    const time=fmtTime(oa.date);
     const items=oa.items.map(i=>i.name+' ×'+i.qty).join(', ');
     return '<div style="background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--rs);padding:12px;margin-bottom:10px">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
@@ -2527,7 +2536,7 @@ function deleteOA(id){
   if(c.qr)contact+='🔗 '+c.qr;
   const rc=el('r-contact');rc.textContent=contact.trim();rc.style.display=contact.trim()?'block':'none';
   const now=new Date(sale.date);
-  setEl('r-date',now.toLocaleDateString()+' '+now.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}));
+  setEl('r-date',now.toLocaleDateString()+' '+fmtTime());
   setEl('r-num','#'+sale.rnum);
   el('r-lines').innerHTML=sale.items.map(i=>'<div class="rline"><span class="rl">'+i.name+' ×'+i.qty+'</span><span class="ra">'+dolr(i.price*i.qty)+'</span></div>').join('');
   setEl('r-sub-amt',dolr(sale.total));setEl('r-total',dolr(sale.total));
@@ -2555,33 +2564,83 @@ function newOrder(){closeOv('ov-rcpt');cart=[];cashIn='';discount={type:'pct',va
 
 // ACTIONS
 function renderActions(mode){
-  setEl('act-title',mode==='returns'?'🔄 '+t('returns'):'❌ '+t('cancelSale'));
   const today=new Date().toDateString();
   const ts=db.sales.filter(s=>new Date(s.date).toDateString()===today);
   const body=el('act-body');
+  if(mode==='cancel'){
+    setEl('act-title','❌ '+t('cancelSale'));
+    if(!ts.length){body.innerHTML='<p style="color:var(--tx3)">'+t('noSalesToday')+'</p>';return;}
+    body.innerHTML=ts.slice().reverse().map(s=>{
+      const active=s.status==='active';
+      const stxt=s.status==='returned'?'🔄':s.status==='cancelled'?'❌':'';
+      const timeStr=fmtTime(s.date);
+      const btn='<button style="width:100%;padding:7px;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;background:'+(active?'var(--rdb)':'var(--s3)')+';border:1.5px solid '+(active?'rgba(248,113,113,.3)':'var(--b1)')+';color:'+(active?'var(--rd)':'var(--tx3)')+'" '+(active?'onclick="doCancel(\''+s.id+'\')"':'disabled')+'>✕ '+(active?t('cancelSale')+' '+dolr(s.total):t('alreadyCancelled'))+'</button>';
+      return '<div class="srow'+(s.status==='cancelled'?' cancelled':'')+'"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-weight:700;font-size:.83rem;color:var(--ac)">Orden #'+(s.rnum||s.id)+' '+stxt+'</span><span style="font-size:.72rem;color:var(--tx3)">'+timeStr+' '+pico(s.payMethod)+'</span></div><div style="font-size:.77rem;color:var(--tx2);margin-bottom:6px">'+s.items.map(i=>i.name+' ×'+i.qty).join(', ')+(s.cashier?' · '+s.cashier:'')+'</div>'+btn+'</div>';
+    }).join('');
+    return;
+  }
+  // RETURNS mode
+  setEl('act-title','🔄 '+t('returns'));
   if(!ts.length){body.innerHTML='<p style="color:var(--tx3)">'+t('noSalesToday')+'</p>';return;}
   body.innerHTML=ts.slice().reverse().map(s=>{
+    const uid='rd-'+s.id;
     const active=s.status==='active';
-    const stxt=s.status==='returned'?'🔄':s.status==='cancelled'?'❌':'';
-    const timeStr=new Date(s.date).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
-    const payIco=pico(s.payMethod);
-    const btnHtml=mode==='returns'
-      ?('<button style="width:100%;padding:7px;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;background:'+(active?'var(--amb)':'var(--s3)')+';border:none;color:'+(active?'#000':'var(--tx3)')+'" '+(active?'onclick="doReturn('+s.id+')"':'disabled')+'>↩ '+(active?'Devolver '+dolr(s.total):'Ya devuelto')+'</button>')
-      :('<button style="width:100%;padding:7px;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;background:'+(active?'var(--rdb)':'var(--s3)')+';border:1.5px solid '+(active?'rgba(248,113,113,.3)':'var(--b1)')+';color:'+(active?'var(--rd)':'var(--tx3)')+'" '+(active?'onclick="doCancel('+s.id+')"':'disabled')+'>✕ '+(active?t('cancelSale')+' '+dolr(s.total):t('alreadyCancelled'))+'</button>');
-    const rowCls='srow'+(s.status==='cancelled'?' cancelled':'');
-    return '<div class="'+rowCls+'"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-weight:700;font-size:.83rem;color:var(--ac)">Orden #'+(s.rnum||s.id)+' '+stxt+'</span><span style="font-size:.72rem;color:var(--tx3)">'+timeStr+' '+payIco+'</span></div><div style="font-size:.77rem;color:var(--tx2);margin-bottom:6px">'+s.items.map(i=>i.name+' ×'+i.qty).join(', ')+(s.cashier?' · '+s.cashier:'')+'</div>'+btnHtml+'</div>';
+    const returned=s.status==='returned';
+    const timeStr=fmtTime(s.date);
+    const badge=returned
+      ?'<span style="font-size:.68rem;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);border-radius:4px;padding:1px 5px;color:var(--am)">🔄 Devuelta</span>'
+      :s.status==='cancelled'?'<span style="font-size:.68rem;background:var(--rdb);border:1px solid rgba(248,113,113,.2);border-radius:4px;padding:1px 5px;color:var(--rd)">❌ Cancelada</span>':'';
+    const delBtn=returned
+      ?'<button style="background:var(--rdb);border:1.5px solid rgba(248,113,113,.25);border-radius:6px;padding:3px 7px;font-size:.72rem;color:var(--rd);cursor:pointer;line-height:1" onclick="delReturn(\''+s.id+'\');event.stopPropagation()">🗑</button>'
+      :'';
+    const itemRows=s.items.map(i=>'<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--b1);font-size:.78rem"><span>'+i.name+' ×'+i.qty+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr((i.price||0)*i.qty)+'</span></div>').join('');
+    const actionBtn=active
+      ?'<button style="width:100%;padding:8px;border-radius:8px;font-weight:700;font-size:.83rem;cursor:pointer;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.4);color:#f59e0b;margin-top:8px" onclick="doReturn(\''+s.id+'\');event.stopPropagation()">↩ Devolver '+dolr(s.total)+'</button>'
+      :returned?'<button style="width:100%;padding:7px;border-radius:8px;font-weight:700;font-size:.78rem;cursor:pointer;background:var(--rdb);border:1.5px solid rgba(248,113,113,.3);color:var(--rd);margin-top:8px" onclick="delReturn(\''+s.id+'\');event.stopPropagation()">🗑 Eliminar devolución</button>':'';
+    const detail='<div id="'+uid+'" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--b1)">'+itemRows+'<div style="display:flex;justify-content:space-between;font-size:.78rem;margin-top:6px;color:var(--tx3)"><span>'+pico(s.payMethod)+' '+(s.payLabel||s.payMethod)+'</span>'+(s.cashier?'<span>👤 '+s.cashier+'</span>':'')+'</div>'+actionBtn+'</div>';
+    const nameColor=active?'var(--ac)':returned?'var(--am)':'var(--rd)';
+    return '<div class="srow" style="cursor:pointer" onclick="toggleRetDetail(\''+uid+'\',this)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+      +'<div style="flex:1"><span style="font-weight:700;font-size:.83rem;color:'+nameColor+'">Orden #'+(s.rnum||s.id)+'</span> '+badge+'</div>'
+      +'<div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><span style="font-size:.72rem;color:var(--tx3)">'+timeStr+' '+pico(s.payMethod)+'</span>'+delBtn+'</div>'
+      +'</div>'
+      +'<div style="font-size:.77rem;color:var(--tx2);margin:4px 0">'+s.items.map(i=>i.name+' ×'+i.qty).join(', ')+(s.cashier?' · '+s.cashier:'')+'</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center">'
+      +'<span style="font-family:monospace;font-weight:700;font-size:.83rem;color:var(--tx2)">'+dolr(s.total)+'</span>'
+      +'<span style="font-size:.72rem;color:var(--tx3)" id="'+uid+'-arr">▼</span>'
+      +'</div>'
+      +detail
+      +'</div>';
   }).join('');
 }
+function toggleRetDetail(uid,card){
+  const det=el(uid);const arr=el(uid+'-arr');
+  if(!det)return;
+  const open=det.style.display==='none';
+  det.style.display=open?'block':'none';
+  if(arr)arr.textContent=open?'▲':'▼';
+}
 function doReturn(id){
-  const sale=db.sales.find(s=>s.id===id);if(!sale||sale.status!=='active')return;
+  const sale=db.sales.find(s=>s.id==id);if(!sale||sale.status!=='active')return;
   confirm2('¿Devolver Orden #'+(sale.rnum||id)+' ('+dolr(sale.total)+')?',()=>{
     sale.status='returned';sale.returnDate=new Date().toISOString();
     sale.items.forEach(item=>{const p=db.products.find(x=>x.id===item.id);if(p)p.stock+=item.qty;});
+    if(!db.returns)db.returns=[];
+    db.returns.push({id:Date.now().toString(),originalSaleId:sale.id,rnum:sale.rnum,items:sale.items.map(i=>Object.assign({},i)),total:sale.total,user:curUser?curUser.name:'',date:sale.returnDate,payMethod:sale.payMethod,payLabel:sale.payLabel});
     saveDB();renderActions('returns');renderProds();toast('✅ Devolución procesada');
   });
 }
+function delReturn(id){
+  const sale=db.sales.find(s=>s.id==id);if(!sale||sale.status!=='returned')return;
+  confirm2('¿Eliminar devolución #'+(sale.rnum||id)+'? El stock se ajustará.',()=>{
+    sale.status='active';delete sale.returnDate;
+    sale.items.forEach(item=>{const p=db.products.find(x=>x.id===item.id);if(p)p.stock=Math.max(0,(p.stock||0)-item.qty);});
+    if(db.returns)db.returns=db.returns.filter(r=>r.originalSaleId!=id);
+    saveDB();renderActions('returns');renderProds();toast('↩ Devolución eliminada');
+  });
+}
 function doCancel(id){
-  const sale=db.sales.find(s=>s.id===id);if(!sale||sale.status!=='active')return;
+  const sale=db.sales.find(s=>s.id==id);if(!sale||sale.status!=='active')return;
   confirm2('¿CANCELAR Orden #'+(sale.rnum||id)+' ('+dolr(sale.total)+')?',()=>{
     sale.status='cancelled';sale.cancelDate=new Date().toISOString();
     sale.items.forEach(item=>{const p=db.products.find(x=>x.id===item.id);if(p)p.stock+=item.qty;});
@@ -2600,7 +2659,7 @@ function renderSales(){
   const rows=allToday.slice().reverse().map(s=>{
     const color=s.status==='active'?'var(--gn)':s.status==='cancelled'?'var(--rd)':'var(--am)';
     const deco=s.status!=='active'?'text-decoration:line-through;':'';
-    const timeStr=new Date(s.date).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+    const timeStr=fmtTime(s.date);
     const stxt=s.status!=='active'?(' <span style="font-size:.7rem;color:var(--tx3)">('+s.status+')</span>'):'';
     const xmark=s.status==='cancelled'?'❌ ':s.status==='returned'?'🔄 ':'';
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--b1);font-size:.82rem"><div><div style="font-weight:600">'+xmark+'Orden #'+(s.rnum||s.id)+stxt+'</div><div style="font-size:.72rem;color:var(--tx3)">'+timeStr+' '+pico(s.payMethod)+(s.cashier?' · '+s.cashier:'')+'</div></div><div style="font-family:Courier New,monospace;font-weight:700;color:'+color+';'+deco+'">'+dolr(s.total)+'</div></div>';
@@ -2646,8 +2705,8 @@ function openLogout(){
   if(byPay2.card)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">💳 Tarjeta</span><span style="font-family:monospace;color:var(--bl)">'+dolr(byPay2.card)+'</span></div>';
   if(byPay2.transf)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">📲 Transferencia</span><span style="font-family:monospace;color:var(--ac)">'+dolr(byPay2.transf)+'</span></div>';
   if(byPay2.credit)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">💳 '+t('credit')+'</span><span style="font-family:monospace;color:var(--am)">'+dolr(byPay2.credit)+'</span></div>';
+  if(ret.length){const retTotal=ret.reduce((s,x)=>s+x.total,0);report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px;padding:4px 0;border-top:1px solid var(--b1)"><span style="color:var(--am)">🔄 Devoluciones ('+ret.length+')</span><span style="font-family:monospace;color:var(--am)">-'+dolr(retTotal)+'</span></div>';}
   if(can.length)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--rd)">❌ Cancelaciones: '+can.length+'</span><span style="font-family:monospace;color:var(--rd)">'+dolr(can.reduce((s,x)=>s+x.total,0))+'</span></div>';
-  if(ret.length)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--am)">🔄 Devoluciones: '+ret.length+'</span><span style="font-family:monospace;color:var(--am)">'+dolr(ret.reduce((s,x)=>s+x.total,0))+'</span></div>';
   report+='</div>';
   el('lo-report').innerHTML=report;
   openOv('ov-logout');
@@ -2665,7 +2724,7 @@ function printShiftReport(){
   active.forEach(s=>byPay[s.payMethod]=(byPay[s.payMethod]||0)+s.total);
   const rows=allToday.slice().reverse().map(s=>{
     const xmark=s.status==='cancelled'?'[X] ':s.status==='returned'?'[R] ':'';
-    const timeStr=new Date(s.date).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+    const timeStr=fmtTime(s.date);
     return '<div style="display:flex;justify-content:space-between;font-size:11px;border-bottom:1px dashed #ccc;padding:3px 0"><span>'+xmark+'#'+s.rnum+' '+timeStr+' '+pico(s.payMethod)+'</span><span>'+dolr(s.total)+'</span></div>';
   }).join('');
   el('parea').innerHTML='<div style="text-align:center;padding:6px">'+logoH+'<b>'+(c.bizName||'4K Negocio')+'</b><br><small>REPORTE DE TURNO</small><br><small>'+new Date().toLocaleDateString()+' '+new Date().toLocaleTimeString()+'</small>'+(curUser?'<br><small>Cajero: '+curUser.name+'</small>':'')+'<hr style="border:1px dashed #000;margin:4px 0">'+rows+'<hr style="border:1px dashed #000;margin:4px 0"><div style="font-size:11px;display:flex;justify-content:space-between"><span>💵 Efectivo</span><span>'+dolr(byPay.cash)+'</span></div><div style="font-size:11px;display:flex;justify-content:space-between"><span>💳 Tarjeta</span><span>'+dolr(byPay.card)+'</span></div><div style="font-size:11px;display:flex;justify-content:space-between"><span>📲 Transferencia</span><span>'+dolr(byPay.transf)+'</span></div><hr style="border:1px dashed #000;margin:4px 0"><div style="font-size:12px;display:flex;justify-content:space-between;font-weight:bold"><span>TOTAL VENTAS</span><span>'+dolr(inc)+'</span></div><div style="font-size:11px;display:flex;justify-content:space-between"><span>Fondo</span><span>'+dolr(db.fundAmount)+'</span></div><div style="font-size:12px;display:flex;justify-content:space-between;font-weight:bold"><span>TOTAL EN CAJA</span><span>'+dolr(inc+db.fundAmount)+'</span></div>'+(can.length?'<div style="font-size:11px">Cancelaciones: '+can.length+'</div>':'')+(ret.length?'<div style="font-size:11px">Devoluciones: '+ret.length+'</div>':'')+'</div>';
@@ -2828,6 +2887,14 @@ function renderUserList(){
 // CONFIG
 function changeCode(){const old=el('cc-old').value,nw=el('cc-new').value;if(old!==db.adminCode){toast('⚠ Código actual incorrecto');return;}if(nw.length<4){toast('⚠ Mínimo 4 caracteres');return;}db.adminCode=nw;saveDB();el('cc-old').value='';el('cc-new').value='';toast('✅ Código actualizado');}
 function saveFund(){db.fundAmount=getNum('cfg-fund');saveDB();toast('✅ Fondo: '+dolr(db.fundAmount));}
+function setTimeFormat(fmt){
+  if(!db.cfg)db.cfg={};
+  db.cfg.timeFormat=fmt;
+  const btn12=el('cfg-time-12h'),btn24=el('cfg-time-24h');
+  if(btn12)btn12.className=fmt==='12h'?'btn btn-p':'btn btn-s';
+  if(btn24)btn24.className=fmt==='24h'?'btn btn-p':'btn btn-s';
+  saveDB();toast('✅ '+(fmt==='24h'?'Hora 24h':'Hora 12h AM/PM'));
+}
 function saveCfg(){
   db.cfg.bizName=el('cfg-biz-name').value||'4K Negocio';db.cfg.bizSub=el('cfg-biz-sub').value||'';
   db.cfg.thanks=el('cfg-thanks').value||'¡Gracias por tu compra! 💕';db.cfg.phone=el('cfg-phone').value||'';
@@ -2841,6 +2908,7 @@ function loadAdminModal(){
   el('cfg-card').checked=db.payMethods.card!==false;if(el('cfg-transf'))el('cfg-transf').checked=db.payMethods.transf!==false;el('cfg-oa').checked=db.payMethods.openAccounts!==false;
   if(el('cfg-credit'))el('cfg-credit').checked=db.payMethods.credit===true;
   el('cfg-drawer-port').value=db.drawerPort||'COM3';el('cfg-drawer-auto').checked=db.drawerAuto!==false;
+  const _tf=(db.cfg&&db.cfg.timeFormat)||'12h';const _b12=el('cfg-time-12h'),_b24=el('cfg-time-24h');if(_b12)_b12.className=_tf==='12h'?'btn btn-p':'btn btn-s';if(_b24)_b24.className=_tf==='24h'?'btn btn-p':'btn btn-s';
   if(db.cfg.logo)el('logo-prev').innerHTML='<img src="'+db.cfg.logo+'" style="width:100%;height:100%;object-fit:contain">';
 }
 function admTab(tab,e2){
