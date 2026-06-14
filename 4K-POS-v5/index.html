@@ -99,8 +99,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .sep{height:1px;background:var(--b1);}
 .plbl{font-size:.7rem;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;}
 .pbtns{display:flex;gap:5px;flex-wrap:wrap;}
-.pbtn{flex:1;min-width:70px;padding:8px 4px 7px;border-radius:var(--rs);border:1.5px solid var(--b1);background:var(--s2);color:#fff;cursor:pointer;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1.1;}
-.pbtn .pico{font-size:1.35rem;line-height:1;}
+.pbtn{flex:1;min-width:0;padding:12px 6px;border-radius:var(--rs);border:1.5px solid var(--b1);background:var(--s2);color:#fff;cursor:pointer;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;transition:all .2s;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;line-height:1;white-space:nowrap;}
+.pbtn .pico{font-size:1.1rem;line-height:1;flex-shrink:0;}
 .pbtn.on{background:var(--ac);border-color:var(--ac);color:#fff;}
 .pbtn.hidden{display:none!important;}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;padding:10px;}
@@ -560,11 +560,12 @@ select.fi option{background:var(--s2);color:var(--tx);}
       </div>
       <!-- INVENTORY -->
       <div id="t-inv" style="display:none">
-        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
-          <input type="text" class="sinp" id="inv-srch" placeholder="🔍 Buscar..." oninput="renderInv()" style="max-width:220px">
-          <button class="btn btn-g" onclick="exportCSV()" id="inv-export-csv-btn">📥 Exportar CSV</button>
-          <button class="btn btn-p" onclick="openInvCount()" id="inv-count-btn">📋 Contar Inventario</button>
+        <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center">
+          <input type="text" class="sinp" id="inv-srch" placeholder="🔍 Nombre o código de barras..." oninput="renderInv()">
+          <button class="btn btn-g" onclick="exportCSV()" id="inv-export-csv-btn">📥 CSV</button>
+          <button class="btn btn-p" onclick="openInvCount()" id="inv-count-btn">📋 Contar</button>
         </div>
+        <div id="inv-cat-chips" style="display:flex;gap:6px;overflow-x:auto;flex-wrap:wrap;margin-bottom:6px"></div>
         <div id="inv-list"></div>
       </div>
       <!-- CUSTOMERS -->
@@ -648,10 +649,13 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="sc am"><div class="sclbl" id="lo-fund-lbl">Fondo</div><div class="scval" id="lo-fund">$0.00</div></div>
       </div>
       <div style="background:var(--s2);border-radius:var(--rs);padding:11px;margin-bottom:13px;font-size:.83rem">
-        <div style="font-weight:700;margin-bottom:6px;color:var(--tx)" id="lo-reconcile-lbl">Cuadre de caja</div>
-        <div style="display:flex;justify-content:space-between;color:var(--tx2);margin-bottom:4px"><span id="lo-v-lbl">Ventas del turno</span><span style="font-family:Courier New,monospace;color:var(--gn)" id="lo-v">$0.00</span></div>
+        <div style="font-weight:700;margin-bottom:7px;color:var(--tx)" id="lo-reconcile-lbl">Cuadre de caja</div>
+        <div style="display:flex;justify-content:space-between;color:var(--tx2);margin-bottom:3px"><span>💵 <span id="lo-v-lbl">Ventas efectivo</span></span><span style="font-family:Courier New,monospace;color:var(--gn)" id="lo-v">$0.00</span></div>
+        <div style="display:flex;justify-content:space-between;color:var(--tx2);margin-bottom:3px" id="lo-card-row"><span>💳 <span id="lo-card-lbl">Tarjeta</span></span><span style="font-family:Courier New,monospace;color:var(--bl)" id="lo-card">$0.00</span></div>
+        <div style="display:flex;justify-content:space-between;color:var(--tx2);margin-bottom:3px" id="lo-cred-row"><span>💰 <span id="lo-cred-lbl">Crédito / Cta.</span></span><span style="font-family:Courier New,monospace;color:var(--am)" id="lo-cred">$0.00</span></div>
+        <div style="display:flex;justify-content:space-between;color:var(--tx3);margin-bottom:4px;border-top:1px solid var(--b1);padding-top:5px;margin-top:5px"><span id="lo-day-lbl">Total del día</span><span style="font-family:Courier New,monospace" id="lo-day">$0.00</span></div>
         <div style="display:flex;justify-content:space-between;color:var(--tx2);margin-bottom:4px"><span id="lo-f-lbl">Fondo de caja</span><span style="font-family:Courier New,monospace;color:var(--am)" id="lo-f">$0.00</span></div>
-        <div style="display:flex;justify-content:space-between;font-weight:700;color:var(--tx);border-top:1px solid var(--b1);padding-top:6px;margin-top:6px"><span id="lo-t-lbl">Total en caja</span><span style="font-family:Courier New,monospace;color:var(--gn)" id="lo-t">$0.00</span></div>
+        <div style="display:flex;justify-content:space-between;font-weight:700;color:var(--tx);border-top:1px solid var(--b1);padding-top:6px;margin-top:5px"><span id="lo-t-lbl">💵 Efectivo esperado</span><span style="font-family:Courier New,monospace;color:var(--gn)" id="lo-t">$0.00</span></div>
       </div>
       <div id="lo-report" style="font-size:.8rem;margin-bottom:13px"></div>
       <div style="background:var(--s1);border-radius:var(--rs);padding:11px;margin-bottom:10px;border:1.5px solid var(--b2)">
@@ -839,6 +843,10 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <div class="ov" id="ov-inv-count">
   <div class="modal" style="max-height:90vh;display:flex;flex-direction:column">
     <div class="mh"><h3 id="inv-count-title">📋 Conteo de Inventario</h3><button class="mx" onclick="closeOv('ov-inv-count')">✕</button></div>
+    <div style="padding:8px 16px;border-bottom:1.5px solid var(--b1);display:flex;gap:6px;flex-wrap:wrap">
+      <input type="text" class="sinp" id="ic-srch" placeholder="🔍 Buscar nombre o código..." oninput="filterInvCount()" style="flex:1">
+      <div id="ic-cat-chips" class="cats" style="padding:0;gap:5px;overflow-x:auto;flex-shrink:0"></div>
+    </div>
     <div class="mb" style="flex:1;overflow-y:auto" id="inv-count-body"></div>
     <div style="padding:12px 16px;border-top:1.5px solid var(--b1);display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-s" onclick="showInvCountResult()" id="inv-view-result-btn">📊 Ver Resultado</button>
@@ -980,7 +988,7 @@ const T = {
     pinTitle:'Código de acceso',pinErr:'Código incorrecto',admTitle:'Administración',logoutTitle:'Cerrar Turno',
     adm:'Administración',ret:'Devoluciones',can:'Cancelar Venta',sal:'Ventas del día',conta:'Contabilidad',drawer:'Abrir Registradora',exit:'Salir del programa',
     payLabel:'Pago',cashier:'Cajero',cancelledLbl:'cancelada',returnedLbl:'devuelta',
-    shiftReport:'Reporte del turno',totalBox:'Total en caja',
+    shiftReport:'Reporte del turno',totalBox:'💵 Efectivo esperado',
     // Pago / checkout
     discount:'Descuento',percentage:'Porcentaje',fixedAmount:'Monto fijo',
     enterAmounts:'Ingresa los montos',cashChange:'Vuelto efectivo',missingAmt:'Faltan',
@@ -1003,7 +1011,7 @@ const T = {
     minStock:'Stock mínimo',
     // Logout modal
     salesLbl:'Ventas',ordersLbl:'Órdenes',fundLbl:'Fondo',
-    cashReconciliation:'Cuadre de caja',shiftSalesTxt:'Ventas del turno',cashFundTxt:'Fondo de caja',
+    cashReconciliation:'Cuadre de caja',shiftSalesTxt:'Ventas efectivo',cashFundTxt:'Fondo de caja',cashCardTxt:'Tarjeta / Transf.',cashCredTxt:'Crédito / Cta.',cashDayTxt:'Total del día',
     printReport:'🖨️ Imprimir Reporte',closeShiftConfirm:'🚪 Confirmar cierre de turno',
     // Misc
     noSalesToday:'Sin ventas hoy.',today:'Hoy',thisWeek:'Esta semana',thisMonth:'Este mes',
@@ -1050,7 +1058,7 @@ const T = {
     pinTitle:'Access code',pinErr:'Incorrect code',admTitle:'Administration',logoutTitle:'Close Shift',
     adm:'Administration',ret:'Returns',can:'Cancel Sale',sal:'Today Sales',conta:'Accounting',drawer:'Open Drawer',exit:'Exit program',
     payLabel:'Payment',cashier:'Cashier',cancelledLbl:'cancelled',returnedLbl:'returned',
-    shiftReport:'Shift report',totalBox:'Total in drawer',
+    shiftReport:'Shift report',totalBox:'💵 Expected cash',
     // Payment / checkout
     discount:'Discount',percentage:'Percentage',fixedAmount:'Fixed amount',
     enterAmounts:'Enter amounts',cashChange:'Cash change',missingAmt:'Missing',
@@ -1073,7 +1081,7 @@ const T = {
     minStock:'Min stock',
     // Logout modal
     salesLbl:'Sales',ordersLbl:'Orders',fundLbl:'Fund',
-    cashReconciliation:'Cash reconciliation',shiftSalesTxt:'Shift sales',cashFundTxt:'Cash fund',
+    cashReconciliation:'Cash reconciliation',shiftSalesTxt:'Cash sales',cashFundTxt:'Cash fund',cashCardTxt:'Card / Transfer',cashCredTxt:'Credit / Acct.',cashDayTxt:'Day total',
     printReport:'🖨️ Print Report',closeShiftConfirm:'🚪 Confirm shift close',
     // Misc
     noSalesToday:'No sales today.',today:'Today',thisWeek:'This week',thisMonth:'This month',
@@ -1129,7 +1137,7 @@ let editingAccountId=null;
 let curUser=null,curCat='all',pinTarget=null,pinVal='';
 let editingUserId=null;
 let confCb=null,fcExpr='',fcNum='0',fcNew=true;
-
+let invCatFilter='',icCatFilter='';
 
 function el(id){return document.getElementById(id);}
 function setEl(id,v){const e=el(id);if(e)e.textContent=v;}
@@ -1176,6 +1184,9 @@ function applyLang(){
   const _loFundLbl=el('lo-fund-lbl');if(_loFundLbl)_loFundLbl.textContent=t('fundLbl');
   const _loReconcile=el('lo-reconcile-lbl');if(_loReconcile)_loReconcile.textContent=t('cashReconciliation');
   const _loVLbl=el('lo-v-lbl');if(_loVLbl)_loVLbl.textContent=t('shiftSalesTxt');
+  const _loCardLbl=el('lo-card-lbl');if(_loCardLbl)_loCardLbl.textContent=t('cashCardTxt');
+  const _loCredLbl=el('lo-cred-lbl');if(_loCredLbl)_loCredLbl.textContent=t('cashCredTxt');
+  const _loDayLbl=el('lo-day-lbl');if(_loDayLbl)_loDayLbl.textContent=t('cashDayTxt');
   const _loFLbl=el('lo-f-lbl');if(_loFLbl)_loFLbl.textContent=t('cashFundTxt');
   const _loTLbl=el('lo-t-lbl');if(_loTLbl)_loTLbl.textContent=t('totalBox');
   const _loPrint=el('lo-print-btn');if(_loPrint)_loPrint.textContent=t('printReport');
@@ -1429,7 +1440,7 @@ async function saveDB(){
     curUser=found;
     el('login-screen').style.display='none';
     setEl('usr-lbl','👤 '+found.name);
-    const tbu=el('tb-user');if(tbu){const sn=found.name.replace(/</g,'&lt;');tbu.innerHTML='<span style="color:#fff">👤</span> '+sn;tbu.style.display='';};
+    const tbu=el('tb-user');if(tbu){const sn=found.name.replace(/</g,'&lt;');const ini=found.name.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('');tbu.innerHTML='<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#fff;color:#1e3a8a;font-size:10px;font-weight:800;flex-shrink:0;vertical-align:middle">'+ini+'</span> '+sn;tbu.style.display='';};
     applyUserPerms();
 
     if(db.fundAmount>0){
@@ -1645,9 +1656,22 @@ function renderProds(){
 }
 
 // INVENTORY
+function setInvCat(id){invCatFilter=id;renderInv();}
 function renderInv(){
   const q=(el('inv-srch').value||'').toLowerCase();
-  const list=db.products.filter(p=>!q||p.name.toLowerCase().includes(q));
+  // Render category chips
+  const chips=el('inv-cat-chips');
+  if(chips){
+    const cats=db.categories||[];
+    let ch='<button class="chip'+(invCatFilter===''?' on':'')+'" onclick="setInvCat(\'\')">Todos</button>';
+    cats.forEach(c=>{ch+='<button class="chip'+(invCatFilter===c.id?' on':'')+'" onclick="setInvCat(\''+c.id+'\')">'+c.name+'</button>';});
+    chips.innerHTML=ch;
+  }
+  const list=db.products.filter(p=>{
+    if(invCatFilter&&(p.cat||'')!==invCatFilter)return false;
+    if(!q)return true;
+    return p.name.toLowerCase().includes(q)||(p.bc||'').toLowerCase().includes(q);
+  });
   const isAdm=curUser&&curUser.role==='admin';
   const costCol=isAdm?('<th style="text-align:right;padding:6px 4px">'+t('fldCostPrice')+'</th>'):'';
   const priceCol=isAdm?('<th style="text-align:right;padding:6px 4px">'+t('fldPrice')+'</th>'):'';
@@ -1697,14 +1721,46 @@ function qtyInputMode(pid,span){
 }
 // CONTEO DE INVENTARIO
 let _invCountData={};
+function filterInvCount(){
+  const q=(el('ic-srch').value||'').toLowerCase();
+  el('inv-count-body').querySelectorAll('tr[data-name]').forEach(tr=>{
+    if(!q){tr.style.display='';return;}
+    const nm=(tr.dataset.name||'').toLowerCase();
+    const bc=(tr.dataset.bc||'').toLowerCase();
+    tr.style.display=(nm.includes(q)||bc.includes(q))?'':'none';
+  });
+}
+function setIcCat(id){
+  icCatFilter=id;
+  el('inv-count-body').querySelectorAll('tr[data-name]').forEach(tr=>{
+    tr.style.display=(!id||tr.dataset.cat===id)?'':'none';
+  });
+  el('ic-srch').value='';
+  // re-render chips to show active state
+  const chips=el('ic-cat-chips');
+  if(chips){
+    const cats=db.categories||[];
+    let ch='<button class="chip'+(icCatFilter===''?' on':'')+'" onclick="setIcCat(\'\')">Todos</button>';
+    cats.forEach(c=>{ch+='<button class="chip'+(icCatFilter===c.id?' on':'')+'" onclick="setIcCat(\''+c.id+'\')">'+c.name+'</button>';});
+    chips.innerHTML=ch;
+  }
+}
 function openInvCount(){
-  _invCountData={};
+  _invCountData={};icCatFilter='';
   const body=el('inv-count-body');
   if(!db.products.length){body.innerHTML='<p style="color:var(--tx3)">Sin productos</p>';openOv('ov-inv-count');return;}
+  const chips=el('ic-cat-chips');
+  if(chips){
+    const cats=db.categories||[];
+    let ch='<button class="chip on" onclick="setIcCat(\'\')">Todos</button>';
+    cats.forEach(c=>{ch+='<button class="chip" onclick="setIcCat(\''+c.id+'\')">'+c.name+'</button>';});
+    chips.innerHTML=ch;
+  }
+  if(el('ic-srch'))el('ic-srch').value='';
   body.innerHTML='<div style="font-size:.78rem;color:var(--tx3);margin-bottom:10px">Ingresa el conteo físico de cada producto:</div>'
     +'<table style="width:100%;border-collapse:collapse;font-size:.83rem">'
     +'<tr style="border-bottom:2px solid var(--b2);color:var(--tx3)"><th style="text-align:left;padding:6px 4px">Producto</th><th style="text-align:right;padding:6px 4px">Sistema</th><th style="text-align:right;padding:6px 4px">Conteo</th></tr>'
-    +db.products.map(p=>'<tr style="border-bottom:1px solid var(--b1)">'
+    +db.products.map(p=>'<tr style="border-bottom:1px solid var(--b1)" data-name="'+p.name.replace(/"/g,'&quot;')+'" data-bc="'+(p.bc||'')+'" data-cat="'+(p.cat||'')+'">'
       +'<td style="padding:7px 4px;font-weight:600;color:var(--tx)">'+p.name+'</td>'
       +'<td style="padding:7px 4px;text-align:right;color:var(--tx2)">'+(p.stock||0)+'</td>'
       +'<td style="padding:4px"><input type="number" min="0" data-pid="'+p.id+'" placeholder="—" style="width:70px;border:1.5px solid var(--b2);border-radius:4px;background:var(--s3);color:var(--tx);font-size:.83rem;text-align:right;padding:3px 6px;outline:none" oninput="this.style.borderColor=\'var(--ac)\'"></td>'
@@ -2493,18 +2549,28 @@ function openLogout(){
   const active=db.sales.filter(s=>new Date(s.date).toDateString()===today&&s.status==='active');
   const inc=active.reduce((s,x)=>s+x.total,0);
   setEl('lo-sales',dolr(inc));setEl('lo-orders',active.length.toString());setEl('lo-fund',dolr(db.fundAmount));
-  setEl('lo-v',dolr(inc));setEl('lo-f',dolr(db.fundAmount));setEl('lo-t',dolr(inc+db.fundAmount));
+  const byPay2={cash:0,card:0,transf:0,credit:0};
+  active.forEach(s=>byPay2[s.payMethod]=(byPay2[s.payMethod]||0)+s.total);
+  const cashSales=byPay2.cash||0;
+  const cardSales=(byPay2.card||0)+(byPay2.transf||0);
+  const credSales=byPay2.credit||0;
+  setEl('lo-v',dolr(cashSales));
+  setEl('lo-card',dolr(cardSales));
+  setEl('lo-cred',dolr(credSales));
+  setEl('lo-day',dolr(inc));
+  setEl('lo-f',dolr(db.fundAmount));
+  setEl('lo-t',dolr(cashSales+db.fundAmount));
+  const loCardRow=el('lo-card-row');if(loCardRow)loCardRow.style.display=cardSales>0?'':'none';
+  const loCredRow=el('lo-cred-row');if(loCredRow)loCredRow.style.display=credSales>0?'':'none';
   const allToday=db.sales.filter(s=>new Date(s.date).toDateString()===today);
   const can=allToday.filter(s=>s.status==='cancelled');
   const ret=allToday.filter(s=>s.status==='returned');
-  const byPay={cash:0,card:0,transf:0,credit:0};
-  active.forEach(s=>byPay[s.payMethod]=(byPay[s.payMethod]||0)+s.total);
   let report='<div style="background:var(--s2);border-radius:var(--rs);padding:11px;font-size:.8rem">';
   report+='<div style="font-weight:700;margin-bottom:8px;color:var(--tx)">'+t('shiftReport')+(curUser?' — '+curUser.name:'')+'</div>';
-  if(byPay.cash)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">💵 Efectivo</span><span style="font-family:monospace;color:var(--gn)">'+dolr(byPay.cash)+'</span></div>';
-  if(byPay.card)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">💳 Tarjeta</span><span style="font-family:monospace;color:var(--bl)">'+dolr(byPay.card)+'</span></div>';
-  if(byPay.transf)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">📲 Transferencia</span><span style="font-family:monospace;color:var(--ac)">'+dolr(byPay.transf)+'</span></div>';
-  if(byPay.credit)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">💳 '+t('credit')+'</span><span style="font-family:monospace;color:var(--am)">'+dolr(byPay.credit)+'</span></div>';
+  if(byPay2.cash)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">💵 Efectivo</span><span style="font-family:monospace;color:var(--gn)">'+dolr(byPay2.cash)+'</span></div>';
+  if(byPay2.card)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">💳 Tarjeta</span><span style="font-family:monospace;color:var(--bl)">'+dolr(byPay2.card)+'</span></div>';
+  if(byPay2.transf)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">📲 Transferencia</span><span style="font-family:monospace;color:var(--ac)">'+dolr(byPay2.transf)+'</span></div>';
+  if(byPay2.credit)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">💳 '+t('credit')+'</span><span style="font-family:monospace;color:var(--am)">'+dolr(byPay2.credit)+'</span></div>';
   if(can.length)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--rd)">❌ Cancelaciones: '+can.length+'</span><span style="font-family:monospace;color:var(--rd)">'+dolr(can.reduce((s,x)=>s+x.total,0))+'</span></div>';
   if(ret.length)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--am)">🔄 Devoluciones: '+ret.length+'</span><span style="font-family:monospace;color:var(--am)">'+dolr(ret.reduce((s,x)=>s+x.total,0))+'</span></div>';
   report+='</div>';
