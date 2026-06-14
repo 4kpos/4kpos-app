@@ -99,14 +99,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .sep{height:1px;background:var(--b1);}
 .plbl{font-size:.7rem;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;}
 .pbtns{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-.pbtn{padding:10px 6px;border-radius:var(--rs);border:1.5px solid var(--b1);background:var(--s2);color:#fff;cursor:pointer;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1;white-space:nowrap;width:100%;box-sizing:border-box;}
+.pbtn{padding:10px 6px;border-radius:var(--rs);border:1.5px solid var(--b1);background:var(--s2);color:#fff;cursor:pointer;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1;white-space:nowrap;width:100%;box-sizing:border-box;}
 .pbtn .pico{font-size:1rem;line-height:1;flex-shrink:0;}
 .pbtn.on{background:var(--ac);border-color:var(--ac);color:#fff;}
 .pbtn.hidden{display:none!important;}
-.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;padding:10px;}
-.cat-card{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r);padding:10px 8px 13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .18s;text-align:center;}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;padding:10px;}
+.cat-card{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r);padding:8px 8px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .18s;text-align:center;min-height:150px;}
 .cat-card:hover{border-color:var(--ac);transform:scale(.97);}
-.cat-card .cc-img{width:84px;height:84px;border-radius:10px;object-fit:cover;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:800;color:var(--ac);margin-bottom:6px;}
+.cat-card .cc-img{width:100%;height:115px;border-radius:7px;object-fit:cover;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:800;color:var(--ac);margin-bottom:6px;}
 .cat-card img.cc-img{font-size:0;}
 .cat-card .cc-name{font-size:16px;font-weight:700;color:var(--tx);line-height:1.2;}
 .cat-card .cc-cnt{font-size:13px;color:var(--tx3);margin-top:2px;}
@@ -121,7 +121,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .npbtn.del{background:var(--acg);border-color:var(--ac);color:var(--ac);}
 .chgbox{background:var(--gnb);border:1.5px solid rgba(52,211,153,.25);border-radius:var(--rs);padding:7px 11px;font-family:Courier New,monospace;font-size:.92rem;color:var(--gn);text-align:center;font-weight:600;}
 .chgbox.neg{background:var(--rdb);border-color:rgba(248,113,113,.25);color:var(--rd);}
-.cobrar{background:linear-gradient(135deg,#1e3a8a,#3b82f6);border:none;border-radius:var(--r);color:#fff;padding:14px;font-size:18px;font-weight:800;cursor:pointer;width:100%;letter-spacing:.3px;transition:all .2s;}
+.cobrar{background:linear-gradient(135deg,#1e3a8a,#3b82f6);border:none;border-radius:var(--r);color:#fff;padding:14px;font-size:18px;font-weight:800;cursor:pointer;width:100%;letter-spacing:.3px;transition:all .2s;text-transform:uppercase;}
+.btn-orange.btn-p{background:#f59e0b!important;border-color:#f59e0b!important;color:#fff!important;}
+.btn-orange.btn-s{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.3)!important;color:#f59e0b!important;}
 .cobrar:hover{opacity:.88;}
 .cobrar:disabled{opacity:.3;cursor:not-allowed;}
 #botbar{background:var(--s1);border-top:1.5px solid var(--b1);display:flex;align-items:center;justify-content:space-between;padding:6px 16px;flex-shrink:0;}
@@ -312,6 +314,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div class="top-mid">
     <div class="clk" id="clk-date">Lun 01</div>
     <div class="clk" id="clk">00:00:00</div>
+    <div id="wifi-dot" style="width:9px;height:9px;border-radius:50%;background:#34d399;flex-shrink:0;margin:0 2px;align-self:center;transition:background .4s" title="Conectado"></div>
     <div class="lic-badge lic-ok" id="lic-badge" style="display:none">✓</div>
   </div>
   <div style="display:flex;gap:5px">
@@ -352,8 +355,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div class="cempty" id="cempty"><div class="cem-ico">🛍️</div><span id="empty-txt">Agrega productos</span></div>
     </div>
     <div class="cfoot">
-      <div class="trow"><span id="sub-lbl" style="text-transform:uppercase;font-size:.72rem;color:var(--tx3)">Subtotal</span><span id="csub" style="font-family:Courier New,monospace">$0.00</span></div>
-      <div class="trow"><span id="items-lbl" style="text-transform:uppercase;font-size:.72rem;color:var(--tx3)">Artículos</span><span id="citems">0</span></div>
+      <div class="trow"><span id="sub-lbl" style="text-transform:uppercase;font-size:14px;color:var(--tx2)">Subtotal</span><span id="csub" style="font-family:Courier New,monospace;font-size:14px">$0.00</span></div>
+      <div class="trow"><span id="items-lbl" style="text-transform:uppercase;font-size:14px;color:var(--tx2)">Artículos</span><span id="citems" style="font-size:14px">0</span></div>
       <div class="sep"></div>
       <div class="trow" id="disc-row" style="display:none;color:var(--rd)"><span>Descuento</span><span id="disc-row-amt"></span></div>
       <div class="trow main"><span>TOTAL</span><span class="amt" id="ctotal">$0.00</span></div>
@@ -671,7 +674,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div style="display:flex;gap:8px;margin-bottom:8px">
         <button class="btn btn-s" style="flex:1" onclick="printShiftReport()" id="lo-print-btn">🖨️ Imprimir Reporte</button>
       </div>
-      <button class="btn btn-d" style="width:100%;padding:12px" onclick="doLogout()" id="lo-confirm-btn">🚪 Confirmar cierre de turno</button>
+      <button class="btn btn-d" style="width:100%;padding:12px" onclick="doLogout()" id="lo-confirm-btn" disabled>🚪 Confirmar cierre de turno</button>
     </div>
   </div>
 </div>
@@ -699,7 +702,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div style="display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap" id="conta-tabs">
         <button class="btn btn-p" onclick="contaTab('ct-res',this)">📊 Resumen</button>
         <button class="btn btn-s" onclick="contaTab('ct-fac',this)">🧾 Facturas</button>
-        <button class="btn btn-s" onclick="contaTab('ct-gst',this)">💸 Gastos</button>
+        <button class="btn btn-s btn-orange" data-extra-class="btn-orange" onclick="contaTab('ct-gst',this)">💸 Gastos</button>
         <button class="btn btn-s" onclick="contaTab('ct-graf',this)">📈 Gráfica</button>
       </div>
       <div id="ct-res">
@@ -994,6 +997,9 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <div id="parea"></div>
 
 <script>
+// Supabase anon key — get it from: Supabase dashboard → Settings → API → Project API keys → "anon public"
+const SUPA_ANON = '';
+const SUPA_URL = 'https://izalnhluwtyotuxwkqrh.supabase.co';
 let ipcRenderer = { invoke: async function(){ return null; } };
 try {
   if (typeof require === 'function') {
@@ -1191,7 +1197,8 @@ function pico(m){return m==='cash'?'💵':m==='card'?'💳':m==='transf'?'📲':
 function fmtTime(dateStr){
   const d=dateStr?new Date(dateStr):new Date();
   const h12=(db.cfg&&db.cfg.timeFormat)!=='24h';
-  return d.toLocaleTimeString(lang==='en'?'en-US':'es',{hour:'2-digit',minute:'2-digit',hour12:h12});
+  let s=d.toLocaleTimeString(lang==='en'?'en-US':'es',{hour:'2-digit',minute:'2-digit',hour12:h12});
+  return s.replace(/\ba\.m\./gi,'AM').replace(/\bp\.m\./gi,'PM').replace(/\bam\b/gi,'AM').replace(/\bpm\b/gi,'PM');
 }
 
 // LANG
@@ -1367,6 +1374,21 @@ function updateClock(){
 }
 setInterval(updateClock,1000); updateClock();
 
+// WIFI INDICATOR
+function setConnDot(ok){
+  const d=el('wifi-dot');if(!d)return;
+  d.style.background=ok?'#34d399':'#f87171';
+  d.title=ok?(lang==='en'?'Connected':'Conectado'):(lang==='en'?'No connection':'Sin conexión');
+}
+function checkConn(){
+  if(!navigator.onLine){setConnDot(false);return;}
+  fetch(SUPA_URL+'/functions/v1/posapi?action=ping',{method:'HEAD',signal:AbortSignal.timeout?AbortSignal.timeout(5000):undefined})
+    .then(()=>setConnDot(true)).catch(()=>setConnDot(false));
+}
+window.addEventListener('online',()=>setConnDot(true));
+window.addEventListener('offline',()=>setConnDot(false));
+setInterval(checkConn,30000);checkConn();
+
 // LICENSE BADGE
 function updateLicBadge(){
   ipcRenderer.invoke('get-license-info').then(function(info){
@@ -1424,16 +1446,19 @@ async function sendDashboardMessage(){
   const pri=(el('msg-priority').value)||'normal';
   const lic=db._lic||'';
   if(!lic){toast('⚠ '+(lang==='en'?'No active license':'Sin licencia activa'));return;}
+  if(!SUPA_ANON){toast('⚠ '+(lang==='en'?'Configure SUPA_ANON key in index.html':'Configura la clave SUPA_ANON en index.html'));console.warn('sendDashboardMessage: SUPA_ANON is empty. Get it from Supabase → Settings → API → anon public');return;}
   const btn=el('msg-send-btn');if(btn)btn.disabled=true;
   try{
-    const r=await fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=send-message',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({license_key:lic,message:{text:txt,from_user:curUser?curUser.name:'POS',priority:pri}})
+    console.log('sendDashboardMessage: sending to Supabase REST API...');
+    const r=await fetch(SUPA_URL+'/rest/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,'Prefer':'return=minimal'},
+      body:JSON.stringify({text:txt,from_user:curUser?curUser.name:'POS',priority:pri,license_key:lic,read:false})
     });
-    const j=await r.json();
-    if(j.success){toast(t('msgSent'));closeOv('ov-msg');}
-    else toast(t('msgErr')+': '+(j.error||''));
-  }catch(e){toast(t('msgNoConn'));}
+    console.log('sendDashboardMessage: HTTP',r.status,r.statusText);
+    if(r.ok||r.status===201){toast(t('msgSent'));closeOv('ov-msg');}
+    else{const body=await r.text().catch(()=>'');console.error('sendDashboardMessage error body:',body);toast(t('msgErr')+': HTTP '+r.status);}
+  }catch(e){console.error('sendDashboardMessage network error:',e);toast(t('msgNoConn'));}
   finally{if(btn)btn.disabled=false;}
 }
 
@@ -1583,11 +1608,19 @@ function calcCashDiff(){
   const expected=cashSales+db.fundAmount;
   const diff=declared-expected;
   const box=el('lo-cash-diff-box');
+  const confirmBtn=el('lo-confirm-btn');
   if(!box)return;
-  if(!declared){box.innerHTML='';return;}
+  if(!declared){box.innerHTML='';if(confirmBtn)confirmBtn.disabled=true;return;}
   const color=diff===0?'var(--gn)':diff<0?'var(--rd)':'var(--am)';
   const icon=diff===0?'✅':diff<0?'⚠️ '+t('missing'):'⚠️ '+t('surplus');
   box.innerHTML='<div style="display:flex;justify-content:space-between"><span style="color:var(--tx3)">'+t('cashDiff')+'</span><span style="font-weight:700;color:'+color+'">'+icon+' '+dolr(Math.abs(diff))+'</span></div>';
+  const isAdmin=curUser&&curUser.role==='admin';
+  if(confirmBtn){
+    if(diff!==0&&!isAdmin){
+      confirmBtn.disabled=true;
+      if(!box.querySelector('.diff-warn'))box.innerHTML+='<div class="diff-warn" style="margin-top:5px;font-size:.78rem;color:var(--rd)">⛔ '+(lang==='en'?'Difference found — only admin can close shift':'Diferencia encontrada — solo admin puede cerrar turno')+'</div>';
+    }else{confirmBtn.disabled=false;}
+  }
 }
 function doLogout(){
   closeOv('ov-logout');curUser=null;cart=[];cashIn='';
@@ -2595,7 +2628,7 @@ function renderActions(mode){
       :'';
     const itemRows=s.items.map(i=>'<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--b1);font-size:.78rem"><span>'+i.name+' ×'+i.qty+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr((i.price||0)*i.qty)+'</span></div>').join('');
     const actionBtn=active
-      ?'<button style="width:100%;padding:8px;border-radius:8px;font-weight:700;font-size:.83rem;cursor:pointer;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.4);color:#f59e0b;margin-top:8px" onclick="doReturn(\''+s.id+'\');event.stopPropagation()">↩ Devolver '+dolr(s.total)+'</button>'
+      ?'<button style="width:100%;padding:8px;border-radius:8px;font-weight:700;font-size:.83rem;cursor:pointer;background:rgba(239,68,68,.12);border:1.5px solid rgba(239,68,68,.4);color:#ef4444;margin-top:8px" onclick="doReturn(\''+s.id+'\');event.stopPropagation()">↩ Devolver '+dolr(s.total)+'</button>'
       :returned?'<button style="width:100%;padding:7px;border-radius:8px;font-weight:700;font-size:.78rem;cursor:pointer;background:var(--rdb);border:1.5px solid rgba(248,113,113,.3);color:var(--rd);margin-top:8px" onclick="delReturn(\''+s.id+'\');event.stopPropagation()">🗑 Eliminar devolución</button>':'';
     const detail='<div id="'+uid+'" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--b1)">'+itemRows+'<div style="display:flex;justify-content:space-between;font-size:.78rem;margin-top:6px;color:var(--tx3)"><span>'+pico(s.payMethod)+' '+(s.payLabel||s.payMethod)+'</span>'+(s.cashier?'<span>👤 '+s.cashier+'</span>':'')+'</div>'+actionBtn+'</div>';
     const nameColor=active?'var(--ac)':returned?'var(--am)':'var(--rd)';
@@ -2709,6 +2742,9 @@ function openLogout(){
   if(can.length)report+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--rd)">❌ Cancelaciones: '+can.length+'</span><span style="font-family:monospace;color:var(--rd)">'+dolr(can.reduce((s,x)=>s+x.total,0))+'</span></div>';
   report+='</div>';
   el('lo-report').innerHTML=report;
+  const cashFld=el('lo-declared-cash');if(cashFld)cashFld.value='';
+  const cashDiffBox=el('lo-cash-diff-box');if(cashDiffBox)cashDiffBox.innerHTML='';
+  const confirmBtn=el('lo-confirm-btn');if(confirmBtn)confirmBtn.disabled=true;
   openOv('ov-logout');
 }
 function printShiftReport(){
@@ -2998,11 +3034,15 @@ function renderGstList(){
 function renderGraf(){
   const type=el('graf-type').value,days=parseInt(el('graf-period').value)||30;
   const canvas=el('graf-canvas');const ctx=canvas.getContext('2d');
-  canvas.width=canvas.offsetWidth||600;canvas.height=280;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle=dark?'#22222e':'#e8eaf0';ctx.fillRect(0,0,canvas.width,canvas.height);
+  const dpr=window.devicePixelRatio||1;
+  const cssW=canvas.offsetWidth||600,cssH=280;
+  canvas.width=cssW*dpr;canvas.height=cssH*dpr;
+  canvas.style.width=cssW+'px';canvas.style.height=cssH+'px';
+  ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,cssW,cssH);
+  ctx.fillStyle=dark?'#22222e':'#e8eaf0';ctx.fillRect(0,0,cssW,cssH);
   const txC=dark?'#9090a8':'#555575',gridC=dark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.08)';
-  const pad={t:20,r:20,b:50,l:60},W=canvas.width-pad.l-pad.r,H=canvas.height-pad.t-pad.b;
+  const pad={t:20,r:20,b:50,l:60},W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
   if(type==='ventas-dia'){
     const dr=getDaysRange(days);
     const data=dr.map(d=>{const next=new Date(d);next.setDate(next.getDate()+1);return db.sales.filter(s=>s.status==='active'&&new Date(s.date)>=d&&new Date(s.date)<next).reduce((s,x)=>s+x.total,0);});
@@ -3025,9 +3065,17 @@ function renderGraf(){
   }
 }
 function drawBar(ctx,labels,data,pad,W,H,color,txC,gridC){
-  if(!data.length)return;const max=Math.max(...data)||1,barW=Math.max(4,W/data.length*0.6),gap=W/data.length;
+  if(!data.length)return;
+  const max=Math.max(...data)||1,barW=Math.max(4,W/data.length*0.6),gap=W/data.length;
+  const skip=data.length>20?5:data.length>10?2:1;
   for(let i=0;i<=4;i++){const y=pad.t+H-(H/4*i);ctx.strokeStyle=gridC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+W,y);ctx.stroke();ctx.fillStyle=txC;ctx.font='11px Segoe UI';ctx.textAlign='right';ctx.fillText(dolr(max/4*i),pad.l-5,y+4);}
-  data.forEach((v,i)=>{const x=pad.l+gap*i+(gap-barW)/2,bH=H*(v/max),y=pad.t+H-bH;ctx.globalAlpha=v>0?1:0.25;ctx.fillStyle=color;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,barW,bH,4);else ctx.rect(x,y,barW,bH);ctx.fill();ctx.globalAlpha=1;ctx.fillStyle=txC;ctx.font='10px Segoe UI';ctx.textAlign='center';const lbl=labels[i]||'';ctx.fillText(lbl.length>5?lbl.substring(0,5):lbl,x+barW/2,pad.t+H+14);});
+  data.forEach((v,i)=>{
+    const x=pad.l+gap*i+(gap-barW)/2,bH=Math.max(v>0?2:0,H*(v/max)),y=pad.t+H-bH;
+    ctx.globalAlpha=v>0?1:0.2;ctx.fillStyle=color;ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(x,y,barW,bH,3);else ctx.rect(x,y,barW,bH);
+    ctx.fill();ctx.globalAlpha=1;
+    if(i%skip===0){ctx.fillStyle=txC;ctx.font='10px Segoe UI';ctx.textAlign='center';const lbl=labels[i]||'';ctx.fillText(lbl.length>5?lbl.substring(0,5):lbl,x+barW/2,pad.t+H+14);}
+  });
 }
 function drawLine(ctx,labels,d1,d2,pad,W,H,txC,gridC){
   if(!d1.length)return;const max=Math.max(...d1,...d2)||1,step=W/(d1.length-1||1);
@@ -3047,8 +3095,8 @@ function drawPie(ctx,labels,data,colors,pad,W,H,txC){
 function contaTab(tab,e2){
   ['ct-res','ct-fac','ct-gst','ct-graf'].forEach(t=>el(t).style.display='none');
   el(tab).style.display='block';
-  document.querySelectorAll('#conta-tabs .btn').forEach(b=>b.className='btn btn-s');
-  if(e2)e2.className='btn btn-p';
+  document.querySelectorAll('#conta-tabs .btn').forEach(b=>b.className='btn btn-s '+(b.dataset.extraClass||'').trim());
+  if(e2)e2.className='btn btn-p '+(e2.dataset.extraClass||'').trim();
   if(tab==='ct-fac')loadFacProds();
   if(tab==='ct-graf')setTimeout(renderGraf,50);
 }
