@@ -390,7 +390,6 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div class="hmi sal" id="hm-sal" onclick="closeHMenu();reqPin('sales')">📊 <span id="hm-sal-txt">Ventas del día</span></div>
   <div class="hmi conta" id="hm-conta" onclick="closeHMenu();reqPin('conta')">📒 <span id="hm-conta-txt">Contabilidad</span></div>
   <div class="hmi" style="color:var(--tx3)" onclick="closeHMenu();openDrawer()">🗃️ <span id="hm-drawer-txt">Abrir Registradora</span></div>
-  <div class="hmi" onclick="closeHMenu();openMsgModal()">📩 <span id="hm-msg-txt">Enviar mensaje</span></div>
   <div class="hmi exit" onclick="closeHMenu();exitApp()">🚪 <span id="hm-exit-txt">Salir del programa</span></div>
 </div>
 
@@ -926,29 +925,6 @@ select.fi option{background:var(--s2);color:var(--tx);}
     </div>
   </div>
 </div>
-<!-- MENSAJE AL DASHBOARD -->
-<div class="ov" id="ov-msg">
-  <div class="modal mnarrow">
-    <div class="mh"><h3 id="msg-modal-title">📩 Mensaje al Dashboard</h3><button class="mx" onclick="closeOv('ov-msg')">✕</button></div>
-    <div class="mb">
-      <div class="fg" style="margin-bottom:12px">
-        <textarea id="msg-text" class="fi" placeholder="Escribe tu mensaje..." rows="4" style="resize:vertical;min-height:90px;font-family:inherit;font-size:.9rem"></textarea>
-      </div>
-      <div class="fg" style="margin-bottom:14px">
-        <label class="lbl" id="msg-priority-lbl">Prioridad</label>
-        <select id="msg-priority" class="fi">
-          <option value="normal">Normal</option>
-          <option value="urgent">🔴 Urgente</option>
-        </select>
-      </div>
-      <div class="frow">
-        <button class="btn btn-s" style="flex:1" onclick="closeOv('ov-msg')">✕ Cancelar</button>
-        <button class="btn btn-p" style="flex:1" id="msg-send-btn" onclick="sendDashboardMessage()">Enviar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- PAGO PARCIAL CRÉDITO -->
 <div class="ov" id="ov-credit-pay">
   <div class="modal mnarrow">
@@ -1076,9 +1052,6 @@ const T = {
     forceClose:'Forzar cierre (Admin)',
     // Placeholders
     pNamePh:'Nombre del producto',saveConfig:'💾 Guardar Config',
-    // Dashboard message
-    sendMsg:'📩 Enviar mensaje',msgTitle:'Mensaje al Dashboard',msgPlaceholder:'Escribe tu mensaje...',
-    msgPriority:'Prioridad',msgNormal:'Normal',msgUrgent:'Urgente',msgSend:'Enviar',msgSent:'✅ Mensaje enviado',msgErr:'⚠ Error al enviar',msgNoConn:'⚠ Sin conexión',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -1151,9 +1124,6 @@ const T = {
     forceClose:'Force close (Admin)',
     // Placeholders
     pNamePh:'Product name',saveConfig:'💾 Save Config',
-    // Dashboard message
-    sendMsg:'📩 Send message',msgTitle:'Message to Dashboard',msgPlaceholder:'Type your message...',
-    msgPriority:'Priority',msgNormal:'Normal',msgUrgent:'Urgent',msgSend:'Send',msgSent:'✅ Message sent',msgErr:'⚠ Error sending',msgNoConn:'⚠ No connection',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -1334,13 +1304,6 @@ function applyLang(){
   const _custSave=el('cust-save-btn');if(_custSave)_custSave.innerHTML=t('save');
   // Placeholders
   const _pNameInput=el('p-name');if(_pNameInput)_pNameInput.placeholder=t('pNamePh');
-  // Hamburger message item
-  const _hmMsgTxt=el('hm-msg-txt');if(_hmMsgTxt)_hmMsgTxt.textContent=t('sendMsg');
-  // Message modal
-  const _msgModalTitle=el('msg-modal-title');if(_msgModalTitle)_msgModalTitle.textContent=t('msgTitle');
-  const _msgTextArea=el('msg-text');if(_msgTextArea)_msgTextArea.placeholder=t('msgPlaceholder');
-  const _msgPriLbl=el('msg-priority-lbl');if(_msgPriLbl)_msgPriLbl.textContent=t('msgPriority');
-  const _msgSendBtn=el('msg-send-btn');if(_msgSendBtn)_msgSendBtn.textContent=t('msgSend');
   updateCobrar(); renderCats(); renderProds(); updatePCat();
 }
 function switchLang(){
@@ -1363,15 +1326,10 @@ function setConnDot(ok){
   const ico=el('wifi-icon');if(ico)ico.setAttribute('stroke',ok?'#22c55e':'#ef4444');
   const d=el('wifi-dot');if(d)d.title=ok?(lang==='en'?'Connected':'Conectado'):(lang==='en'?'No connection':'Sin conexión');
 }
-function checkConn(){
-  if(!navigator.onLine){setConnDot(false);return;}
-  const sig=typeof AbortSignal!=='undefined'&&AbortSignal.timeout?AbortSignal.timeout(5000):undefined;
-  fetch(SUPA_URL+'/functions/v1/posapi',{method:'HEAD',signal:sig,headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}})
-    .then(()=>setConnDot(true)).catch(()=>setConnDot(false));
-}
+function checkConn(){setConnDot(navigator.onLine);}
 window.addEventListener('online',()=>setConnDot(true));
 window.addEventListener('offline',()=>setConnDot(false));
-setInterval(checkConn,30000);checkConn();
+checkConn();
 
 // LICENSE BADGE
 function updateLicBadge(){
@@ -1418,33 +1376,6 @@ function exitApp(){
     try{ipcRenderer.invoke('exit-app');}catch(e){window.close();}
   });
 }
-function openMsgModal(){
-  const ta=el('msg-text');if(ta)ta.value='';
-  const sel=el('msg-priority');if(sel)sel.value='normal';
-  openOv('ov-msg');
-  setTimeout(function(){if(ta)ta.focus();},120);
-}
-async function sendDashboardMessage(){
-  const txt=(el('msg-text').value||'').trim();
-  if(!txt){toast('⚠ '+(lang==='en'?'Write a message':'Escribe un mensaje'));return;}
-  const pri=(el('msg-priority').value)||'normal';
-  const lic=db._lic||'';
-  if(!lic){toast('⚠ '+(lang==='en'?'No active license':'Sin licencia activa'));return;}
-  const btn=el('msg-send-btn');if(btn)btn.disabled=true;
-  try{
-    const res=await fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=send-message',{
-      method:'POST',
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
-      body:JSON.stringify({license_key:lic,message:{text:txt,from_user:curUser?curUser.name:'POS',priority:pri}})
-    });
-    const j=await res.json().catch(()=>({}));
-    console.log('sendMessage:',res.status,j);
-    if(j.success){toast(t('msgSent'));closeOv('ov-msg');}
-    else toast(t('msgErr')+': '+(j.error||'Error en servidor'));
-  }catch(e){console.error('sendMessage error:',e);toast(t('msgNoConn'));}
-  finally{if(btn)btn.disabled=false;}
-}
-
 // DATA
 async function loadDB(){
   try{
