@@ -1437,11 +1437,12 @@ async function loadDB(){
       const slim={
         sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,payLabel:_normPayLabel(s),cashier:s.cashier||'',items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),
         products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat,minStock:p.minStock||5};}),
-        categories:(db.categories||[]).map(function(c){return {id:c.id,name:c.name};}),
+        categories:(db.categories||[]).map(function(c){return {id:c.id,name:c.name,image:c.img||null};}),
         returns:(db.returns||[]).map(function(r){return {id:r.id,originalSaleId:r.originalSaleId,rnum:r.rnum,total:r.total,user:r.user,date:r.date,payMethod:r.payMethod};}),
         cfg:{bizName:(db.cfg||{}).bizName||''}
       };
       fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({license_key:db._lic,data:slim})}).catch(function(){});
+      syncCategories();
     }catch(e){}
   })();}
 }
@@ -1458,7 +1459,7 @@ async function saveDB(){
   try{
     const licKey=db._lic||'';
     if(licKey){
-      const slim={sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,payLabel:_normPayLabel(s),cashier:s.cashier||'',items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat,minStock:p.minStock||5};}),categories:(db.categories||[]).map(function(c){return {id:c.id,name:c.name};}),cfg:{bizName:(db.cfg||{}).bizName||''}};
+      const slim={sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,payLabel:_normPayLabel(s),cashier:s.cashier||'',items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat,minStock:p.minStock||5};}),categories:(db.categories||[]).map(function(c){return {id:c.id,name:c.name,image:c.img||null};}),cfg:{bizName:(db.cfg||{}).bizName||''}};
       fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({license_key:licKey,data:slim})}).catch(function(){});
     }
   }catch(e){}
@@ -1640,11 +1641,27 @@ function saveCat(){
   const eid=el('cat-eid').value,cat={id:eid||Date.now().toString(),name,img:el('cat-data').value||''};
   if(eid){const i=db.categories.findIndex(x=>x.id===eid);if(i>=0)db.categories[i]=cat;el('cat-eid').value='';}
   else db.categories.push(cat);
-  saveDB();renderCatList();renderCats();updatePCat();clearCat();toast('✓ '+name);
+  saveDB();syncCategories();renderCatList();renderCats();updatePCat();clearCat();toast('✓ '+name);
 }
 function clearCat(){el('cat-eid').value='';el('cat-name').value='';imgClear('cat-prev','cat-data','cat-file');}
 function editCat(id){const c=db.categories.find(x=>x.id===id);if(!c)return;el('cat-eid').value=c.id;el('cat-name').value=c.name;if(c.img){el('cat-prev').innerHTML='<img src="'+c.img+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px">';el('cat-data').value=c.img;}}
-function delCat(id){confirm2('¿Eliminar categoría?',()=>{db.categories=db.categories.filter(x=>x.id!==id);saveDB();renderCatList();renderCats();updatePCat();});}
+function delCat(id){confirm2('¿Eliminar categoría?',()=>{db.categories=db.categories.filter(x=>x.id!==id);saveDB();syncDeleteCategory(id);renderCatList();renderCats();updatePCat();});}
+function syncCategories(){
+  if(!db._lic||!db.categories.length)return;
+  const cats=(db.categories||[]).map(function(c){return {id:c.id,name:c.name,image:c.img||null,license_key:db._lic};});
+  fetch(SUPA_URL+'/rest/v1/categories',{
+    method:'POST',
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify(cats)
+  }).catch(function(){});
+}
+function syncDeleteCategory(id){
+  if(!db._lic||!id)return;
+  fetch(SUPA_URL+'/rest/v1/categories?id=eq.'+encodeURIComponent(id)+'&license_key=eq.'+encodeURIComponent(db._lic),{
+    method:'DELETE',
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+  }).catch(function(){});
+}
 function renderCatList(){
   const e2=el('cat-list');
   if(!db.categories.length){e2.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('noCats')+'</div>';return;}
