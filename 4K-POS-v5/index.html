@@ -1415,7 +1415,7 @@ function exitApp(){
 const DASHBOARD_URL='https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html';
 function openDashboard(){
   ipcRenderer.invoke('get-license-info').then(function(info){
-    const isPro=info&&(info.plan||'').toLowerCase()==='pro';
+    const isPro=info&&['pro','lifetime'].includes((info.plan||'').toLowerCase());
     if(isPro){
       try{require('electron').shell.openExternal(DASHBOARD_URL);}catch(e){window.open(DASHBOARD_URL,'_blank');}
     }else{
@@ -1429,7 +1429,7 @@ function updateDashBtn(){
   ipcRenderer.invoke('get-license-info').then(function(info){
     const dash=el('hm-dash');
     if(!dash)return;
-    const isPro=info&&(info.plan||'').toLowerCase()==='pro';
+    const isPro=info&&['pro','lifetime'].includes((info.plan||'').toLowerCase());
     dash.style.display='flex';
     if(isPro){
       dash.style.opacity='1';dash.style.cursor='pointer';
@@ -2820,7 +2820,7 @@ function saveUser(){
   const name=el('u-name').value.trim(),user=el('u-user').value.trim(),pass=el('u-pass').value,role=el('u-role').value;
   if(!name||!user||!pass){toast('⚠ Todos los campos requeridos');return;}
   ipcRenderer.invoke('get-license-info').then(function(info){
-    const planLimit=(info&&info.plan==='pro')?10:3;
+    const planLimit=(info&&['pro','lifetime'].includes((info.plan||'').toLowerCase()))?10:3;
     const cnt=db.users.filter(u=>u.id!=='1').length;
     if(cnt>=planLimit-1){
       el('ulimit-warn').style.display='block';
@@ -2881,7 +2881,7 @@ function saveUser(){
     toast('✓ Usuario actualizado: '+name);
   }else{
     ipcRenderer.invoke('get-license-info').then(function(info){
-      const planLimit=(info&&info.plan==='pro')?10:3;
+      const planLimit=(info&&['pro','lifetime'].includes((info.plan||'').toLowerCase()))?10:3;
       const cnt=db.users.filter(u=>u.id!=='1').length;
 
       if(cnt>=planLimit-1){
