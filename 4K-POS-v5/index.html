@@ -5,7 +5,7 @@
 <title>4K POS</title>
 <style>
 :root{--bg:#0f0f13;--s1:#1a1a22;--s2:#22222e;--s3:#2a2a38;--b1:rgba(255,255,255,0.09);--b2:rgba(255,255,255,0.16);--tx:#ffffff;--tx2:#ccccdd;--tx3:#888899;--ac:#3b82f6;--acg:rgba(59,130,246,0.15);--gn:#34d399;--gnb:rgba(52,211,153,0.13);--rd:#f87171;--rdb:rgba(248,113,113,0.13);--am:#fbbf24;--amb:rgba(251,191,36,0.13);--bl:#60a5fa;--blb:rgba(96,165,250,0.13);--r:10px;--rs:8px;}
-body.light{--bg:#f0f2f5;--s1:#ffffff;--s2:#e8eaf0;--s3:#dde0ea;--b1:rgba(0,0,0,0.09);--b2:rgba(0,0,0,0.16);--tx:#0a0a1a;--tx2:#222240;--tx3:#555575;--ac:#1e3a8a;--acg:rgba(30,58,138,0.12);--gn:#047857;--gnb:rgba(4,120,87,0.12);--rd:#b91c1c;--rdb:rgba(185,28,28,0.12);--am:#92400e;--amb:rgba(146,64,14,0.12);--bl:#1d4ed8;--blb:rgba(29,78,216,0.12);}
+body.light{--bg:#f0f2f5;--s1:#ffffff;--s2:#e8eaf0;--s3:#dde0ea;--b1:rgba(0,0,0,0.15);--b2:rgba(0,0,0,0.25);--tx:#0a0a1a;--tx2:#1a1a2e;--tx3:#3d3d58;--ac:#1e3a8a;--acg:rgba(30,58,138,0.12);--gn:#047857;--gnb:rgba(4,120,87,0.12);--rd:#b91c1c;--rdb:rgba(185,28,28,0.12);--am:#92400e;--amb:rgba(146,64,14,0.12);--bl:#1d4ed8;--blb:rgba(29,78,216,0.12);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:15px;}
 ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:var(--s2);}::-webkit-scrollbar-thumb{background:var(--ac);border-radius:3px;}
@@ -103,8 +103,33 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .pbtn .pico{font-size:1rem;line-height:1;flex-shrink:0;}
 .pbtn.on{background:var(--ac);border-color:var(--ac);color:#fff;}
 .pbtn.hidden{display:none!important;}
-body.light .pbtn{color:#333333;border-color:#999999;background:#f0f0f0;}
+body.light .pbtn{color:#1a1a1a;border-color:#cccccc;background:#f4f4f8;font-weight:700;}
 body.light .pbtn.on{color:#ffffff;border-color:#1e3a8a;background:#1e3a8a;}
+/* ── Light mode: contraste, tamaño y pesos ── */
+body.light .lbl,body.light .slbl,body.light .plbl,body.light .sclbl{color:#333344;font-weight:700;}
+body.light .ci-name{font-size:14px;font-weight:600;color:#1a1a1a;}
+body.light .ci-uprice{font-size:.76rem;color:#3d3d58;font-weight:500;}
+body.light .ci-tot{font-size:14px;font-weight:700;color:#1a6040;}
+body.light .qn{font-size:14px;font-weight:600;color:#1a1a1a;}
+body.light .trow{font-size:14px;font-weight:500;color:#1a1a2e;}
+body.light .trow.main{font-size:20px;font-weight:700;color:#0a0a1a;}
+body.light .trow.main .amt{font-size:20px;font-weight:700;color:#0a0a1a;font-family:Courier New,monospace;}
+body.light .pcard-stk{color:#3d3d58;font-weight:500;}
+body.light .pcard{border-color:#cccccc;}
+body.light .fi,body.light .sinp,body.light .lfi{border-color:#cccccc;}
+body.light .chip{border-color:#cccccc;color:#1a1a1a;font-weight:600;}
+body.light .ci-del{color:#555570;}
+body.light .eb{border-color:#cccccc;color:#333344;}
+body.light .xb{color:#3d3d58;}
+body.light .hmi{border-color:#cccccc;}
+body.light .egrid-empty,body.light .cempty{color:#3d3d58;}
+body.light .cat-card .cc-cnt{color:#3d3d58;}
+body.light .back-bar{border-bottom-color:#cccccc;}
+body.light .ord-lbl{color:#333344;font-weight:600;}
+body.light .pli-meta{color:#3d3d58;}
+body.light .tog-label{color:#1a1a2e;font-weight:500;}
+body.light .rline{border-bottom-color:#cccccc;}
+body.light .rsub,.rsub{color:#3d3d58;}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;padding:10px;}
 .cat-card{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r);padding:8px 8px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .18s;text-align:center;min-height:150px;}
 .cat-card:hover{border-color:var(--ac);transform:scale(.97);}
