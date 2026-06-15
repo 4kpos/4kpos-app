@@ -1726,7 +1726,26 @@ function applyUserPerms(){
   el('hm-sal').style.display=(isAdm||pm.sal)?'flex':'none';
   el('hm-conta').style.display=(isAdm||pm.conta)?'flex':'none';
 }
-function confirmShift(){el('shift-open-screen').classList.remove('show');startApp();}
+function syncShiftStatus(status){
+  const now=new Date().toISOString();
+  const userName=curUser?curUser.name:'';
+  if(status==='open'){
+    db.cfg.shiftOpen=true;
+    db.cfg.shiftUser=userName;
+    db.cfg.shiftOpenAt=now;
+    db.cfg.shiftClosedAt=null;
+  }else{
+    db.cfg.shiftOpen=false;
+    db.cfg.shiftUser=userName;
+    db.cfg.shiftClosedAt=now;
+  }
+  saveDB();
+}
+function confirmShift(){
+  el('shift-open-screen').classList.remove('show');
+  syncShiftStatus('open');
+  startApp();
+}
 function startApp(){
   applyLang();
   applyPayMethods();
@@ -1804,6 +1823,7 @@ function calcCashDiff(){
   }
 }
 function doLogout(){
+  syncShiftStatus('closed');
   closeOv('ov-logout');curUser=null;cart=[];cashIn='';
   // hideMainUI();
   el('shift-open-screen').classList.remove('show');
