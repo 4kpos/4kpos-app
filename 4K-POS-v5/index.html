@@ -392,6 +392,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div class="hmi sal" id="hm-sal" onclick="closeHMenu();reqPin('sales')">📊 <span id="hm-sal-txt">Ventas del día</span></div>
   <div class="hmi conta" id="hm-conta" onclick="closeHMenu();reqPin('conta')">📒 <span id="hm-conta-txt">Contabilidad</span></div>
   <div class="hmi" style="color:var(--tx3)" onclick="closeHMenu();openDrawer()">🗃️ <span id="hm-drawer-txt">Abrir Registradora</span></div>
+  <div class="hmi" id="hm-dash" style="display:none;color:#3b82f6" onclick="closeHMenu();openDashboard()">📱 <span id="hm-dash-txt">Dashboard móvil</span></div>
   <div class="hmi exit" onclick="closeHMenu();exitApp()">🚪 <span id="hm-exit-txt">Salir del programa</span></div>
 </div>
 
@@ -1066,6 +1067,8 @@ const T = {
     forceClose:'Forzar cierre (Admin)',
     // Placeholders
     pNamePh:'Nombre del producto',saveConfig:'💾 Guardar Config',
+    invSrch:'🔍 Nombre o código de barras...',icSrch:'🔍 Buscar nombre o código...',creditSrch:'🔍 Buscar por nombre o cédula...',optional:'(opcional)',
+    dashboardBtn:'📱 Dashboard móvil',dashboardProOnly:'El dashboard móvil está disponible en el plan Pro. Actualiza tu plan para acceder.',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -1138,6 +1141,8 @@ const T = {
     forceClose:'Force close (Admin)',
     // Placeholders
     pNamePh:'Product name',saveConfig:'💾 Save Config',
+    invSrch:'🔍 Name or barcode...',icSrch:'🔍 Search name or code...',creditSrch:'🔍 Search by name or ID...',optional:'(optional)',
+    dashboardBtn:'📱 Mobile Dashboard',dashboardProOnly:'Mobile dashboard is available on the Pro plan. Upgrade your plan to access.',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -1318,6 +1323,11 @@ function applyLang(){
   const _custSave=el('cust-save-btn');if(_custSave)_custSave.innerHTML=t('save');
   // Placeholders
   const _pNameInput=el('p-name');if(_pNameInput)_pNameInput.placeholder=t('pNamePh');
+  const _invSrch=el('inv-srch');if(_invSrch)_invSrch.placeholder=t('invSrch');
+  const _icSrch=el('ic-srch');if(_icSrch)_icSrch.placeholder=t('icSrch');
+  const _creditSrch=el('credit-cust-srch');if(_creditSrch)_creditSrch.placeholder=t('creditSrch');
+  const _ncPhone=el('nc-phone');if(_ncPhone)_ncPhone.placeholder=t('optional');
+  const _hmDash=el('hm-dash-txt');if(_hmDash)_hmDash.textContent=t('dashboardBtn');
   updateCobrar(); renderCats(); renderProds(); updatePCat();
 }
 function switchLang(){
@@ -1389,6 +1399,24 @@ function exitApp(){
   confirm2(lang==='en'?'Exit program?':'¿Salir del programa?',function(){
     try{ipcRenderer.invoke('exit-app');}catch(e){window.close();}
   });
+}
+const DASHBOARD_URL='https://4kpos-dashboard.netlify.app'; // TODO: actualizar URL del dashboard
+function openDashboard(){
+  ipcRenderer.invoke('get-license-info').then(function(info){
+    if(info&&(info.plan||'').toLowerCase()==='pro'){
+      try{require('electron').shell.openExternal(DASHBOARD_URL);}catch(e){window.open(DASHBOARD_URL,'_blank');}
+    }else{
+      toast('⚠ '+t('dashboardProOnly'));
+    }
+  }).catch(function(){
+    toast('⚠ '+t('dashboardProOnly'));
+  });
+}
+function updateDashBtn(){
+  ipcRenderer.invoke('get-license-info').then(function(info){
+    const dash=el('hm-dash');
+    if(dash)dash.style.display=(info&&(info.plan||'').toLowerCase()==='pro')?'flex':'none';
+  }).catch(function(){});
 }
 // DATA
 async function loadDB(){
@@ -1522,7 +1550,7 @@ function startApp(){
 
   showCategories();
   renderCart();
-  updateLicBadge();
+  updateLicBadge();updateDashBtn();
   updateOACounter();
   setEl('ord-lbl','#'+db.orderNum);
   if(_restoredFromBackup){toast('🔄 Datos restaurados del backup automático');_restoredFromBackup=false;}
