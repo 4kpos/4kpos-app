@@ -745,7 +745,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <div class="mb">
       <div style="display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap" id="conta-tabs">
         <button class="btn btn-p" onclick="contaTab('ct-res',this)">📊 Resumen</button>
-        <button class="btn btn-s" onclick="contaTab('ct-fac',this)">🧾 Facturas</button>
+        <button class="btn btn-s" onclick="contaTab('ct-fac',this)">🧾 Ventas</button>
+        <button class="btn btn-s" onclick="contaTab('ct-cred',this)">💳 Créditos</button>
         <button class="btn btn-s btn-red-soft" data-extra-class="btn-red-soft" onclick="contaTab('ct-gst',this)">💸 Gastos</button>
         <button class="btn btn-s" onclick="contaTab('ct-graf',this)">📈 Gráfica</button>
       </div>
@@ -764,6 +765,27 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div id="ct-breakdown"></div>
       </div>
       <div id="ct-fac" style="display:none">
+        <!-- Ventas del período -->
+        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+          <select class="fi" id="vnt-period" style="width:136px" onchange="renderVentasList()">
+            <option value="hoy">Hoy</option>
+            <option value="semana">Esta semana</option>
+            <option value="mes" selected>Este mes</option>
+            <option value="todo">Todo</option>
+          </select>
+          <select class="fi" id="vnt-method" style="width:136px" onchange="renderVentasList()">
+            <option value="">Todos los métodos</option>
+            <option value="cash">Efectivo</option>
+            <option value="card">Tarjeta</option>
+            <option value="transf">Transferencia</option>
+            <option value="credit">Crédito</option>
+          </select>
+          <input class="fi sinp" id="vnt-srch" placeholder="🔍 # orden o cliente..." style="flex:1;min-width:110px" oninput="renderVentasList()">
+        </div>
+        <div id="vnt-summary" style="font-size:.82rem;font-weight:700;color:var(--gn);margin-bottom:8px"></div>
+        <div id="vnt-list" style="max-height:260px;overflow-y:auto;margin-bottom:14px"></div>
+        <div class="sep-line"></div>
+        <div class="slbl" style="margin-top:8px">Compras de inventario</div>
         <div id="fac-block" style="display:none;background:var(--rdb);border:1.5px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px;font-size:.83rem;color:var(--rd);margin-bottom:12px">🔒 Sin acceso a Facturas</div>
         <div id="fac-content">
           <div class="slbl">Registrar Factura</div>
@@ -798,7 +820,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
           </div>
           <div class="fg"><label class="lbl">Notas</label><input type="text" class="fi" id="gst-notes"></div>
           <div class="frow"><button class="btn btn-p" onclick="saveGasto()">💾 Registrar</button><button class="btn btn-s" onclick="clearGasto()">↺</button></div>
-          <div class="slbl">Gastos</div><div id="gst-list"></div>
+          <div class="slbl" style="display:flex;justify-content:space-between;align-items:center"><span>Gastos</span><span id="gst-period-total" style="font-weight:700;color:var(--rd);font-size:.78rem;text-transform:none;letter-spacing:0"></span></div><div id="gst-list"></div>
         </div>
       </div>
       <div id="ct-graf" style="display:none">
@@ -817,6 +839,26 @@ select.fi option{background:var(--s2);color:var(--tx);}
         </div>
         <canvas id="graf-canvas" style="width:100%;max-height:320px;background:var(--s2);border-radius:var(--rs);padding:10px"></canvas>
         <div id="graf-legend" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
+      </div>
+
+      <!-- CRÉDITOS -->
+      <div id="ct-cred" style="display:none">
+        <div style="background:var(--amb);border:1.5px solid var(--am);border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--am)">Crédito pendiente total</div>
+            <div id="cred-pending-badge" style="font-family:monospace;font-size:1.15rem;font-weight:700;color:var(--am)">$0.00</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3)">Clientes</div>
+            <div id="cred-count-badge" style="font-size:1rem;font-weight:700;color:var(--tx2)">0</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:5px;margin-bottom:12px">
+          <button class="btn btn-p" id="cred-f-pend" data-f="pending" onclick="setCredFilter('pending')">Pendientes</button>
+          <button class="btn btn-s" id="cred-f-paid" data-f="paid" onclick="setCredFilter('paid')">Pagados</button>
+          <button class="btn btn-s" id="cred-f-all" data-f="all" onclick="setCredFilter('all')">Todos</button>
+        </div>
+        <div id="cred-tab-list"></div>
       </div>
     </div>
   </div>
@@ -3146,9 +3188,11 @@ function renderConta(){
   const costoFac=facturas.reduce((s,x)=>s+x.cost,0);
   const totalGastos=gastos.reduce((s,x)=>s+x.monto,0);
   const utilidad=ingresos-costoFac-totalGastos;
+  const creditPending=_getPendingCredits().reduce(function(s,c){return s+(c.total-c.paid);},0);
   el('ct-stats').innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px">'
     +sCard('gn','💰 Ingresos',dolr(ingresos))+sCard('rd','💸 Compras',dolr(costoFac))+sCard('am','⚡ Gastos',dolr(totalGastos))
-    +sCard('ac','📊 Órdenes',sales.length.toString())+sCard(utilidad>=0?'gn':'rd','✨ Utilidad',dolr(utilidad))+sCard('bl','📦 Facturas',facturas.length.toString())+'</div>';
+    +sCard('ac','📊 Órdenes',sales.length.toString())+sCard(utilidad>=0?'gn':'rd','✨ Utilidad',dolr(utilidad))
+    +sCard('am','💳 Crédito',dolr(creditPending))+'</div>';
   const prodMap={};
   sales.forEach(s=>s.items.forEach(i=>{if(!prodMap[i.name])prodMap[i.name]={qty:0,total:0};prodMap[i.name].qty+=i.qty;prodMap[i.name].total+=i.price*i.qty;}));
   const sorted=Object.entries(prodMap).sort((a,b)=>b[1].total-a[1].total);
@@ -3186,9 +3230,15 @@ function clearGasto(){['gst-concepto','gst-monto','gst-notes'].forEach(id=>el(id
 function delGasto(id){confirm2('¿Eliminar gasto?',()=>{db.gastos_conta=db.gastos_conta.filter(g=>g.id!==id);saveDB();renderGstList();});}
 function renderGstList(){
   const list=el('gst-list');
-  if(!db.gastos_conta.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">Sin gastos.</div>';return;}
+  const period=(el('ct-period')||{value:'todo'}).value;
+  const range=getDateRange(period);
+  const all=(db.gastos_conta||[]).filter(function(g){const d=new Date(g.date);return d>=range.start&&d<=range.end;});
+  const totalGst=all.reduce(function(s,g){return s+g.monto;},0);
+  const hdr=el('gst-period-total');
+  if(hdr)hdr.textContent='Total período: '+dolr(totalGst)+' ('+all.length+' registros)';
+  if(!all.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">Sin gastos en este período.</div>';return;}
   const cc={operativo:'var(--bl)',inventario:'var(--ac)',servicios:'var(--am)',nomina:'var(--gn)',marketing:'var(--rd)',otro:'var(--tx3)'};
-  list.innerHTML=db.gastos_conta.slice().reverse().map(g=>'<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1.5px solid var(--b1)"><div style="flex:1"><div style="font-weight:600;font-size:.83rem;color:var(--tx)">'+g.concepto+'</div><div style="font-size:.72rem;color:var(--tx3)">'+new Date(g.date).toLocaleDateString()+' · <span style="color:'+(cc[g.cat]||'var(--tx3)')+'">'+g.cat+'</span>'+(g.notes?' · '+g.notes:'')+'</div></div><div style="font-family:monospace;color:var(--rd);font-size:.85rem;font-weight:700">'+dolr(g.monto)+'</div><button class="xb" onclick="delGasto(\''+g.id+'\')">✕</button></div>').join('');
+  list.innerHTML=all.slice().reverse().map(function(g){return '<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1.5px solid var(--b1)"><div style="flex:1"><div style="font-weight:600;font-size:.83rem;color:var(--tx)">'+g.concepto+'</div><div style="font-size:.72rem;color:var(--tx3)">'+new Date(g.date).toLocaleDateString()+' · <span style="color:'+(cc[g.cat]||'var(--tx3)')+'">'+g.cat+'</span>'+(g.notes?' · '+g.notes:'')+'</div></div><div style="font-family:monospace;color:var(--rd);font-size:.85rem;font-weight:700">'+dolr(g.monto)+'</div><button class="xb" onclick="delGasto(\''+g.id+'\')">✕</button></div>';}).join('');
 }
 // CHART TOOLTIP
 function _grafTip(){
@@ -3328,12 +3378,101 @@ function drawPie(ctx,labels,data,colors,pad,W,H){
   data.forEach((v,i)=>{const slice=v/total*Math.PI*2;ctx.fillStyle=colors[i%colors.length];ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,angle,angle+slice);ctx.closePath();ctx.fill();const midA=angle+slice/2,lx=cx+Math.cos(midA)*r*0.65,ly=cy+Math.sin(midA)*r*0.65,pct=Math.round(v/total*100);if(pct>5){ctx.fillStyle='#fff';ctx.font='bold 12px Segoe UI';ctx.textAlign='center';ctx.fillText(pct+'%',lx,ly);}angle+=slice;});
   el('graf-legend').innerHTML=labels.map((l,i)=>'<span style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:#fff"><span style="width:11px;height:11px;background:'+colors[i%colors.length]+';border-radius:3px;display:inline-block"></span>'+l+'</span>').join('');
 }
+function renderVentasList(){
+  const period=(el('vnt-period')||{value:'mes'}).value;
+  const range=getDateRange(period);
+  const method=(el('vnt-method')||{value:''}).value;
+  const srch=((el('vnt-srch')||{value:''}).value||'').toLowerCase().trim();
+  const pmLabel={cash:'Efectivo',card:'Tarjeta',transf:'Transferencia',credit:'Crédito',split:'Dividido'};
+  const pmColor={cash:'var(--gn)',card:'var(--bl)',transf:'var(--am)',credit:'var(--rd)',split:'var(--tx3)'};
+  const sales=(db.sales||[]).filter(function(s){
+    if(s.status!=='active')return false;
+    const d=new Date(s.date);
+    if(d<range.start||d>range.end)return false;
+    if(method&&s.payMethod!==method)return false;
+    if(srch){
+      const rnum=String(s.rnum||s.id||'').toLowerCase();
+      const client=(s.creditClient||'').toLowerCase();
+      if(!rnum.includes(srch)&&!client.includes(srch))return false;
+    }
+    return true;
+  }).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  const total=sales.reduce(function(s,x){return s+x.total;},0);
+  const lbl=el('vnt-summary');
+  if(lbl)lbl.textContent=sales.length+' ventas · Total: '+dolr(total);
+  const list=el('vnt-list');if(!list)return;
+  if(!sales.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:12px 0;text-align:center">Sin ventas en este período.</div>';return;}
+  list.innerHTML=sales.map(function(s){
+    const dt=new Date(s.date);
+    const dStr=dt.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+    const tStr=dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+    const items=(s.items||[]).map(function(i){return i.name+' ×'+(i.qty||1);}).join(', ');
+    const pm=s.payMethod||'cash';
+    const col=pmColor[pm]||'var(--tx3)';
+    const lPm=s.payLabel||(pmLabel[pm]||pm);
+    const credBadge=pm==='credit'
+      ?'<span style="margin-left:6px;font-size:.68rem;font-weight:700;color:'+((s.creditStatus||'pending')==='paid'?'var(--gn)':'var(--am)')+'">'+((s.creditStatus||'pending')==='paid'?'✅ Pagado':s.creditPaid>0?'⏳ Abonado '+dolr(s.creditPaid):'⏳ Pendiente')+'</span>'
+      :'';
+    return '<div style="background:var(--s2);border-radius:var(--rs);padding:9px 11px;margin-bottom:6px;border-left:3px solid '+col+'">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">'
+      +'<span style="font-size:.8rem;font-weight:700;color:var(--tx2)">#'+(s.rnum||s.id)+(s.creditClient?' · '+s.creditClient:'')+'</span>'
+      +'<span style="font-family:monospace;font-weight:700;color:var(--gn)">'+dolr(s.total)+'</span></div>'
+      +'<div style="font-size:.72rem;color:var(--tx3)">'+dStr+' '+tStr+' · '+(s.cashier||'—')+'</div>'
+      +(items?'<div style="font-size:.71rem;color:var(--tx3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+items+'</div>':'')
+      +'<div style="font-size:.72rem;margin-top:2px"><span style="color:'+col+';font-weight:600">'+lPm+'</span>'+credBadge+'</div>'
+      +'</div>';
+  }).join('');
+}
+let _credFilter='pending';
+function setCredFilter(f){
+  _credFilter=f;
+  ['pend','paid','all'].forEach(function(x){const b=el('cred-f-'+x);if(b)b.className='btn btn-s';});
+  const ab=el('cred-f-'+f);if(ab)ab.className='btn btn-p';
+  renderContaCredits();
+}
+function renderContaCredits(){
+  const pending=_getPendingCredits();
+  const totalOwed=pending.reduce(function(s,c){return s+(c.total-c.paid);},0);
+  const pb=el('cred-pending-badge');if(pb)pb.textContent=dolr(totalOwed);
+  const cb=el('cred-count-badge');if(cb)cb.textContent=pending.length;
+  const paidSales=(db.sales||[]).filter(function(s){return s.payMethod==='credit'&&s.creditStatus==='paid';})
+    .map(function(s){return {_key:'sp'+s.id,_src:'sale',saleId:s.id,client:s.creditClient||'—',cedula:s.creditCedula||'',
+      total:s.total,paid:s.creditPaid||s.total,date:s.date,items:s.items||[],payments:s.creditPayments||[]};})
+    .sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  let display=[];
+  if(_credFilter==='pending')display=pending;
+  else if(_credFilter==='paid')display=paidSales;
+  else display=[...pending,...paidSales].sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  const list=el('cred-tab-list');if(!list)return;
+  if(!display.length){
+    list.innerHTML='<div style="color:var(--tx3);text-align:center;padding:20px 0;font-size:.84rem">'
+      +(_credFilter==='paid'?'Sin créditos pagados.':_credFilter==='pending'?'Sin créditos pendientes.':'Sin créditos registrados.')+'</div>';
+    return;
+  }
+  const paidKeys=new Set(paidSales.map(function(x){return x._key;}));
+  list.innerHTML=display.map(function(c){
+    if(paidKeys.has(c._key)){
+      const dt=new Date(c.date);
+      const lastPay=c.payments.length?c.payments[c.payments.length-1]:null;
+      return '<div style="background:var(--gnb);border:1.5px solid var(--gn);border-radius:var(--rs);padding:10px 12px;margin-bottom:7px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center">'
+        +'<span style="font-weight:700;color:var(--tx)">'+c.client+'</span>'
+        +'<span style="font-family:monospace;font-weight:700;color:var(--gn)">'+dolr(c.total)+'</span></div>'
+        +(c.cedula?'<div style="font-size:.72rem;color:var(--tx3)">CI: '+c.cedula+'</div>':'')
+        +'<div style="font-size:.73rem;color:var(--gn);margin-top:3px">✅ Pagado · '+dt.toLocaleDateString()
+        +(lastPay?' · Último abono: '+new Date(lastPay.date).toLocaleDateString():'')+'</div>'
+        +'</div>';
+    }
+    return _buildCreditCard(c,false);
+  }).join('');
+}
 function contaTab(tab,e2){
-  ['ct-res','ct-fac','ct-gst','ct-graf'].forEach(t=>el(t).style.display='none');
+  ['ct-res','ct-fac','ct-gst','ct-graf','ct-cred'].forEach(function(t){const p=el(t);if(p)p.style.display='none';});
   el(tab).style.display='block';
-  document.querySelectorAll('#conta-tabs .btn').forEach(b=>b.className='btn btn-s '+(b.dataset.extraClass||'').trim());
+  document.querySelectorAll('#conta-tabs .btn').forEach(function(b){b.className='btn btn-s '+(b.dataset.extraClass||'').trim();});
   if(e2)e2.className='btn btn-p '+(e2.dataset.extraClass||'').trim();
-  if(tab==='ct-fac')loadFacProds();
+  if(tab==='ct-fac'){loadFacProds();renderVentasList();}
+  if(tab==='ct-cred')renderContaCredits();
   if(tab==='ct-graf')setTimeout(renderGraf,50);
 }
 
