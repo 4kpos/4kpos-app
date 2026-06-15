@@ -130,6 +130,16 @@ body.light .pli-meta{color:#3d3d58;}
 body.light .tog-label{color:#1a1a2e;font-weight:500;}
 body.light .rline{border-bottom-color:#cccccc;}
 body.light .rsub,.rsub{color:#3d3d58;}
+body.light input,body.light select,body.light textarea{color:#1a1a1a!important;font-weight:500;}
+body.light input::placeholder,body.light textarea::placeholder{color:#666!important;}
+body.light .fi,body.light .sinp,body.light .lfi{color:#1a1a1a;font-size:.9rem;}
+body.light label{color:#333344!important;font-weight:600!important;}
+body.light .pli-price{font-size:16px!important;font-weight:700!important;color:#1a6040!important;}
+body.light .pli-name{font-size:14px!important;font-weight:600!important;color:#1a1a1a!important;}
+body.light .pli-meta{font-size:.73rem!important;color:#3d3d58!important;}
+body.light .pcard-name{color:#1a1a1a!important;font-weight:700!important;}
+body.light .pcard-price{color:#15803d!important;font-weight:700!important;}
+body.light .chgbox{color:#15803d!important;border-color:#15803d!important;background:rgba(21,128,61,0.08)!important;}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;padding:10px;}
 .cat-card{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r);padding:8px 8px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .18s;text-align:center;min-height:150px;}
 .cat-card:hover{border-color:var(--ac);transform:scale(.97);}
@@ -631,10 +641,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="slbl" id="slbl-customers">Clientes</div><div id="cust-list"></div>
       <!-- CREDITS -->
       <div id="t-credits" style="display:none">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
           <div class="slbl" style="margin:0" id="slbl-credits">Créditos pendientes</div>
           <div style="font-size:.85rem;color:var(--am);font-weight:700" id="credits-total-lbl"></div>
         </div>
+        <div style="font-size:.77rem;color:var(--tx3);margin-bottom:12px" id="credits-count-lbl"></div>
         <div id="adm-credits-list"></div>
       </div>
       </div>
@@ -1536,7 +1547,7 @@ async function loadDB(){
     // This ensures categories reach Supabase even if the previous save predates the categories field
     try{
       const slim={
-        sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,payLabel:_normPayLabel(s),cashier:s.cashier||'',items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),
+        sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,payLabel:_normPayLabel(s),cashier:s.cashier||'',creditClient:s.creditClient||null,creditStatus:s.creditStatus||null,creditPaid:s.creditPaid||null,items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),
         products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat,minStock:p.minStock||5};}),
         categories:(db.categories||[]).map(function(c){return {id:c.id,name:c.name,image:c.img||null};}),
         returns:(db.returns||[]).map(function(r){return {id:r.id,originalSaleId:r.originalSaleId,rnum:r.rnum,total:r.total,user:r.user,date:r.date,payMethod:r.payMethod};}),
@@ -2454,7 +2465,8 @@ function confirmCreditSale(){
   const rcode='4K-'+rnum+'-'+Date.now().toString(36).toUpperCase();
   const sale={id:db.orderNum,date:new Date().toISOString(),items:JSON.parse(JSON.stringify(cart)),
     total,recv:0,change:0,payMethod:'credit',payLabel:t('credit'),
-    status:'active',rnum,rcode,cashier:curUser?curUser.name:'—',creditClient:name,creditCustId:cust.id};
+    status:'active',rnum,rcode,cashier:curUser?curUser.name:'—',creditClient:name,creditCustId:cust.id,
+    creditCedula:cust.cedula||'',creditStatus:'pending',creditPaid:0,creditPayments:[]};
   db.sales.push(sale);
   if(!db.credits)db.credits=[];
   db.credits.push({id:Date.now().toString(),saleId:db.orderNum,custId:cust.id,client:name,cedula:cust.cedula||'',total,paid:0,date:new Date().toISOString(),payments:[],items:JSON.parse(JSON.stringify(cart))});
@@ -2471,17 +2483,31 @@ function openCreditsPanel(){
   renderCreditsPanel();
   openOv('ov-credits');
 }
-function renderCreditsPanel(){
-  if(!db.credits)db.credits=[];
-  const pending=db.credits.filter(c=>c.paid<c.total);
-  const totalOwed=pending.reduce((s,c)=>s+(c.total-c.paid),0);
-  const sl=el('credits-summary');
-  if(sl)sl.textContent=pending.length+' '+t('pendingCredits')+' — '+t('creditAmount')+': '+dolr(totalOwed);
-  const list=el('credits-list');
-  if(!list)return;
-  if(!pending.length){list.innerHTML='<p style="color:var(--tx3)">'+t('noPendingCredits')+'</p>';return;}
-  list.innerHTML=pending.map(c=>{
-    const owed=c.total-c.paid;
+// ── Unified credit list: db.sales (primary) + db.credits (legacy fallback) ──
+function _getPendingCredits(){
+  const list=[];
+  const seenSaleIds=new Set();
+  (db.sales||[]).forEach(function(s){
+    if(s.payMethod!=='credit')return;
+    seenSaleIds.add(String(s.id));
+    if((s.creditStatus||'pending')==='paid')return;
+    list.push({_key:'s'+s.id,saleId:s.id,client:s.creditClient||'—',cedula:s.creditCedula||'',
+      total:s.total,paid:s.creditPaid||0,date:s.date,
+      items:s.items||[],payments:s.creditPayments||[],_src:'sale'});
+  });
+  (db.credits||[]).forEach(function(c){
+    if(seenSaleIds.has(String(c.saleId)))return;
+    if(c.paid>=c.total)return;
+    list.push({_key:'c'+c.id,saleId:c.saleId,_credId:c.id,client:c.client,cedula:c.cedula||'',
+      total:c.total,paid:c.paid,date:c.date,
+      items:c.items||[],payments:c.payments||[],_src:'credit'});
+  });
+  list.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  return list;
+}
+function _buildCreditCard(c,compact){
+  const owed=c.total-c.paid;
+  if(compact){
     return '<div style="background:var(--s2);border-radius:var(--rs);padding:11px;margin-bottom:8px">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
       +'<div style="font-weight:700;color:var(--tx)">'+c.client+'</div>'
@@ -2489,74 +2515,94 @@ function renderCreditsPanel(){
       +'<div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px">'+new Date(c.date).toLocaleDateString()
       +(c.paid>0?' · '+t('creditPaid')+': '+dolr(c.paid):'')+'</div>'
       +'<div style="display:flex;gap:6px">'
-      +'<button class="btn btn-s" style="font-size:.75rem" onclick="openCreditPay(\''+c.id+'\')">💵 '+t('partialPayment')+'</button>'
-      +'<button class="btn btn-g" style="font-size:.75rem" onclick="payCreditFull(\''+c.id+'\')">✅ '+t('markPaid')+'</button>'
+      +'<button class="btn btn-s" style="font-size:.75rem" onclick="openCreditPay(\''+c._key+'\')">💵 '+t('partialPayment')+'</button>'
+      +'<button class="btn btn-g" style="font-size:.75rem" onclick="payCreditFull(\''+c._key+'\')">✅ '+t('markPaid')+'</button>'
       +'</div></div>';
-  }).join('');
+  }
+  const itemsHtml=(c.items&&c.items.length)
+    ?'<div style="font-size:.72rem;color:var(--tx3);margin:3px 0 5px;line-height:1.6">'
+      +t('creditItems')+': '+c.items.map(function(i){return i.name+' ×'+(i.qty||1)+' ('+dolr((i.price||0)*(i.qty||1))+')';}).join(' | ')
+      +'</div>'
+    :'';
+  const paymentsHtml=(c.payments&&c.payments.length)
+    ?'<div style="font-size:.72rem;color:var(--tx3);margin:0 0 6px">'
+      +t('payments')+': '+c.payments.map(function(p){return dolr(p.amount)+' – '+new Date(p.date).toLocaleDateString();}).join(' | ')
+      +'</div>'
+    :'';
+  const statusColor=c.paid>0?'var(--am)':'var(--rd)';
+  const statusLabel=c.paid>0?t('creditPaid')+': '+dolr(c.paid):'Pendiente';
+  return '<div style="background:var(--s2);border-radius:var(--rs);padding:11px;margin-bottom:8px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px">'
+    +'<div><span style="font-weight:700;color:var(--tx)">'+c.client+'</span>'
+    +(c.cedula?'<span style="font-size:.72rem;color:var(--tx3);margin-left:6px">CI: '+c.cedula+'</span>':'')+'</div>'
+    +'<span style="color:var(--am);font-family:monospace;font-weight:700">'+dolr(owed)+'</span></div>'
+    +'<div style="font-size:.74rem;color:'+statusColor+';margin-bottom:5px">'
+    +new Date(c.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})
+    +' · '+statusLabel+'</div>'
+    +itemsHtml+paymentsHtml
+    +'<div style="display:flex;gap:6px">'
+    +'<button class="btn btn-s" style="font-size:.75rem" onclick="openCreditPay(\''+c._key+'\')">💵 '+t('partialPayment')+'</button>'
+    +'<button class="btn btn-g" style="font-size:.75rem" onclick="payCreditFull(\''+c._key+'\')">✅ '+t('markPaid')+'</button>'
+    +'</div></div>';
+}
+function renderCreditsPanel(){
+  const pending=_getPendingCredits();
+  const totalOwed=pending.reduce(function(s,c){return s+(c.total-c.paid);},0);
+  const sl=el('credits-summary');
+  if(sl)sl.textContent=pending.length+' '+t('pendingCredits')+' — '+t('creditAmount')+': '+dolr(totalOwed);
+  const list=el('credits-list');
+  if(!list)return;
+  if(!pending.length){list.innerHTML='<p style="color:var(--tx3)">'+t('noPendingCredits')+'</p>';return;}
+  list.innerHTML=pending.map(function(c){return _buildCreditCard(c,true);}).join('');
 }
 function renderAdmCredits(){
-  if(!db.credits)db.credits=[];
-  const pending=db.credits.filter(c=>c.paid<c.total);
-  const totalOwed=pending.reduce((s,c)=>s+(c.total-c.paid),0);
+  const pending=_getPendingCredits();
+  const totalOwed=pending.reduce(function(s,c){return s+(c.total-c.paid);},0);
   const lbl=el('credits-total-lbl');if(lbl)lbl.textContent=dolr(totalOwed);
+  const lbl2=el('credits-count-lbl');if(lbl2)lbl2.textContent=pending.length+' '+t('pendingCredits');
   const list=el('adm-credits-list');if(!list)return;
-  if(!pending.length){list.innerHTML='<p style="color:var(--tx3)">'+t('noPendingCredits')+'</p>';return;}
-  list.innerHTML=pending.map(c=>{
-    const owed=c.total-c.paid;
-    const itemsHtml=(c.items&&c.items.length)
-      ?'<div style="font-size:.72rem;color:var(--tx3);margin:3px 0 5px;line-height:1.5">'
-        +t('creditItems')+': '+(c.items.map(i=>'<span>'+i.name+' ×'+i.qty+' ('+dolr(i.price*i.qty)+')</span>').join(', '))
-        +'</div>'
-      :'';
-    const paymentsHtml=(c.payments&&c.payments.length)
-      ?'<div style="font-size:.72rem;color:var(--tx3);margin:0 0 6px">'
-        +t('payments')+': '+(c.payments.map(p=>dolr(p.amount)+' – '+new Date(p.date).toLocaleDateString()).join(' | '))
-        +'</div>'
-      :'';
-    return '<div style="background:var(--s2);border-radius:var(--rs);padding:11px;margin-bottom:8px">'
-      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px">'
-      +'<div><span style="font-weight:700;color:var(--tx)">'+c.client+'</span>'
-      +(c.cedula?'<span style="font-size:.72rem;color:var(--tx3);margin-left:6px">CI: '+c.cedula+'</span>':'')+'</div>'
-      +'<span style="color:var(--am);font-family:monospace;font-weight:700">'+dolr(owed)+'</span></div>'
-      +'<div style="font-size:.74rem;color:var(--tx3);margin-bottom:5px">'
-        +new Date(c.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})
-        +(c.paid>0?' · '+t('creditPaid')+': '+dolr(c.paid):'')
-      +'</div>'
-      +itemsHtml+paymentsHtml
-      +'<div style="display:flex;gap:6px">'
-      +'<button class="btn btn-s" style="font-size:.75rem" onclick="openCreditPay(\''+c.id+'\')">💵 '+t('partialPayment')+'</button>'
-      +'<button class="btn btn-g" style="font-size:.75rem" onclick="payCreditFull(\''+c.id+'\')">✅ '+t('markPaid')+'</button>'
-      +'</div></div>';
-  }).join('');
+  if(!pending.length){list.innerHTML='<p style="color:var(--tx3);padding:20px 0;text-align:center">'+t('noPendingCredits')+'</p>';return;}
+  list.innerHTML=pending.map(function(c){return _buildCreditCard(c,false);}).join('');
 }
-let _cpayId=null;
-function openCreditPay(id){
-  const c=(db.credits||[]).find(x=>x.id===id);if(!c)return;
-  _cpayId=id;
+let _cpayKey=null;
+function openCreditPay(key){
+  _cpayKey=key;
+  const pending=_getPendingCredits();
+  const c=pending.find(function(x){return x._key===key;});if(!c)return;
   const owed=c.total-c.paid;
-  const cl=el('cpay-client');if(cl)cl.textContent=c.client;
+  const cl=el('cpay-client');if(cl)cl.textContent=c.client+(c.cedula?' · CI '+c.cedula:'');
   const pe=el('cpay-pending');if(pe)pe.textContent=dolr(owed);
   const amt=el('cpay-amount');if(amt){amt.value='';amt.max=owed;}
   openOv('ov-credit-pay');
-  setTimeout(()=>{const i=el('cpay-amount');if(i){i.focus();i.select();}},120);
+  setTimeout(function(){const i=el('cpay-amount');if(i){i.focus();i.select();}},120);
 }
 function doCreditPayment(full){
-  const c=(db.credits||[]).find(x=>x.id===_cpayId);if(!c)return;
+  const pending=_getPendingCredits();
+  const c=pending.find(function(x){return x._key===_cpayKey;});if(!c)return;
   const owed=c.total-c.paid;
   const amt=full?owed:(parseFloat(el('cpay-amount').value)||0);
   if(!amt||amt<=0){toast('⚠ '+t('amountLbl'));return;}
   const actual=Math.min(amt,owed);
-  c.paid+=actual;
-  c.payments.push({date:new Date().toISOString(),amount:actual});
+  const now=new Date().toISOString();
+  if(c._src==='sale'){
+    const s=(db.sales||[]).find(function(x){return x.id===c.saleId;});if(!s)return;
+    s.creditPaid=(s.creditPaid||0)+actual;
+    if(!s.creditPayments)s.creditPayments=[];
+    s.creditPayments.push({date:now,amount:actual});
+    s.creditStatus=s.creditPaid>=s.total?'paid':'partial';
+  }else{
+    const cr=(db.credits||[]).find(function(x){return x.id===c._credId;});if(!cr)return;
+    cr.paid+=actual;
+    cr.payments.push({date:now,amount:actual});
+  }
   saveDB();
   closeOv('ov-credit-pay');
   renderCreditsPanel();
   renderAdmCredits();
   toast('✓ '+dolr(actual)+' '+t('creditPaid'));
 }
-function payCreditFull(id){
-  const c=(db.credits||[]).find(x=>x.id===id);if(!c)return;
-  _cpayId=id;doCreditPayment(true);
+function payCreditFull(key){
+  _cpayKey=key;doCreditPayment(true);
 }
 
 function openSaveOA(){
