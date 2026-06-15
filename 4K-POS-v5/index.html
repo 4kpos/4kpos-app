@@ -392,8 +392,22 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div class="hmi sal" id="hm-sal" onclick="closeHMenu();reqPin('sales')">📊 <span id="hm-sal-txt">Ventas del día</span></div>
   <div class="hmi conta" id="hm-conta" onclick="closeHMenu();reqPin('conta')">📒 <span id="hm-conta-txt">Contabilidad</span></div>
   <div class="hmi" style="color:var(--tx3)" onclick="closeHMenu();openDrawer()">🗃️ <span id="hm-drawer-txt">Abrir Registradora</span></div>
-  <div class="hmi" style="color:#3b82f6" onclick="closeHMenu();if(window.require){require('electron').shell.openExternal('https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html')}">📱 <span>Dashboard</span></div>
+  <div class="hmi" style="color:#3b82f6" onclick="closeHMenu();openDashQR()">📱 <span>Dashboard</span></div>
   <div class="hmi exit" onclick="closeHMenu();exitApp()">🚪 <span id="hm-exit-txt">Salir del programa</span></div>
+</div>
+
+<!-- DASHBOARD QR -->
+<div class="ov" id="ov-dash-qr">
+  <div class="modal" style="max-width:300px;text-align:center">
+    <div class="mh"><h3>📱 Dashboard móvil</h3><button class="mx" onclick="closeOv('ov-dash-qr')">✕</button></div>
+    <div class="mb" style="display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:8px">
+      <div style="background:#fff;padding:10px;border-radius:12px;display:inline-block">
+        <img id="dash-qr-img" src="" alt="QR" style="width:200px;height:200px;display:block">
+      </div>
+      <p style="font-size:.82rem;color:var(--tx2);margin:0">Escanea con tu celular<br>para abrir el dashboard</p>
+      <a id="dash-qr-link" href="#" target="_blank" onclick="try{require('electron').shell.openExternal(this.dataset.url);return false;}catch(e){}" style="font-size:.75rem;color:var(--ac);word-break:break-all;text-decoration:none"></a>
+    </div>
+  </div>
 </div>
 
 <!-- PIN -->
@@ -1183,6 +1197,12 @@ function dolr(n){return '$'+(isNaN(n)?'0.00':Number(n).toFixed(2));}
 function toast(m){const e=el('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2300);}
 function openOv(id){el(id).classList.add('open');}
 function closeOv(id){el(id).classList.remove('open');}
+function openDashQR(){
+  const url='https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html';
+  const qr=el('dash-qr-img');if(qr)qr.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(url);
+  const lnk=el('dash-qr-link');if(lnk){lnk.dataset.url=url;lnk.textContent=url;}
+  openOv('ov-dash-qr');
+}
 function confirm2(msg,cb){confCb=cb;el('conf-msg').textContent=msg;el('confov').classList.add('open');}
 function confYes(){el('confov').classList.remove('open');if(confCb)confCb();confCb=null;}
 function confNo(){el('confov').classList.remove('open');confCb=null;}
