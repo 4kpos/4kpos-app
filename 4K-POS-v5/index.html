@@ -744,11 +744,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <div class="mh"><h3>📒 Contabilidad</h3><button class="mx" onclick="closeOv('ov-conta')">✕</button></div>
     <div class="mb">
       <div style="display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap" id="conta-tabs">
-        <button class="btn btn-p" onclick="contaTab('ct-res',this)">📊 Resumen</button>
-        <button class="btn btn-s" onclick="contaTab('ct-fac',this)">🧾 Ventas</button>
-        <button class="btn btn-s" onclick="contaTab('ct-cred',this)">💳 Créditos</button>
-        <button class="btn btn-s btn-red-soft" data-extra-class="btn-red-soft" onclick="contaTab('ct-gst',this)">💸 Gastos</button>
-        <button class="btn btn-s" onclick="contaTab('ct-graf',this)">📈 Gráfica</button>
+        <button class="btn btn-p" onclick="contaTab('ct-res',this)">📊 <span id="ct-tab-res-txt">Resumen</span></button>
+        <button class="btn btn-s" onclick="contaTab('ct-fac',this)">🧾 <span id="ct-tab-fac-txt">Ventas</span></button>
+        <button class="btn btn-s" onclick="contaTab('ct-cred',this)">💳 <span id="ct-tab-cred-txt">Créditos</span></button>
+        <button class="btn btn-s btn-red-soft" data-extra-class="btn-red-soft" onclick="contaTab('ct-gst',this)">💸 <span id="ct-tab-gst-txt">Gastos</span></button>
+        <button class="btn btn-s" onclick="contaTab('ct-graf',this)">📈 <span id="ct-tab-graf-txt">Gráfica</span></button>
       </div>
       <div id="ct-res">
         <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -1027,10 +1027,24 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <div class="mb">
       <div style="font-weight:700;color:var(--tx);margin-bottom:4px" id="cpay-client"></div>
       <div style="font-size:.8rem;color:var(--tx3);margin-bottom:10px"><span id="cpay-pending-lbl">Pendiente</span>: <span id="cpay-pending" style="color:var(--am);font-weight:700">$0.00</span></div>
+      <div class="fg" style="margin-bottom:8px">
+        <label class="lbl" id="cpay-method-lbl">Método de pago</label>
+        <div style="display:flex;gap:5px;margin-top:4px">
+          <button class="btn btn-p" id="cpay-m-cash" onclick="setCpayMethod('cash')">💵 <span id="cpay-m-cash-txt">Efectivo</span></button>
+          <button class="btn btn-s" id="cpay-m-card" onclick="setCpayMethod('card')">💳 <span id="cpay-m-card-txt">Tarjeta</span></button>
+          <button class="btn btn-s" id="cpay-m-split" onclick="setCpayMethod('split')">⚡ Split</button>
+        </div>
+      </div>
+      <div id="cpay-split-fields" style="display:none;margin-bottom:8px">
+        <div class="g2">
+          <div class="fg"><label class="lbl" id="cpay-split-cash-lbl">Efectivo</label><input type="number" class="fi" id="cpay-split-cash" placeholder="0.00" step="0.01" oninput="cpayCalcSplit()"></div>
+          <div class="fg"><label class="lbl" id="cpay-split-card-lbl">Tarjeta</label><input type="number" class="fi" id="cpay-split-card" placeholder="0.00" step="0.01" oninput="cpayCalcSplit()"></div>
+        </div>
+      </div>
       <div class="fg"><label class="lbl" id="cpay-amount-lbl">Monto a pagar</label><input type="number" class="fi" id="cpay-amount" min="0" step="0.01" placeholder="0.00"></div>
       <div class="frow" style="margin-top:12px;gap:8px">
-        <button class="btn btn-p" onclick="doCreditPayment(false)" id="cpay-partial-btn">✓ Parcial</button>
-        <button class="btn btn-g" onclick="doCreditPayment(true)" id="cpay-full-btn">✓ Total</button>
+        <button class="btn btn-p" onclick="doCreditPayment(false)" id="cpay-partial-btn">✓ <span id="cpay-partial-txt">Parcial</span></button>
+        <button class="btn btn-g" onclick="doCreditPayment(true)" id="cpay-full-btn">✓ <span id="cpay-full-txt">Total</span></button>
       </div>
     </div>
   </div>
@@ -1168,6 +1182,14 @@ const T = {
     filterPending:'Pendientes',filterPaid:'Pagados',filterAll:'Todos',
     creditTotalPending:'Crédito pendiente total',creditClients:'Clientes',
     lastPayment:'Último abono',noPaidCredits:'Sin créditos pagados.',noCredits:'Sin créditos registrados.',
+    payMethodLabel:'Método de pago',cpayPartialBtn:'Parcial',cpayTotalBtn:'Pago total',
+    todaySales:'Ventas del día',totalSalesLbl:'Total ventas',cashFromSales:'Efectivo en ventas',
+    fundBoxLbl:'Fondo de caja',expectedCashLbl:'Efectivo esperado',
+    creditPaymentsRcvd:'Pagos de crédito recibidos hoy',cashCreditPay:'Abonos en efectivo',cardCreditPay:'Abonos en tarjeta',
+    newCredits:'Créditos nuevos (deuda)',
+    payMethodCash:'Efectivo',payMethodCard:'Tarjeta',payMethodTransf:'Transferencia',payMethodSplit:'Mixto',payMethodCredit:'Crédito',
+    tabSummary:'Resumen',tabSalesLbl:'Ventas',tabExpenses:'Gastos',tabChart:'Gráfica',
+    salesBreakdown:'Desglose por producto',purchasesLbl:'Compras de inventario',
     // Cashier on receipt
     attendedBy:'Atendido por',
     // Cash close
@@ -1246,6 +1268,14 @@ const T = {
     filterPending:'Pending',filterPaid:'Paid',filterAll:'All',
     creditTotalPending:'Total pending credit',creditClients:'Customers',
     lastPayment:'Last payment',noPaidCredits:'No paid credits.',noCredits:'No credits registered.',
+    payMethodLabel:'Payment method',cpayPartialBtn:'Partial',cpayTotalBtn:'Full payment',
+    todaySales:"Today's sales",totalSalesLbl:'Total sales',cashFromSales:'Cash from sales',
+    fundBoxLbl:'Cash fund',expectedCashLbl:'Expected cash',
+    creditPaymentsRcvd:'Credit payments received today',cashCreditPay:'Cash credit payments',cardCreditPay:'Card credit payments',
+    newCredits:'New credits (debt)',
+    payMethodCash:'Cash',payMethodCard:'Card',payMethodTransf:'Transfer',payMethodSplit:'Mixed',payMethodCredit:'Credit',
+    tabSummary:'Summary',tabSalesLbl:'Sales',tabExpenses:'Expenses',tabChart:'Chart',
+    salesBreakdown:'Product breakdown',purchasesLbl:'Inventory purchases',
     // Cashier on receipt
     attendedBy:'Attended by',
     // Cash close
@@ -1450,6 +1480,27 @@ function applyLang(){
   const _creditSrch=el('credit-cust-srch');if(_creditSrch)_creditSrch.placeholder=t('creditSrch');
   const _ncPhone=el('nc-phone');if(_ncPhone)_ncPhone.placeholder=t('optional');
   const _hmDash=el('hm-dash-txt');if(_hmDash)_hmDash.textContent=t('dashboardBtn');
+  // Contabilidad tabs
+  const _ctRes=el('ct-tab-res-txt');if(_ctRes)_ctRes.textContent=t('tabSummary');
+  const _ctFac=el('ct-tab-fac-txt');if(_ctFac)_ctFac.textContent=t('tabSalesLbl');
+  const _ctCred=el('ct-tab-cred-txt');if(_ctCred)_ctCred.textContent=t('tabCredits');
+  const _ctGst=el('ct-tab-gst-txt');if(_ctGst)_ctGst.textContent=t('tabExpenses');
+  const _ctGraf=el('ct-tab-graf-txt');if(_ctGraf)_ctGraf.textContent=t('tabChart');
+  // Credit pay modal
+  const _cpayMethodLbl=el('cpay-method-lbl');if(_cpayMethodLbl)_cpayMethodLbl.textContent=t('payMethodLabel');
+  const _cpayCashTxt=el('cpay-m-cash-txt');if(_cpayCashTxt)_cpayCashTxt.textContent=t('payMethodCash');
+  const _cpayCardTxt=el('cpay-m-card-txt');if(_cpayCardTxt)_cpayCardTxt.textContent=t('payMethodCard');
+  const _cpaySplitCashLbl=el('cpay-split-cash-lbl');if(_cpaySplitCashLbl)_cpaySplitCashLbl.textContent=t('payMethodCash');
+  const _cpaySplitCardLbl=el('cpay-split-card-lbl');if(_cpaySplitCardLbl)_cpaySplitCardLbl.textContent=t('payMethodCard');
+  const _cpayPendLbl=el('cpay-pending-lbl');if(_cpayPendLbl)_cpayPendLbl.textContent=lang==='en'?'Pending':'Pendiente';
+  const _cpayAmtLbl=el('cpay-amount-lbl');if(_cpayAmtLbl)_cpayAmtLbl.textContent=t('amountLbl');
+  const _cpayPartialTxt=el('cpay-partial-txt');if(_cpayPartialTxt)_cpayPartialTxt.textContent=t('cpayPartialBtn');
+  const _cpayFullTxt=el('cpay-full-txt');if(_cpayFullTxt)_cpayFullTxt.textContent=t('cpayTotalBtn');
+  // Contabilidad period dropdown
+  const _ctPeriod=el('ct-period');if(_ctPeriod)_ctPeriod.options[0]&&(_ctPeriod.options[0].text=t('today'));
+  // Cash close label
+  const _loCashCloseLbl=el('lo-cash-close-lbl');if(_loCashCloseLbl)_loCashCloseLbl.textContent=lang==='en'?'Cash in drawer':'Efectivo en caja';
+  const _loDeclaredLbl=el('lo-declared-lbl');if(_loDeclaredLbl)_loDeclaredLbl.textContent=lang==='en'?'Declared cash':'Efectivo declarado';
   updateCobrar(); renderCats(); renderProds(); updatePCat();
 }
 function switchLang(){
@@ -1692,12 +1743,35 @@ function startApp(){
   const bts=localStorage.getItem('4kpos_backup_ts');
   const lbl=el('last-backup-lbl');if(lbl&&bts)lbl.textContent=new Date(bts).toLocaleString(lang);
 }
+function _getCreditCashToday(){
+  const today=new Date().toDateString();
+  let cashPart=0,cardPart=0,total=0,count=0;
+  (db.sales||[]).forEach(function(s){
+    if(s.payMethod!=='credit')return;
+    (s.creditPayments||[]).forEach(function(p){
+      if(new Date(p.date).toDateString()!==today)return;
+      total+=p.amount||0;count++;
+      cashPart+=(p.cashPart!=null?p.cashPart:(p.method==='card'?0:p.amount))||0;
+      cardPart+=(p.cardPart!=null?p.cardPart:(p.method==='card'?p.amount:0))||0;
+    });
+  });
+  (db.credits||[]).forEach(function(c){
+    (c.payments||[]).forEach(function(p){
+      if(new Date(p.date).toDateString()!==today)return;
+      total+=p.amount||0;count++;
+      cashPart+=(p.cashPart!=null?p.cashPart:(p.method==='card'?0:p.amount))||0;
+      cardPart+=(p.cardPart!=null?p.cardPart:(p.method==='card'?p.amount:0))||0;
+    });
+  });
+  return{total:total,cashPart:cashPart,cardPart:cardPart,count:count};
+}
 function calcCashDiff(){
   const today=new Date().toDateString();
   const active=db.sales.filter(s=>new Date(s.date).toDateString()===today&&s.status==='active');
   const cashSales=active.filter(s=>s.payMethod==='cash').reduce((s,x)=>s+x.total,0);
+  const creditCash=_getCreditCashToday().cashPart;
   const declared=parseFloat(el('lo-declared-cash').value)||0;
-  const expected=cashSales+db.fundAmount;
+  const expected=cashSales+creditCash+db.fundAmount;
   const diff=Math.round((declared-expected)*100)/100;
   const box=el('lo-cash-diff-box');
   const confirmBtn=el('lo-confirm-btn');
@@ -1714,7 +1788,10 @@ function calcCashDiff(){
   const diffTxt=diff===0
     ?'✅ '+(lang==='en'?'Cash matches':'Cuadre correcto')
     :(diff<0?'⬇ ':('+⬆ '))+(lang==='en'?'Difference':'Diferencia')+': '+dolr(Math.abs(diff));
-  box.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+(lang==='en'?'Expected':'Esperado')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(expected)+'</span></div>'
+  box.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+t('cashFromSales')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(cashSales)+'</span></div>'
+    +(creditCash?'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+t('cashCreditPay')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(creditCash)+'</span></div>':'')
+    +'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+t('fundBoxLbl')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(db.fundAmount)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;margin-bottom:3px;padding-top:4px;border-top:1px solid var(--b1)"><span style="color:var(--tx3)">'+t('expectedCashLbl')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(expected)+'</span></div>'
     +'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+(lang==='en'?'Declared':'Declarado')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(declared)+'</span></div>'
     +'<div style="display:flex;justify-content:space-between;padding-top:5px;border-top:1px solid var(--b1)"><span style="color:var(--tx3)">'+(lang==='en'?'Difference':'Diferencia')+'</span><span style="font-weight:700;color:'+color+'">'+diffTxt+'</span></div>';
   if(diff===0){
@@ -2619,6 +2696,27 @@ function renderAdmCredits(){
   list.innerHTML=pending.map(function(c){return _buildCreditCard(c,false);}).join('');
 }
 let _cpayKey=null;
+let _cpayMethod='cash';
+function setCpayMethod(m){
+  _cpayMethod=m;
+  const ids=['cash','card','split'];
+  ids.forEach(function(id){
+    const b=el('cpay-m-'+id);
+    if(b)b.className='btn '+(id===m?'btn-p':'btn-s');
+  });
+  const sf=el('cpay-split-fields');
+  if(sf)sf.style.display=m==='split'?'block':'none';
+  if(m==='split'){
+    const sc=el('cpay-split-cash');const sk=el('cpay-split-card');
+    if(sc)sc.value='';if(sk)sk.value='';
+    if(sc)setTimeout(function(){sc.focus();},60);
+  }
+}
+function cpayCalcSplit(){
+  const sc=parseFloat(el('cpay-split-cash').value)||0;
+  const sk=parseFloat(el('cpay-split-card').value)||0;
+  const ia=el('cpay-amount');if(ia&&(sc||sk))ia.value=(sc+sk).toFixed(2);
+}
 function openCreditPay(key){
   _cpayKey=key;
   const pending=_getPendingCredits();
@@ -2627,6 +2725,7 @@ function openCreditPay(key){
   const cl=el('cpay-client');if(cl)cl.textContent=c.client+(c.cedula?' · CI '+c.cedula:'');
   const pe=el('cpay-pending');if(pe)pe.textContent=dolr(owed);
   const amt=el('cpay-amount');if(amt){amt.value='';amt.max=owed;}
+  setCpayMethod('cash');
   openOv('ov-credit-pay');
   setTimeout(function(){const i=el('cpay-amount');if(i){i.focus();i.select();}},120);
 }
@@ -2640,26 +2739,47 @@ function doCreditPayment(full){
   const pending=_getPendingCredits();
   const c=pending.find(function(x){return x._key===_cpayKey;});if(!c)return;
   const owed=c.total-c.paid;
-  const amt=full?owed:(parseFloat(el('cpay-amount').value)||0);
+  let amt;
+  if(full){
+    amt=owed;
+  }else if(_cpayMethod==='split'){
+    const sc=parseFloat(el('cpay-split-cash').value)||0;
+    const sk=parseFloat(el('cpay-split-card').value)||0;
+    amt=sc+sk;
+    if(!amt){toast('⚠ '+t('amountLbl'));return;}
+    if(Math.abs((sc+sk)-(parseFloat(el('cpay-amount').value)||0))>0.01){
+      // keep amount field in sync
+      const ia=el('cpay-amount');if(ia)ia.value=amt.toFixed(2);
+    }
+  }else{
+    amt=parseFloat(el('cpay-amount').value)||0;
+  }
   if(!amt||amt<=0){toast('⚠ '+t('amountLbl'));return;}
   const actual=Math.min(amt,owed);
   const now=new Date().toISOString();
+  const method=_cpayMethod;
+  let cashPart=actual, cardPart=0;
+  if(method==='card'){cashPart=0;cardPart=actual;}
+  else if(method==='split'){
+    cashPart=Math.min(parseFloat(el('cpay-split-cash').value)||0, actual);
+    cardPart=actual-cashPart;
+  }
+  const payRec={date:now,amount:actual,method:method,cashPart:cashPart,cardPart:cardPart};
   if(c._src==='sale'){
     const s=(db.sales||[]).find(function(x){return x.id===c.saleId;});if(!s)return;
     s.creditPaid=(s.creditPaid||0)+actual;
     if(!s.creditPayments)s.creditPayments=[];
-    s.creditPayments.push({date:now,amount:actual});
+    s.creditPayments.push(payRec);
     s.creditStatus=s.creditPaid>=s.total?'paid':'partial';
   }else{
     const cr=(db.credits||[]).find(function(x){return x.id===c._credId;});if(!cr)return;
     cr.paid+=actual;
-    cr.payments.push({date:now,amount:actual});
+    cr.payments.push(payRec);
   }
   saveDB();
   closeOv('ov-credit-pay');
   renderCreditsPanel();
   renderAdmCredits();
-  // Re-render contabilidad credits tab if visible
   const ctCred=el('ct-cred');
   if(ctCred&&ctCred.style.display!=='none')renderContaCredits();
   toast('✓ '+dolr(actual)+' '+t('creditPaid'));
@@ -2907,6 +3027,8 @@ function openLogout(){
   const byCnt2={cash:0,card:0,transf:0,credit:0,split:0,openAccount:0};
   active.forEach(s=>{const m=s.payMethod||'cash';byPay2[m]=(byPay2[m]||0)+s.total;byCnt2[m]=(byCnt2[m]||0)+1;});
   const cashSales=byPay2.cash||0;
+  const credCash=_getCreditCashToday();
+  const expectedCash=cashSales+(credCash.cashPart||0)+db.fundAmount;
   const allToday=db.sales.filter(s=>new Date(s.date).toDateString()===today);
   const can=allToday.filter(s=>s.status==='cancelled');
   const ret=allToday.filter(s=>s.status==='returned');
@@ -2914,20 +3036,26 @@ function openLogout(){
   function rRow(icon,lbl,val,cnt,color){return '<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">'+icon+' '+lbl+(cnt?' <span style="color:var(--tx3);font-size:.75rem">('+cnt+')</span>':'')+'</span><span style="font-family:monospace;color:'+color+'">'+dolr(val)+'</span></div>';}
   let report='<div style="background:var(--s2);border-radius:var(--rs);padding:11px;font-size:.8rem">';
   report+='<div style="font-weight:700;margin-bottom:8px;color:var(--tx)">'+t('shiftReport')+(curUser?' — '+curUser.name:'')+'</div>';
-  report+='<div style="font-weight:600;font-size:.75rem;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">Ventas del día</div>';
-  if(byPay2.cash)report+=rRow('💵','Efectivo',byPay2.cash,byCnt2.cash,'var(--gn)');
-  if(byPay2.card)report+=rRow('💳','Tarjeta',byPay2.card,byCnt2.card,'var(--bl)');
-  if(byPay2.transf)report+=rRow('📲','Transferencia',byPay2.transf,byCnt2.transf,'var(--ac)');
-  if(byPay2.split)report+=rRow('⚡','Mixto',byPay2.split,byCnt2.split,'var(--bl)');
-  if(byPay2.credit)report+=rRow('🏷️','Crédito',byPay2.credit,byCnt2.credit,'var(--am)');
+  report+='<div style="font-weight:600;font-size:.75rem;color:var(--tx3);text-transform:uppercase;margin-bottom:5px">'+t('todaySales')+'</div>';
+  if(byPay2.cash)report+=rRow('💵',t('payMethodCash'),byPay2.cash,byCnt2.cash,'var(--gn)');
+  if(byPay2.card)report+=rRow('💳',t('payMethodCard'),byPay2.card,byCnt2.card,'var(--bl)');
+  if(byPay2.transf)report+=rRow('📲',t('payMethodTransf'),byPay2.transf,byCnt2.transf,'var(--ac)');
+  if(byPay2.split)report+=rRow('⚡',t('payMethodSplit'),byPay2.split,byCnt2.split,'var(--bl)');
+  if(byPay2.credit)report+=rRow('🏷️',t('payMethodCredit'),byPay2.credit,byCnt2.credit,'var(--am)');
   if(byPay2.openAccount)report+=rRow('📖','Cta. Abierta',byPay2.openAccount,byCnt2.openAccount,'var(--am)');
-  report+='<div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--b1);padding-top:5px;margin:5px 0"><span style="color:var(--tx)">Total ventas</span><span style="font-family:monospace;color:var(--gn)">'+dolr(inc)+'</span></div>';
-  if(ret.length)report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--am)">🔄 Devoluciones ('+ret.length+')</span><span style="font-family:monospace;color:var(--am)">-'+dolr(retTotal)+'</span></div>';
-  if(can.length)report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--rd)">❌ Cancelaciones: '+can.length+'</span><span style="font-family:monospace;color:var(--rd)">'+dolr(can.reduce((s,x)=>s+x.total,0))+'</span></div>';
+  report+='<div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--b1);padding-top:5px;margin:5px 0"><span style="color:var(--tx)">'+t('totalSalesLbl')+'</span><span style="font-family:monospace;color:var(--gn)">'+dolr(inc)+'</span></div>';
+  if(ret.length)report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--am)">🔄 '+(lang==='en'?'Returns':'Devoluciones')+' ('+ret.length+')</span><span style="font-family:monospace;color:var(--am)">-'+dolr(retTotal)+'</span></div>';
+  if(can.length)report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--rd)">❌ '+(lang==='en'?'Cancellations':'Cancelaciones')+': '+can.length+'</span><span style="font-family:monospace;color:var(--rd)">'+dolr(can.reduce((s,x)=>s+x.total,0))+'</span></div>';
+  if(credCash.count>0){
+    report+='<div style="border-top:1px solid var(--b1);margin-top:5px;padding-top:6px;font-weight:600;font-size:.75rem;color:var(--tx3);text-transform:uppercase;margin-bottom:4px">'+t('creditPaymentsRcvd')+'</div>';
+    report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">💵 '+t('cashCreditPay')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(credCash.cashPart)+'</span></div>';
+    if(credCash.cardPart)report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">💳 '+t('cardCreditPay')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(credCash.cardPart)+'</span></div>';
+  }
   report+='<div style="border-top:1px solid var(--b1);margin-top:5px;padding-top:6px">';
-  report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">💵 Efectivo en ventas</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(cashSales)+'</span></div>';
-  report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">🗃️ Fondo de caja</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(db.fundAmount)+'</span></div>';
-  report+='<div style="display:flex;justify-content:space-between;font-weight:700"><span style="color:var(--tx)">💵 Efectivo esperado</span><span style="font-family:monospace;color:var(--gn)">'+dolr(cashSales+db.fundAmount)+'</span></div>';
+  report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">💵 '+t('cashFromSales')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(cashSales)+'</span></div>';
+  if(credCash.cashPart)report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">🏷️ '+t('cashCreditPay')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(credCash.cashPart)+'</span></div>';
+  report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">🗃️ '+t('fundBoxLbl')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(db.fundAmount)+'</span></div>';
+  report+='<div style="display:flex;justify-content:space-between;font-weight:700"><span style="color:var(--tx)">💵 '+t('expectedCashLbl')+'</span><span style="font-family:monospace;color:var(--gn)">'+dolr(expectedCash)+'</span></div>';
   report+='</div></div>';
   el('lo-report').innerHTML=report;
   const cashFld=el('lo-declared-cash');if(cashFld)cashFld.value='';
@@ -2950,8 +3078,9 @@ function printShiftReport(){
   const byCnt={cash:0,card:0,transf:0,credit:0,split:0,openAccount:0};
   active.forEach(s=>{const m=s.payMethod||'cash';byPay[m]=(byPay[m]||0)+s.total;byCnt[m]=(byCnt[m]||0)+1;});
   const cashSales=byPay.cash||0;
+  const credCashPrint=_getCreditCashToday();
   const declared=parseFloat((el('lo-declared-cash')||{}).value)||0;
-  const expected=cashSales+db.fundAmount;
+  const expected=cashSales+(credCashPrint.cashPart||0)+db.fundAmount;
   const diff=Math.round((declared-expected)*100)/100;
   const diffTxt=declared>0?(diff===0?'Cuadre correcto ✅':(diff>0?'+':'')+dolr(diff)):'—';
   const now=new Date();
@@ -2968,23 +3097,28 @@ function printShiftReport(){
     +'<hr style="border:1px dashed #000;margin:4px 0">'
     +rows
     +'<hr style="border:1px dashed #000;margin:4px 0">'
-    +'<div style="font-size:11px;font-weight:bold;margin-bottom:3px">DESGLOSE POR MÉTODO DE PAGO</div>'
-    +pr('💵','Efectivo',byPay.cash,byCnt.cash)
-    +pr('💳','Tarjeta',byPay.card,byCnt.card)
-    +pr('📲','Transferencia',byPay.transf,byCnt.transf)
-    +pr('⚡','Mixto/Split',byPay.split,byCnt.split)
-    +pr('🏷️','Crédito',byPay.credit,byCnt.credit)
+    +'<div style="font-size:11px;font-weight:bold;margin-bottom:3px">'+(lang==='en'?'PAYMENT BREAKDOWN':'DESGLOSE POR MÉTODO DE PAGO')+'</div>'
+    +pr('💵',t('payMethodCash'),byPay.cash,byCnt.cash)
+    +pr('💳',t('payMethodCard'),byPay.card,byCnt.card)
+    +pr('📲',t('payMethodTransf'),byPay.transf,byCnt.transf)
+    +pr('⚡',t('payMethodSplit'),byPay.split,byCnt.split)
+    +pr('🏷️',t('payMethodCredit'),byPay.credit,byCnt.credit)
     +pr('📖','Cta. Abierta',byPay.openAccount,byCnt.openAccount)
-    +(ret.length?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>🔄 Devoluciones ('+ret.length+')</span><span>-'+dolr(retTotal)+'</span></div>':'')
-    +(can.length?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>❌ Cancelaciones: '+can.length+'</span><span>'+dolr(can.reduce((s,x)=>s+x.total,0))+'</span></div>':'')
+    +(ret.length?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>🔄 '+(lang==='en'?'Returns':'Devoluciones')+' ('+ret.length+')</span><span>-'+dolr(retTotal)+'</span></div>':'')
+    +(can.length?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>❌ '+(lang==='en'?'Cancellations':'Cancelaciones')+': '+can.length+'</span><span>'+dolr(can.reduce((s,x)=>s+x.total,0))+'</span></div>':'')
     +'<hr style="border:1px dashed #000;margin:4px 0">'
-    +'<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:bold"><span>TOTAL VENTAS</span><span>'+dolr(inc)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:bold"><span>'+(lang==='en'?'TOTAL SALES':'TOTAL VENTAS')+'</span><span>'+dolr(inc)+'</span></div>'
+    +(credCashPrint.count>0?'<hr style="border:1px dashed #000;margin:4px 0"><div style="font-size:11px;font-weight:bold;margin-bottom:3px">'+t('creditPaymentsRcvd').toUpperCase()+'</div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>💵 '+t('cashCreditPay')+'</span><span>'+dolr(credCashPrint.cashPart)+'</span></div>'
+      +(credCashPrint.cardPart?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>💳 '+t('cardCreditPay')+'</span><span>'+dolr(credCashPrint.cardPart)+'</span></div>':'')
+      :'')
     +'<hr style="border:1px dashed #000;margin:4px 0">'
-    +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>💵 Efectivo ventas</span><span>'+dolr(cashSales)+'</span></div>'
-    +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>🗃️ Fondo de caja</span><span>'+dolr(db.fundAmount)+'</span></div>'
-    +'<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:bold;padding:3px 0"><span>EFECTIVO ESPERADO</span><span>'+dolr(expected)+'</span></div>'
-    +(declared?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>Efectivo declarado</span><span>'+dolr(declared)+'</span></div>':'')
-    +(declared?'<div style="display:flex;justify-content:space-between;font-size:11px;font-weight:bold;padding:2px 0"><span>Diferencia</span><span>'+diffTxt+'</span></div>':'')
+    +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>💵 '+t('cashFromSales')+'</span><span>'+dolr(cashSales)+'</span></div>'
+    +(credCashPrint.cashPart?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>🏷️ '+t('cashCreditPay')+'</span><span>'+dolr(credCashPrint.cashPart)+'</span></div>':'')
+    +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>🗃️ '+t('fundBoxLbl')+'</span><span>'+dolr(db.fundAmount)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:bold;padding:3px 0"><span>'+t('expectedCashLbl').toUpperCase()+'</span><span>'+dolr(expected)+'</span></div>'
+    +(declared?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>'+(lang==='en'?'Declared cash':'Efectivo declarado')+'</span><span>'+dolr(declared)+'</span></div>':'')
+    +(declared?'<div style="display:flex;justify-content:space-between;font-size:11px;font-weight:bold;padding:2px 0"><span>'+(lang==='en'?'Difference':'Diferencia')+'</span><span>'+diffTxt+'</span></div>':'')
     +'</div>';
   window.print();
 }
@@ -3211,9 +3345,9 @@ function renderConta(){
   const utilidad=ingresos-costoFac-totalGastos;
   const creditPending=_getPendingCredits().reduce(function(s,c){return s+(c.total-c.paid);},0);
   el('ct-stats').innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px">'
-    +sCard('gn','💰 Ingresos',dolr(ingresos))+sCard('rd','💸 Compras',dolr(costoFac))+sCard('am','⚡ Gastos',dolr(totalGastos))
-    +sCard('ac','📊 Órdenes',sales.length.toString())+sCard(utilidad>=0?'gn':'rd','✨ Utilidad',dolr(utilidad))
-    +sCard('am','💳 Crédito',dolr(creditPending))+'</div>';
+    +sCard('gn','💰 '+(lang==='en'?'Income':'Ingresos'),dolr(ingresos))+sCard('rd','💸 '+t('purchasesLbl'),dolr(costoFac))+sCard('am','⚡ '+t('tabExpenses'),dolr(totalGastos))
+    +sCard('ac','📊 '+(lang==='en'?'Orders':'Órdenes'),sales.length.toString())+sCard(utilidad>=0?'gn':'rd','✨ '+(lang==='en'?'Profit':'Utilidad'),dolr(utilidad))
+    +sCard('am','💳 '+t('payMethodCredit'),dolr(creditPending))+'</div>';
   const prodMap={};
   sales.forEach(s=>s.items.forEach(i=>{if(!prodMap[i.name])prodMap[i.name]={qty:0,total:0};prodMap[i.name].qty+=i.qty;prodMap[i.name].total+=i.price*i.qty;}));
   const sorted=Object.entries(prodMap).sort((a,b)=>b[1].total-a[1].total);
@@ -3221,7 +3355,7 @@ function renderConta(){
   el('ct-breakdown').innerHTML=sorted.length?sorted.map(e=>{
     const pct=Math.round(e[1].total/maxT*100);
     return '<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:3px"><span style="color:var(--tx2)">'+e[0]+'</span><span style="font-family:monospace;color:var(--gn)">'+dolr(e[1].total)+' ('+e[1].qty+' u)</span></div><div style="height:7px;background:var(--b2);border-radius:4px"><div style="height:100%;width:'+pct+'%;background:var(--ac);border-radius:4px;transition:width .4s"></div></div></div>';
-  }).join(''):'<div style="color:var(--tx3);font-size:.82rem">Sin ventas.</div>';
+  }).join(''):'<div style="color:var(--tx3);font-size:.82rem">'+(lang==='en'?'No sales.':'Sin ventas.')+'</div>';
   renderFacList();renderGstList();
 }
 function sCard(color,lbl,val){return '<div style="background:var(--'+color+'b,var(--s2));border:1.5px solid var(--'+color+',var(--b1));border-radius:8px;padding:10px;text-align:center"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.8px;color:var(--'+color+');margin-bottom:3px">'+lbl+'</div><div style="font-family:monospace;font-size:1rem;font-weight:700;color:var(--'+color+')">'+val+'</div></div>';}
@@ -3238,7 +3372,7 @@ function delFactura(id){confirm2('¿Eliminar factura? El stock NO se revertirá.
 function loadFacProds(){el('fac-prod').innerHTML='<option value="">— Selecciona producto —</option>'+db.products.map(p=>'<option value="'+p.id+'">'+p.name+' (Stock: '+(p.stock||0)+')</option>').join('');}
 function renderFacList(){
   const list=el('fac-list');
-  if(!db.facturas.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">Sin facturas.</div>';return;}
+  if(!db.facturas.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+(lang==='en'?'No invoices.':'Sin facturas.')+'</div>';return;}
   list.innerHTML=db.facturas.slice().reverse().map(f=>'<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1.5px solid var(--b1)"><div style="flex:1"><div style="font-weight:600;font-size:.83rem;color:var(--tx)">'+f.prodName+' — <span style="color:var(--gn)">+'+f.qty+' u</span></div><div style="font-size:.72rem;color:var(--tx3)">'+new Date(f.date).toLocaleDateString()+(f.proveedor?' · '+f.proveedor:'')+(f.numFac?' · #'+f.numFac:'')+'</div></div><div style="font-family:monospace;color:var(--am);font-size:.85rem;font-weight:700">'+dolr(f.cost)+'</div><button class="xb" onclick="delFactura(\''+f.id+'\')">✕</button></div>').join('');
 }
 function saveGasto(){
@@ -3257,7 +3391,7 @@ function renderGstList(){
   const totalGst=all.reduce(function(s,g){return s+g.monto;},0);
   const hdr=el('gst-period-total');
   if(hdr)hdr.textContent='Total período: '+dolr(totalGst)+' ('+all.length+' registros)';
-  if(!all.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">Sin gastos en este período.</div>';return;}
+  if(!all.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+(lang==='en'?'No expenses in this period.':'Sin gastos en este período.')+'</div>';return;}
   const cc={operativo:'var(--bl)',inventario:'var(--ac)',servicios:'var(--am)',nomina:'var(--gn)',marketing:'var(--rd)',otro:'var(--tx3)'};
   list.innerHTML=all.slice().reverse().map(function(g){return '<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1.5px solid var(--b1)"><div style="flex:1"><div style="font-weight:600;font-size:.83rem;color:var(--tx)">'+g.concepto+'</div><div style="font-size:.72rem;color:var(--tx3)">'+new Date(g.date).toLocaleDateString()+' · <span style="color:'+(cc[g.cat]||'var(--tx3)')+'">'+g.cat+'</span>'+(g.notes?' · '+g.notes:'')+'</div></div><div style="font-family:monospace;color:var(--rd);font-size:.85rem;font-weight:700">'+dolr(g.monto)+'</div><button class="xb" onclick="delGasto(\''+g.id+'\')">✕</button></div>';}).join('');
 }
