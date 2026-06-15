@@ -845,11 +845,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div id="ct-cred" style="display:none">
         <div style="background:var(--amb);border:1.5px solid var(--am);border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--am)">Crédito pendiente total</div>
+            <div id="cred-lbl-total" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--am)">Crédito pendiente total</div>
             <div id="cred-pending-badge" style="font-family:monospace;font-size:1.15rem;font-weight:700;color:var(--am)">$0.00</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3)">Clientes</div>
+            <div id="cred-lbl-clients" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3)">Clientes</div>
             <div id="cred-count-badge" style="font-size:1rem;font-weight:700;color:var(--tx2)">0</div>
           </div>
         </div>
@@ -1164,6 +1164,10 @@ const T = {
     creditPaid:'Pagado',markPaid:'Marcar pagado',creditHistory:'Historial de créditos',
     pendingCredits:'Créditos pendientes',noPendingCredits:'Sin créditos pendientes',
     partialPayment:'Pago parcial',payments:'Abonos',creditItems:'Artículos',
+    creditOriginal:'Original',creditBalance:'Saldo pendiente',
+    filterPending:'Pendientes',filterPaid:'Pagados',filterAll:'Todos',
+    creditTotalPending:'Crédito pendiente total',creditClients:'Clientes',
+    lastPayment:'Último abono',noPaidCredits:'Sin créditos pagados.',noCredits:'Sin créditos registrados.',
     // Cashier on receipt
     attendedBy:'Atendido por',
     // Cash close
@@ -1238,6 +1242,10 @@ const T = {
     creditPaid:'Paid',markPaid:'Mark paid',creditHistory:'Credit history',
     pendingCredits:'Pending credits',noPendingCredits:'No pending credits',
     partialPayment:'Partial payment',payments:'Payments',creditItems:'Items',
+    creditOriginal:'Original',creditBalance:'Pending balance',
+    filterPending:'Pending',filterPaid:'Paid',filterAll:'All',
+    creditTotalPending:'Total pending credit',creditClients:'Customers',
+    lastPayment:'Last payment',noPaidCredits:'No paid credits.',noCredits:'No credits registered.',
     // Cashier on receipt
     attendedBy:'Attended by',
     // Cash close
@@ -2549,43 +2557,47 @@ function _getPendingCredits(){
 }
 function _buildCreditCard(c,compact){
   const owed=c.total-c.paid;
+  const dateStr=new Date(c.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+  const btns='<div style="display:flex;gap:6px;margin-top:8px">'
+    +'<button class="btn btn-s" style="font-size:.75rem" onclick="openCreditPay(\''+c._key+'\')">💵 '+t('partialPayment')+'</button>'
+    +'<button class="btn btn-g" style="font-size:.75rem" onclick="payCreditFull(\''+c._key+'\')">✅ '+t('markPaid')+'</button>'
+    +'</div>';
   if(compact){
     return '<div style="background:var(--s2);border-radius:var(--rs);padding:11px;margin-bottom:8px">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
       +'<div style="font-weight:700;color:var(--tx)">'+c.client+'</div>'
-      +'<div style="color:var(--am);font-family:monospace;font-weight:700">'+dolr(owed)+'</div></div>'
-      +'<div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px">'+new Date(c.date).toLocaleDateString()
-      +(c.paid>0?' · '+t('creditPaid')+': '+dolr(c.paid):'')+'</div>'
-      +'<div style="display:flex;gap:6px">'
-      +'<button class="btn btn-s" style="font-size:.75rem" onclick="openCreditPay(\''+c._key+'\')">💵 '+t('partialPayment')+'</button>'
-      +'<button class="btn btn-g" style="font-size:.75rem" onclick="payCreditFull(\''+c._key+'\')">✅ '+t('markPaid')+'</button>'
-      +'</div></div>';
+      +'<div>'
+        +(c.paid>0?'<div style="font-size:.68rem;color:var(--tx3);text-align:right;line-height:1.2">'+t('creditOriginal')+' '+dolr(c.total)+'</div>':'')
+        +'<div style="color:var(--am);font-family:monospace;font-weight:800;font-size:.98rem">'+dolr(owed)+'</div>'
+      +'</div></div>'
+      +(c.paid>0?'<div style="font-size:.72rem;color:var(--tx3);margin-bottom:4px">'+t('creditPaid')+': '+dolr(c.paid)+'</div>':'')
+      +'<div style="font-size:.73rem;color:var(--tx3);margin-bottom:6px">'+dateStr+'</div>'
+      +btns+'</div>';
   }
   const itemsHtml=(c.items&&c.items.length)
-    ?'<div style="font-size:.72rem;color:var(--tx3);margin:3px 0 5px;line-height:1.6">'
+    ?'<div style="font-size:.72rem;color:var(--tx3);margin:4px 0 5px;line-height:1.6">'
       +t('creditItems')+': '+c.items.map(function(i){return i.name+' ×'+(i.qty||1)+' ('+dolr((i.price||0)*(i.qty||1))+')';}).join(' | ')
       +'</div>'
     :'';
   const paymentsHtml=(c.payments&&c.payments.length)
-    ?'<div style="font-size:.72rem;color:var(--tx3);margin:0 0 6px">'
+    ?'<div style="font-size:.72rem;color:var(--am);margin:0 0 5px">'
       +t('payments')+': '+c.payments.map(function(p){return dolr(p.amount)+' – '+new Date(p.date).toLocaleDateString();}).join(' | ')
       +'</div>'
     :'';
-  const statusColor=c.paid>0?'var(--am)':'var(--rd)';
-  const statusLabel=c.paid>0?t('creditPaid')+': '+dolr(c.paid):'Pendiente';
   return '<div style="background:var(--s2);border-radius:var(--rs);padding:11px;margin-bottom:8px">'
-    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">'
     +'<div><span style="font-weight:700;color:var(--tx)">'+c.client+'</span>'
     +(c.cedula?'<span style="font-size:.72rem;color:var(--tx3);margin-left:6px">CI: '+c.cedula+'</span>':'')+'</div>'
-    +'<span style="color:var(--am);font-family:monospace;font-weight:700">'+dolr(owed)+'</span></div>'
-    +'<div style="font-size:.74rem;color:'+statusColor+';margin-bottom:5px">'
-    +new Date(c.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})
-    +' · '+statusLabel+'</div>'
+    +'<div style="text-align:right">'
+      +(c.paid>0?'<div style="font-size:.68rem;color:var(--tx3)">'+t('creditOriginal')+' '+dolr(c.total)+'</div>':'')
+      +'<div style="font-family:monospace;font-weight:800;font-size:1.02rem;color:var(--am)">'+dolr(owed)+'</div>'
+      +(c.paid>0?'<div style="font-size:.68rem;color:var(--tx3)">'+t('creditPaid')+' '+dolr(c.paid)+'</div>':'')
+    +'</div></div>'
+    +'<div style="font-size:.73rem;color:var(--tx3);margin-bottom:4px">'+dateStr
+    +(c.paid>0?' · <span style="color:var(--am);font-weight:600">'+t('creditBalance')+': '+dolr(owed)+'</span>':' · <span style="color:var(--rd)">'+t('creditPending')+'</span>')
+    +'</div>'
     +itemsHtml+paymentsHtml
-    +'<div style="display:flex;gap:6px">'
-    +'<button class="btn btn-s" style="font-size:.75rem" onclick="openCreditPay(\''+c._key+'\')">💵 '+t('partialPayment')+'</button>'
-    +'<button class="btn btn-g" style="font-size:.75rem" onclick="payCreditFull(\''+c._key+'\')">✅ '+t('markPaid')+'</button>'
-    +'</div></div>';
+    +btns+'</div>';
 }
 function renderCreditsPanel(){
   const pending=_getPendingCredits();
@@ -2618,6 +2630,12 @@ function openCreditPay(key){
   openOv('ov-credit-pay');
   setTimeout(function(){const i=el('cpay-amount');if(i){i.focus();i.select();}},120);
 }
+// TODO DASHBOARD: Sincronizar créditos a Supabase
+// - Cuando se hace abono: actualizar creditPaid y creditStatus en la venta (db.sales) vía posapi action=save
+// - Cuando se paga en full: creditStatus='paid', creditPaid=total → se incluye en el slim que ya se sincroniza
+// - El dashboard debe leer ventas con payMethod='credit' y mostrar sección de créditos
+// - Mostrar total pendiente, abonos recientes, y créditos pagados
+// - slim ya incluye creditClient/creditStatus/creditPaid en cada venta → el dashboard puede filtrar
 function doCreditPayment(full){
   const pending=_getPendingCredits();
   const c=pending.find(function(x){return x._key===_cpayKey;});if(!c)return;
@@ -2641,6 +2659,9 @@ function doCreditPayment(full){
   closeOv('ov-credit-pay');
   renderCreditsPanel();
   renderAdmCredits();
+  // Re-render contabilidad credits tab if visible
+  const ctCred=el('ct-cred');
+  if(ctCred&&ctCred.style.display!=='none')renderContaCredits();
   toast('✓ '+dolr(actual)+' '+t('creditPaid'));
 }
 function payCreditFull(key){
@@ -3435,6 +3456,12 @@ function renderContaCredits(){
   const totalOwed=pending.reduce(function(s,c){return s+(c.total-c.paid);},0);
   const pb=el('cred-pending-badge');if(pb)pb.textContent=dolr(totalOwed);
   const cb=el('cred-count-badge');if(cb)cb.textContent=pending.length;
+  // Sync header labels with current language
+  const lbl1=el('cred-lbl-total');if(lbl1)lbl1.textContent=t('creditTotalPending');
+  const lbl2=el('cred-lbl-clients');if(lbl2)lbl2.textContent=t('creditClients');
+  // Sync filter button labels
+  const bf={pend:t('filterPending'),paid:t('filterPaid'),all:t('filterAll')};
+  Object.keys(bf).forEach(function(k){const b=el('cred-f-'+k);if(b)b.textContent=bf[k];});
   const paidSales=(db.sales||[]).filter(function(s){return s.payMethod==='credit'&&s.creditStatus==='paid';})
     .map(function(s){return {_key:'sp'+s.id,_src:'sale',saleId:s.id,client:s.creditClient||'—',cedula:s.creditCedula||'',
       total:s.total,paid:s.creditPaid||s.total,date:s.date,items:s.items||[],payments:s.creditPayments||[]};})
@@ -3442,11 +3469,11 @@ function renderContaCredits(){
   let display=[];
   if(_credFilter==='pending')display=pending;
   else if(_credFilter==='paid')display=paidSales;
-  else display=[...pending,...paidSales].sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  else display=[].concat(pending,paidSales).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
   const list=el('cred-tab-list');if(!list)return;
   if(!display.length){
-    list.innerHTML='<div style="color:var(--tx3);text-align:center;padding:20px 0;font-size:.84rem">'
-      +(_credFilter==='paid'?'Sin créditos pagados.':_credFilter==='pending'?'Sin créditos pendientes.':'Sin créditos registrados.')+'</div>';
+    const msg=_credFilter==='paid'?t('noPaidCredits'):_credFilter==='pending'?t('noPendingCredits'):t('noCredits');
+    list.innerHTML='<div style="color:var(--tx3);text-align:center;padding:20px 0;font-size:.84rem">'+msg+'</div>';
     return;
   }
   const paidKeys=new Set(paidSales.map(function(x){return x._key;}));
@@ -3456,11 +3483,11 @@ function renderContaCredits(){
       const lastPay=c.payments.length?c.payments[c.payments.length-1]:null;
       return '<div style="background:var(--gnb);border:1.5px solid var(--gn);border-radius:var(--rs);padding:10px 12px;margin-bottom:7px">'
         +'<div style="display:flex;justify-content:space-between;align-items:center">'
-        +'<span style="font-weight:700;color:var(--tx)">'+c.client+'</span>'
+        +'<div><span style="font-weight:700;color:var(--tx)">'+c.client+'</span>'
+        +(c.cedula?'<span style="font-size:.71rem;color:var(--tx3);margin-left:6px">CI: '+c.cedula+'</span>':'')+'</div>'
         +'<span style="font-family:monospace;font-weight:700;color:var(--gn)">'+dolr(c.total)+'</span></div>'
-        +(c.cedula?'<div style="font-size:.72rem;color:var(--tx3)">CI: '+c.cedula+'</div>':'')
-        +'<div style="font-size:.73rem;color:var(--gn);margin-top:3px">✅ Pagado · '+dt.toLocaleDateString()
-        +(lastPay?' · Último abono: '+new Date(lastPay.date).toLocaleDateString():'')+'</div>'
+        +'<div style="font-size:.73rem;color:var(--gn);margin-top:3px">✅ '+t('creditPaid')+' · '+dt.toLocaleDateString()
+        +(lastPay?' · '+t('lastPayment')+': '+new Date(lastPay.date).toLocaleDateString():'')+'</div>'
         +'</div>';
     }
     return _buildCreditCard(c,false);
