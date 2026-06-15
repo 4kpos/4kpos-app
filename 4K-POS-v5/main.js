@@ -12,8 +12,8 @@ try {
   console.log('electron-updater no disponible, actualizaciones desactivadas:', e.message)
 }
 
-// DevTools solo en desarrollo
-const isDev = true
+// DevTools solo en desarrollo (auto-detectado: true cuando no está empaquetado)
+const isDev = !app.isPackaged
 
 // ── ID único de máquina ────────────────────────
 function getMachineId() {
@@ -57,7 +57,7 @@ function createWindow() {
   })
 
   win.loadFile('index.html')
-  win.webContents.openDevTools()
+  if (isDev) win.webContents.openDevTools()
   win.once('ready-to-show', () => win.show())
   win.setMenuBarVisibility(false)
 

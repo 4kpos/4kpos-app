@@ -980,6 +980,18 @@ try {
 } catch(e) {
   console.warn('Electron ipcRenderer no disponible, usando modo local.');
 }
+// ── Bloquear DevTools en producción ────────────
+document.addEventListener('keydown', function(e) {
+  if (db && db.cfg && db.cfg.devMode) return;
+  if (e.key === 'F12') { e.preventDefault(); return; }
+  if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) { e.preventDefault(); return; }
+  if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) { e.preventDefault(); return; }
+  if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); return; }
+});
+document.addEventListener('contextmenu', function(e) {
+  if (db && db.cfg && db.cfg.devMode) return;
+  e.preventDefault();
+});
 // ── Auto-updater notifications ─────────────────
 try {
   ipcRenderer.on('update-msg', function(e, type) {
@@ -1400,23 +1412,35 @@ function exitApp(){
     try{ipcRenderer.invoke('exit-app');}catch(e){window.close();}
   });
 }
-const DASHBOARD_URL='https://4kpos-dashboard.netlify.app'; // TODO: actualizar URL del dashboard
+const DASHBOARD_URL='https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html';
 function openDashboard(){
   ipcRenderer.invoke('get-license-info').then(function(info){
-    if(info&&(info.plan||'').toLowerCase()==='pro'){
+    const isPro=info&&(info.plan||'').toLowerCase()==='pro';
+    if(isPro){
       try{require('electron').shell.openExternal(DASHBOARD_URL);}catch(e){window.open(DASHBOARD_URL,'_blank');}
     }else{
       toast('⚠ '+t('dashboardProOnly'));
     }
   }).catch(function(){
-    toast('⚠ '+t('dashboardProOnly'));
+    try{require('electron').shell.openExternal(DASHBOARD_URL);}catch(e){window.open(DASHBOARD_URL,'_blank');}
   });
 }
 function updateDashBtn(){
   ipcRenderer.invoke('get-license-info').then(function(info){
     const dash=el('hm-dash');
-    if(dash)dash.style.display=(info&&(info.plan||'').toLowerCase()==='pro')?'flex':'none';
-  }).catch(function(){});
+    if(!dash)return;
+    const isPro=info&&(info.plan||'').toLowerCase()==='pro';
+    dash.style.display='flex';
+    if(isPro){
+      dash.style.opacity='1';dash.style.cursor='pointer';
+      const txt=el('hm-dash-txt');if(txt)txt.textContent=t('dashboardBtn');
+    }else{
+      dash.style.opacity='0.45';dash.style.cursor='default';
+      const txt=el('hm-dash-txt');if(txt)txt.textContent=t('dashboardBtn')+' (Pro)';
+    }
+  }).catch(function(){
+    const dash=el('hm-dash');if(dash)dash.style.display='flex';
+  });
 }
 // DATA
 async function loadDB(){
