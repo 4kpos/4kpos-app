@@ -392,7 +392,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div class="hmi sal" id="hm-sal" onclick="closeHMenu();reqPin('sales')">📊 <span id="hm-sal-txt">Ventas del día</span></div>
   <div class="hmi conta" id="hm-conta" onclick="closeHMenu();reqPin('conta')">📒 <span id="hm-conta-txt">Contabilidad</span></div>
   <div class="hmi" style="color:var(--tx3)" onclick="closeHMenu();openDrawer()">🗃️ <span id="hm-drawer-txt">Abrir Registradora</span></div>
-  <div class="hmi" id="hm-dash" style="display:none;color:#3b82f6" onclick="closeHMenu();openDashboard()">📱 <span id="hm-dash-txt">Dashboard móvil</span></div>
+  <div class="hmi" style="color:#3b82f6" onclick="closeHMenu();if(window.require){require('electron').shell.openExternal('https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html')}">📱 <span>Dashboard</span></div>
   <div class="hmi exit" onclick="closeHMenu();exitApp()">🚪 <span id="hm-exit-txt">Salir del programa</span></div>
 </div>
 
