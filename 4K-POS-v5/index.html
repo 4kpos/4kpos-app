@@ -1318,7 +1318,7 @@ let db={products:[],categories:[],sales:[],returns:[],orderNum:1,adminCode:'1234
   fundAmount:0,customers:[],credits:[],payMethods:{cash:true,card:true,transf:true,openAccounts:true,credit:false},
   drawerPort:'COM3',drawerAuto:true,
   cfg:{bizName:'4K Negocio',bizSub:'',thanks:'¡Gracias por tu compra! 💕',phone:'',s1:'',s2:'',qr:'',logo:'',timeFormat:'12h'},
-  facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true};
+  facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true,shifts:[]};
 let cart=[],payMethod='cash',cashIn='',discount={type:'pct',value:0,active:false};
 let currentView='categories',currentCategory=null;
 let editingAccountId=null;
@@ -1783,13 +1783,30 @@ function startApp(){
   const bts=localStorage.getItem('4kpos_backup_ts');
   const lbl=el('last-backup-lbl');if(lbl&&bts)lbl.textContent=new Date(bts).toLocaleString(lang);
 }
-function _getCreditCashToday(){
-  const today=new Date().toDateString();
+// ── Shift helpers ───────────────────────────────────────
+// Returns the Date when current shift opened (fallback: start of today)
+function _getShiftOpenAt(){
+  if(db.cfg&&db.cfg.shiftOpenAt)return new Date(db.cfg.shiftOpenAt);
+  const d=new Date();d.setHours(0,0,0,0);return d;
+}
+// Active sales in current shift only
+function _getShiftSales(){
+  const openAt=_getShiftOpenAt();
+  return (db.sales||[]).filter(function(s){return s.status==='active'&&new Date(s.date)>=openAt;});
+}
+// All sales (any status) in current shift
+function _getAllShiftSales(){
+  const openAt=_getShiftOpenAt();
+  return (db.sales||[]).filter(function(s){return new Date(s.date)>=openAt;});
+}
+// Credit payments (abonos) received during current shift
+function _getCreditCashShift(){
+  const openAt=_getShiftOpenAt();
   let cashPart=0,cardPart=0,total=0,count=0;
   (db.sales||[]).forEach(function(s){
     if(s.payMethod!=='credit')return;
     (s.creditPayments||[]).forEach(function(p){
-      if(new Date(p.date).toDateString()!==today)return;
+      if(new Date(p.date)<openAt)return;
       total+=p.amount||0;count++;
       cashPart+=(p.cashPart!=null?p.cashPart:(p.method==='card'?0:p.amount))||0;
       cardPart+=(p.cardPart!=null?p.cardPart:(p.method==='card'?p.amount:0))||0;
@@ -1797,7 +1814,7 @@ function _getCreditCashToday(){
   });
   (db.credits||[]).forEach(function(c){
     (c.payments||[]).forEach(function(p){
-      if(new Date(p.date).toDateString()!==today)return;
+      if(new Date(p.date)<openAt)return;
       total+=p.amount||0;count++;
       cashPart+=(p.cashPart!=null?p.cashPart:(p.method==='card'?0:p.amount))||0;
       cardPart+=(p.cardPart!=null?p.cardPart:(p.method==='card'?p.amount:0))||0;
@@ -1805,11 +1822,11 @@ function _getCreditCashToday(){
   });
   return{total:total,cashPart:cashPart,cardPart:cardPart,count:count};
 }
+function _getCreditCashToday(){return _getCreditCashShift();}
 function calcCashDiff(){
-  const today=new Date().toDateString();
-  const active=db.sales.filter(s=>new Date(s.date).toDateString()===today&&s.status==='active');
+  const active=_getShiftSales();
   const cashSales=active.filter(s=>s.payMethod==='cash').reduce((s,x)=>s+x.total,0);
-  const creditCash=_getCreditCashToday().cashPart;
+  const creditCash=_getCreditCashShift().cashPart;
   const declared=parseFloat(el('lo-declared-cash').value)||0;
   const expected=cashSales+creditCash+db.fundAmount;
   const diff=Math.round((declared-expected)*100)/100;
@@ -1844,6 +1861,24 @@ function calcCashDiff(){
   }
 }
 function doLogout(){
+  // Save shift record
+  if(!db.shifts)db.shifts=[];
+  const _shiftActive=_getShiftSales();
+  const _bpS={cash:0,card:0,transf:0,credit:0,split:0,openAccount:0};
+  _shiftActive.forEach(s=>{const m=s.payMethod||'cash';_bpS[m]=(_bpS[m]||0)+s.total;});
+  const _aboS=_getCreditCashShift();
+  db.shifts.push({
+    id:'shift-'+Date.now(),
+    user:curUser?curUser.name:'',
+    openedAt:(db.cfg&&db.cfg.shiftOpenAt)||new Date().toISOString(),
+    closedAt:new Date().toISOString(),
+    salesCount:_shiftActive.length,
+    cobrado:(_bpS.cash||0)+(_bpS.card||0)+(_bpS.transf||0)+(_bpS.split||0)+(_bpS.openAccount||0)+(_aboS.cashPart||0)+(_aboS.cardPart||0),
+    creditNew:_bpS.credit||0,
+    abonosCash:_aboS.cashPart||0
+  });
+  // Keep only last 30 shifts
+  if(db.shifts.length>30)db.shifts=db.shifts.slice(-30);
   syncShiftStatus('closed');
   closeOv('ov-logout');curUser=null;cart=[];cashIn='';
   // hideMainUI();
@@ -2970,8 +3005,7 @@ function newOrder(){closeOv('ov-rcpt');cart=[];cashIn='';discount={type:'pct',va
 
 // ACTIONS
 function renderActions(mode){
-  const today=new Date().toDateString();
-  const ts=db.sales.filter(s=>new Date(s.date).toDateString()===today);
+  const ts=_getAllShiftSales();
   const body=el('act-body');
   if(mode==='cancel'){
     setEl('act-title','❌ '+t('cancelSale'));
@@ -3056,15 +3090,15 @@ function doCancel(id){
 
 // SALES
 function renderSales(){
-  const today=new Date().toDateString();
-  const active=db.sales.filter(s=>new Date(s.date).toDateString()===today&&s.status==='active');
+  const active=_getShiftSales();
   const cobradas=active.filter(s=>s.payMethod!=='credit'||s.creditStatus==='paid');
   const creditPend=active.filter(s=>s.payMethod==='credit'&&s.creditStatus!=='paid');
   const inc=cobradas.reduce((s,x)=>s+x.total,0);
   const creditAmt=creditPend.reduce((s,x)=>s+x.total,0);
-  const can=db.sales.filter(s=>new Date(s.date).toDateString()===today&&s.status==='cancelled').length;
-  const ret=db.sales.filter(s=>new Date(s.date).toDateString()===today&&s.status==='returned').length;
-  const allToday=db.sales.filter(s=>new Date(s.date).toDateString()===today);
+  const allShift=_getAllShiftSales();
+  const can=allShift.filter(s=>s.status==='cancelled').length;
+  const ret=allShift.filter(s=>s.status==='returned').length;
+  const allToday=allShift;
   const rows=allToday.slice().reverse().map(s=>{
     const isCreditPend=s.payMethod==='credit'&&s.creditStatus!=='paid';
     const color=s.status!=='active'?(s.status==='cancelled'?'var(--rd)':'var(--am)'):isCreditPend?'var(--am)':'var(--gn)';
@@ -3096,26 +3130,26 @@ function openLogout(){
     openOv('ov-oa-block');
     return;
   }
-  const today=new Date().toDateString();
-  const active=db.sales.filter(s=>new Date(s.date).toDateString()===today&&s.status==='active');
+  const active=_getShiftSales();
   const byPay2={cash:0,card:0,transf:0,credit:0,split:0,openAccount:0};
   const byCnt2={cash:0,card:0,transf:0,credit:0,split:0,openAccount:0};
   active.forEach(s=>{const m=s.payMethod||'cash';byPay2[m]=(byPay2[m]||0)+s.total;byCnt2[m]=(byCnt2[m]||0)+1;});
-  // cobradoHoy = only methods that represent received cash/card (NOT new credit sales)
   const cobradoHoy=(byPay2.cash||0)+(byPay2.card||0)+(byPay2.transf||0)+(byPay2.split||0)+(byPay2.openAccount||0);
-  const credCash=_getCreditCashToday();
+  const credCash=_getCreditCashShift();
   const totalCobrado=cobradoHoy+(credCash.cashPart||0)+(credCash.cardPart||0);
   setEl('lo-sales',dolr(totalCobrado));setEl('lo-orders',active.length.toString());setEl('lo-fund',dolr(db.fundAmount));
   const cashSales=byPay2.cash||0;
   const expectedCash=cashSales+(credCash.cashPart||0)+db.fundAmount;
-  const allToday=db.sales.filter(s=>new Date(s.date).toDateString()===today);
-  const can=allToday.filter(s=>s.status==='cancelled');
-  const ret=allToday.filter(s=>s.status==='returned');
+  const allShift=_getAllShiftSales();
+  const can=allShift.filter(s=>s.status==='cancelled');
+  const ret=allShift.filter(s=>s.status==='returned');
   const retTotal=ret.reduce((s,x)=>s+x.total,0);
   function rRow(icon,lbl,val,cnt,color){return '<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--tx2)">'+icon+' '+lbl+(cnt?' <span style="color:var(--tx3);font-size:.75rem">('+cnt+')</span>':'')+'</span><span style="font-family:monospace;color:'+color+'">'+dolr(val)+'</span></div>';}
   function secHdr(txt){return '<div style="font-weight:600;font-size:.72rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin:8px 0 5px;padding-top:6px;border-top:1px solid var(--b1)">'+txt+'</div>';}
   let report='<div style="background:var(--s2);border-radius:var(--rs);padding:11px;font-size:.8rem">';
-  report+='<div style="font-weight:700;margin-bottom:8px;color:var(--tx)">'+t('shiftReport')+(curUser?' — '+curUser.name:'')+'</div>';
+  const _sOpenAt=db.cfg&&db.cfg.shiftOpenAt?new Date(db.cfg.shiftOpenAt):null;
+  report+='<div style="font-weight:700;margin-bottom:3px;color:var(--tx)">'+t('shiftReport')+(curUser?' — '+curUser.name:'')+'</div>';
+  if(_sOpenAt)report+='<div style="font-size:.72rem;color:var(--tx3);margin-bottom:6px">⏱ '+(lang==='en'?'Shift opened':'Turno abierto')+': '+_sOpenAt.toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'})+'</div>';
   // ── Bloque 1: Ventas cobradas ──────────────────────────
   report+=secHdr(lang==='en'?'COLLECTED SALES':'VENTAS COBRADAS DEL DÍA');
   if(byPay2.cash)report+=rRow('💵',t('payMethodCash'),byPay2.cash,byCnt2.cash,'var(--gn)');
@@ -3155,9 +3189,8 @@ function openLogout(){
 function printShiftReport(){
   const c=db.cfg;
   const logoH=(c.logo||LOGO)?('<img src="'+(c.logo||LOGO)+'" style="width:50px;height:50px;object-fit:contain"><br>'):'';
-  const today=new Date().toDateString();
-  const active=db.sales.filter(s=>new Date(s.date).toDateString()===today&&s.status==='active');
-  const allToday=db.sales.filter(s=>new Date(s.date).toDateString()===today);
+  const active=_getShiftSales();
+  const allToday=_getAllShiftSales();
   const can=allToday.filter(s=>s.status==='cancelled');
   const ret=allToday.filter(s=>s.status==='returned');
   const retTotal=ret.reduce((s,x)=>s+x.total,0);
@@ -3166,7 +3199,7 @@ function printShiftReport(){
   active.forEach(s=>{const m=s.payMethod||'cash';byPay[m]=(byPay[m]||0)+s.total;byCnt[m]=(byCnt[m]||0)+1;});
   const cobradoPrint=(byPay.cash||0)+(byPay.card||0)+(byPay.transf||0)+(byPay.split||0)+(byPay.openAccount||0);
   const cashSales=byPay.cash||0;
-  const credCashPrint=_getCreditCashToday();
+  const credCashPrint=_getCreditCashShift();
   const totalCobradoPrint=cobradoPrint+(credCashPrint.cashPart||0)+(credCashPrint.cardPart||0);
   const declared=parseFloat((el('lo-declared-cash')||{}).value)||0;
   const expected=cashSales+(credCashPrint.cashPart||0)+db.fundAmount;
@@ -3184,6 +3217,7 @@ function printShiftReport(){
     +'<small>REPORTE DE TURNO</small><br>'
     +'<small>'+now.toLocaleDateString()+' '+now.toLocaleTimeString()+'</small>'
     +(curUser?'<br><small>Cajero: '+curUser.name+'</small>':'')
+    +(db.cfg&&db.cfg.shiftOpenAt?'<br><small>Turno desde: '+new Date(db.cfg.shiftOpenAt).toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'})+'</small>':'')
     +'<hr style="border:1px dashed #000;margin:4px 0">'
     +rows
     +'<hr style="border:1px dashed #000;margin:4px 0">'
