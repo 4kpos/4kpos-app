@@ -61,6 +61,13 @@ function createWindow() {
   win.once('ready-to-show', () => win.show())
   win.setMenuBarVisibility(false)
 
+  // Atajo secreto Ctrl+Shift+F12 → DevTools (en cualquier modo)
+  win.webContents.on('before-input-event', (event, input) => {
+    if (input.control && input.shift && input.key === 'F12') {
+      win.webContents.toggleDevTools()
+    }
+  })
+
   // Bloquear F12 / DevTools solo en versión instalada
   if (!isDev) {
     win.webContents.on('before-input-event', (event, input) => {

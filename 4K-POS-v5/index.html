@@ -1793,11 +1793,16 @@ function syncShiftStatus(status){
 }
 function syncCreditSummary(){
   const totalPending=_getPendingCredits().reduce(function(s,c){return s+(c.total-c.paid);},0);
+  console.log('[CreditSync] Syncing credit summary:', totalPending,'| SUPA_URL:', SUPA_URL?'ok':'MISSING','| SUPA_KEY:', SUPA_KEY?'ok':'MISSING','| lic:', db._lic?'ok':'MISSING');
+  const payload={id:'credit_summary',value:JSON.stringify({totalPending:Math.round(totalPending*100)/100,updatedAt:new Date().toISOString()}),license_key:db._lic||''};
   fetch(SUPA_URL+'/rest/v1/pos_data',{
     method:'POST',
     headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
-    body:JSON.stringify({id:'credit_summary',value:JSON.stringify({totalPending:Math.round(totalPending*100)/100,updatedAt:new Date().toISOString()}),license_key:db._lic||''})
-  }).catch(function(){});
+    body:JSON.stringify(payload)
+  }).then(function(r){
+    console.log('[CreditSync] Response status:', r.status, r.ok?'OK':'ERROR');
+    if(!r.ok)r.text().then(function(t){console.error('[CreditSync] Error body:', t);});
+  }).catch(function(e){console.error('[CreditSync] Fetch failed:', e);});
 }
 function confirmShift(){
   el('shift-open-screen').classList.remove('show');
@@ -1815,6 +1820,7 @@ function startApp(){
   renderCart();
   updateLicBadge();updateDashBtn();
   updateOACounter();_startNotifTimer();
+  syncCreditSummary();
   setEl('ord-lbl','#'+db.orderNum);
   if(_restoredFromBackup){toast('🔄 Datos restaurados del backup automático');_restoredFromBackup=false;}
   const bts=localStorage.getItem('4kpos_backup_ts');
