@@ -68,24 +68,24 @@ function createWindow() {
     }
   })
 
-  // Bloquear F12 / DevTools solo en versión instalada
-  if (!isDev) {
-    win.webContents.on('before-input-event', (event, input) => {
-      const key = input.key.toLowerCase()
-      if (
-        input.key === 'F12' ||
-        (input.control && input.shift && key === 'i') ||
-        (input.control && input.shift && key === 'j') ||
-        (input.control && key === 'u')
-      ) {
-        event.preventDefault()
-      }
-    })
-
-    win.webContents.on('devtools-opened', () => {
-      win.webContents.closeDevTools()
-    })
-  }
+  // TEMP: bloqueo de DevTools desactivado para debug
+  // if (!isDev) {
+  //   win.webContents.on('before-input-event', (event, input) => {
+  //     const key = input.key.toLowerCase()
+  //     if (
+  //       input.key === 'F12' ||
+  //       (input.control && input.shift && key === 'i') ||
+  //       (input.control && input.shift && key === 'j') ||
+  //       (input.control && key === 'u')
+  //     ) {
+  //       event.preventDefault()
+  //     }
+  //   })
+  //
+  //   win.webContents.on('devtools-opened', () => {
+  //     win.webContents.closeDevTools()
+  //   })
+  // }
 
   // ── Auto-updater ──────────────────────────────
   if (autoUpdater) {
