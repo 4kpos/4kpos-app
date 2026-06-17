@@ -1857,7 +1857,7 @@ function calcCashDiff(){
   const cashSales=active.filter(s=>s.payMethod==='cash').reduce((s,x)=>s+x.total,0);
   const creditCash=_getCreditCashShift().cashPart;
   const declared=parseFloat(el('lo-declared-cash').value)||0;
-  const expected=cashSales+creditCash+db.fundAmount;
+  const expected=cashSales+creditCash;
   const diff=Math.round((declared-expected)*100)/100;
   const box=el('lo-cash-diff-box');
   const confirmBtn=el('lo-confirm-btn');
@@ -1876,7 +1876,7 @@ function calcCashDiff(){
     :(diff<0?'⬇ ':('+⬆ '))+(lang==='en'?'Difference':'Diferencia')+': '+dolr(Math.abs(diff));
   box.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+t('cashFromSales')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(cashSales)+'</span></div>'
     +(creditCash?'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+t('cashCreditPay')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(creditCash)+'</span></div>':'')
-    +'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+t('fundBoxLbl')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(db.fundAmount)+'</span></div>'
+    +(db.fundAmount>0?'<div style="font-size:.73rem;color:var(--tx3);margin-bottom:3px">🗃️ '+(lang==='en'?'Fund: '+dolr(db.fundAmount)+' (not in reconciliation)':'Fondo: '+dolr(db.fundAmount)+' (no incluido)')+'</div>':'')
     +'<div style="display:flex;justify-content:space-between;margin-bottom:3px;padding-top:4px;border-top:1px solid var(--b1)"><span style="color:var(--tx3)">'+t('expectedCashLbl')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(expected)+'</span></div>'
     +'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+(lang==='en'?'Declared':'Declarado')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(declared)+'</span></div>'
     +'<div style="display:flex;justify-content:space-between;padding-top:5px;border-top:1px solid var(--b1)"><span style="color:var(--tx3)">'+(lang==='en'?'Difference':'Diferencia')+'</span><span style="font-weight:700;color:'+color+'">'+diffTxt+'</span></div>';
@@ -3170,7 +3170,7 @@ function openLogout(){
   const totalCobrado=cobradoHoy+(credCash.cashPart||0)+(credCash.cardPart||0);
   setEl('lo-sales',dolr(totalCobrado));setEl('lo-orders',active.length.toString());setEl('lo-fund',dolr(db.fundAmount));
   const cashSales=byPay2.cash||0;
-  const expectedCash=cashSales+(credCash.cashPart||0)+db.fundAmount;
+  const expectedCash=cashSales+(credCash.cashPart||0);
   const allShift=_getAllShiftSales();
   const can=allShift.filter(s=>s.status==='cancelled');
   const ret=allShift.filter(s=>s.status==='returned');
@@ -3195,19 +3195,11 @@ function openLogout(){
   if(ret.length)report+=rRow('🔄',lang==='en'?'Returns':'Devoluciones',-retTotal,ret.length,'var(--am)');
   if(can.length)report+=rRow('❌',lang==='en'?'Cancellations':'Cancelaciones',can.reduce((s,x)=>s+x.total,0),can.length,'var(--rd)');
   report+='<div style="display:flex;justify-content:space-between;font-weight:700;background:var(--gnb);border-radius:5px;padding:5px 8px;margin-top:5px"><span style="color:var(--gn)">✅ '+(lang==='en'?'TOTAL COLLECTED':'TOTAL COBRADO')+'</span><span style="font-family:monospace;color:var(--gn)">'+dolr(totalCobrado)+'</span></div>';
-  // ── Bloque 2: Créditos otorgados hoy (deuda) ──────────
-  if(byPay2.credit){
-    report+=secHdr(lang==='en'?'CREDITS GRANTED TODAY (DEBT)':'CRÉDITOS OTORGADOS HOY (DEUDA)');
-    report+='<div style="display:flex;justify-content:space-between;margin-bottom:3px;padding:5px 8px;background:rgba(245,158,11,.08);border-radius:5px;border:1px solid rgba(245,158,11,.25)">'
-      +'<span style="color:var(--am)">🏷️ '+t('creditDebtCard')+' <span style="font-size:.72rem;opacity:.8">('+byCnt2.credit+')</span></span>'
-      +'<span style="font-family:monospace;color:var(--am)">'+dolr(byPay2.credit)+'</span></div>';
-    report+='<div style="font-size:.72rem;color:var(--tx3);padding:2px 0">'+(lang==='en'?'⚠ Not included in expected cash — this is a debt':'⚠ No incluido en efectivo esperado — es una deuda')+'</div>';
-  }
-  // ── Bloque 3: Cuadre de efectivo ──────────────────────
+  // ── Bloque 2: Cuadre de efectivo ──────────────────────
   report+=secHdr(lang==='en'?'CASH RECONCILIATION':'CUADRE DE EFECTIVO');
   report+=rRow('💵',t('cashFromSales'),cashSales,0,'var(--tx2)');
   if(credCash.cashPart)report+=rRow('🏷️',t('cashCreditPay'),credCash.cashPart,0,'var(--tx2)');
-  report+=rRow('🗃️',t('fundBoxLbl'),db.fundAmount,0,'var(--tx2)');
+  if(db.fundAmount>0)report+='<div style="font-size:.73rem;color:var(--tx3);margin:2px 0 4px">'+(lang==='en'?'🗃️ Cash fund: '+dolr(db.fundAmount)+' (not included in reconciliation)':'🗃️ Fondo de caja: '+dolr(db.fundAmount)+' (no incluido en el cuadre)')+'</div>';
   report+='<div style="display:flex;justify-content:space-between;font-weight:700;margin-top:4px"><span style="color:var(--tx)">💵 '+t('expectedCashLbl')+'</span><span style="font-family:monospace;color:var(--gn)">'+dolr(expectedCash)+'</span></div>';
   report+='</div>';
   el('lo-report').innerHTML=report;
