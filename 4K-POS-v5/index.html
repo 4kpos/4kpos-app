@@ -1791,6 +1791,14 @@ function syncShiftStatus(status){
     body:JSON.stringify({id:'shift_status',value:JSON.stringify(_sp)})
   }).catch(function(){});
 }
+function syncCreditSummary(){
+  const totalPending=_getPendingCredits().reduce(function(s,c){return s+(c.total-c.paid);},0);
+  fetch(SUPA_URL+'/rest/v1/pos_data',{
+    method:'POST',
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify({id:'credit_summary',value:JSON.stringify({totalPending:Math.round(totalPending*100)/100,updatedAt:new Date().toISOString()}),license_key:db._lic||''})
+  }).catch(function(){});
+}
 function confirmShift(){
   el('shift-open-screen').classList.remove('show');
   syncShiftStatus('open');
@@ -2721,6 +2729,7 @@ function confirmCreditSale(){
   db.credits.push({id:Date.now().toString(),saleId:db.orderNum,custId:cust.id,client:name,cedula:cust.cedula||'',total,paid:0,date:new Date().toISOString(),payments:[],items:JSON.parse(JSON.stringify(cart))});
   db.orderNum++;
   saveDB();
+  syncCreditSummary();
   if(editingAccountId){const ls=_loadOAs().filter(x=>x.id!==editingAccountId);_saveOAs(ls);editingAccountId=null;}
   closeOv('ov-credit-sale');
   showRcpt(sale);
@@ -2909,6 +2918,7 @@ function doCreditPayment(full){
     cr.payments.push(payRec);
   }
   saveDB();
+  syncCreditSummary();
   closeOv('ov-credit-pay');
   renderCreditsPanel();
   renderAdmCredits();
