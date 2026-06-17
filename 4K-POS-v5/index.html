@@ -3195,6 +3195,12 @@ function openLogout(){
   if(ret.length)report+=rRow('🔄',lang==='en'?'Returns':'Devoluciones',-retTotal,ret.length,'var(--am)');
   if(can.length)report+=rRow('❌',lang==='en'?'Cancellations':'Cancelaciones',can.reduce((s,x)=>s+x.total,0),can.length,'var(--rd)');
   report+='<div style="display:flex;justify-content:space-between;font-weight:700;background:var(--gnb);border-radius:5px;padding:5px 8px;margin-top:5px"><span style="color:var(--gn)">✅ '+(lang==='en'?'TOTAL COLLECTED':'TOTAL COBRADO')+'</span><span style="font-family:monospace;color:var(--gn)">'+dolr(totalCobrado)+'</span></div>';
+  if(byPay2.credit){
+    report+='<div style="display:flex;justify-content:space-between;margin-top:6px;padding:5px 8px;background:rgba(245,158,11,.08);border-radius:5px;border:1px solid rgba(245,158,11,.2)">'
+      +'<span style="color:var(--am)">🏷️ '+(lang==='en'?'Credit granted this shift':'Crédito otorgado en este turno')+' <span style="font-size:.72rem;opacity:.75">('+byCnt2.credit+')</span></span>'
+      +'<span style="font-family:monospace;color:var(--am)">'+dolr(byPay2.credit)+'</span></div>'
+      +'<div style="font-size:.7rem;color:var(--tx3);padding:2px 6px;margin-bottom:2px">'+(lang==='en'?'⚠ Debt — not counted in collected cash':'⚠ Deuda — no incluida en lo cobrado')+'</div>';
+  }
   // ── Bloque 2: Cuadre de efectivo ──────────────────────
   report+=secHdr(lang==='en'?'CASH RECONCILIATION':'CUADRE DE EFECTIVO');
   report+=rRow('💵',t('cashFromSales'),cashSales,0,'var(--tx2)');
@@ -3517,17 +3523,12 @@ function renderConta(){
     return sum+(s.creditPayments||[]).filter(function(p){var d=new Date(p.date);return d>=range.start&&d<=range.end;}).reduce(function(s2,p){return s2+(p.amount||0);},0);
   },0);
   const ingresos=cobradas.reduce((s,x)=>s+x.total,0)+abonosPeriodo;
-  // Credit debt = any credit sale NOT fully paid
-  const creditDebtPeriod=sales.filter(s=>s.payMethod==='credit'&&s.creditStatus!=='paid').reduce((s,x)=>s+(x.total-(x.creditPaid||0)),0);
   const costoFac=facturas.reduce((s,x)=>s+x.cost,0);
   const totalGastos=gastos.reduce((s,x)=>s+x.monto,0);
   const utilidad=ingresos-costoFac-totalGastos;
-  const creditPending=_getPendingCredits().reduce(function(s,c){return s+(c.total-c.paid);},0);
   el('ct-stats').innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px">'
     +sCard('gn','💰 '+t('incomeCollected'),dolr(ingresos))+sCard('rd','💸 '+t('purchasesLbl'),dolr(costoFac))+sCard('am','⚡ '+t('tabExpenses'),dolr(totalGastos))
-    +sCard('ac','📊 '+(lang==='en'?'Orders':'Órdenes'),sales.length.toString())+sCard(utilidad>=0?'gn':'rd','✨ '+(lang==='en'?'Profit':'Utilidad'),dolr(utilidad))
-    +sCard('ac','💳 '+(lang==='en'?'Credits granted':'Créditos otorgados'),dolr(creditDebtPeriod))
-    +sCard('am','🏷️ '+(lang==='en'?'Total pending debt':'Deuda total pendiente'),dolr(creditPending))+'</div>';
+    +sCard('ac','📊 '+(lang==='en'?'Orders':'Órdenes'),sales.length.toString())+sCard(utilidad>=0?'gn':'rd','✨ '+(lang==='en'?'Profit':'Utilidad'),dolr(utilidad))+'</div>';
   const prodMap={};
   sales.forEach(s=>s.items.forEach(i=>{if(!prodMap[i.name])prodMap[i.name]={qty:0,total:0};prodMap[i.name].qty+=i.qty;prodMap[i.name].total+=i.price*i.qty;}));
   const sorted=Object.entries(prodMap).sort((a,b)=>b[1].total-a[1].total);
