@@ -43,6 +43,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .lic-ok{background:var(--gnb);border-color:var(--gn);color:var(--gn);}
 .lic-warn{background:var(--amb);border-color:var(--am);color:var(--am);}
 .lic-err{background:var(--rdb);border-color:var(--rd);color:var(--rd);}
+#notif-btn{background:none;border:none;cursor:pointer;font-size:1.05rem;padding:4px 5px;position:relative;color:var(--tx2);line-height:1;border-radius:8px;display:flex;align-items:center;}
+#notif-btn:hover{background:var(--s2);}
+#notif-badge{display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;border-radius:50%;font-size:.58rem;font-weight:800;min-width:15px;height:15px;align-items:center;justify-content:center;padding:0 2px;line-height:1;box-shadow:0 0 0 2px var(--bg);}
+#notif-panel{display:none;position:fixed;top:60px;right:10px;width:320px;max-height:440px;overflow-y:auto;background:var(--s1);border:1.5px solid var(--b2);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.45);z-index:8501;}
+#notif-panel-hdr{padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;justify-content:space-between;align-items:center;font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;}
+.notif-row{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--b1);cursor:pointer;align-items:flex-start;transition:background .15s;}
+.notif-row:hover{background:var(--s2);}
+.notif-row.read{opacity:.45;}
+.notif-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+#notif-backdrop{display:none;position:fixed;inset:0;z-index:8500;}
 .tbtn{background:var(--s2);border:1.5px solid var(--b1);color:var(--tx2);width:34px;height:34px;border-radius:var(--rs);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;position:relative;}
 .tbtn:hover{border-color:var(--ac);color:var(--ac);}
 #tb-user,#tb-user *{color:#fff!important;}
@@ -354,6 +364,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <div class="clk" id="clk">00:00:00</div>
     <span id="wifi-dot" style="display:flex;align-items:center;flex-shrink:0;margin:0 2px;align-self:center;cursor:default" title="Conectado"><svg id="wifi-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></span>
     <div class="lic-badge lic-ok" id="lic-badge" style="display:none">✓</div>
+    <button id="notif-btn" onclick="toggleNotifPanel()" title="Notificaciones">🔔<span id="notif-badge">0</span></button>
   </div>
   <div style="display:flex;gap:5px">
     <div style="position:relative">
@@ -1090,6 +1101,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
 </div>
 
 <div class="toast" id="toast"></div>
+<div id="notif-backdrop" onclick="closeNotifPanel()"></div>
+<div id="notif-panel">
+  <div id="notif-panel-hdr"><span>🔔 Notificaciones</span><button onclick="markAllNotifsRead()" style="background:none;border:none;cursor:pointer;font-size:.72rem;color:var(--ac);font-weight:600;padding:2px 6px">Marcar leídas</button></div>
+  <div id="notif-list"></div>
+</div>
 <div id="parea"></div>
 
 <script>
@@ -1767,6 +1783,13 @@ function syncShiftStatus(status){
     db.cfg.shiftClosedAt=now;
   }
   saveDB();
+  const _sp={status:status,user:userName};
+  if(status==='open')_sp.openedAt=now; else _sp.closedAt=now;
+  fetch(SUPA_URL+'/rest/v1/pos_data',{
+    method:'POST',
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify({id:'shift_status',value:JSON.stringify(_sp)})
+  }).catch(function(){});
 }
 function confirmShift(){
   el('shift-open-screen').classList.remove('show');
@@ -1783,7 +1806,7 @@ function startApp(){
   showCategories();
   renderCart();
   updateLicBadge();updateDashBtn();
-  updateOACounter();
+  updateOACounter();_startNotifTimer();
   setEl('ord-lbl','#'+db.orderNum);
   if(_restoredFromBackup){toast('🔄 Datos restaurados del backup automático');_restoredFromBackup=false;}
   const bts=localStorage.getItem('4kpos_backup_ts');
@@ -1886,6 +1909,8 @@ function doLogout(){
   // Keep only last 30 shifts
   if(db.shifts.length>30)db.shifts=db.shifts.slice(-30);
   syncShiftStatus('closed');
+  if(_notifInterval){clearInterval(_notifInterval);_notifInterval=null;}
+  closeNotifPanel();_notifs=[];_updateNotifBadge();
   closeOv('ov-logout');curUser=null;cart=[];cashIn='';
   // hideMainUI();
   el('shift-open-screen').classList.remove('show');
@@ -3509,8 +3534,8 @@ function renderConta(){
   el('ct-stats').innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px">'
     +sCard('gn','💰 '+t('incomeCollected'),dolr(ingresos))+sCard('rd','💸 '+t('purchasesLbl'),dolr(costoFac))+sCard('am','⚡ '+t('tabExpenses'),dolr(totalGastos))
     +sCard('ac','📊 '+(lang==='en'?'Orders':'Órdenes'),sales.length.toString())+sCard(utilidad>=0?'gn':'rd','✨ '+(lang==='en'?'Profit':'Utilidad'),dolr(utilidad))
-    +(creditDebtPeriod>0?sCard('am','🏷️ '+t('creditDebtCard'),dolr(creditDebtPeriod)):'')
-    +sCard('am','💳 '+t('payMethodCredit')+' '+(lang==='en'?'total':'total'),dolr(creditPending))+'</div>';
+    +sCard('ac','💳 '+(lang==='en'?'Credits granted':'Créditos otorgados'),dolr(creditDebtPeriod))
+    +sCard('am','🏷️ '+(lang==='en'?'Total pending debt':'Deuda total pendiente'),dolr(creditPending))+'</div>';
   const prodMap={};
   sales.forEach(s=>s.items.forEach(i=>{if(!prodMap[i.name])prodMap[i.name]={qty:0,total:0};prodMap[i.name].qty+=i.qty;prodMap[i.name].total+=i.price*i.qty;}));
   const sorted=Object.entries(prodMap).sort((a,b)=>b[1].total-a[1].total);
@@ -3899,6 +3924,118 @@ document.addEventListener('keydown',function(e){
     return;
   }
 });
+
+// ── NOTIFICATION CENTER ───────────────────────────────────────────────────────
+let _notifs=[];
+let _notifInterval=null;
+
+function calcNotifs(){
+  const now=new Date();now.setHours(0,0,0,0);
+  const readIds=new Set(_notifs.filter(function(n){return n.read;}).map(function(n){return n.id;}));
+  const fresh=[];
+
+  // Overdue & due-soon credits
+  (db.sales||[]).forEach(function(s){
+    if(s.payMethod!=='credit'||(s.creditStatus||'pending')==='paid')return;
+    if(!s.creditDueDate)return;
+    const due=new Date(s.creditDueDate);due.setHours(0,0,0,0);
+    const diff=Math.round((due-now)/(1000*60*60*24));
+    const client=s.creditClient||s.creditCedula||'#'+(s.rnum||s.id);
+    const owed=s.total-(s.creditPaid||0);
+    if(diff<0){
+      const id='ovrd-'+s.id;
+      fresh.push({id,type:'overdue',color:'#ef4444',read:readIds.has(id),
+        msg:client+' — '+dolr(owed)+' vencido hace '+Math.abs(diff)+'d'});
+    }else if(diff<=3){
+      const id='soon-'+s.id;
+      fresh.push({id,type:'due_soon',color:'#f59e0b',read:readIds.has(id),
+        msg:client+' — '+dolr(owed)+' vence en '+diff+(diff===1?'d':' días')});
+    }
+  });
+
+  // Low stock
+  (db.products||[]).forEach(function(p){
+    if((p.stock||0)<=(p.minStock||5)){
+      const id='stock-'+p.id;
+      fresh.push({id,type:'low_stock',color:'#f97316',read:readIds.has(id),
+        msg:p.name+' — '+(p.stock||0)+' u. (mín: '+(p.minStock||5)+')'});
+    }
+  });
+
+  _notifs=fresh;
+  _updateNotifBadge();
+}
+
+function _updateNotifBadge(){
+  const unread=_notifs.filter(function(n){return !n.read;}).length;
+  const badge=el('notif-badge');
+  const btn=el('notif-btn');
+  if(!badge||!btn)return;
+  if(unread>0){
+    badge.textContent=unread>9?'9+':String(unread);
+    badge.style.display='flex';
+    btn.style.color='#ef4444';
+  }else{
+    badge.style.display='none';
+    btn.style.color='';
+  }
+}
+
+function toggleNotifPanel(){
+  const panel=el('notif-panel');
+  if(!panel)return;
+  if(panel.style.display==='block'){closeNotifPanel();}
+  else{openNotifPanel();}
+}
+
+function openNotifPanel(){
+  calcNotifs();
+  const icons={overdue:'🔴',due_soon:'🟡',low_stock:'🟠',update:'🔵'};
+  const labels={overdue:'Vencido',due_soon:'Por vencer',low_stock:'Stock bajo',update:'Actualización'};
+  const list=el('notif-list');
+  if(!list)return;
+  if(!_notifs.length){
+    list.innerHTML='<div style="padding:20px;text-align:center;color:var(--tx3);font-size:.85rem">✅ Sin notificaciones pendientes</div>';
+  }else{
+    list.innerHTML=_notifs.map(function(n){
+      return '<div class="notif-row'+(n.read?' read':'')+'" onclick="_notifClick(\''+n.id+'\')">'
+        +'<span style="font-size:1rem;flex-shrink:0;margin-top:1px">'+(icons[n.type]||'🔵')+'</span>'
+        +'<div style="flex:1;min-width:0">'
+          +'<div style="font-size:.68rem;font-weight:700;color:'+n.color+';text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px">'+(labels[n.type]||n.type)+'</div>'
+          +'<div style="font-size:.82rem;color:var(--tx2)">'+n.msg+'</div>'
+        +'</div>'
+        +(n.read?'':'<div class="notif-dot" style="background:'+n.color+'"></div>')
+        +'</div>';
+    }).join('');
+  }
+  el('notif-panel').style.display='block';
+  el('notif-backdrop').style.display='block';
+}
+
+function closeNotifPanel(){
+  const p=el('notif-panel'),b=el('notif-backdrop');
+  if(p)p.style.display='none';
+  if(b)b.style.display='none';
+}
+
+function _notifClick(id){
+  const n=_notifs.find(function(x){return x.id===id;});
+  if(n)n.read=true;
+  _updateNotifBadge();
+  openNotifPanel();
+}
+
+function markAllNotifsRead(){
+  _notifs.forEach(function(n){n.read=true;});
+  _updateNotifBadge();
+  openNotifPanel();
+}
+
+function _startNotifTimer(){
+  if(_notifInterval)clearInterval(_notifInterval);
+  calcNotifs();
+  _notifInterval=setInterval(calcNotifs,5*60*1000);
+}
 </script>
 </body>
 </html>
