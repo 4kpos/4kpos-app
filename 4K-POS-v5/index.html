@@ -1121,18 +1121,6 @@ try {
 } catch(e) {
   console.warn('Electron ipcRenderer no disponible, usando modo local.');
 }
-// ── Bloquear DevTools en producción ──────────── TEMP: desactivado para debug
-// document.addEventListener('keydown', function(e) {
-//   if (db && db.cfg && db.cfg.devMode) return;
-//   if (e.key === 'F12') { e.preventDefault(); return; }
-//   if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) { e.preventDefault(); return; }
-//   if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) { e.preventDefault(); return; }
-//   if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); return; }
-// });
-// document.addEventListener('contextmenu', function(e) {
-//   if (db && db.cfg && db.cfg.devMode) return;
-//   e.preventDefault();
-// });
 // ── Auto-updater notifications ─────────────────
 try {
   ipcRenderer.on('update-msg', function(e, type) {
@@ -1821,6 +1809,7 @@ function startApp(){
   updateLicBadge();updateDashBtn();
   updateOACounter();_startNotifTimer();
   syncCreditSummary();
+  if(!window._cSyncInt)window._cSyncInt=setInterval(syncCreditSummary,120000);
   setEl('ord-lbl','#'+db.orderNum);
   if(_restoredFromBackup){toast('🔄 Datos restaurados del backup automático');_restoredFromBackup=false;}
   const bts=localStorage.getItem('4kpos_backup_ts');

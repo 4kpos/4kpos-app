@@ -68,25 +68,6 @@ function createWindow() {
     }
   })
 
-  // TEMP: bloqueo de DevTools desactivado para debug
-  // if (!isDev) {
-  //   win.webContents.on('before-input-event', (event, input) => {
-  //     const key = input.key.toLowerCase()
-  //     if (
-  //       input.key === 'F12' ||
-  //       (input.control && input.shift && key === 'i') ||
-  //       (input.control && input.shift && key === 'j') ||
-  //       (input.control && key === 'u')
-  //     ) {
-  //       event.preventDefault()
-  //     }
-  //   })
-  //
-  //   win.webContents.on('devtools-opened', () => {
-  //     win.webContents.closeDevTools()
-  //   })
-  // }
-
   // ── Auto-updater ──────────────────────────────
   if (autoUpdater) {
     try {
@@ -133,23 +114,6 @@ function createActivationWindow(reason) {
     win.webContents.send('activation-reason', reason)
   })
 
-  if (!isDev) {
-    win.webContents.on('before-input-event', (event, input) => {
-      const key = input.key.toLowerCase()
-      if (
-        input.key === 'F12' ||
-        (input.control && input.shift && key === 'i') ||
-        (input.control && input.shift && key === 'j') ||
-        (input.control && key === 'u')
-      ) {
-        event.preventDefault()
-      }
-    })
-
-    win.webContents.on('devtools-opened', () => {
-      win.webContents.closeDevTools()
-    })
-  }
 }
 
 // ── Arrancar app con verificación de licencia ────────
