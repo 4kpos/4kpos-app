@@ -1368,6 +1368,7 @@ function el(id){return document.getElementById(id);}
 function setEl(id,v){const e=el(id);if(e)e.textContent=v;}
 function getNum(id,def){return parseFloat(el(id)&&el(id).value)||def||0;}
 function dolr(n){return '$'+(isNaN(n)?'0.00':Number(n).toFixed(2));}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toast(m){const e=el('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2300);}
 function openOv(id){el(id).classList.add('open');}
 function closeOv(id){el(id).classList.remove('open');}
