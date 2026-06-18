@@ -1850,6 +1850,20 @@ function syncCreditSummary(){
     body:JSON.stringify({id:'credit_summary',value:val})
   }).catch(function(){});
 }
+function syncCreditDirect(){
+  try{
+    var pending=(db.sales||[]).filter(function(s){
+      return s.payMethod==='credit'&&s.creditStatus!=='paid'&&(s.total-(s.creditPaid||0))>0;
+    });
+    var total=pending.reduce(function(sum,s){return sum+(s.total||0)-(s.creditPaid||0);},0);
+    var body={totalPending:Math.round(total*100)/100,count:pending.length,updatedAt:new Date().toISOString()};
+    fetch(SUPA_URL+'/rest/v1/categories',{
+      method:'POST',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify({id:'credit_summary',name:JSON.stringify(body),license_key:db._lic||''})
+    }).catch(function(){});
+  }catch(e){}
+}
 function confirmShift(){
   el('shift-open-screen').classList.remove('show');
   syncShiftStatus('open');
@@ -1868,6 +1882,7 @@ function startApp(){
   updateOACounter();_startNotifTimer();
   syncCreditSummary();
   if(!window._cSyncInt)window._cSyncInt=setInterval(syncCreditSummary,30000);
+  if(!window._cdSyncInt){window._cdSyncInt=setInterval(syncCreditDirect,30000);setTimeout(syncCreditDirect,3000);}
   setEl('ord-lbl','#'+db.orderNum);
   if(_restoredFromBackup){toast('🔄 Datos restaurados del backup automático');_restoredFromBackup=false;}
   const bts=localStorage.getItem('4kpos_backup_ts');
