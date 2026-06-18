@@ -3827,7 +3827,7 @@ function contaTab(tab,e2){
   document.querySelectorAll('#conta-tabs .btn').forEach(function(b){b.className='btn btn-s '+(b.dataset.extraClass||'').trim();});
   if(e2)e2.className='btn btn-p '+(e2.dataset.extraClass||'').trim();
   if(tab==='ct-fac'){loadFacProds();renderVentasList();}
-  if(tab==='ct-cred')renderContaCredits();
+  if(tab==='ct-cred'){syncCreditSummary();renderContaCredits();}
   if(tab==='ct-graf')setTimeout(renderGraf,50);
 }
 
