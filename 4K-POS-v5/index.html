@@ -7,6 +7,8 @@
 :root{--bg:#0f0f13;--s1:#1a1a22;--s2:#22222e;--s3:#2a2a38;--b1:rgba(255,255,255,0.09);--b2:rgba(255,255,255,0.16);--tx:#ffffff;--tx2:#ccccdd;--tx3:#888899;--ac:#3b82f6;--acg:rgba(59,130,246,0.15);--gn:#34d399;--gnb:rgba(52,211,153,0.13);--rd:#f87171;--rdb:rgba(248,113,113,0.13);--am:#fbbf24;--amb:rgba(251,191,36,0.13);--bl:#60a5fa;--blb:rgba(96,165,250,0.13);--r:10px;--rs:8px;}
 body.light{--bg:#f0f2f5;--s1:#ffffff;--s2:#e8eaf0;--s3:#dde0ea;--b1:rgba(0,0,0,0.15);--b2:rgba(0,0,0,0.25);--tx:#0a0a1a;--tx2:#1a1a2e;--tx3:#3d3d58;--ac:#1e3a8a;--acg:rgba(30,58,138,0.12);--gn:#047857;--gnb:rgba(4,120,87,0.12);--rd:#b91c1c;--rdb:rgba(185,28,28,0.12);--am:#92400e;--amb:rgba(146,64,14,0.12);--bl:#1d4ed8;--blb:rgba(29,78,216,0.12);}
 *{margin:0;padding:0;box-sizing:border-box;}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+input[type=number]{-moz-appearance:textfield;}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:15px;}
 ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:var(--s2);}::-webkit-scrollbar-thumb{background:var(--ac);border-radius:3px;}
 #lang-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:none;align-items:center;justify-content:center;}
@@ -813,7 +815,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <div class="slbl">Proveedor</div>
           <div class="g2">
             <div class="fg"><label class="lbl">Nombre *</label><input type="text" class="fi" id="comp-prov" placeholder="Nombre del proveedor"></div>
-            <div class="fg"><label class="lbl">Núm. Factura</label><input type="text" class="fi" id="comp-num" placeholder="(opcional)"></div>
+            <div class="fg"><label class="lbl">Núm. Factura *</label><input type="text" class="fi" id="comp-num" placeholder="Requerido"></div>
           </div>
           <div class="g2">
             <div class="fg"><label class="lbl">Dirección</label><input type="text" class="fi" id="comp-dir" placeholder="(opcional)"></div>
@@ -3619,6 +3621,8 @@ function compAddItem(){
   _compSyncAllItems();
   _compItems.push({prodId:'',qty:'',unitPrice:''});
   renderCompItems();
+  const newSel=el('cit-prod-'+(_compItems.length-1));
+  if(newSel)newSel.focus();
 }
 function compRemoveItem(i){
   _compItems.splice(i,1);
@@ -3637,7 +3641,7 @@ function renderCompItems(){
     return '<div style="display:grid;grid-template-columns:1fr 70px 90px 80px 24px;gap:4px;align-items:center;margin-bottom:5px">'
       +'<select class="fi" id="cit-prod-'+i+'" onchange="_compSyncItem('+i+')" style="font-size:.79rem">'+opts+'</select>'
       +'<input type="number" class="fi" id="cit-qty-'+i+'" min="1" placeholder="0" value="'+escHtml(String(it.qty||''))+'" oninput="_compSyncItem('+i+')" style="font-size:.79rem;text-align:right">'
-      +'<input type="number" class="fi" id="cit-price-'+i+'" min="0" step="0.01" placeholder="0.00" value="'+escHtml(String(it.unitPrice||''))+'" oninput="_compSyncItem('+i+')" style="font-size:.79rem;text-align:right">'
+      +'<input type="number" class="fi" id="cit-price-'+i+'" min="0" step="0.01" placeholder="0.00" value="'+escHtml(String(it.unitPrice||''))+'" oninput="_compSyncItem('+i+')" onkeydown="if(event.key===\'Enter\'){event.preventDefault();compAddItem();}" style="font-size:.79rem;text-align:right">'
       +'<span style="font-family:monospace;font-size:.78rem;color:var(--am);text-align:right" id="cit-sub-'+i+'">'+dolr(sub)+'</span>'
       +'<button class="xb" onclick="compRemoveItem('+i+')">✕</button>'
       +'</div>';
@@ -3670,8 +3674,10 @@ function clearCompForm(){
   renderCompItems();
 }
 function saveCompInvoice(){
-  const proveedor=(el('comp-prov')||{}).value&&el('comp-prov').value.trim();
+  const proveedor=el('comp-prov')?el('comp-prov').value.trim():'';
   if(!proveedor){toast('⚠ El nombre del proveedor es obligatorio');return;}
+  const numFac=el('comp-num')?el('comp-num').value.trim():'';
+  if(!numFac){toast('⚠ El número de factura es obligatorio');return;}
   _compSyncAllItems();
   const validItems=_compItems.filter(function(it){
     return it.prodId&&parseInt(it.qty)>0&&parseFloat(it.unitPrice)>0;
