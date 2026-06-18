@@ -3523,11 +3523,17 @@ function loadContaPerms(){
     const credBtn=el('ct-btn-cred');
     contaTab('ct-cred',credBtn||null);
   }
-  // Existing fac/gst block checks
-  if(!isAdm&&!pm.fac){el('fac-block').style.display='block';el('fac-content').style.display='none';}
-  else{el('fac-block').style.display='none';el('fac-content').style.display='block';}
-  if(!isAdm&&!pm.gst){el('gst-block').style.display='block';el('gst-content').style.display='none';}
-  else{el('gst-block').style.display='none';el('gst-content').style.display='block';}
+  // fac/gst block checks (with null guards)
+  const facBlock=el('fac-block'),facContent=el('fac-content');
+  if(facBlock&&facContent){
+    if(!isAdm&&!pm.fac){facBlock.style.display='block';facContent.style.display='none';}
+    else{facBlock.style.display='none';facContent.style.display='block';}
+  }
+  const gstBlock=el('gst-block'),gstContent=el('gst-content');
+  if(gstBlock&&gstContent){
+    if(!isAdm&&!pm.gst){gstBlock.style.display='block';gstContent.style.display='none';}
+    else{gstBlock.style.display='none';gstContent.style.display='block';}
+  }
 }
 function getDateRange(period){
   const now=new Date(),start=new Date();
