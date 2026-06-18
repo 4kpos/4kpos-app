@@ -810,26 +810,34 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div id="ct-comp" style="display:none">
         <div id="comp-block" style="display:none;background:var(--rdb);border:1.5px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px;font-size:.83rem;color:var(--rd);margin-bottom:12px">🔒 Sin acceso a Compras</div>
         <div id="comp-content">
-          <div class="slbl" id="comp-form-ttl">Registrar factura de compra</div>
+          <div class="slbl">Proveedor</div>
           <div class="g2">
-            <div class="fg"><label class="lbl" id="comp-prov-lbl">Proveedor</label><input type="text" class="fi" id="comp-prov" placeholder="Nombre del proveedor"></div>
-            <div class="fg"><label class="lbl" id="comp-num-lbl">Núm. Factura</label><input type="text" class="fi" id="comp-num" placeholder="(opcional)"></div>
+            <div class="fg"><label class="lbl">Nombre *</label><input type="text" class="fi" id="comp-prov" placeholder="Nombre del proveedor"></div>
+            <div class="fg"><label class="lbl">Núm. Factura</label><input type="text" class="fi" id="comp-num" placeholder="(opcional)"></div>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 4px">
-            <div class="slbl" style="margin:0" id="comp-prod-ttl">Productos</div>
-            <button class="btn btn-s" style="font-size:.75rem;padding:4px 10px" onclick="compAddItem()" id="comp-add-btn">+ Agregar</button>
+          <div class="g2">
+            <div class="fg"><label class="lbl">Dirección</label><input type="text" class="fi" id="comp-dir" placeholder="(opcional)"></div>
+            <div class="fg"><label class="lbl">Teléfono</label><input type="text" class="fi" id="comp-tel" placeholder="(opcional)"></div>
+          </div>
+          <div class="fg" style="max-width:180px"><label class="lbl">Fecha</label><input type="date" class="fi" id="comp-date"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 4px">
+            <div class="slbl" style="margin:0">Productos comprados</div>
+            <button class="btn btn-s" style="font-size:.75rem;padding:4px 10px" onclick="compAddItem()">➕ Agregar línea</button>
+          </div>
+          <div style="font-size:.7rem;color:var(--tx3);margin-bottom:6px;display:grid;grid-template-columns:1fr 70px 90px 80px 24px;gap:4px;padding:0 2px">
+            <span>Producto</span><span style="text-align:right">Cant.</span><span style="text-align:right">Precio unit.</span><span style="text-align:right">Subtotal</span><span></span>
           </div>
           <div id="comp-items"></div>
-          <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:8px 0 10px">
-            <span style="font-size:.82rem;color:var(--tx2)" id="comp-total-lbl">Total:</span>
-            <span style="font-family:monospace;font-weight:700;color:var(--am);font-size:1rem" id="comp-total">$0.00</span>
+          <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:10px 0 12px;padding-top:8px;border-top:1.5px solid var(--b2)">
+            <span style="font-size:.85rem;color:var(--tx2)">Total factura:</span>
+            <span style="font-family:monospace;font-weight:700;color:var(--am);font-size:1.15rem" id="comp-total">$0.00</span>
           </div>
           <div class="frow">
-            <button class="btn btn-p" onclick="saveCompInvoice()" id="comp-save-btn">💾 Registrar</button>
-            <button class="btn btn-s" onclick="clearCompForm()" id="comp-clear-btn">↺</button>
+            <button class="btn btn-p" onclick="saveCompInvoice()" id="comp-save-btn">💾 Guardar factura</button>
+            <button class="btn btn-s" onclick="clearCompForm()">↺ Limpiar</button>
           </div>
           <div class="sep-line"></div>
-          <div class="slbl" id="comp-list-ttl">Facturas de compra</div>
+          <div class="slbl">Facturas registradas</div>
           <div id="comp-list"></div>
         </div>
       </div>
@@ -2208,14 +2216,30 @@ function openInvCount(){
   if(el('ic-srch'))el('ic-srch').value='';
   body.innerHTML='<div style="font-size:.78rem;color:var(--tx3);margin-bottom:10px">Ingresa el conteo físico de cada producto:</div>'
     +'<table style="width:100%;border-collapse:collapse;font-size:.83rem">'
-    +'<tr style="border-bottom:2px solid var(--b2);color:var(--tx3)"><th style="text-align:left;padding:6px 4px">Producto</th><th style="text-align:right;padding:6px 4px">Sistema</th><th style="text-align:right;padding:6px 4px">Conteo</th></tr>'
+    +'<tr style="border-bottom:2px solid var(--b2);color:var(--tx3)"><th style="text-align:left;padding:6px 4px">Producto</th><th style="text-align:right;padding:6px 4px">Sistema</th><th style="text-align:right;padding:6px 4px">Conteo</th><th style="text-align:right;padding:6px 4px">Estado</th></tr>'
     +db.products.map(p=>'<tr style="border-bottom:1px solid var(--b1)" data-name="'+p.name.replace(/"/g,'&quot;')+'" data-bc="'+(p.bc||'')+'" data-cat="'+(p.cat||'')+'">'
       +'<td style="padding:7px 4px;font-weight:600;color:var(--tx)">'+p.name+'</td>'
-      +'<td style="padding:7px 4px;text-align:right;color:var(--tx2)">'+(p.stock||0)+'</td>'
-      +'<td style="padding:4px"><input type="number" min="0" data-pid="'+p.id+'" placeholder="—" style="width:70px;border:1.5px solid var(--b2);border-radius:4px;background:var(--s3);color:var(--tx);font-size:.83rem;text-align:right;padding:3px 6px;outline:none" oninput="this.style.borderColor=\'var(--ac)\'"></td>'
+      +'<td style="padding:7px 4px;text-align:right;color:var(--tx2)" id="ics-sys-'+p.id+'">'+(p.stock||0)+'</td>'
+      +'<td style="padding:4px"><input type="number" min="0" data-pid="'+p.id+'" data-sys="'+(p.stock||0)+'" placeholder="—" style="width:70px;border:1.5px solid var(--b2);border-radius:4px;background:var(--s3);color:var(--tx);font-size:.83rem;text-align:right;padding:3px 6px;outline:none" oninput="icLiveStatus(this)"></td>'
+      +'<td style="padding:7px 4px;text-align:right;font-size:.8rem;font-weight:700" id="ics-st-'+p.id+'"></td>'
       +'</tr>').join('')
     +'</table>';
   openOv('ov-inv-count');
+}
+function icLiveStatus(inp){
+  inp.style.borderColor='var(--ac)';
+  const pid=inp.dataset.pid;
+  const sys=parseInt(inp.dataset.sys)||0;
+  const stEl=document.getElementById('ics-st-'+pid);
+  if(!stEl)return;
+  const v=inp.value.trim();
+  if(v===''){stEl.textContent='';return;}
+  const cnt=parseInt(v);
+  if(isNaN(cnt)||cnt<0){stEl.textContent='';return;}
+  const diff=cnt-sys;
+  if(diff===0){stEl.style.color='var(--gn)';stEl.textContent='✅';}
+  else if(diff<0){stEl.style.color='var(--rd)';stEl.textContent='⚠ '+diff;}
+  else{stEl.style.color='var(--am)';stEl.textContent='⚠ +'+diff;}
 }
 function _readInvCountInputs(){
   const data={};
@@ -3583,28 +3607,38 @@ function sCard(color,lbl,val){return '<div style="background:var(--'+color+'b,va
 // ── COMPRAS DE INVENTARIO (multi-producto) ──────────────
 let _compItems=[];
 function compLoadProds(){
-  if(!_compItems.length)compAddItem();
+  if(!_compItems.length)_compItems=[{prodId:'',qty:'',unitPrice:''}];
+  // Set default date
+  const dateEl=el('comp-date');
+  if(dateEl&&!dateEl.value)dateEl.value=new Date().toISOString().slice(0,10);
   renderCompItems();
   renderCompList();
 }
 function compAddItem(){
-  _compItems.push({prodId:'',qty:'',unitCost:''});
+  _compSyncAllItems();
+  _compItems.push({prodId:'',qty:'',unitPrice:''});
   renderCompItems();
 }
 function compRemoveItem(i){
   _compItems.splice(i,1);
-  if(!_compItems.length)_compItems.push({prodId:'',qty:'',unitCost:''});
+  if(!_compItems.length)_compItems=[{prodId:'',qty:'',unitPrice:''}];
   renderCompItems();
-  compCalcTotal();
+}
+function _compSyncAllItems(){
+  _compItems.forEach(function(_,i){_compSyncItem(i);});
 }
 function renderCompItems(){
-  const opts='<option value="">— Selecciona —</option>'+(db.products||[]).map(function(p){return '<option value="'+p.id+'">'+escHtml(p.name)+' (Stock: '+(p.stock||0)+')</option>';}).join('');
+  const opts='<option value="">— Seleccionar —</option>'+(db.products||[]).map(function(p){
+    return '<option value="'+p.id+'">'+escHtml(p.name)+' (Stock: '+(p.stock||0)+')</option>';
+  }).join('');
   el('comp-items').innerHTML=_compItems.map(function(it,i){
-    return '<div style="display:grid;grid-template-columns:1fr 80px 100px 28px;gap:5px;align-items:flex-end;margin-bottom:6px">'
-      +'<div><label class="lbl" style="font-size:.7rem">Producto</label><select class="fi" id="cit-prod-'+i+'" onchange="_compSyncItem('+i+')" style="font-size:.8rem">'+opts+'</select></div>'
-      +'<div><label class="lbl" style="font-size:.7rem">Cantidad</label><input type="number" class="fi" id="cit-qty-'+i+'" min="1" placeholder="0" value="'+escHtml(String(it.qty||''))+'" oninput="_compSyncItem('+i+')" style="font-size:.8rem"></div>'
-      +'<div><label class="lbl" style="font-size:.7rem">Costo total $</label><input type="number" class="fi" id="cit-cost-'+i+'" placeholder="0.00" step="0.01" value="'+escHtml(String(it.unitCost||''))+'" oninput="_compSyncItem('+i+')" style="font-size:.8rem"></div>'
-      +'<button class="xb" onclick="compRemoveItem('+i+')" style="margin-bottom:2px">✕</button>'
+    const sub=(parseFloat(it.unitPrice)||0)*(parseInt(it.qty)||0);
+    return '<div style="display:grid;grid-template-columns:1fr 70px 90px 80px 24px;gap:4px;align-items:center;margin-bottom:5px">'
+      +'<select class="fi" id="cit-prod-'+i+'" onchange="_compSyncItem('+i+')" style="font-size:.79rem">'+opts+'</select>'
+      +'<input type="number" class="fi" id="cit-qty-'+i+'" min="1" placeholder="0" value="'+escHtml(String(it.qty||''))+'" oninput="_compSyncItem('+i+')" style="font-size:.79rem;text-align:right">'
+      +'<input type="number" class="fi" id="cit-price-'+i+'" min="0" step="0.01" placeholder="0.00" value="'+escHtml(String(it.unitPrice||''))+'" oninput="_compSyncItem('+i+')" style="font-size:.79rem;text-align:right">'
+      +'<span style="font-family:monospace;font-size:.78rem;color:var(--am);text-align:right" id="cit-sub-'+i+'">'+dolr(sub)+'</span>'
+      +'<button class="xb" onclick="compRemoveItem('+i+')">✕</button>'
       +'</div>';
   }).join('');
   _compItems.forEach(function(_,i){
@@ -3613,41 +3647,58 @@ function renderCompItems(){
   compCalcTotal();
 }
 function _compSyncItem(i){
-  const ps=el('cit-prod-'+i),qs=el('cit-qty-'+i),cs=el('cit-cost-'+i);
+  const ps=el('cit-prod-'+i),qs=el('cit-qty-'+i),cs=el('cit-price-'+i);
   if(ps)_compItems[i].prodId=ps.value;
   if(qs)_compItems[i].qty=qs.value;
-  if(cs)_compItems[i].unitCost=cs.value;
+  if(cs)_compItems[i].unitPrice=cs.value;
+  // Update subtotal span
+  const sub=(parseFloat(_compItems[i].unitPrice)||0)*(parseInt(_compItems[i].qty)||0);
+  const subEl=el('cit-sub-'+i);if(subEl)subEl.textContent=dolr(sub);
   compCalcTotal();
 }
 function compCalcTotal(){
-  const total=_compItems.reduce(function(s,it){return s+(parseFloat(it.unitCost)||0);},0);
+  const total=_compItems.reduce(function(s,it){
+    return s+(parseFloat(it.unitPrice)||0)*(parseInt(it.qty)||0);
+  },0);
   setEl('comp-total',dolr(total));
 }
 function clearCompForm(){
-  _compItems=[{prodId:'',qty:'',unitCost:''}];
-  el('comp-prov').value='';el('comp-num').value='';
+  _compItems=[{prodId:'',qty:'',unitPrice:''}];
+  ['comp-prov','comp-num','comp-dir','comp-tel'].forEach(function(id){const e=el(id);if(e)e.value='';});
+  const dateEl=el('comp-date');if(dateEl)dateEl.value=new Date().toISOString().slice(0,10);
   renderCompItems();
 }
 function saveCompInvoice(){
-  const proveedor=(el('comp-prov').value||'').trim();
-  const numFac=(el('comp-num').value||'').trim();
-  // Sync from DOM
-  _compItems.forEach(function(_,i){_compSyncItem(i);});
-  const items=_compItems.filter(function(it){return it.prodId&&parseInt(it.qty)>0&&parseFloat(it.unitCost)>0;});
-  if(!items.length){toast('⚠ Agrega al menos un producto con cantidad y costo');return;}
+  const proveedor=(el('comp-prov')||{}).value&&el('comp-prov').value.trim();
+  if(!proveedor){toast('⚠ El nombre del proveedor es obligatorio');return;}
+  _compSyncAllItems();
+  const validItems=_compItems.filter(function(it){
+    return it.prodId&&parseInt(it.qty)>0&&parseFloat(it.unitPrice)>0;
+  });
+  if(!validItems.length){toast('⚠ Agrega al menos un producto con cantidad y precio');return;}
   const facItems=[];
-  items.forEach(function(it){
+  validItems.forEach(function(it){
     const prod=(db.products||[]).find(function(p){return p.id===it.prodId;});
     if(!prod)return;
-    const qty=parseInt(it.qty),lineCost=parseFloat(it.unitCost);
+    const qty=parseInt(it.qty),unitPrice=parseFloat(it.unitPrice),lineCost=qty*unitPrice;
     prod.stock=(prod.stock||0)+qty;
-    facItems.push({prodId:prod.id,prodName:prod.name,qty:qty,lineCost:lineCost,unitCost:lineCost/qty});
+    if(unitPrice>0)prod.costPrice=unitPrice;
+    facItems.push({prodId:prod.id,prodName:prod.name,qty:qty,unitPrice:unitPrice,lineCost:lineCost});
   });
+  if(!facItems.length){toast('⚠ Ningún producto válido encontrado');return;}
   const total=facItems.reduce(function(s,x){return s+x.lineCost;},0);
+  const dateVal=el('comp-date')&&el('comp-date').value?new Date(el('comp-date').value).toISOString():new Date().toISOString();
   if(!db.facturas)db.facturas=[];
-  db.facturas.push({id:Date.now().toString(),date:new Date().toISOString(),proveedor:proveedor,numFac:numFac,items:facItems,total:total});
+  db.facturas.push({
+    id:Date.now().toString(),date:dateVal,
+    proveedor:proveedor,
+    direccion:(el('comp-dir')||{}).value||'',
+    telefono:(el('comp-tel')||{}).value||'',
+    numFac:(el('comp-num')||{}).value||'',
+    items:facItems,total:total
+  });
   saveDB();renderProds();clearCompForm();renderCompList();
-  toast('✅ Factura registrada — '+facItems.length+' producto(s), total '+dolr(total));
+  toast('✅ Factura guardada. Stock actualizado — '+facItems.length+' producto(s), total '+dolr(total));
 }
 function renderCompList(){
   const list=el('comp-list');if(!list)return;
