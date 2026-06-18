@@ -47,7 +47,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      devTools: isDev
+      devTools: true
     },
     title: '4K POS',
     icon: path.join(__dirname, 'assets', 'logo.ico'), // TODO: regenerar logo.ico con fondo blanco
@@ -61,12 +61,7 @@ function createWindow() {
   win.once('ready-to-show', () => win.show())
   win.setMenuBarVisibility(false)
 
-  // Atajo secreto Ctrl+Shift+F12 → DevTools (en cualquier modo)
-  win.webContents.on('before-input-event', (event, input) => {
-    if (input.control && input.shift && input.key === 'F12') {
-      win.webContents.toggleDevTools()
-    }
-  })
+  win.webContents.on('devtools-opened', () => { win.webContents.closeDevTools() })
 
   // ── Auto-updater ──────────────────────────────
   if (autoUpdater) {
