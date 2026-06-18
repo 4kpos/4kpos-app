@@ -1959,7 +1959,7 @@ function runTarget(t2){
   else if(t2==='returns'){renderActions('returns');openOv('ov-actions');}
   else if(t2==='cancel'){renderActions('cancel');openOv('ov-actions');}
   else if(t2==='sales'){renderSales();openOv('ov-sales');}
-  else if(t2==='conta'){loadContaPerms();renderConta();openOv('ov-conta');}
+  else if(t2==='conta'){openOv('ov-conta');loadContaPerms();renderConta();}
   else if(t2==='force-logout'){_execForceLogout();}
 }
 function forceLogout(){
@@ -3549,8 +3549,11 @@ function getDaysRange(days){
   return arr;
 }
 function renderConta(){
-  const period=el('ct-period').value,range=getDateRange(period);
-  const sales=db.sales.filter(s=>s.status==='active'&&new Date(s.date)>=range.start&&new Date(s.date)<=range.end);
+  if(!db.facturas)db.facturas=[];
+  if(!db.gastos_conta)db.gastos_conta=[];
+  const periodEl=el('ct-period');if(!periodEl)return;
+  const period=periodEl.value,range=getDateRange(period);
+  const sales=(db.sales||[]).filter(s=>s.status==='active'&&new Date(s.date)>=range.start&&new Date(s.date)<=range.end);
   const facturas=db.facturas.filter(f=>new Date(f.date)>=range.start&&new Date(f.date)<=range.end);
   const gastos=db.gastos_conta.filter(g=>new Date(g.date)>=range.start&&new Date(g.date)<=range.end);
   // Cobradas = non-credit OR fully paid credit (covers undefined/null creditStatus)
