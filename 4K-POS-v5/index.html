@@ -766,6 +766,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div style="display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap" id="conta-tabs">
         <button id="ct-btn-res" class="btn btn-p" onclick="contaTab('ct-res',this)">📊 <span id="ct-tab-res-txt">Resumen</span></button>
         <button id="ct-btn-fac" class="btn btn-s" onclick="contaTab('ct-fac',this)">🧾 <span id="ct-tab-fac-txt">Ventas</span></button>
+        <button id="ct-btn-comp" class="btn btn-s" onclick="contaTab('ct-comp',this)">📦 <span id="ct-tab-comp-txt">Compras</span></button>
         <button id="ct-btn-cred" class="btn btn-s" onclick="contaTab('ct-cred',this)">💳 <span id="ct-tab-cred-txt">Créditos</span></button>
         <button id="ct-btn-gst" class="btn btn-s btn-red-soft" data-extra-class="btn-red-soft" onclick="contaTab('ct-gst',this)">💸 <span id="ct-tab-gst-txt">Gastos</span></button>
         <button id="ct-btn-graf" class="btn btn-s" onclick="contaTab('ct-graf',this)">📈 <span id="ct-tab-graf-txt">Gráfica</span></button>
@@ -804,23 +805,32 @@ select.fi option{background:var(--s2);color:var(--tx);}
         </div>
         <div id="vnt-summary" style="font-size:.82rem;font-weight:700;color:var(--gn);margin-bottom:8px"></div>
         <div id="vnt-list" style="max-height:260px;overflow-y:auto;margin-bottom:14px"></div>
-        <div class="sep-line"></div>
-        <div class="slbl" style="margin-top:8px">Compras de inventario</div>
-        <div id="fac-block" style="display:none;background:var(--rdb);border:1.5px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px;font-size:.83rem;color:var(--rd);margin-bottom:12px">🔒 Sin acceso a Facturas</div>
-        <div id="fac-content">
-          <div class="slbl">Registrar Factura</div>
-          <div class="g3">
-            <div class="fg"><label class="lbl">Producto</label><select class="fi" id="fac-prod"></select></div>
-            <div class="fg"><label class="lbl">Cantidad</label><input type="number" class="fi" id="fac-qty" placeholder="0" min="1"></div>
-            <div class="fg"><label class="lbl">Costo total ($)</label><input type="number" class="fi" id="fac-cost" placeholder="0.00" step="0.01"></div>
-          </div>
+      </div>
+      <!-- COMPRAS DE INVENTARIO -->
+      <div id="ct-comp" style="display:none">
+        <div id="comp-block" style="display:none;background:var(--rdb);border:1.5px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px;font-size:.83rem;color:var(--rd);margin-bottom:12px">🔒 Sin acceso a Compras</div>
+        <div id="comp-content">
+          <div class="slbl" id="comp-form-ttl">Registrar factura de compra</div>
           <div class="g2">
-            <div class="fg"><label class="lbl">Proveedor</label><input type="text" class="fi" id="fac-prov"></div>
-            <div class="fg"><label class="lbl">Núm. Factura</label><input type="text" class="fi" id="fac-num"></div>
+            <div class="fg"><label class="lbl" id="comp-prov-lbl">Proveedor</label><input type="text" class="fi" id="comp-prov" placeholder="Nombre del proveedor"></div>
+            <div class="fg"><label class="lbl" id="comp-num-lbl">Núm. Factura</label><input type="text" class="fi" id="comp-num" placeholder="(opcional)"></div>
           </div>
-          <div class="fg"><label class="lbl">Notas</label><input type="text" class="fi" id="fac-notes"></div>
-          <div class="frow"><button class="btn btn-p" onclick="saveFactura()">💾 Registrar</button><button class="btn btn-s" onclick="clearFactura()">↺</button></div>
-          <div class="slbl">Facturas</div><div id="fac-list"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 4px">
+            <div class="slbl" style="margin:0" id="comp-prod-ttl">Productos</div>
+            <button class="btn btn-s" style="font-size:.75rem;padding:4px 10px" onclick="compAddItem()" id="comp-add-btn">+ Agregar</button>
+          </div>
+          <div id="comp-items"></div>
+          <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:8px 0 10px">
+            <span style="font-size:.82rem;color:var(--tx2)" id="comp-total-lbl">Total:</span>
+            <span style="font-family:monospace;font-weight:700;color:var(--am);font-size:1rem" id="comp-total">$0.00</span>
+          </div>
+          <div class="frow">
+            <button class="btn btn-p" onclick="saveCompInvoice()" id="comp-save-btn">💾 Registrar</button>
+            <button class="btn btn-s" onclick="clearCompForm()" id="comp-clear-btn">↺</button>
+          </div>
+          <div class="sep-line"></div>
+          <div class="slbl" id="comp-list-ttl">Facturas de compra</div>
+          <div id="comp-list"></div>
         </div>
       </div>
       <div id="ct-gst" style="display:none">
@@ -1220,8 +1230,11 @@ const T = {
     creditDueDateLbl:'Fecha límite de pago',creditDueCustom:'Personalizado',creditOverdue:'VENCIDO',creditDueSoon:'Vence en',creditDueOn:'Vence el',
     allowCashierDue:'Cajeros pueden fijar fecha límite',defaultDueDays:'Días límite por defecto',
     payMethodCash:'Efectivo',payMethodCard:'Tarjeta',payMethodTransf:'Transferencia',payMethodSplit:'Mixto',payMethodCredit:'Crédito',
-    tabSummary:'Resumen',tabSalesLbl:'Ventas',tabExpenses:'Gastos',tabChart:'Gráfica',
+    tabSummary:'Resumen',tabSalesLbl:'Ventas',tabExpenses:'Gastos',tabChart:'Gráfica',tabPurchases:'Compras',
     salesBreakdown:'Desglose por producto',purchasesLbl:'Compras de inventario',
+    addPurchaseInv:'Registrar factura de compra',supplierLbl:'Proveedor',invNumLbl:'Núm. Factura',
+    addProductRow:'+ Agregar producto',invTotalLbl:'Total factura',noInvoices:'Sin facturas registradas',
+    invDelConfirm:'¿Eliminar factura? Se revertirá el stock de todos los productos.',invDelAdminOnly:'Solo admins pueden eliminar facturas.',
     // Cashier on receipt
     attendedBy:'Atendido por',
     // Cash close
@@ -1308,8 +1321,11 @@ const T = {
     creditDueDateLbl:'Payment due date',creditDueCustom:'Custom',creditOverdue:'OVERDUE',creditDueSoon:'Due in',creditDueOn:'Due on',
     allowCashierDue:'Cashiers can set due date',defaultDueDays:'Default due days',
     payMethodCash:'Cash',payMethodCard:'Card',payMethodTransf:'Transfer',payMethodSplit:'Mixed',payMethodCredit:'Credit',
-    tabSummary:'Summary',tabSalesLbl:'Sales',tabExpenses:'Expenses',tabChart:'Chart',
+    tabSummary:'Summary',tabSalesLbl:'Sales',tabExpenses:'Expenses',tabChart:'Chart',tabPurchases:'Purchases',
     salesBreakdown:'Product breakdown',purchasesLbl:'Inventory purchases',
+    addPurchaseInv:'Register purchase invoice',supplierLbl:'Supplier',invNumLbl:'Invoice #',
+    addProductRow:'+ Add product',invTotalLbl:'Invoice total',noInvoices:'No invoices registered',
+    invDelConfirm:'Delete invoice? Stock will be reverted for all products.',invDelAdminOnly:'Only admins can delete invoices.',
     // Cashier on receipt
     attendedBy:'Attended by',
     // Cash close
@@ -1691,7 +1707,8 @@ async function loadDB(){
         categories:(db.categories||[]).map(function(c){return {id:c.id,name:c.name,image:c.img||null};}),
         returns:(db.returns||[]).map(function(r){return {id:r.id,originalSaleId:r.originalSaleId,rnum:r.rnum,total:r.total,user:r.user,date:r.date,payMethod:r.payMethod};}),
         credits:(db.credits||[]).map(function(cr){return {id:cr.id,saleId:cr.saleId,client:cr.client,cedula:cr.cedula||'',total:cr.total,paid:cr.paid,date:cr.date,payments:cr.payments||[],items:(cr.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),
-        cfg:{bizName:(db.cfg||{}).bizName||''}
+        cfg:{bizName:(db.cfg||{}).bizName||''},
+        creditSummary:(function(){var _p=(db.sales||[]).filter(function(s){return s.payMethod==='credit'&&s.creditStatus!=='paid'&&(s.total-(s.creditPaid||0))>0;});return {totalPending:_p.reduce(function(s,x){return s+((x.total||0)-(x.creditPaid||0));},0),count:_p.length};}())
       };
       fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({license_key:db._lic,data:slim})}).catch(function(){});
       syncCategories();
@@ -1711,7 +1728,7 @@ async function saveDB(){
   try{
     const licKey=db._lic||'';
     if(licKey){
-      const slim={sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,payLabel:_normPayLabel(s),cashier:s.cashier||'',items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat,minStock:p.minStock||5};}),categories:(db.categories||[]).map(function(c){return {id:c.id,name:c.name,image:c.img||null};}),cfg:{bizName:(db.cfg||{}).bizName||''}};
+      const slim={sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,payLabel:_normPayLabel(s),cashier:s.cashier||'',creditStatus:s.creditStatus||null,creditPaid:s.creditPaid||null,items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat,minStock:p.minStock||5};}),categories:(db.categories||[]).map(function(c){return {id:c.id,name:c.name,image:c.img||null};}),cfg:{bizName:(db.cfg||{}).bizName||''},creditSummary:(function(){var _p=(db.sales||[]).filter(function(s){return s.payMethod==='credit'&&s.creditStatus!=='paid'&&(s.total-(s.creditPaid||0))>0;});return {totalPending:_p.reduce(function(s,x){return s+((x.total||0)-(x.creditPaid||0));},0),count:_p.length};}())};
       fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({license_key:licKey,data:slim})}).catch(function(){});
     }
   }catch(e){}
@@ -3493,9 +3510,14 @@ function loadContaPerms(){
   const isAdm=curUser&&curUser.role==='admin';
   const hasFullAccess=isAdm||!!pm.contaFull;
   // Hide restricted tabs for non-full users
-  ['ct-btn-res','ct-btn-fac','ct-btn-gst','ct-btn-graf'].forEach(function(id){
+  ['ct-btn-res','ct-btn-fac','ct-btn-comp','ct-btn-gst','ct-btn-graf'].forEach(function(id){
     const b=el(id);if(b)b.style.display=hasFullAccess?'':'none';
   });
+  const compBlock=el('comp-block'),compContent=el('comp-content');
+  if(compBlock&&compContent){
+    if(!isAdm&&!pm.fac){compBlock.style.display='block';compContent.style.display='none';}
+    else{compBlock.style.display='none';compContent.style.display='block';}
+  }
   if(!hasFullAccess){
     // Force into Créditos tab
     const credBtn=el('ct-btn-cred');
@@ -3532,7 +3554,7 @@ function renderConta(){
     return sum+(s.creditPayments||[]).filter(function(p){var d=new Date(p.date);return d>=range.start&&d<=range.end;}).reduce(function(s2,p){return s2+(p.amount||0);},0);
   },0);
   const ingresos=cobradas.reduce((s,x)=>s+x.total,0)+abonosPeriodo;
-  const costoFac=facturas.reduce((s,x)=>s+x.cost,0);
+  const costoFac=facturas.reduce((s,x)=>s+(x.total||x.cost||0),0);
   const totalGastos=gastos.reduce((s,x)=>s+x.monto,0);
   const utilidad=ingresos-costoFac-totalGastos;
   el('ct-stats').innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px">'
@@ -3549,6 +3571,118 @@ function renderConta(){
   renderFacList();renderGstList();
 }
 function sCard(color,lbl,val){return '<div style="background:var(--'+color+'b,var(--s2));border:1.5px solid var(--'+color+',var(--b1));border-radius:8px;padding:10px;text-align:center"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.8px;color:var(--'+color+');margin-bottom:3px">'+lbl+'</div><div style="font-family:monospace;font-size:1rem;font-weight:700;color:var(--'+color+')">'+val+'</div></div>';}
+// ── COMPRAS DE INVENTARIO (multi-producto) ──────────────
+let _compItems=[];
+function compLoadProds(){
+  if(!_compItems.length)compAddItem();
+  renderCompItems();
+  renderCompList();
+}
+function compAddItem(){
+  _compItems.push({prodId:'',qty:'',unitCost:''});
+  renderCompItems();
+}
+function compRemoveItem(i){
+  _compItems.splice(i,1);
+  if(!_compItems.length)_compItems.push({prodId:'',qty:'',unitCost:''});
+  renderCompItems();
+  compCalcTotal();
+}
+function renderCompItems(){
+  const opts='<option value="">— Selecciona —</option>'+(db.products||[]).map(function(p){return '<option value="'+p.id+'">'+escHtml(p.name)+' (Stock: '+(p.stock||0)+')</option>';}).join('');
+  el('comp-items').innerHTML=_compItems.map(function(it,i){
+    return '<div style="display:grid;grid-template-columns:1fr 80px 100px 28px;gap:5px;align-items:flex-end;margin-bottom:6px">'
+      +'<div><label class="lbl" style="font-size:.7rem">Producto</label><select class="fi" id="cit-prod-'+i+'" onchange="_compSyncItem('+i+')" style="font-size:.8rem">'+opts+'</select></div>'
+      +'<div><label class="lbl" style="font-size:.7rem">Cantidad</label><input type="number" class="fi" id="cit-qty-'+i+'" min="1" placeholder="0" value="'+escHtml(String(it.qty||''))+'" oninput="_compSyncItem('+i+')" style="font-size:.8rem"></div>'
+      +'<div><label class="lbl" style="font-size:.7rem">Costo total $</label><input type="number" class="fi" id="cit-cost-'+i+'" placeholder="0.00" step="0.01" value="'+escHtml(String(it.unitCost||''))+'" oninput="_compSyncItem('+i+')" style="font-size:.8rem"></div>'
+      +'<button class="xb" onclick="compRemoveItem('+i+')" style="margin-bottom:2px">✕</button>'
+      +'</div>';
+  }).join('');
+  _compItems.forEach(function(_,i){
+    const ps=el('cit-prod-'+i);if(ps&&_compItems[i].prodId)ps.value=_compItems[i].prodId;
+  });
+  compCalcTotal();
+}
+function _compSyncItem(i){
+  const ps=el('cit-prod-'+i),qs=el('cit-qty-'+i),cs=el('cit-cost-'+i);
+  if(ps)_compItems[i].prodId=ps.value;
+  if(qs)_compItems[i].qty=qs.value;
+  if(cs)_compItems[i].unitCost=cs.value;
+  compCalcTotal();
+}
+function compCalcTotal(){
+  const total=_compItems.reduce(function(s,it){return s+(parseFloat(it.unitCost)||0);},0);
+  setEl('comp-total',dolr(total));
+}
+function clearCompForm(){
+  _compItems=[{prodId:'',qty:'',unitCost:''}];
+  el('comp-prov').value='';el('comp-num').value='';
+  renderCompItems();
+}
+function saveCompInvoice(){
+  const proveedor=(el('comp-prov').value||'').trim();
+  const numFac=(el('comp-num').value||'').trim();
+  // Sync from DOM
+  _compItems.forEach(function(_,i){_compSyncItem(i);});
+  const items=_compItems.filter(function(it){return it.prodId&&parseInt(it.qty)>0&&parseFloat(it.unitCost)>0;});
+  if(!items.length){toast('⚠ Agrega al menos un producto con cantidad y costo');return;}
+  const facItems=[];
+  items.forEach(function(it){
+    const prod=(db.products||[]).find(function(p){return p.id===it.prodId;});
+    if(!prod)return;
+    const qty=parseInt(it.qty),lineCost=parseFloat(it.unitCost);
+    prod.stock=(prod.stock||0)+qty;
+    facItems.push({prodId:prod.id,prodName:prod.name,qty:qty,lineCost:lineCost,unitCost:lineCost/qty});
+  });
+  const total=facItems.reduce(function(s,x){return s+x.lineCost;},0);
+  if(!db.facturas)db.facturas=[];
+  db.facturas.push({id:Date.now().toString(),date:new Date().toISOString(),proveedor:proveedor,numFac:numFac,items:facItems,total:total});
+  saveDB();renderProds();clearCompForm();renderCompList();
+  toast('✅ Factura registrada — '+facItems.length+' producto(s), total '+dolr(total));
+}
+function renderCompList(){
+  const list=el('comp-list');if(!list)return;
+  const allFac=(db.facturas||[]).slice().reverse();
+  if(!allFac.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('noInvoices')+'</div>';return;}
+  const isAdm=curUser&&curUser.role==='admin';
+  list.innerHTML=allFac.map(function(f){
+    const items=f.items||[{prodName:f.prodName,qty:f.qty,lineCost:f.cost}];
+    const total=f.total||f.cost||0;
+    const dateStr=new Date(f.date).toLocaleDateString();
+    const detail=items.map(function(it){
+      return '<div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--tx2);padding:2px 0">'
+        +'<span>'+escHtml(it.prodName||'—')+' × '+it.qty+'</span>'
+        +'<span style="font-family:monospace">'+dolr(it.lineCost||it.cost||0)+'</span>'
+        +'</div>';
+    }).join('');
+    return '<div style="border-bottom:1.5px solid var(--b1);padding:8px 0">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">'
+      +'<div><div style="font-weight:600;font-size:.83rem;color:var(--tx)">'+(f.proveedor?escHtml(f.proveedor):'Sin proveedor')+(f.numFac?' · <span style="color:var(--tx3)">#'+escHtml(f.numFac)+'</span>':'')+' <span style="font-size:.7rem;color:var(--tx3)">▾</span></div>'
+      +'<div style="font-size:.72rem;color:var(--tx3)">'+dateStr+' · '+items.length+' producto(s)</div></div>'
+      +'<div style="display:flex;align-items:center;gap:8px"><span style="font-family:monospace;color:var(--am);font-weight:700">'+dolr(total)+'</span>'
+      +(isAdm?'<button class="xb" onclick="event.stopPropagation();delCompInvoice(\''+f.id+'\')">✕</button>':'')
+      +'</div></div>'
+      +'<div style="display:none;padding:4px 0 4px 8px">'+detail+'</div>'
+      +'</div>';
+  }).join('');
+}
+function delCompInvoice(id){
+  if(!curUser||curUser.role!=='admin'){toast('⚠ '+t('invDelAdminOnly'));return;}
+  confirm2(t('invDelConfirm'),function(){
+    const f=(db.facturas||[]).find(function(x){return x.id===id;});
+    if(f){
+      const items=f.items||[{prodId:f.prodId,qty:f.qty}];
+      items.forEach(function(it){
+        if(!it.prodId)return;
+        const prod=(db.products||[]).find(function(p){return p.id===it.prodId;});
+        if(prod)prod.stock=Math.max(0,(prod.stock||0)-it.qty);
+      });
+    }
+    db.facturas=(db.facturas||[]).filter(function(x){return x.id!==id;});
+    saveDB();renderProds();renderCompList();
+    toast('🗑 Factura eliminada — stock revertido');
+  });
+}
 function saveFactura(){
   const prodId=el('fac-prod').value,qty=parseInt(el('fac-qty').value)||0,cost=parseFloat(el('fac-cost').value)||0;
   if(!prodId||!qty||!cost){toast('⚠ Producto, cantidad y costo requeridos');return;}
@@ -3819,11 +3953,12 @@ function renderContaCredits(){
   }).join('');
 }
 function contaTab(tab,e2){
-  ['ct-res','ct-fac','ct-gst','ct-graf','ct-cred'].forEach(function(t){const p=el(t);if(p)p.style.display='none';});
+  ['ct-res','ct-fac','ct-comp','ct-gst','ct-graf','ct-cred'].forEach(function(t){const p=el(t);if(p)p.style.display='none';});
   el(tab).style.display='block';
   document.querySelectorAll('#conta-tabs .btn').forEach(function(b){b.className='btn btn-s '+(b.dataset.extraClass||'').trim();});
   if(e2)e2.className='btn btn-p '+(e2.dataset.extraClass||'').trim();
   if(tab==='ct-fac'){loadFacProds();renderVentasList();}
+  if(tab==='ct-comp'){compLoadProds();renderCompList();}
   if(tab==='ct-cred'){syncCreditSummary();renderContaCredits();}
   if(tab==='ct-graf')setTimeout(renderGraf,50);
 }
