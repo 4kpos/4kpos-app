@@ -12,6 +12,29 @@ try {
   console.log('electron-updater no disponible, actualizaciones desactivadas:', e.message)
 }
 
+let mainWindow = null
+
+if (autoUpdater) {
+  autoUpdater.autoDownload = true
+  autoUpdater.autoInstallOnAppQuit = true
+  autoUpdater.on('checking-for-update', () => {
+    if (mainWindow) mainWindow.webContents.send('update-status', 'checking')
+  })
+  autoUpdater.on('update-available', () => {
+    if (mainWindow) mainWindow.webContents.send('update-status', 'downloading')
+  })
+  autoUpdater.on('update-not-available', () => {
+    if (mainWindow) mainWindow.webContents.send('update-status', 'no-update')
+  })
+  autoUpdater.on('update-downloaded', () => {
+    if (mainWindow) mainWindow.webContents.send('update-status', 'ready')
+  })
+  autoUpdater.on('error', (err) => {
+    console.log('AutoUpdater error:', err)
+    if (mainWindow) mainWindow.webContents.send('update-status', 'error')
+  })
+}
+
 // DevTools solo en desarrollo (auto-detectado: true cuando no está empaquetado)
 const isDev = !app.isPackaged
 
@@ -56,30 +79,14 @@ function createWindow() {
     autoHideMenuBar: true
   })
 
+  mainWindow = win
+
   win.loadFile('index.html')
   if (isDev) win.webContents.openDevTools()
   win.once('ready-to-show', () => win.show())
   win.setMenuBarVisibility(false)
 
   win.webContents.on('devtools-opened', () => { win.webContents.closeDevTools() })
-
-  // ── Auto-updater ──────────────────────────────
-  if (autoUpdater) {
-    try {
-      autoUpdater.checkForUpdatesAndNotify()
-      autoUpdater.on('update-available', () => {
-        win.webContents.send('update-msg', 'downloading')
-      })
-      autoUpdater.on('update-downloaded', () => {
-        win.webContents.send('update-msg', 'ready')
-      })
-      autoUpdater.on('error', (err) => {
-        console.log('AutoUpdater error:', err)
-      })
-    } catch(e) {
-      console.log('AutoUpdater init error:', e)
-    }
-  }
 }
 
 // ── Ventana de activación de licencia ────────────────
@@ -117,6 +124,7 @@ app.whenReady().then(async () => {
 
   if (result.valid) {
     createWindow()
+    if (autoUpdater) setTimeout(() => { try { autoUpdater.checkForUpdatesAndNotify() } catch(e) {} }, 10000)
   } else {
     createActivationWindow(result.reason)
   }
@@ -158,6 +166,18 @@ ipcMain.on('restart-app', () => {
   } else {
     app.relaunch()
     app.exit(0)
+  }
+})
+
+ipcMain.on('check-updates', () => {
+  if (autoUpdater) try { autoUpdater.checkForUpdatesAndNotify() } catch(e) {}
+})
+
+ipcMain.on('restart-for-update', () => {
+  if (autoUpdater) {
+    try { autoUpdater.quitAndInstall() } catch(e) { app.relaunch(); app.exit(0) }
+  } else {
+    app.relaunch(); app.exit(0)
   }
 })
 
