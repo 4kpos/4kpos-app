@@ -1856,7 +1856,7 @@ function syncCreditDirect(){
       return s.payMethod==='credit'&&s.creditStatus!=='paid'&&(s.total-(s.creditPaid||0))>0;
     });
     var total=pending.reduce(function(sum,s){return sum+(s.total||0)-(s.creditPaid||0);},0);
-    var body={totalPending:Math.round(total*100)/100,count:pending.length,updatedAt:new Date().toISOString()};
+    var body={totalPending:Math.round(total*100)/100,count:pending.length,updatedAt:new Date().toISOString(),items:pending.map(function(s){return {client:s.creditClient||'Sin nombre',total:s.total,paid:s.creditPaid||0,balance:(s.total||0)-(s.creditPaid||0),date:s.date,dueDate:s.creditDueDate||null};})};
     fetch(SUPA_URL+'/rest/v1/categories',{
       method:'POST',
       headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
