@@ -24,20 +24,3 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Delete old release
-        uses: dev-drprasad/delete-tag-and-release@v1.0
-        with:
-          tag_name: latest
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: latest
-          name: "4K POS — Última versión"
-          body: "Descarga e instala 4K POS en tu PC con Windows."
-          files: |
-            4K-POS-v5/dist/*.exe
-            4K-POS-v5/dist/*.yml
-          token: ${{ secrets.GITHUB_TOKEN }}
