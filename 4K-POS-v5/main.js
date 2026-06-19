@@ -5,6 +5,11 @@ const os = require('os')
 const crypto = require('crypto')
 const { activateLicense, verifyLicense, getLicenseInfo, getHardwareId } = require('./license')
 
+const logFile = path.join(app.getPath('userData'), 'update-log.txt')
+function logUpdate(msg) {
+  try { fs.appendFileSync(logFile, new Date().toISOString() + ' ' + msg + '\n') } catch(e) {}
+}
+
 let autoUpdater
 try {
   autoUpdater = require('electron-updater').autoUpdater
@@ -18,21 +23,31 @@ if (autoUpdater) {
   autoUpdater.autoDownload = true
   autoUpdater.autoInstallOnAppQuit = true
   autoUpdater.on('checking-for-update', () => {
+    logUpdate('Checking...')
     if (mainWindow) mainWindow.webContents.send('update-status', 'checking')
   })
-  autoUpdater.on('update-available', () => {
+  autoUpdater.on('update-available', (info) => {
+    logUpdate('Available: ' + JSON.stringify(info))
     if (mainWindow) mainWindow.webContents.send('update-status', 'downloading')
   })
-  autoUpdater.on('update-not-available', () => {
+  autoUpdater.on('update-not-available', (info) => {
+    logUpdate('Not available: ' + JSON.stringify(info))
     if (mainWindow) mainWindow.webContents.send('update-status', 'no-update')
   })
-  autoUpdater.on('update-downloaded', () => {
+  autoUpdater.on('download-progress', (p) => {
+    logUpdate('Progress: ' + p.percent)
+  })
+  autoUpdater.on('update-downloaded', (info) => {
+    logUpdate('Downloaded: ' + JSON.stringify(info))
     if (mainWindow) mainWindow.webContents.send('update-status', 'ready')
   })
   autoUpdater.on('error', (err) => {
+    logUpdate('ERROR: ' + err.message)
     console.log('AutoUpdater error:', err)
     if (mainWindow) mainWindow.webContents.send('update-status', 'error')
   })
+  logUpdate('App version: ' + app.getVersion())
+  logUpdate('Log file: ' + logFile)
 }
 
 // DevTools solo en desarrollo (auto-detectado: true cuando no está empaquetado)
