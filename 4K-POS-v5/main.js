@@ -17,7 +17,15 @@ try {
   autoUpdater = require('electron-updater').autoUpdater
   logUpdate('electron-updater loaded OK')
   logUpdate('App version: ' + app.getVersion())
+  logUpdate('isPackaged: ' + app.isPackaged)
   logUpdate('Log file: ' + logFile)
+  autoUpdater.logger = {
+    info:  (msg) => logUpdate('INFO: '  + msg),
+    warn:  (msg) => logUpdate('WARN: '  + msg),
+    error: (msg) => logUpdate('ERROR: ' + msg),
+    debug: (msg) => logUpdate('DEBUG: ' + msg)
+  }
+  if (!app.isPackaged) autoUpdater.forceDevUpdateConfig = true
   autoUpdater.autoDownload = true
   autoUpdater.autoInstallOnAppQuit = true
   autoUpdater.on('checking-for-update', () => { logUpdate('Checking...'); if (mainWindow) mainWindow.webContents.send('update-status', 'checking') })
