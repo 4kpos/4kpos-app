@@ -409,7 +409,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div class="trow"><span id="sub-lbl" style="text-transform:uppercase;font-size:14px;color:var(--tx2)">Subtotal</span><span id="csub" style="font-family:Courier New,monospace;font-size:14px">$0.00</span></div>
       <div class="trow"><span id="items-lbl" style="text-transform:uppercase;font-size:14px;color:var(--tx2)">Artículos</span><span id="citems" style="font-size:14px">0</span></div>
       <div class="sep"></div>
-      <div class="trow" id="disc-row" style="display:none;color:var(--rd)"><span>Descuento</span><span id="disc-row-amt"></span></div>
+      <div class="trow" id="disc-row" style="display:none;color:var(--rd)"><span id="disc-row-lbl">Descuento</span><span id="disc-row-amt"></span></div>
       <div class="trow main"><span>TOTAL</span><span class="amt" id="ctotal">$0.00</span></div>
       <div>
         <div class="plbl" style="margin-bottom:5px" id="pay-lbl">Método de pago</div>
@@ -516,7 +516,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div id="t-cats" style="display:none">
         <input type="hidden" id="cat-eid">
         <div class="g2">
-          <div class="fg"><label class="lbl">Nombre categoría</label><input type="text" class="fi" id="cat-name" placeholder="Ej: Cosméticos"></div>
+          <div class="fg"><label class="lbl" id="cat-name-lbl">Nombre categoría</label><input type="text" class="fi" id="cat-name" placeholder="Ej: Cosméticos"></div>
           <div class="fg"><label class="lbl">Foto (opcional)</label>
             <div class="img-upload-row">
               <input type="file" accept="image/*" id="cat-file" style="display:none" onchange="imgLoad(this,'cat-prev','cat-data')">
@@ -528,35 +528,35 @@ select.fi option{background:var(--s2);color:var(--tx);}
         </div>
         <input type="hidden" id="cat-data">
         <div class="frow"><button class="btn btn-p" id="cat-save-btn" onclick="saveCat()">💾 Guardar</button><button class="btn btn-s" onclick="clearCat()">↺</button></div>
-        <div class="slbl">Categorías</div><div id="cat-list"></div>
+        <div class="slbl" id="cat-list-title">Categorías</div><div id="cat-list"></div>
       </div>
       <!-- USERS -->
       <div id="t-users" style="display:none">
         <div id="ulimit-warn" style="display:none;background:var(--amb);border:1.5px solid var(--am);border-radius:var(--rs);padding:8px 12px;font-size:.8rem;color:var(--am);margin-bottom:12px"></div>
         <div class="g2">
-          <div class="fg"><label class="lbl">Nombre</label><input type="text" class="fi" id="u-name" placeholder="María"></div>
-          <div class="fg"><label class="lbl">Usuario</label><input type="text" class="fi" id="u-user" placeholder="maria123" autocomplete="off"></div>
-          <div class="fg"><label class="lbl">Contraseña</label><input type="password" class="fi" id="u-pass" autocomplete="new-password"></div>
-          <div class="fg"><label class="lbl">Rol</label>
+          <div class="fg"><label class="lbl" id="u-name-lbl">Nombre</label><input type="text" class="fi" id="u-name" placeholder="María"></div>
+          <div class="fg"><label class="lbl" id="u-user-lbl">Usuario</label><input type="text" class="fi" id="u-user" placeholder="maria123" autocomplete="off"></div>
+          <div class="fg"><label class="lbl" id="u-pass-lbl">Contraseña</label><input type="password" class="fi" id="u-pass" autocomplete="new-password"></div>
+          <div class="fg"><label class="lbl" id="u-role-lbl">Rol</label>
             <select class="fi" id="u-role">
-              <option value="admin">👑 Admin</option>
-              <option value="cashier">💰 Cajero</option>
+              <option value="admin" id="u-role-admin">👑 Admin</option>
+              <option value="cashier" id="u-role-cashier">💰 Cajero</option>
             </select>
           </div>
         </div>
-        <div class="slbl">Permisos</div>
+        <div class="slbl" id="u-perms-lbl">Permisos</div>
         <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:10px">
-          <div class="tog"><span class="tog-label">🔐 Administración</span><label class="tog-sw"><input type="checkbox" id="pm-adm" checked><span class="slider"></span></label></div>
-          <div class="tog"><span class="tog-label">🔄 Devoluciones</span><label class="tog-sw"><input type="checkbox" id="pm-ret" checked><span class="slider"></span></label></div>
-          <div class="tog"><span class="tog-label">❌ Cancelar Venta</span><label class="tog-sw"><input type="checkbox" id="pm-can" checked><span class="slider"></span></label></div>
-          <div class="tog"><span class="tog-label">📊 Ventas del día</span><label class="tog-sw"><input type="checkbox" id="pm-sal" checked><span class="slider"></span></label></div>
-          <div class="tog"><span class="tog-label">📒 Contabilidad</span><label class="tog-sw"><input type="checkbox" id="pm-conta" checked><span class="slider"></span></label></div>
-          <div class="tog" style="padding-left:18px"><span class="tog-label" style="font-size:.82rem;color:var(--tx3)">↳ Ver contabilidad completa</span><label class="tog-sw"><input type="checkbox" id="pm-contaFull"><span class="slider"></span></label></div>
-          <div class="tog"><span class="tog-label">🧾 Facturas</span><label class="tog-sw"><input type="checkbox" id="pm-fac" checked><span class="slider"></span></label></div>
-          <div class="tog"><span class="tog-label">💸 Gastos</span><label class="tog-sw"><input type="checkbox" id="pm-gst" checked><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label" id="pm-adm-lbl">🔐 Administración</span><label class="tog-sw"><input type="checkbox" id="pm-adm" checked><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label" id="pm-ret-lbl">🔄 Devoluciones</span><label class="tog-sw"><input type="checkbox" id="pm-ret" checked><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label" id="pm-can-lbl">❌ Cancelar Venta</span><label class="tog-sw"><input type="checkbox" id="pm-can" checked><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label" id="pm-sal-lbl">📊 Ventas del día</span><label class="tog-sw"><input type="checkbox" id="pm-sal" checked><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label" id="pm-conta-lbl">📒 Contabilidad</span><label class="tog-sw"><input type="checkbox" id="pm-conta" checked><span class="slider"></span></label></div>
+          <div class="tog" style="padding-left:18px"><span class="tog-label" id="pm-contaFull-lbl" style="font-size:.82rem;color:var(--tx3)">↳ Ver contabilidad completa</span><label class="tog-sw"><input type="checkbox" id="pm-contaFull"><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label" id="pm-fac-lbl">🧾 Facturas</span><label class="tog-sw"><input type="checkbox" id="pm-fac" checked><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label" id="pm-gst-lbl">💸 Gastos</span><label class="tog-sw"><input type="checkbox" id="pm-gst" checked><span class="slider"></span></label></div>
         </div>
         <div class="frow"><button class="btn btn-p" id="user-save-btn" onclick="saveUser()">💾 Guardar</button><button class="btn btn-s" onclick="clearUser()">↺</button></div>
-        <div class="slbl">Usuarios</div><div id="user-list"></div>
+        <div class="slbl" id="user-list-title">Usuarios</div><div id="user-list"></div>
       </div>
       <!-- CONFIG -->
       <div id="t-cfg" style="display:none">
@@ -571,27 +571,27 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="fg"><label class="lbl">Monto ($)</label><input type="number" class="fi" id="cfg-fund" placeholder="50.00" step="0.01"></div>
         <div class="frow"><button class="btn btn-p" id="fund-save-btn" onclick="saveFund()">💾 Guardar</button></div>
         <div class="sep-line"></div>
-        <div class="slbl">Métodos de Pago</div>
+        <div class="slbl" id="cfg-pay-methods-lbl">Métodos de Pago</div>
         <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:10px">
-          <div class="tog"><span class="tog-label">💵 Efectivo</span><label class="tog-sw"><input type="checkbox" id="cfg-cash" checked disabled><span class="slider"></span></label></div>
-          <div class="tog"><span class="tog-label">💳 Tarjeta</span><label class="tog-sw"><input type="checkbox" id="cfg-card" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
-          <div class="tog"><span class="tog-label">📋 Cuentas Abiertas</span><label class="tog-sw"><input type="checkbox" id="cfg-oa" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
-          <div class="tog"><span class="tog-label">🏷️ Crédito</span><label class="tog-sw"><input type="checkbox" id="cfg-credit" onchange="savePayMethods()"><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label" id="cfg-cash-lbl">💵 Efectivo</span><label class="tog-sw"><input type="checkbox" id="cfg-cash" checked disabled><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label" id="cfg-card-lbl">💳 Tarjeta</span><label class="tog-sw"><input type="checkbox" id="cfg-card" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label" id="cfg-oa-lbl">📋 Cuentas Abiertas</span><label class="tog-sw"><input type="checkbox" id="cfg-oa" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label" id="cfg-credit-lbl">🏷️ Crédito</span><label class="tog-sw"><input type="checkbox" id="cfg-credit" onchange="savePayMethods()"><span class="slider"></span></label></div>
         </div>
         <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:10px" id="credit-cfg-box">
-          <div class="slbl" style="margin-bottom:8px">Opciones de Crédito</div>
+          <div class="slbl" id="cfg-credit-opts-lbl" style="margin-bottom:8px">Opciones de Crédito</div>
           <div class="fg" style="margin-bottom:8px">
             <label class="lbl" id="cfg-credit-due-lbl">Días límite por defecto</label>
             <input type="number" class="fi" id="cfg-credit-due-days" value="30" min="1" max="365" style="width:90px">
           </div>
           <div class="tog"><span class="tog-label" id="cfg-allow-cashier-due-lbl">Cajeros pueden fijar fecha límite</span><label class="tog-sw"><input type="checkbox" id="cfg-allow-cashier-due" checked><span class="slider"></span></label></div>
-          <div class="frow" style="margin-top:8px"><button class="btn btn-p" onclick="saveCreditCfg()">💾 Guardar</button></div>
+          <div class="frow" style="margin-top:8px"><button class="btn btn-p" id="cfg-credit-save-btn" onclick="saveCreditCfg()">💾 Guardar</button></div>
         </div>
         <div class="sep-line"></div>
-        <div class="slbl">Registradora</div>
-        <div class="fg"><label class="lbl">Puerto COM</label><input type="text" class="fi" id="cfg-drawer-port" placeholder="COM3"></div>
-        <div class="tog" style="margin-top:8px"><span class="tog-label">Abrir automáticamente al cobrar</span><label class="tog-sw"><input type="checkbox" id="cfg-drawer-auto" checked><span class="slider"></span></label></div>
-        <div class="frow"><button class="btn btn-s" onclick="openDrawer()">🗃️ Probar</button><button class="btn btn-p" id="cfg-drawer-save-btn" onclick="saveCfgDrawer()">💾 Guardar</button></div>
+        <div class="slbl" id="cfg-drawer-lbl">Registradora</div>
+        <div class="fg"><label class="lbl" id="cfg-com-lbl">Puerto COM</label><input type="text" class="fi" id="cfg-drawer-port" placeholder="COM3"></div>
+        <div class="tog" style="margin-top:8px"><span class="tog-label" id="cfg-drawer-auto-lbl">Abrir automáticamente al cobrar</span><label class="tog-sw"><input type="checkbox" id="cfg-drawer-auto" checked><span class="slider"></span></label></div>
+        <div class="frow"><button class="btn btn-s" id="cfg-drawer-test-btn" onclick="openDrawer()">🗃️ Probar</button><button class="btn btn-p" id="cfg-drawer-save-btn" onclick="saveCfgDrawer()">💾 Guardar</button></div>
         <div class="sep-line"></div>
         <div class="slbl" id="cfg-time-lbl">Formato de hora</div>
         <div style="display:flex;gap:8px;margin-bottom:10px">
@@ -609,11 +609,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
         </div>
         <input type="hidden" id="logo-data">
         <div class="g2">
-          <div class="fg"><label class="lbl">Nombre negocio</label><input type="text" class="fi" id="cfg-biz-name"></div>
+          <div class="fg"><label class="lbl" id="cfg-biz-name-lbl">Nombre negocio</label><input type="text" class="fi" id="cfg-biz-name"></div>
           <div class="fg"><label class="lbl">Subtítulo</label><input type="text" class="fi" id="cfg-biz-sub"></div>
         </div>
         <div class="fg"><label class="lbl">Mensaje gracias</label><input type="text" class="fi" id="cfg-thanks"></div>
-        <div class="fg"><label class="lbl">Teléfono</label><input type="text" class="fi" id="cfg-phone"></div>
+        <div class="fg"><label class="lbl" id="cfg-phone-lbl">Teléfono</label><input type="text" class="fi" id="cfg-phone"></div>
         <div class="g2">
           <div class="fg"><label class="lbl">Red social 1</label><input type="text" class="fi" id="cfg-s1"></div>
           <div class="fg"><label class="lbl">Red social 2</label><input type="text" class="fi" id="cfg-s2"></div>
@@ -791,17 +791,17 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <!-- Ventas del período -->
         <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
           <select class="fi" id="vnt-period" style="width:136px" onchange="renderVentasList()">
-            <option value="hoy">Hoy</option>
-            <option value="semana">Esta semana</option>
-            <option value="mes" selected>Este mes</option>
-            <option value="todo">Todo</option>
+            <option value="hoy" id="vnt-p-hoy">Hoy</option>
+            <option value="semana" id="vnt-p-semana">Esta semana</option>
+            <option value="mes" id="vnt-p-mes" selected>Este mes</option>
+            <option value="todo" id="vnt-p-todo">Todo</option>
           </select>
           <select class="fi" id="vnt-method" style="width:136px" onchange="renderVentasList()">
-            <option value="">Todos los métodos</option>
-            <option value="cash">Efectivo</option>
-            <option value="card">Tarjeta</option>
-            <option value="transf">Transferencia</option>
-            <option value="credit">Crédito</option>
+            <option value="" id="vnt-m-all">Todos los métodos</option>
+            <option value="cash" id="vnt-m-cash">Efectivo</option>
+            <option value="card" id="vnt-m-card">Tarjeta</option>
+            <option value="transf" id="vnt-m-transf">Transferencia</option>
+            <option value="credit" id="vnt-m-credit">Crédito</option>
           </select>
           <input class="fi sinp" id="vnt-srch" placeholder="🔍 # orden o cliente..." style="flex:1;min-width:110px" oninput="renderVentasList()">
         </div>
@@ -810,7 +810,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
       </div>
       <!-- COMPRAS DE INVENTARIO -->
       <div id="ct-comp" style="display:none">
-        <div id="comp-block" style="display:none;background:var(--rdb);border:1.5px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px;font-size:.83rem;color:var(--rd);margin-bottom:12px">🔒 Sin acceso a Compras</div>
+        <div id="comp-block" style="display:none;background:var(--rdb);border:1.5px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px;font-size:.83rem;color:var(--rd);margin-bottom:12px"><span id="comp-block-msg">🔒 Sin acceso a Compras</span></div>
         <div id="comp-content">
           <div class="slbl" id="comp-prov-section-lbl">Proveedor</div>
           <div class="g2">
@@ -841,7 +841,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
         </div>
       </div>
       <div id="ct-gst" style="display:none">
-        <div id="gst-block" style="display:none;background:var(--rdb);border:1.5px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px;font-size:.83rem;color:var(--rd);margin-bottom:12px">🔒 Sin acceso a Gastos</div>
+        <div id="gst-block" style="display:none;background:var(--rdb);border:1.5px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px;font-size:.83rem;color:var(--rd);margin-bottom:12px"><span id="gst-block-msg">🔒 Sin acceso a Gastos</span></div>
         <div id="gst-content">
           <div class="slbl">Registrar Gasto</div>
           <div class="g3">
@@ -1237,6 +1237,17 @@ const T = {
     creditDueDateLbl:'Fecha límite de pago',creditDueCustom:'Personalizado',creditOverdue:'VENCIDO',creditDueSoon:'Vence en',creditDueOn:'Vence el',
     allowCashierDue:'Cajeros pueden fijar fecha límite',defaultDueDays:'Días límite por defecto',
     payMethodCash:'Efectivo',payMethodCard:'Tarjeta',payMethodTransf:'Transferencia',payMethodSplit:'Mixto',payMethodCredit:'Crédito',
+    catNameLbl:'Nombre categoría',catListTitle:'Categorías',
+    userNameLbl:'Nombre',userUserLbl:'Usuario',userPassLbl:'Contraseña',userRoleLbl:'Rol',
+    roleCashier:'💰 Cajero',permsLbl:'Permisos',userListTitle:'Usuarios',
+    permAdm:'🔐 Administración',permContaFull:'↳ Ver contabilidad completa',permFac:'🧾 Facturas',
+    cfgAdminCode:'Código Admin',cfgCurCode:'Código actual',cfgNewCode:'Nuevo código',cfgChangeBtn:'🔑 Cambiar',
+    cfgFundLbl:'Fondo de Caja',cfgAmountLbl:'Monto ($)',
+    cfgPayMethods:'Métodos de Pago',cfgOpenAccounts:'📋 Cuentas Abiertas',cfgCreditOpts:'Opciones de Crédito',
+    cfgDrawerLbl:'Registradora',cfgComLbl:'Puerto COM',cfgDrawerAutoLbl:'Abrir automáticamente al cobrar',cfgDrawerTestBtn:'🗃️ Probar',
+    cfgBizNameLbl:'Nombre negocio',cfgPhoneLbl:'Teléfono',
+    pendingCreditsSec:'Créditos pendientes',noAccessComp:'🔒 Sin acceso a Compras',noAccessGst:'🔒 Sin acceso a Gastos',
+    vntPeriodToday:'Hoy',vntPeriodWeek:'Esta semana',vntPeriodMonth:'Este mes',vntPeriodAll:'Todo',vntAllMethods:'Todos los métodos',vntTransf:'Transferencia',
     tabSummary:'Resumen',tabSalesLbl:'Ventas',tabExpenses:'Gastos',tabChart:'Gráfica',tabPurchases:'Compras',
     salesBreakdown:'Desglose por producto',purchasesLbl:'Compras de inventario',
     addPurchaseInv:'Registrar factura de compra',supplierLbl:'Proveedor',invNumLbl:'Núm. Factura *',
@@ -1332,6 +1343,17 @@ const T = {
     creditDueDateLbl:'Payment due date',creditDueCustom:'Custom',creditOverdue:'OVERDUE',creditDueSoon:'Due in',creditDueOn:'Due on',
     allowCashierDue:'Cashiers can set due date',defaultDueDays:'Default due days',
     payMethodCash:'Cash',payMethodCard:'Card',payMethodTransf:'Transfer',payMethodSplit:'Mixed',payMethodCredit:'Credit',
+    catNameLbl:'Category name',catListTitle:'Categories',
+    userNameLbl:'Name',userUserLbl:'Username',userPassLbl:'Password',userRoleLbl:'Role',
+    roleCashier:'💰 Cashier',permsLbl:'Permissions',userListTitle:'Users',
+    permAdm:'🔐 Administration',permContaFull:'↳ Full accounting access',permFac:'🧾 Invoices',
+    cfgAdminCode:'Admin Code',cfgCurCode:'Current code',cfgNewCode:'New code',cfgChangeBtn:'🔑 Change',
+    cfgFundLbl:'Cash Fund',cfgAmountLbl:'Amount ($)',
+    cfgPayMethods:'Payment Methods',cfgOpenAccounts:'📋 Open Accounts',cfgCreditOpts:'Credit Options',
+    cfgDrawerLbl:'Cash Drawer',cfgComLbl:'COM Port',cfgDrawerAutoLbl:'Auto-open on checkout',cfgDrawerTestBtn:'🗃️ Test',
+    cfgBizNameLbl:'Business name',cfgPhoneLbl:'Phone',
+    pendingCreditsSec:'Pending credits',noAccessComp:'🔒 No access to Purchases',noAccessGst:'🔒 No access to Expenses',
+    vntPeriodToday:'Today',vntPeriodWeek:'This week',vntPeriodMonth:'This month',vntPeriodAll:'All',vntAllMethods:'All methods',vntTransf:'Transfer',
     tabSummary:'Summary',tabSalesLbl:'Sales',tabExpenses:'Expenses',tabChart:'Chart',tabPurchases:'Purchases',
     salesBreakdown:'Product breakdown',purchasesLbl:'Inventory purchases',
     addPurchaseInv:'Register purchase invoice',supplierLbl:'Supplier',invNumLbl:'Invoice # *',
@@ -1575,6 +1597,57 @@ function applyLang(){
   const _cnr=el('comp-num');if(_cnr)_cnr.placeholder=t('invRequired');
   const _cdo=el('comp-dir');if(_cdo)_cdo.placeholder=t('optional');
   const _cto=el('comp-tel');if(_cto)_cto.placeholder=t('optional');
+  // Discount row label
+  const _discRowLbl=el('disc-row-lbl');if(_discRowLbl)_discRowLbl.textContent=t('discount');
+  // Category form
+  const _catNL=el('cat-name-lbl');if(_catNL)_catNL.textContent=t('catNameLbl');
+  const _catLT=el('cat-list-title');if(_catLT)_catLT.textContent=t('catListTitle');
+  // User form
+  const _uNL=el('u-name-lbl');if(_uNL)_uNL.textContent=t('userNameLbl');
+  const _uUL=el('u-user-lbl');if(_uUL)_uUL.textContent=t('userUserLbl');
+  const _uPL=el('u-pass-lbl');if(_uPL)_uPL.textContent=t('userPassLbl');
+  const _uRL=el('u-role-lbl');if(_uRL)_uRL.textContent=t('userRoleLbl');
+  const _uRC=el('u-role-cashier');if(_uRC)_uRC.textContent=t('roleCashier');
+  const _uPerms=el('u-perms-lbl');if(_uPerms)_uPerms.textContent=t('permsLbl');
+  const _uLT=el('user-list-title');if(_uLT)_uLT.textContent=t('userListTitle');
+  // Permission toggles
+  const _pmAdm=el('pm-adm-lbl');if(_pmAdm)_pmAdm.textContent=t('permAdm');
+  const _pmRet=el('pm-ret-lbl');if(_pmRet)_pmRet.textContent='🔄 '+t('ret');
+  const _pmCan=el('pm-can-lbl');if(_pmCan)_pmCan.textContent='❌ '+t('can');
+  const _pmSal=el('pm-sal-lbl');if(_pmSal)_pmSal.textContent='📊 '+t('sal');
+  const _pmConta=el('pm-conta-lbl');if(_pmConta)_pmConta.textContent='📒 '+t('conta');
+  const _pmCF=el('pm-contaFull-lbl');if(_pmCF)_pmCF.textContent=t('permContaFull');
+  const _pmFac=el('pm-fac-lbl');if(_pmFac)_pmFac.textContent=t('permFac');
+  const _pmGst=el('pm-gst-lbl');if(_pmGst)_pmGst.textContent='💸 '+t('tabExpenses');
+  // Config labels
+  const _cfgPM=el('cfg-pay-methods-lbl');if(_cfgPM)_cfgPM.textContent=t('cfgPayMethods');
+  const _cfgCash=el('cfg-cash-lbl');if(_cfgCash)_cfgCash.textContent='💵 '+t('cash');
+  const _cfgCard=el('cfg-card-lbl');if(_cfgCard)_cfgCard.textContent='💳 '+t('card');
+  const _cfgOA=el('cfg-oa-lbl');if(_cfgOA)_cfgOA.textContent=t('cfgOpenAccounts');
+  const _cfgCred=el('cfg-credit-lbl');if(_cfgCred)_cfgCred.textContent='🏷️ '+t('credit');
+  const _cfgCO=el('cfg-credit-opts-lbl');if(_cfgCO)_cfgCO.textContent=t('cfgCreditOpts');
+  const _cfgCS=el('cfg-credit-save-btn');if(_cfgCS)_cfgCS.textContent=t('save');
+  const _cfgDL=el('cfg-drawer-lbl');if(_cfgDL)_cfgDL.textContent=t('cfgDrawerLbl');
+  const _cfgCOM=el('cfg-com-lbl');if(_cfgCOM)_cfgCOM.textContent=t('cfgComLbl');
+  const _cfgDA=el('cfg-drawer-auto-lbl');if(_cfgDA)_cfgDA.textContent=t('cfgDrawerAutoLbl');
+  const _cfgDT=el('cfg-drawer-test-btn');if(_cfgDT)_cfgDT.textContent=t('cfgDrawerTestBtn');
+  const _cfgBN=el('cfg-biz-name-lbl');if(_cfgBN)_cfgBN.textContent=t('cfgBizNameLbl');
+  const _cfgPH=el('cfg-phone-lbl');if(_cfgPH)_cfgPH.textContent=t('cfgPhoneLbl');
+  // Pending credits section heading
+  const _slblCred=el('slbl-credits');if(_slblCred)_slblCred.textContent=t('pendingCreditsSec');
+  // No-access messages
+  const _compBMsg=el('comp-block-msg');if(_compBMsg)_compBMsg.textContent=t('noAccessComp');
+  const _gstBMsg=el('gst-block-msg');if(_gstBMsg)_gstBMsg.textContent=t('noAccessGst');
+  // Ventas filter options
+  const _vntPH=el('vnt-p-hoy');if(_vntPH)_vntPH.textContent=t('vntPeriodToday');
+  const _vntPS=el('vnt-p-semana');if(_vntPS)_vntPS.textContent=t('vntPeriodWeek');
+  const _vntPM=el('vnt-p-mes');if(_vntPM)_vntPM.textContent=t('vntPeriodMonth');
+  const _vntPT=el('vnt-p-todo');if(_vntPT)_vntPT.textContent=t('vntPeriodAll');
+  const _vntMA=el('vnt-m-all');if(_vntMA)_vntMA.textContent=t('vntAllMethods');
+  const _vntMC=el('vnt-m-cash');if(_vntMC)_vntMC.textContent=t('cash');
+  const _vntMCard=el('vnt-m-card');if(_vntMCard)_vntMCard.textContent=t('card');
+  const _vntMT=el('vnt-m-transf');if(_vntMT)_vntMT.textContent=t('vntTransf');
+  const _vntMCred=el('vnt-m-credit');if(_vntMCred)_vntMCred.textContent=t('credit');
   // Credit pay modal
   const _cpayMethodLbl=el('cpay-method-lbl');if(_cpayMethodLbl)_cpayMethodLbl.textContent=t('payMethodLabel');
   const _cpayCashTxt=el('cpay-m-cash-txt');if(_cpayCashTxt)_cpayCashTxt.textContent=t('payMethodCash');
@@ -2415,7 +2488,7 @@ function showCategories(){
 function showProducts(catId){
   currentView='products';currentCategory=catId;
   el('cat-view').style.display='none';el('prod-view').style.display='';
-  const name=catId==='all'?'Todo':(db.categories.find(c=>c.id===catId)||{name:'Categoría'}).name;
+  const name=catId==='all'?t('all'):(db.categories.find(c=>c.id===catId)||{name:t('tabCats')}).name;
   el('back-cat-name').textContent=name;
   renderProds();
 }
