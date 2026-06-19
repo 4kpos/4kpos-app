@@ -10,44 +10,26 @@ function logUpdate(msg) {
   try { fs.appendFileSync(logFile, new Date().toISOString() + ' ' + msg + '\n') } catch(e) {}
 }
 
-let autoUpdater
+let mainWindow = null
+let autoUpdater = null
+
 try {
   autoUpdater = require('electron-updater').autoUpdater
-} catch(e) {
-  console.log('electron-updater no disponible, actualizaciones desactivadas:', e.message)
-}
-
-let mainWindow = null
-
-if (autoUpdater) {
-  autoUpdater.autoDownload = true
-  autoUpdater.autoInstallOnAppQuit = true
-  autoUpdater.on('checking-for-update', () => {
-    logUpdate('Checking...')
-    if (mainWindow) mainWindow.webContents.send('update-status', 'checking')
-  })
-  autoUpdater.on('update-available', (info) => {
-    logUpdate('Available: ' + JSON.stringify(info))
-    if (mainWindow) mainWindow.webContents.send('update-status', 'downloading')
-  })
-  autoUpdater.on('update-not-available', (info) => {
-    logUpdate('Not available: ' + JSON.stringify(info))
-    if (mainWindow) mainWindow.webContents.send('update-status', 'no-update')
-  })
-  autoUpdater.on('download-progress', (p) => {
-    logUpdate('Progress: ' + p.percent)
-  })
-  autoUpdater.on('update-downloaded', (info) => {
-    logUpdate('Downloaded: ' + JSON.stringify(info))
-    if (mainWindow) mainWindow.webContents.send('update-status', 'ready')
-  })
-  autoUpdater.on('error', (err) => {
-    logUpdate('ERROR: ' + err.message)
-    console.log('AutoUpdater error:', err)
-    if (mainWindow) mainWindow.webContents.send('update-status', 'error')
-  })
+  logUpdate('electron-updater loaded OK')
   logUpdate('App version: ' + app.getVersion())
   logUpdate('Log file: ' + logFile)
+  autoUpdater.autoDownload = true
+  autoUpdater.autoInstallOnAppQuit = true
+  autoUpdater.on('checking-for-update', () => { logUpdate('Checking...'); if (mainWindow) mainWindow.webContents.send('update-status', 'checking') })
+  autoUpdater.on('update-available', (i) => { logUpdate('Available: ' + JSON.stringify(i)); if (mainWindow) mainWindow.webContents.send('update-status', 'downloading') })
+  autoUpdater.on('update-not-available', () => { logUpdate('No update'); if (mainWindow) mainWindow.webContents.send('update-status', 'no-update') })
+  autoUpdater.on('download-progress', (p) => { logUpdate('Progress: ' + p.percent) })
+  autoUpdater.on('update-downloaded', () => { logUpdate('Downloaded'); if (mainWindow) mainWindow.webContents.send('update-status', 'ready') })
+  autoUpdater.on('error', (e) => { logUpdate('Error: ' + e.message); if (mainWindow) mainWindow.webContents.send('update-status', 'error') })
+  ipcMain.on('check-updates', () => { logUpdate('Manual check triggered'); autoUpdater.checkForUpdatesAndNotify() })
+  setTimeout(() => { logUpdate('Auto check starting'); autoUpdater.checkForUpdatesAndNotify() }, 10000)
+} catch(e) {
+  logUpdate('FAILED to load electron-updater: ' + e.message)
 }
 
 // DevTools solo en desarrollo (auto-detectado: true cuando no está empaquetado)
@@ -139,7 +121,6 @@ app.whenReady().then(async () => {
 
   if (result.valid) {
     createWindow()
-    if (autoUpdater) setTimeout(() => { try { autoUpdater.checkForUpdatesAndNotify() } catch(e) {} }, 10000)
   } else {
     createActivationWindow(result.reason)
   }
@@ -182,10 +163,6 @@ ipcMain.on('restart-app', () => {
     app.relaunch()
     app.exit(0)
   }
-})
-
-ipcMain.on('check-updates', () => {
-  if (autoUpdater) try { autoUpdater.checkForUpdatesAndNotify() } catch(e) {}
 })
 
 ipcMain.on('restart-for-update', () => {
