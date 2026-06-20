@@ -1132,6 +1132,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <script>
 // Supabase anon key — get it from: Supabase dashboard → Settings → API → Project API keys → "anon public"
 const APP_VERSION = (function(){try{return require('./package.json').version;}catch(e){return '5.3.0';}})();
+let bcrypt; try{bcrypt=require('bcryptjs');}catch(e){console.warn('bcryptjs no disponible:',e.message);}
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6YWxuaGx1d3R5b3R1eHdrcXJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDg2OTEsImV4cCI6MjA5NTkyNDY5MX0.qtaMdroQMP4CIARsStkSWx6vGU-T5id98zczaGKGAvk';
 const SUPA_URL = 'https://izalnhluwtyotuxwkqrh.supabase.co';
 let ipcRenderer = { invoke: async function(){ return null; }, on: function(){} };
@@ -1792,6 +1793,7 @@ async function loadDB(){
       if(d.adminCode)db.adminCode=d.adminCode;
       if(d.fundAmount!==undefined)db.fundAmount=d.fundAmount;
       if(d.users&&d.users.length)db.users=d.users;
+      if(bcrypt){let _m=false;db.users.forEach(function(u){if(u.pass&&!u.pass.startsWith('$2')){u.pass=bcrypt.hashSync(u.pass,10);_m=true;}});if(_m)saveDB();}
       if(d.cfg)db.cfg=Object.assign(db.cfg,d.cfg);
       if(d.facturas)db.facturas=d.facturas;
       if(d.gastos_conta)db.gastos_conta=d.gastos_conta;
@@ -1861,7 +1863,7 @@ async function saveDB(){
   let found=null;
 
   for(let i=0;i<db.users.length;i++){
-    if(db.users[i].user===u&&db.users[i].pass===p){
+    if(db.users[i].user===u&&(bcrypt?bcrypt.compareSync(p,db.users[i].pass):db.users[i].pass===p)){
       found=db.users[i];
       break;
     }
@@ -3488,7 +3490,7 @@ function saveUser(){
         pass=el('u-pass').value,
         role=el('u-role').value.trim();
 
-  if(!name||!user||!pass||!role){
+  if(!name||!user||(!editingUserId&&!pass)||!role){
     toast('⚠ Todos los campos requeridos');
     return;
   }
@@ -3519,7 +3521,7 @@ function saveUser(){
 
     u.name=name;
     u.user=user;
-    u.pass=pass;
+    if(pass)u.pass=bcrypt?bcrypt.hashSync(pass,10):pass;
     u.role=role;
     u.perms=perms;
 
@@ -3539,7 +3541,7 @@ function saveUser(){
         id:Date.now().toString(),
         name,
         user,
-        pass,
+        pass:bcrypt?bcrypt.hashSync(pass,10):pass,
         role,
         perms
       });
@@ -3553,7 +3555,7 @@ function saveUser(){
         id:Date.now().toString(),
         name,
         user,
-        pass,
+        pass:bcrypt?bcrypt.hashSync(pass,10):pass,
         role,
         perms
       });
@@ -3579,7 +3581,7 @@ function saveUser(){
 
   el('u-name').value=u.name;
   el('u-user').value=u.user;
-  el('u-pass').value=u.pass;
+  el('u-pass').value='';
   el('u-role').value=u.role;
 
   el('pm-adm').checked=!!u.perms.adm;
