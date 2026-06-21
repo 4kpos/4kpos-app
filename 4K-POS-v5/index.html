@@ -643,6 +643,13 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="slbl" id="cfg-backup-lbl">Backup automático</div>
         <div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px" id="cfg-backup-info">Automático cada 5 min · silencioso</div>
         <div style="font-size:.72rem;color:var(--tx3);margin-bottom:8px">Último respaldo: <span id="last-backup-lbl" style="color:var(--gn)">—</span></div>
+        <div class="sep-line"></div>
+        <div class="slbl">Bloqueo por Inactividad</div>
+        <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:10px">
+          <div class="tog"><span class="tog-label">⏱ Bloquear por inactividad</span><label class="tog-sw"><input type="checkbox" id="cfg-inactivity-enabled"><span class="slider"></span></label></div>
+          <div class="fg" style="margin-top:10px"><label class="lbl">Minutos sin actividad</label><input type="number" class="fi" id="cfg-inactivity-mins" min="1" max="120" step="1" placeholder="10"></div>
+        </div>
+        <div class="frow"><button class="btn btn-p" onclick="saveInactivityCfg()">💾 Guardar</button></div>
       </div>
       <!-- INVENTORY -->
       <div id="t-inv" style="display:none">
@@ -1466,7 +1473,8 @@ let db={products:[],categories:[],sales:[],returns:[],orderNum:1,adminCode:'1234
   fundAmount:0,customers:[],credits:[],payMethods:{cash:true,card:true,transf:true,openAccounts:true,credit:false},
   drawerPort:'COM3',drawerAuto:true,
   cfg:{bizName:'4K Negocio',bizSub:'',thanks:'¡Gracias por tu compra! 💕',phone:'',s1:'',s2:'',qr:'',logo:'',timeFormat:'12h'},
-  facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true,shifts:[],auditLog:[]};
+  facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true,shifts:[],auditLog:[],
+  settings:{inactivityLockEnabled:true,inactivityMinutes:10}};
 let cart=[],payMethod='cash',cashIn='',discount={type:'pct',value:0,active:false};
 let currentView='categories',currentCategory=null;
 let editingAccountId=null;
@@ -1873,6 +1881,7 @@ async function loadDB(){
       if(d.openAccounts)db.openAccounts=d.openAccounts;
       if(d.returns)db.returns=d.returns;
       if(d.auditLog)db.auditLog=d.auditLog;
+      if(d.settings)db.settings=Object.assign({inactivityLockEnabled:true,inactivityMinutes:10},d.settings);
     }
  }catch(e){console.error(e);}
 
@@ -2208,6 +2217,7 @@ function startApp(){
   if(_restoredFromBackup){toast('🔄 Datos restaurados del backup automático');_restoredFromBackup=false;}
   const bts=localStorage.getItem('4kpos_backup_ts');
   const lbl=el('last-backup-lbl');if(lbl&&bts)lbl.textContent=new Date(bts).toLocaleString(lang);
+  _startInactivityTimer();
 }
 // ── Shift helpers ───────────────────────────────────────
 // Returns the Date when current shift opened (fallback: start of today)
@@ -2287,6 +2297,7 @@ function calcCashDiff(){
   }
 }
 function doLogout(){
+  _stopInactivityTimer();
   // Save shift record
   if(!db.shifts)db.shifts=[];
   const _shiftActive=_getShiftSales();
@@ -2931,6 +2942,76 @@ function doAutoBackup(){
   }catch(e){}
 }
 setInterval(doAutoBackup,5*60*1000);
+
+// ── INACTIVIDAD ─────────────────────────────────
+var _iTimer=null;
+function saveInactivityCfg(){
+  if(!db.settings)db.settings={inactivityLockEnabled:true,inactivityMinutes:10};
+  db.settings.inactivityLockEnabled=(el('cfg-inactivity-enabled')||{}).checked!==false;
+  db.settings.inactivityMinutes=Math.max(1,parseInt((el('cfg-inactivity-mins')||{}).value)||10);
+  saveDB();
+  _resetInactivityTimer();
+  toast('✅ Bloqueo por inactividad guardado');
+}
+function _isModalCritical(){
+  const ck=el('ov-checkout');if(ck&&ck.classList.contains('open'))return true;
+  const lo=el('ov-logout');if(lo&&lo.classList.contains('open'))return true;
+  return false;
+}
+function _stopInactivityTimer(){
+  if(_iTimer){clearTimeout(_iTimer);_iTimer=null;}
+}
+function _resetInactivityTimer(){
+  _stopInactivityTimer();
+  if(!curUser)return;
+  const s=db.settings||{};
+  if(s.inactivityLockEnabled===false)return;
+  const mins=Math.max(1,s.inactivityMinutes||10);
+  _iTimer=setTimeout(_onInactivityTimeout,mins*60*1000);
+}
+function _startInactivityTimer(){
+  _stopInactivityTimer();
+  _resetInactivityTimer();
+}
+function _onInactivityTimeout(){
+  if(!curUser)return;
+  if(_isModalCritical()){_resetInactivityTimer();return;}
+  var _userName=curUser.name;
+  if(cart&&cart.length){
+    var _ref='Inactividad – '+_userName+' '+new Date().toLocaleTimeString();
+    var _tot=cart.reduce(function(s,c){return s+c.price*c.qty;},0);
+    var _oaList=_loadOAs();
+    _oaList.push({id:Date.now().toString(),ref:_ref,name:_userName,table:'',date:new Date().toISOString(),items:JSON.parse(JSON.stringify(cart)),total:_tot,cashier:_userName});
+    _saveOAs(_oaList);
+  }
+  logAction('Cierre por inactividad',_userName+' · '+((db.settings&&db.settings.inactivityMinutes)||10)+' min sin actividad');
+  _sessionLogout();
+  toast('🔒 Sesión bloqueada por inactividad'+(cart&&cart.length?' — carrito guardado':''));
+}
+function _sessionLogout(){
+  _stopInactivityTimer();
+  if(!curUser)return;
+  if(_notifInterval){clearInterval(_notifInterval);_notifInterval=null;}
+  closeNotifPanel();_notifs=[];_updateNotifBadge();
+  document.querySelectorAll('.ov.open').forEach(function(o){o.classList.remove('open');});
+  curUser=null;cart=[];cashIn='';
+  discount={type:'pct',value:0,active:false};
+  el('shift-open-screen').classList.remove('show');
+  setEl('usr-lbl','—');
+  var _tb=el('tb-user');if(_tb){_tb.textContent='';_tb.style.display='none';}
+  el('lu').value='';el('lp').value='';
+  el('topbar').style.display='none';
+  el('app-main').style.display='none';
+  el('login-screen').style.display='flex';
+  renderCart();
+}
+(function(){
+  var _ev=['mousemove','click','keydown','touchstart'];
+  function _act(){_resetInactivityTimer();}
+  _ev.forEach(function(ev){document.addEventListener(ev,_act,{passive:true});});
+})();
+// ── FIN INACTIVIDAD ─────────────────────────────
+
 function restoreFromBackup(){
   try{
     const raw=localStorage.getItem('4kpos_backup');if(!raw)return false;
@@ -3894,6 +3975,8 @@ function loadAdminModal(){
   el('cfg-drawer-port').value=db.drawerPort||'COM3';el('cfg-drawer-auto').checked=db.drawerAuto!==false;
   const _tf=(db.cfg&&db.cfg.timeFormat)||'12h';const _b12=el('cfg-time-12h'),_b24=el('cfg-time-24h');if(_b12)_b12.className=_tf==='12h'?'btn btn-p':'btn btn-s';if(_b24)_b24.className=_tf==='24h'?'btn btn-p':'btn btn-s';
   if(db.cfg.logo)el('logo-prev').innerHTML='<img src="'+db.cfg.logo+'" style="width:100%;height:100%;object-fit:contain">';
+  if(el('cfg-inactivity-enabled'))el('cfg-inactivity-enabled').checked=(db.settings&&db.settings.inactivityLockEnabled)!==false;
+  if(el('cfg-inactivity-mins'))el('cfg-inactivity-mins').value=(db.settings&&db.settings.inactivityMinutes)||10;
 }
 function admTab(tab,e2){
   ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits'].forEach(t=>{const el2=el(t);if(el2)el2.style.display='none';});
