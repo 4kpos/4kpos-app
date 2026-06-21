@@ -4401,6 +4401,50 @@ document.addEventListener('keydown', function(e) {
     if(all[i + 1].select) all[i + 1].select();
   }
 });
+
+// ── Barcode scanner ─────────────────────────────
+(function(){
+  var _buf='', _t=0;
+  var SPEED=50, MIN=4;
+  document.addEventListener('keydown', function(e){
+    var now=Date.now(), key=e.key;
+    // Modifier keys pass through silently — don't reset buffer, don't accumulate
+    if(key==='Shift'||key==='Alt'||key==='Control'||key==='Meta'||key==='CapsLock') return;
+    // Gap too large → this is human typing speed, not a scanner burst
+    if(_t>0 && (now-_t)>SPEED) _buf='';
+    if(key==='Enter'){
+      var code=_buf.trim(); _buf=''; _t=0;
+      // Ignore if buffer too short to be a real barcode
+      if(code.length<MIN) return;
+      // Ignore if on login screen
+      if(el('login-screen')&&el('login-screen').style.display!=='none') return;
+      var active=document.activeElement;
+      // Let #p-bc capture scanner input normally (product form barcode field)
+      if(active&&active.id==='p-bc') return;
+      // Don't interfere during checkout
+      if(el('ov-checkout')&&el('ov-checkout').classList.contains('open')) return;
+      // Must be in sale mode
+      if(!el('app-main')||el('app-main').style.display==='none') return;
+      // Confirmed scan — take over
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      // Clear search field if it accidentally received the scan chars
+      if(active&&active.id==='srch'){active.value='';renderProds();}
+      // Exact barcode match only
+      var prod=db.products.find(function(p){return p.bc&&p.bc===code;});
+      if(prod){
+        addToCart(prod.id);
+      } else {
+        toast('⚠ '+(lang==='en'?'Code not found: ':'Código no encontrado: ')+code);
+      }
+      return;
+    }
+    // Printable char → accumulate
+    if(key.length===1){_buf+=key;_t=now;}
+    // Any other key (arrows, F-keys, etc.) → not a scanner, reset
+    else{_buf='';_t=0;}
+  }, true); // capture phase: fires before all bubble-phase listeners
+})();
 </script>
 </body>
 </html>
