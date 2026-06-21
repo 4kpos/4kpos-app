@@ -447,6 +447,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div class="hmi" style="color:#3b82f6" onclick="closeHMenu();openDashQR()">📱 <span>Dashboard</span></div>
   <div class="hmi" style="color:#10b981" id="hm-update" onclick="closeHMenu();checkUpdates()">⬆️ <span id="hm-update-txt">Buscar actualizaciones</span></div>
   <div class="hmi" style="color:#8b5cf6;display:none" id="hm-audit" onclick="closeHMenu();openAudit()">📋 <span>Auditoría</span></div>
+  <div class="hmi" style="color:#f87171" onclick="doQuickLock()">🔒 <span>Bloquear sesión</span></div>
   <div id="hm-ver" style="padding:8px 16px;font-size:.68rem;color:var(--tx3);text-align:center;border-top:1px solid var(--b1);cursor:default;user-select:none"></div>
 </div>
 
@@ -754,6 +755,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="rtr"><span id="r-pay-lbl">Pago</span><span id="r-pay-val" style="font-weight:700;color:var(--ac)"></span></div>
         <div class="rtr main"><span>TOTAL</span><span class="amt" id="r-total"></span></div>
       </div>
+      <div id="r-recv-row" style="display:none;justify-content:space-between;font-size:.83rem;color:var(--tx2);margin-top:9px"><span>Recibido</span><span id="r-recv-amt" style="font-family:Courier New,monospace"></span></div>
       <div class="rchg" id="r-chg" style="display:none"></div>
       <div style="font-size:.75rem;color:var(--tx3);text-align:center;margin-top:6px" id="r-cashier"></div>
       <div class="rbc" id="r-bc"></div>
@@ -1255,7 +1257,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <script>
 // Supabase anon key — get it from: Supabase dashboard → Settings → API → Project API keys → "anon public"
 const APP_VERSION = (function(){try{return require('./package.json').version;}catch(e){return '5.3.0';}})();
-let bcrypt; try{bcrypt=require('bcryptjs');}catch(e){console.warn('bcryptjs no disponible:',e.message);alert("BCRYPTJS FALLO - revisar require");}
+let bcrypt; try{bcrypt=require('bcryptjs');}catch(e){console.warn('bcryptjs no disponible:',e.message);}
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6YWxuaGx1d3R5b3R1eHdrcXJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDg2OTEsImV4cCI6MjA5NTkyNDY5MX0.qtaMdroQMP4CIARsStkSWx6vGU-T5id98zczaGKGAvk';
 const SUPA_URL = 'https://izalnhluwtyotuxwkqrh.supabase.co';
 let ipcRenderer = { invoke: async function(){ return null; }, on: function(){} };
@@ -2920,7 +2922,6 @@ function calcChange(){
   else{box.textContent=t('change')+': '+dolr(recv-total);box.className='chgbox';}
 }
 function openCheckoutModal(){
-  alert("taxEnabled: " + db.cfg.taxEnabled + " | taxRate: " + db.cfg.taxRate);
   if(!cart.length)return;
   const tax=getTaxCalc();const cfg=db.cfg||{};
   el('ck-title').textContent='✓ Cobrar Orden #'+db.orderNum;
@@ -3266,6 +3267,22 @@ function _sessionLogout(){
   el('app-main').style.display='none';
   el('login-screen').style.display='flex';
   renderCart();
+}
+function doQuickLock(){
+  closeHMenu();
+  if(!curUser)return;
+  var _uName=curUser.name;
+  var _hadCart=!!(cart&&cart.length);
+  if(_hadCart){
+    var _ref='Bloqueado – '+_uName+' '+new Date().toLocaleTimeString();
+    var _tot=cart.reduce(function(s,c){return s+c.price*c.qty;},0);
+    var _oaList=_loadOAs();
+    _oaList.push({id:Date.now().toString(),ref:_ref,name:_uName,table:'',date:new Date().toISOString(),items:JSON.parse(JSON.stringify(cart)),total:_tot,cashier:_uName});
+    _saveOAs(_oaList);
+  }
+  logAction('Sesión bloqueada manualmente',_uName);
+  _sessionLogout();
+  toast('🔒 Sesión bloqueada'+(_hadCart?' — carrito guardado':''));
 }
 (function(){
   var _ev=['mousemove','click','keydown','touchstart'];
@@ -3826,9 +3843,14 @@ function deleteOA(id){
   }else{setEl('r-sub-amt',dolr(sale.total));}
   setEl('r-total',dolr(sale.total));
   setEl('r-pay-val',pico(sale.payMethod)+' '+(sale.payLabel||sale.payMethod));
-  const chg=el('r-chg');
-  if(sale.payMethod==='cash'){chg.style.display='block';chg.textContent=t('change')+': '+dolr(sale.change);}
-  else chg.style.display='none';
+  const chg=el('r-chg');const recvRow=el('r-recv-row');
+  if(sale.payMethod==='cash'){
+    if(recvRow){recvRow.style.display='flex';setEl('r-recv-amt',dolr(sale.recv));}
+    chg.style.display='block';chg.textContent=t('change')+': '+dolr(sale.change);
+  }else{
+    if(recvRow)recvRow.style.display='none';
+    chg.style.display='none';
+  }
   setEl('r-bc',sale.rcode);
   const rcash=el('r-cashier');if(rcash)rcash.textContent=sale.cashier?(t('attendedBy')+': '+sale.cashier):'';
   openOv('ov-rcpt');
@@ -3847,7 +3869,7 @@ function doPrint(){
     ?'<div style="display:flex;justify-content:space-between;font-size:11px"><span>Subtotal</span><span>'+el('r-sub-amt').textContent+'</span></div>'
      +'<div style="display:flex;justify-content:space-between;font-size:11px"><span>'+(el('r-tax-lbl')?el('r-tax-lbl').textContent:'Impuesto')+'</span><span>'+(el('r-tax-amt')?el('r-tax-amt').textContent:'')+'</span></div>'
     :'';
-  el('parea').innerHTML='<div style="text-align:center;padding:8px">'+logoH+'<b>'+el('r-biz').textContent+'</b><br><small>'+el('r-sub').textContent+'</small>'+contact+'<hr style="border:1px dashed #000;margin:5px 0">'+el('r-num').textContent+' — '+el('r-date').textContent+'<hr style="border:1px dashed #000;margin:5px 0">'+lines+'<hr style="border:1px dashed #000;margin:5px 0">'+_pTaxBlock+'<div style="display:flex;justify-content:space-between;font-weight:800"><span>TOTAL</span><span>'+el('r-total').textContent+'</span></div><div>'+el('r-pay-val').textContent+'</div>'+(el('r-chg').style.display!=='none'?('<div>'+el('r-chg').textContent+'</div>'):'')+(el('r-cashier')&&el('r-cashier').textContent?('<div style="font-size:10px;text-align:center">'+el('r-cashier').textContent+'</div>'):'')+'<hr style="border:1px dashed #000;margin:5px 0"><small style="letter-spacing:2px">'+el('r-bc').textContent+'</small><br><small>'+el('r-ty').textContent+'</small></div>';
+  el('parea').innerHTML='<div style="text-align:center;padding:8px">'+logoH+'<b>'+el('r-biz').textContent+'</b><br><small>'+el('r-sub').textContent+'</small>'+contact+'<hr style="border:1px dashed #000;margin:5px 0">'+el('r-num').textContent+' — '+el('r-date').textContent+'<hr style="border:1px dashed #000;margin:5px 0">'+lines+'<hr style="border:1px dashed #000;margin:5px 0">'+_pTaxBlock+'<div style="display:flex;justify-content:space-between;font-weight:800"><span>TOTAL</span><span>'+el('r-total').textContent+'</span></div><div>'+el('r-pay-val').textContent+'</div>'+(el('r-recv-row')&&el('r-recv-row').style.display!=='none'?('<div style="display:flex;justify-content:space-between;font-size:11px"><span>Recibido</span><span>'+el('r-recv-amt').textContent+'</span></div>'):'')+(el('r-chg').style.display!=='none'?('<div>'+el('r-chg').textContent+'</div>'):'')+(el('r-cashier')&&el('r-cashier').textContent?('<div style="font-size:10px;text-align:center">'+el('r-cashier').textContent+'</div>'):'')+'<hr style="border:1px dashed #000;margin:5px 0"><small style="letter-spacing:2px">'+el('r-bc').textContent+'</small><br><small>'+el('r-ty').textContent+'</small></div>';
   window.print();
 }
 function newOrder(){closeOv('ov-rcpt');cart=[];cashIn='';discount={type:'pct',value:0,active:false};editingAccountId=null;renderCart();renderProds();calcChange();}
