@@ -668,6 +668,13 @@ select.fi option{background:var(--s2);color:var(--tx);}
         </div>
         <div class="frow"><button class="btn btn-p" onclick="saveInactivityCfg()">💾 Guardar</button></div>
         <div class="sep-line"></div>
+        <div class="slbl">Notificaciones</div>
+        <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:10px">
+          <div class="fg"><label class="lbl">Umbral de stock bajo (global)</label><input type="number" class="fi" id="cfg-low-stock-threshold" min="0" max="9999" step="1" placeholder="5"></div>
+          <div style="font-size:.7rem;color:var(--tx3);margin-top:6px">Las notificaciones de stock bajo se activan cuando el inventario llega a este nivel o menos. Se puede sobreescribir por producto en el campo "Stock mínimo".</div>
+        </div>
+        <div class="frow"><button class="btn btn-p" onclick="saveLowStockCfg()">💾 Guardar</button></div>
+        <div class="sep-line"></div>
         <div class="slbl">Confirmación Admin</div>
         <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:8px">
           <div class="tog"><span class="tog-label">🔐 Admin exento de re-confirmar</span><label class="tog-sw"><input type="checkbox" id="cfg-admin-exempt"><span class="slider"></span></label></div>
@@ -1523,7 +1530,7 @@ let db={products:[],categories:[],sales:[],returns:[],orderNum:1,adminCode:'1234
   drawerPort:'COM3',drawerAuto:true,
   cfg:{bizName:'4K Negocio',bizSub:'',thanks:'¡Gracias por tu compra! 💕',phone:'',s1:'',s2:'',qr:'',logo:'',timeFormat:'12h',taxEnabled:false,taxName:'Impuesto',taxRate:0,taxIncluded:false},
   facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true,shifts:[],auditLog:[],
-  settings:{inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null,adminExemptFromConfirm:true}};
+  settings:{inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null,adminExemptFromConfirm:true,lowStockThreshold:5}};
 let cart=[],payMethod='cash',cashIn='',discount={type:'pct',value:0,active:false};
 let currentView='categories',currentCategory=null;
 let editingAccountId=null;
@@ -2295,14 +2302,15 @@ function calcCashDiff(){
   const active=_getShiftSales();
   const cashSales=active.filter(s=>s.payMethod==='cash').reduce((s,x)=>s+x.total,0);
   const creditCash=_getCreditCashShift().cashPart;
-  const declared=parseFloat(el('lo-declared-cash').value)||0;
+  const _loRaw=(el('lo-declared-cash')||{}).value;
+  const declared=parseFloat(_loRaw)||0;
   const expected=cashSales+creditCash;
   const diff=Math.round((declared-expected)*100)/100;
   const box=el('lo-cash-diff-box');
   const confirmBtn=el('lo-confirm-btn');
   const forceBtn=el('lo-force-btn');
   if(!box)return;
-  if(!declared){
+  if(_loRaw===''||_loRaw==null){
     box.innerHTML='';
     if(confirmBtn)confirmBtn.disabled=true;
     if(forceBtn)forceBtn.style.display='none';
@@ -2527,7 +2535,7 @@ function saveProd(){
   const prod={id:eid||Date.now().toString(),name,cat:el('p-cat').value,price,cost:getNum('p-cost')||undefined,stock:getNum('p-stock'),minStock:getNum('p-minstock')||5,bc:el('p-bc').value.trim(),img:imgData};
   if(eid){const i=db.products.findIndex(x=>x.id===eid);if(i>=0){if(db.products[i].price!==price)logAction('Precio editado',prod.name,dolr(db.products[i].price),dolr(price));if(!imgData)prod.img=db.products[i].img;db.products[i]=prod;}el('p-eid').value='';}
   else db.products.push(prod);
-  saveDB();renderProdList();renderProds();clearProd();toast('✓ '+name);
+  saveDB();renderProdList();renderProds();clearProd();calcNotifs();toast('✓ '+name);
 }
 function editProd(id){
   const p=db.products.find(x=>x.id===id);if(!p)return;
@@ -2544,7 +2552,7 @@ function delProd(id){
     confirm2('¿Eliminar producto '+_dp.name+'?',function(){
       db.products=db.products.filter(x=>x.id!==id);cart=cart.filter(x=>x.id!==id);
       logAction('Producto eliminado',_dp.name+((_dp.bc)?' · #'+_dp.bc:'')+' · '+dolr(_dp.price||0));
-      saveDB();renderProdList();renderProds();renderCart();
+      saveDB();renderProdList();renderProds();renderCart();calcNotifs();
     });
   };
   if((_dp.stock||0)>0){
@@ -3216,6 +3224,12 @@ function saveInactivityCfg(){
   _resetInactivityTimer();
   toast('✅ Bloqueo por inactividad guardado');
 }
+function saveLowStockCfg(){
+  if(!db.settings)db.settings={};
+  db.settings.lowStockThreshold=Math.max(0,parseInt((el('cfg-low-stock-threshold')||{}).value)||5);
+  saveDB();calcNotifs();
+  toast('✅ Umbral de stock bajo guardado');
+}
 function _isModalCritical(){
   const ck=el('ov-checkout');if(ck&&ck.classList.contains('open'))return true;
   const lo=el('ov-logout');if(lo&&lo.classList.contains('open'))return true;
@@ -3724,6 +3738,7 @@ function doCreditPayment(full){
   closeOv('ov-credit-pay');
   renderCreditsPanel();
   renderAdmCredits();
+  calcNotifs();
   const ctCred=el('ct-cred');
   if(ctCred&&ctCred.style.display!=='none')renderContaCredits();
   toast('✓ '+dolr(actual)+' '+t('creditPaid'));
@@ -4318,6 +4333,7 @@ function loadAdminModal(){
   if(el('cfg-admin-exempt'))el('cfg-admin-exempt').checked=(db.settings&&db.settings.adminExemptFromConfirm)!==false;
   if(el('cfg-inactivity-enabled'))el('cfg-inactivity-enabled').checked=(db.settings&&db.settings.inactivityLockEnabled)!==false;
   if(el('cfg-inactivity-mins'))el('cfg-inactivity-mins').value=(db.settings&&db.settings.inactivityMinutes)||10;
+  if(el('cfg-low-stock-threshold'))el('cfg-low-stock-threshold').value=(db.settings&&db.settings.lowStockThreshold!=null)?db.settings.lowStockThreshold:5;
   if(el('cfg-tax-enabled'))el('cfg-tax-enabled').checked=(db.cfg&&db.cfg.taxEnabled)===true;
   if(el('cfg-tax-name'))el('cfg-tax-name').value=(db.cfg&&db.cfg.taxName)||'Impuesto';
   if(el('cfg-tax-rate'))el('cfg-tax-rate').value=(db.cfg&&db.cfg.taxRate)||0;
@@ -5045,9 +5061,18 @@ document.addEventListener('keydown',function(e){
 let _notifs=[];
 let _notifInterval=null;
 
+function _getNotifDismissed(){
+  try{return new Set(JSON.parse(localStorage.getItem('4kpos_notif_dismissed')||'[]'));}catch(e){return new Set();}
+}
+function _saveNotifDismissed(ids){
+  try{localStorage.setItem('4kpos_notif_dismissed',JSON.stringify([...ids]));}catch(e){}
+}
+
 function calcNotifs(){
   const now=new Date();now.setHours(0,0,0,0);
-  const readIds=new Set(_notifs.filter(function(n){return n.read;}).map(function(n){return n.id;}));
+  // Merge in-memory read state + persisted dismissed IDs
+  const dismissed=_getNotifDismissed();
+  const readIds=new Set([...dismissed,..._notifs.filter(function(n){return n.read;}).map(function(n){return n.id;})]);
   const fresh=[];
 
   // Overdue & due-soon credits
@@ -5069,16 +5094,21 @@ function calcNotifs(){
     }
   });
 
-  // Low stock
+  // Low stock — per-product minStock overrides global threshold
+  const _globalThr=(db.settings&&db.settings.lowStockThreshold!=null)?db.settings.lowStockThreshold:5;
   (db.products||[]).forEach(function(p){
-    if((p.stock||0)<=(p.minStock||5)){
+    const _pMin=p.minStock!=null?p.minStock:_globalThr;
+    if((p.stock||0)<=_pMin){
       const id='stock-'+p.id;
       fresh.push({id,type:'low_stock',color:'#f97316',read:readIds.has(id),
-        msg:p.name+' — '+(p.stock||0)+' u. (mín: '+(p.minStock||5)+')'});
+        msg:p.name+' — '+(p.stock||0)+' u. (mín: '+_pMin+')'});
     }
   });
 
   _notifs=fresh;
+  // Remove stale dismissed IDs (credit paid → no longer active → auto-clears)
+  const activeIds=new Set(fresh.map(function(n){return n.id;}));
+  _saveNotifDismissed(new Set([...dismissed].filter(function(id){return activeIds.has(id);})));
   _updateNotifBadge();
 }
 
@@ -5136,13 +5166,15 @@ function closeNotifPanel(){
 
 function _notifClick(id){
   const n=_notifs.find(function(x){return x.id===id;});
-  if(n)n.read=true;
+  if(n){n.read=true;const d=_getNotifDismissed();d.add(id);_saveNotifDismissed(d);}
   _updateNotifBadge();
   openNotifPanel();
 }
 
 function markAllNotifsRead(){
-  _notifs.forEach(function(n){n.read=true;});
+  const d=_getNotifDismissed();
+  _notifs.forEach(function(n){n.read=true;d.add(n.id);});
+  _saveNotifDismissed(d);
   _updateNotifBadge();
   openNotifPanel();
 }
