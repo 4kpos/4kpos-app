@@ -412,6 +412,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div class="trow"><span id="items-lbl" style="text-transform:uppercase;font-size:14px;color:var(--tx2)">Artículos</span><span id="citems" style="font-size:14px">0</span></div>
       <div class="sep"></div>
       <div class="trow" id="disc-row" style="display:none;color:var(--rd)"><span id="disc-row-lbl">Descuento</span><span id="disc-row-amt"></span></div>
+      <div class="trow" id="cart-tax-row" style="display:none"><span id="cart-tax-lbl" style="text-transform:uppercase;font-size:14px;color:var(--tx2)">Impuesto</span><span id="ctax" style="font-family:Courier New,monospace;font-size:14px;color:var(--am)">$0.00</span></div>
       <div class="trow main"><span>TOTAL</span><span class="amt" id="ctotal">$0.00</span></div>
       <div>
         <div class="plbl" style="margin-bottom:5px" id="pay-lbl">Método de pago</div>
@@ -2828,8 +2829,9 @@ function clearCart(){cart=[];cashIn='';discount={type:'pct',value:0,active:false
 function renderCart(){
   const total=cart.reduce((s,c)=>s+c.price*c.qty,0);
   const cnt=cart.reduce((s,c)=>s+c.qty,0);
-  const finalTotal=getFinalTotal();const discAmt=getDiscountAmt();
+  const _rcTax=getTaxCalc();const finalTotal=_rcTax.total;const discAmt=getDiscountAmt();
   setEl('ccnt',cart.length.toString());setEl('csub',dolr(total));setEl('citems',cnt.toString());setEl('ctotal',dolr(finalTotal));
+  const _cTaxRow=el('cart-tax-row');if(_cTaxRow){if(db.cfg&&db.cfg.taxEnabled&&_rcTax.taxAmount>0){_cTaxRow.style.display='';setEl('cart-tax-lbl',(db.cfg.taxName||'IMPUESTO').toUpperCase());setEl('ctax',dolr(_rcTax.taxAmount));}else{_cTaxRow.style.display='none';}}
   const discRow=el('disc-row');if(discRow)discRow.style.display=discAmt>0?'flex':'none';setEl('disc-row-amt',discAmt>0?'-'+dolr(discAmt):'');
   el('cobrar').disabled=!cart.length;updateCobrar();
   el('cempty').style.display=cart.length?'none':'flex';
