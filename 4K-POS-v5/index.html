@@ -1931,8 +1931,23 @@ async function saveDB(){
 }
    function doLogin(){
   const u=el('lu').value,p=el('lp').value;
-  let found=null;
 
+  // Find user by username only (lock is per-user, independent of password)
+  const candidate=db.users.find(function(x){return x.user===u;});
+
+  // Check lock before validating password
+  if(candidate&&candidate.lockedUntil&&new Date(candidate.lockedUntil)>new Date()){
+    const minsLeft=Math.max(1,Math.ceil((new Date(candidate.lockedUntil)-Date.now())/60000));
+    logAction('Login fallido','Cuenta bloqueada · '+u+' · '+minsLeft+' min restantes');
+    el('lerr').textContent='⛔ Cuenta bloqueada. Intenta en '+minsLeft+' min.';
+    el('lerr').style.display='block';
+    el('lp').value='';
+    setTimeout(()=>{el('lerr').style.display='none';el('lerr').textContent='Usuario o contraseña incorrectos';},3500);
+    return;
+  }
+
+  // Validate password (untouched logic)
+  let found=null;
   for(let i=0;i<db.users.length;i++){
     if(db.users[i].user===u&&(bcrypt?bcrypt.compareSync(p,db.users[i].pass):db.users[i].pass===p)){
       found=db.users[i];
@@ -1941,6 +1956,9 @@ async function saveDB(){
   }
 
   if(found){
+    // Reset counter on successful login
+    found.failedAttempts=0;found.lockedUntil=null;
+    saveDB();
     curUser=found;
     el('login-screen').style.display='none';
     const _usrLblEl=el('usr-lbl');if(_usrLblEl){const _uln=found.name.replace(/</g,'&lt;');_usrLblEl.innerHTML='<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#1e3a8a;color:#fff;font-size:9px;font-weight:800;vertical-align:middle">'+found.name.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('')+'</span> '+_uln;}
@@ -1954,10 +1972,28 @@ async function saveDB(){
     }
     _continueAfterLogin(found);
   }else{
-    logAction('Login fallido','Usuario: '+el('lu').value);
+    // Wrong password — increment or lock the candidate user
+    if(candidate){
+      candidate.failedAttempts=(candidate.failedAttempts||0)+1;
+      if(candidate.failedAttempts>=5){
+        candidate.lockedUntil=new Date(Date.now()+5*60*1000).toISOString();
+        candidate.failedAttempts=0;
+        logAction('Login fallido','BLOQUEADO tras 5 intentos · '+u);
+        el('lerr').textContent='⛔ Demasiados intentos. Cuenta bloqueada 5 min.';
+        setTimeout(()=>{el('lerr').style.display='none';el('lerr').textContent='Usuario o contraseña incorrectos';},4000);
+      }else{
+        logAction('Login fallido','Contraseña incorrecta · '+u+' ('+candidate.failedAttempts+'/5)');
+        el('lerr').textContent='Contraseña incorrecta ('+candidate.failedAttempts+'/5)';
+        setTimeout(()=>{el('lerr').style.display='none';el('lerr').textContent='Usuario o contraseña incorrectos';},2500);
+      }
+      saveDB();
+    }else{
+      logAction('Login fallido','Usuario no existe: '+u);
+      el('lerr').textContent='Usuario o contraseña incorrectos';
+      setTimeout(()=>el('lerr').style.display='none',2500);
+    }
     el('lerr').style.display='block';
     el('lp').value='';
-    setTimeout(()=>el('lerr').style.display='none',2500);
   }
 }
 
