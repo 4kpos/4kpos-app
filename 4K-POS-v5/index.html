@@ -446,8 +446,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div class="hmi" style="color:var(--tx3)" onclick="closeHMenu();openDrawer()">🗃️ <span id="hm-drawer-txt">Abrir Registradora</span></div>
   <div class="hmi" style="color:#3b82f6" onclick="closeHMenu();openDashQR()">📱 <span>Dashboard</span></div>
   <div class="hmi" style="color:#10b981" id="hm-update" onclick="closeHMenu();checkUpdates()">⬆️ <span id="hm-update-txt">Buscar actualizaciones</span></div>
-  <div class="hmi" style="color:#8b5cf6;display:none" id="hm-audit" onclick="closeHMenu();openAudit()">📋 <span>Auditoría</span></div>
-  <div class="hmi" style="color:#f87171" onclick="doQuickLock()">🔒 <span>Bloquear sesión</span></div>
+  <div class="hmi" style="color:#8b5cf6;display:none" id="hm-audit" onclick="closeHMenu();openAudit()">📋 <span id="hm-audit-txt">Auditoría</span></div>
+  <div class="hmi" style="color:#f87171" onclick="doQuickLock()">🔒 <span id="hm-lock-txt">Bloquear sesión</span></div>
   <div id="hm-ver" style="padding:8px 16px;font-size:.68rem;color:var(--tx3);text-align:center;border-top:1px solid var(--b1);cursor:default;user-select:none"></div>
 </div>
 
@@ -647,38 +647,38 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px" id="cfg-backup-info">Automático cada 5 min · silencioso</div>
         <div style="font-size:.72rem;color:var(--tx3);margin-bottom:8px">Último respaldo: <span id="last-backup-lbl" style="color:var(--gn)">—</span></div>
         <div class="sep-line"></div>
-        <div class="slbl">Contraseña de Respaldo</div>
+        <div class="slbl" id="cfg-bkp-pass-title">Contraseña de Respaldo</div>
         <div id="bkp-no-pass-warn" style="font-size:.73rem;padding:8px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);border-radius:6px;color:#f59e0b;margin-bottom:8px">⚠️ Tus backups no están cifrados — configura una contraseña para proteger las exportaciones.</div>
         <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:8px">
-          <div class="fg" style="margin-bottom:8px"><label class="lbl">Nueva contraseña</label><input type="password" class="fi" id="cfg-bkp-pass1" placeholder="Mín. 6 caracteres" autocomplete="new-password"></div>
-          <div class="fg"><label class="lbl">Confirmar contraseña</label><input type="password" class="fi" id="cfg-bkp-pass2" placeholder="Repetir contraseña" autocomplete="new-password"></div>
+          <div class="fg" style="margin-bottom:8px"><label class="lbl" id="cfg-bkp-new-pass-lbl">Nueva contraseña</label><input type="password" class="fi" id="cfg-bkp-pass1" placeholder="Mín. 6 caracteres" autocomplete="new-password"></div>
+          <div class="fg"><label class="lbl" id="cfg-bkp-confirm-pass-lbl">Confirmar contraseña</label><input type="password" class="fi" id="cfg-bkp-pass2" placeholder="Repetir contraseña" autocomplete="new-password"></div>
         </div>
-        <div style="font-size:.71rem;color:#ef4444;background:rgba(239,68,68,.08);border-radius:6px;padding:8px;margin-bottom:8px">⚠️ Si olvidas esta contraseña, <strong>NO podrás recuperar</strong> los backups cifrados. Guárdala en un lugar seguro.</div>
+        <div id="cfg-bkp-sec-warn" style="font-size:.71rem;color:#ef4444;background:rgba(239,68,68,.08);border-radius:6px;padding:8px;margin-bottom:8px">⚠️ Si olvidas esta contraseña, <strong>NO podrás recuperar</strong> los backups cifrados. Guárdala en un lugar seguro.</div>
         <div id="bkp-pass-err" style="color:#ef4444;font-size:.73rem;min-height:16px;margin-bottom:4px"></div>
         <div class="frow" style="gap:8px;margin-bottom:6px">
-          <button class="btn btn-p" onclick="saveBackupPass()" style="flex:1">🔐 Guardar contraseña</button>
+          <button class="btn btn-p" id="cfg-bkp-save-btn" onclick="saveBackupPass()" style="flex:1">🔐 Guardar contraseña</button>
           <button class="btn btn-s" id="bkp-rm-btn" style="color:#ef4444;display:none" onclick="removeBackupPass()">Quitar</button>
         </div>
         <div id="bkp-pass-ok" style="font-size:.72rem;color:var(--gn);min-height:16px;margin-bottom:4px"></div>
         <div class="sep-line"></div>
-        <div class="slbl">Bloqueo por Inactividad</div>
+        <div class="slbl" id="cfg-inactivity-section-lbl">Bloqueo por Inactividad</div>
         <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:10px">
-          <div class="tog"><span class="tog-label">⏱ Bloquear por inactividad</span><label class="tog-sw"><input type="checkbox" id="cfg-inactivity-enabled"><span class="slider"></span></label></div>
-          <div class="fg" style="margin-top:10px"><label class="lbl">Minutos sin actividad</label><input type="number" class="fi" id="cfg-inactivity-mins" min="1" max="120" step="1" placeholder="10"></div>
+          <div class="tog"><span class="tog-label" id="cfg-inactivity-toggle-lbl">⏱ Bloquear por inactividad</span><label class="tog-sw"><input type="checkbox" id="cfg-inactivity-enabled"><span class="slider"></span></label></div>
+          <div class="fg" style="margin-top:10px"><label class="lbl" id="cfg-inactivity-mins-lbl">Minutos sin actividad</label><input type="number" class="fi" id="cfg-inactivity-mins" min="1" max="120" step="1" placeholder="10"></div>
         </div>
         <div class="frow"><button class="btn btn-p" onclick="saveInactivityCfg()">💾 Guardar</button></div>
         <div class="sep-line"></div>
-        <div class="slbl">Notificaciones</div>
+        <div class="slbl" id="cfg-notif-section-lbl">Notificaciones</div>
         <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:10px">
-          <div class="fg"><label class="lbl">Umbral de stock bajo (global)</label><input type="number" class="fi" id="cfg-low-stock-threshold" min="0" max="9999" step="1" placeholder="5"></div>
-          <div style="font-size:.7rem;color:var(--tx3);margin-top:6px">Las notificaciones de stock bajo se activan cuando el inventario llega a este nivel o menos. Se puede sobreescribir por producto en el campo "Stock mínimo".</div>
+          <div class="fg"><label class="lbl" id="cfg-low-stock-threshold-lbl">Umbral de stock bajo (global)</label><input type="number" class="fi" id="cfg-low-stock-threshold" min="0" max="9999" step="1" placeholder="5"></div>
+          <div id="cfg-low-stock-threshold-info" style="font-size:.7rem;color:var(--tx3);margin-top:6px">Las notificaciones de stock bajo se activan cuando el inventario llega a este nivel o menos. Se puede sobreescribir por producto en el campo "Stock mínimo".</div>
         </div>
         <div class="frow"><button class="btn btn-p" onclick="saveLowStockCfg()">💾 Guardar</button></div>
         <div class="sep-line"></div>
-        <div class="slbl">Confirmación Admin</div>
+        <div class="slbl" id="cfg-admin-confirm-section-lbl">Confirmación Admin</div>
         <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:8px">
-          <div class="tog"><span class="tog-label">🔐 Admin exento de re-confirmar</span><label class="tog-sw"><input type="checkbox" id="cfg-admin-exempt"><span class="slider"></span></label></div>
-          <div style="font-size:.7rem;color:var(--tx3);margin-top:6px">Si está activo, los usuarios Admin no necesitan ingresar el código para acciones destructivas. Los cajeros con permiso elevado siempre lo necesitan.</div>
+          <div class="tog"><span class="tog-label" id="cfg-admin-exempt-toggle-lbl">🔐 Admin exento de re-confirmar</span><label class="tog-sw"><input type="checkbox" id="cfg-admin-exempt"><span class="slider"></span></label></div>
+          <div id="cfg-admin-exempt-info" style="font-size:.7rem;color:var(--tx3);margin-top:6px">Si está activo, los usuarios Admin no necesitan ingresar el código para acciones destructivas. Los cajeros con permiso elevado siempre lo necesitan.</div>
         </div>
         <div class="frow"><button class="btn btn-p" onclick="saveAdminExemptCfg()">💾 Guardar</button></div>
         <div class="sep-line"></div>
@@ -762,7 +762,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="rtr"><span id="r-pay-lbl">Pago</span><span id="r-pay-val" style="font-weight:700;color:var(--ac)"></span></div>
         <div class="rtr main"><span>TOTAL</span><span class="amt" id="r-total"></span></div>
       </div>
-      <div id="r-recv-row" style="display:none;justify-content:space-between;font-size:.83rem;color:var(--tx2);margin-top:9px"><span>Recibido</span><span id="r-recv-amt" style="font-family:Courier New,monospace"></span></div>
+      <div id="r-recv-row" style="display:none;justify-content:space-between;font-size:.83rem;color:var(--tx2);margin-top:9px"><span id="r-recv-span">Recibido</span><span id="r-recv-amt" style="font-family:Courier New,monospace"></span></div>
       <div class="rchg" id="r-chg" style="display:none"></div>
       <div style="font-size:.75rem;color:var(--tx3);text-align:center;margin-top:6px" id="r-cashier"></div>
       <div class="rbc" id="r-bc"></div>
@@ -1169,10 +1169,10 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <!-- RESET PASS RESULT -->
 <div class="ov" id="ov-reset-pass">
   <div class="modal" style="max-width:340px;text-align:center;padding:24px 20px">
-    <div style="font-size:1.05rem;font-weight:700;margin-bottom:10px">🔑 Contraseña reseteada</div>
-    <div style="font-size:.82rem;color:var(--tx2);margin-bottom:2px">Usuario: <b id="rp-uname"></b></div>
+    <div id="rp-title" style="font-size:1.05rem;font-weight:700;margin-bottom:10px">🔑 Contraseña reseteada</div>
+    <div style="font-size:.82rem;color:var(--tx2);margin-bottom:2px"><span id="rp-user-lbl">Usuario: </span><b id="rp-uname"></b></div>
     <div style="background:var(--b1);border-radius:8px;padding:18px 14px;margin:14px 0">
-      <div style="font-size:.7rem;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Contraseña temporal</div>
+      <div id="rp-temp-lbl" style="font-size:.7rem;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Contraseña temporal</div>
       <div id="rp-code" style="font-size:2.2rem;font-weight:800;letter-spacing:.2em;font-family:monospace;color:var(--ac)"></div>
     </div>
     <div style="font-size:.74rem;color:var(--tx3);line-height:1.5;margin-bottom:18px">Anótala — no se mostrará otra vez.<br>El empleado deberá cambiarla al iniciar sesión.</div>
@@ -1197,7 +1197,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <!-- AUDITORÍA -->
 <div class="ov" id="ov-audit">
   <div class="modal mwide">
-    <div class="mh"><h3>📋 Registro de Auditoría</h3><button class="mx" onclick="closeOv('ov-audit')">✕</button></div>
+    <div class="mh"><h3 id="aud-title">📋 Registro de Auditoría</h3><button class="mx" onclick="closeOv('ov-audit')">✕</button></div>
     <div class="mb">
       <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
         <select class="fi" id="aud-filter-user" style="flex:1;min-width:130px" onchange="renderAuditTable()">
@@ -1212,13 +1212,13 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <table style="width:100%;border-collapse:collapse;font-size:.77rem">
           <thead>
             <tr style="position:sticky;top:0;z-index:1;background:var(--s1)">
-              <th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--b1);white-space:nowrap;color:var(--tx3)">Fecha</th>
-              <th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--b1);white-space:nowrap;color:var(--tx3)">Hora</th>
-              <th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--b1);white-space:nowrap;color:var(--tx3)">Usuario</th>
-              <th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--b1);color:var(--tx3)">Acción</th>
-              <th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--b1);color:var(--tx3)">Detalle</th>
-              <th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--b1);color:var(--tx3)">Antes</th>
-              <th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--b1);color:var(--tx3)">Después</th>
+              <th id="aud-th-date" style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--b1);white-space:nowrap;color:var(--tx3)">Fecha</th>
+              <th id="aud-th-time" style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--b1);white-space:nowrap;color:var(--tx3)">Hora</th>
+              <th id="aud-th-user" style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--b1);white-space:nowrap;color:var(--tx3)">Usuario</th>
+              <th id="aud-th-action" style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--b1);color:var(--tx3)">Acción</th>
+              <th id="aud-th-detail" style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--b1);color:var(--tx3)">Detalle</th>
+              <th id="aud-th-before" style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--b1);color:var(--tx3)">Antes</th>
+              <th id="aud-th-after" style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--b1);color:var(--tx3)">Después</th>
             </tr>
           </thead>
           <tbody id="aud-tbody"></tbody>
@@ -1256,7 +1256,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <div class="toast" id="toast"></div>
 <div id="notif-backdrop" onclick="closeNotifPanel()"></div>
 <div id="notif-panel">
-  <div id="notif-panel-hdr"><span>🔔 Notificaciones</span><button onclick="markAllNotifsRead()" style="background:none;border:none;cursor:pointer;font-size:.72rem;color:var(--ac);font-weight:600;padding:2px 6px">Marcar leídas</button></div>
+  <div id="notif-panel-hdr"><span id="notif-panel-title">🔔 Notificaciones</span><button id="notif-mark-read-btn" onclick="markAllNotifsRead()" style="background:none;border:none;cursor:pointer;font-size:.72rem;color:var(--ac);font-weight:600;padding:2px 6px">Marcar leídas</button></div>
   <div id="notif-list"></div>
 </div>
 <div id="parea"></div>
@@ -1410,6 +1410,59 @@ const T = {
     invSrch:'🔍 Nombre o código de barras...',icSrch:'🔍 Buscar nombre o código...',creditSrch:'🔍 Buscar por nombre o cédula...',optional:'(opcional)',
     dashboardBtn:'📱 Dashboard móvil',dashboardProOnly:'El dashboard móvil está disponible en el plan Pro. Actualiza tu plan para acceder.',
     checkUpdates:'Buscar actualizaciones',
+    // Login lock / attempts
+    accountLockedPrefix:'⛔ Cuenta bloqueada. Intenta en ',accountLockedSuffix:' min.',
+    tooManyAttempts:'⛔ Demasiados intentos. Cuenta bloqueada 5 min.',
+    wrongPassPrefix:'Contraseña incorrecta (',wrongPassSuffix:'/5)',
+    // Password reset / force change
+    resetPassTitle:'🔑 Contraseña reseteada',resetPassUserLbl:'Usuario: ',resetPassTempLbl:'Contraseña temporal',
+    resetPassConfirmPre:'¿Resetear contraseña de ',resetPassConfirmSuf:'?\nSe generará una contraseña temporal que el empleado deberá cambiar al iniciar sesión.',
+    min4chars:'Mínimo 4 caracteres',passwordsNoMatch:'Las contraseñas no coinciden',passUpdated:'✅ Contraseña actualizada',
+    // Backup password
+    backupPassSectionTitle:'Contraseña de Respaldo',
+    backupPassWarn:'⚠️ Tus backups no están cifrados — configura una contraseña para proteger las exportaciones.',
+    backupNewPassLbl:'Nueva contraseña',backupNewPassPh:'Mín. 6 caracteres',
+    backupConfirmPassLbl:'Confirmar contraseña',backupRepeatPassPh:'Repetir contraseña',
+    backupPassSecWarn:'⚠️ Si olvidas esta contraseña, NO podrás recuperar los backups cifrados. Guárdala en un lugar seguro.',
+    backupSaveBtn:'🔐 Guardar contraseña',backupRemoveBtn:'Quitar',
+    encryptionActive:'🔐 Cifrado activo · llave en sesión',
+    encryptionConfigured:'🔐 Contraseña configurada · ingresa para activar cifrado',
+    enterAPassword:'Ingresa una contraseña',min6chars:'Mínimo 6 caracteres',
+    cryptoUnavailable:'Error: módulo crypto no disponible',
+    backupPassSaved:'🔐 Contraseña de respaldo guardada',
+    removeBackupPassConfirm:'¿Quitar la contraseña de respaldo? Los nuevos backups no se cifrarán. Los backups cifrados anteriores no se podrán recuperar sin la contraseña.',
+    backupPassRemoved:'✅ Contraseña de respaldo eliminada',
+    enterPassword:'Ingresa la contraseña',invalidFileDecrypt:'Archivo inválido tras descifrado',
+    wrongPassword:'Contraseña incorrecta',wrongPassOrCorrupt:'Contraseña incorrecta o archivo corrupto',
+    // Inactivity
+    inactivitySectionTitle:'Bloqueo por Inactividad',inactivityToggleLbl:'⏱ Bloquear por inactividad',
+    inactivityMinutesLbl:'Minutos sin actividad',inactivitySaved:'✅ Bloqueo por inactividad guardado',
+    sessionLockedInactivity:'🔒 Sesión bloqueada por inactividad',
+    // Notifications config
+    notifSectionTitle:'Notificaciones',lowStockThresholdLbl:'Umbral de stock bajo (global)',
+    lowStockThresholdInfo:'Las notificaciones de stock bajo se activan cuando el inventario llega a este nivel o menos. Se puede sobreescribir por producto en el campo "Stock mínimo".',
+    lowStockThresholdSaved:'✅ Umbral de stock bajo guardado',
+    // Admin confirm section
+    adminConfirmSectionTitle:'Confirmación Admin',
+    adminExemptToggleLbl:'🔐 Admin exento de re-confirmar',
+    adminExemptInfo:'Si está activo, los usuarios Admin no necesitan ingresar el código para acciones destructivas. Los cajeros con permiso elevado siempre lo necesitan.',
+    adminCodeRequired:'Código Admin requerido',configSaved:'✅ Configuración guardada',
+    // Audit log
+    auditTitle:'📋 Registro de Auditoría',auditAllUsers:'Todos los usuarios',
+    auditColDate:'Fecha',auditColTime:'Hora',auditColUser:'Usuario',
+    auditColAction:'Acción',auditColDetail:'Detalle',auditColBefore:'Antes',auditColAfter:'Después',
+    auditNoRecords:'Sin registros',auditRecordsSuffix:' registros',
+    auditNoRecordsExport:'Sin registros de auditoría',
+    // Notification panel
+    notifPanelTitle:'🔔 Notificaciones',notifMarkAllRead:'Marcar leídas',
+    notifLabelOverdue:'Vencido',notifLabelDueSoon:'Por vencer',notifLabelLowStock:'Stock bajo',notifLabelUpdate:'Actualización',
+    notifEmpty:'✅ Sin notificaciones pendientes',
+    notifOverdueBy:'vencido hace',notifDueIn:'vence en',notifDays:'días',notifUnitsMin:'u. (mín:',
+    // Lock session / hamburger
+    lockSession:'Bloquear sesión',sessionLocked:'🔒 Sesión bloqueada',cartSaved:'— carrito guardado',
+    auditMenu:'Auditoría',
+    // Checkout
+    exactPayment:'Pago exacto por defecto',insufficientPrefix:'⚠ Insuficiente — ',chargeOrderPrefix:'✓ Cobrar Orden #',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -1517,6 +1570,59 @@ const T = {
     invSrch:'🔍 Name or barcode...',icSrch:'🔍 Search name or code...',creditSrch:'🔍 Search by name or ID...',optional:'(optional)',
     dashboardBtn:'📱 Mobile Dashboard',dashboardProOnly:'Mobile dashboard is available on the Pro plan. Upgrade your plan to access.',
     checkUpdates:'Check for updates',
+    // Login lock / attempts
+    accountLockedPrefix:'⛔ Account locked. Try in ',accountLockedSuffix:' min.',
+    tooManyAttempts:'⛔ Too many attempts. Account locked 5 min.',
+    wrongPassPrefix:'Wrong password (',wrongPassSuffix:'/5)',
+    // Password reset / force change
+    resetPassTitle:'🔑 Password reset',resetPassUserLbl:'User: ',resetPassTempLbl:'Temporary password',
+    resetPassConfirmPre:'Reset password for ',resetPassConfirmSuf:'?\nA temporary password will be generated that the employee must change on next login.',
+    min4chars:'Minimum 4 characters',passwordsNoMatch:'Passwords do not match',passUpdated:'✅ Password updated',
+    // Backup password
+    backupPassSectionTitle:'Backup Password',
+    backupPassWarn:'⚠️ Your backups are not encrypted — set a password to protect exports.',
+    backupNewPassLbl:'New password',backupNewPassPh:'Min. 6 characters',
+    backupConfirmPassLbl:'Confirm password',backupRepeatPassPh:'Repeat password',
+    backupPassSecWarn:'⚠️ If you forget this password, you CANNOT recover encrypted backups. Store it in a safe place.',
+    backupSaveBtn:'🔐 Save password',backupRemoveBtn:'Remove',
+    encryptionActive:'🔐 Encryption active · key in session',
+    encryptionConfigured:'🔐 Password set · enter to activate encryption',
+    enterAPassword:'Enter a password',min6chars:'Minimum 6 characters',
+    cryptoUnavailable:'Error: crypto module unavailable',
+    backupPassSaved:'🔐 Backup password saved',
+    removeBackupPassConfirm:'Remove backup password? New backups will not be encrypted. Previously encrypted backups cannot be recovered without the password.',
+    backupPassRemoved:'✅ Backup password removed',
+    enterPassword:'Enter password',invalidFileDecrypt:'Invalid file after decryption',
+    wrongPassword:'Wrong password',wrongPassOrCorrupt:'Wrong password or corrupt file',
+    // Inactivity
+    inactivitySectionTitle:'Inactivity Lock',inactivityToggleLbl:'⏱ Lock on inactivity',
+    inactivityMinutesLbl:'Minutes of inactivity',inactivitySaved:'✅ Inactivity lock saved',
+    sessionLockedInactivity:'🔒 Session locked due to inactivity',
+    // Notifications config
+    notifSectionTitle:'Notifications',lowStockThresholdLbl:'Low stock threshold (global)',
+    lowStockThresholdInfo:'Low stock notifications trigger when inventory reaches this level or below. Can be overridden per product in the "Min stock" field.',
+    lowStockThresholdSaved:'✅ Low stock threshold saved',
+    // Admin confirm section
+    adminConfirmSectionTitle:'Admin Confirmation',
+    adminExemptToggleLbl:'🔐 Admin exempt from re-confirming',
+    adminExemptInfo:'When active, Admin users do not need to enter the code for destructive actions. Cashiers with elevated permissions always need it.',
+    adminCodeRequired:'Admin code required',configSaved:'✅ Config saved',
+    // Audit log
+    auditTitle:'📋 Audit Log',auditAllUsers:'All users',
+    auditColDate:'Date',auditColTime:'Time',auditColUser:'User',
+    auditColAction:'Action',auditColDetail:'Detail',auditColBefore:'Before',auditColAfter:'After',
+    auditNoRecords:'No records',auditRecordsSuffix:' records',
+    auditNoRecordsExport:'No audit records',
+    // Notification panel
+    notifPanelTitle:'🔔 Notifications',notifMarkAllRead:'Mark all read',
+    notifLabelOverdue:'Overdue',notifLabelDueSoon:'Due soon',notifLabelLowStock:'Low stock',notifLabelUpdate:'Update',
+    notifEmpty:'✅ No pending notifications',
+    notifOverdueBy:'overdue by',notifDueIn:'due in',notifDays:'days',notifUnitsMin:'u. (min:',
+    // Lock session / hamburger
+    lockSession:'Lock session',sessionLocked:'🔒 Session locked',cartSaved:'— cart saved',
+    auditMenu:'Audit',
+    // Checkout
+    exactPayment:'Exact payment by default',insufficientPrefix:'⚠ Insufficient — ',chargeOrderPrefix:'✓ Charge Order #',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -1746,6 +1852,49 @@ function applyLang(){
   const _cto=el('comp-tel');if(_cto)_cto.placeholder=t('optional');
   // Discount row label
   const _discRowLbl=el('disc-row-lbl');if(_discRowLbl)_discRowLbl.textContent=t('discount');
+  // Hamburger extras
+  const _hmAuditTxt=el('hm-audit-txt');if(_hmAuditTxt)_hmAuditTxt.textContent=t('auditMenu');
+  const _hmLockTxt=el('hm-lock-txt');if(_hmLockTxt)_hmLockTxt.textContent=t('lockSession');
+  // Receipt received span
+  const _rRecvSpan=el('r-recv-span');if(_rRecvSpan)_rRecvSpan.textContent=t('received');
+  // Reset pass modal
+  const _rpTitle=el('rp-title');if(_rpTitle)_rpTitle.textContent=t('resetPassTitle');
+  const _rpUserLbl=el('rp-user-lbl');if(_rpUserLbl)_rpUserLbl.textContent=t('resetPassUserLbl');
+  const _rpTempLbl=el('rp-temp-lbl');if(_rpTempLbl)_rpTempLbl.textContent=t('resetPassTempLbl');
+  // Backup password section
+  const _cfgBkpPassTitle=el('cfg-bkp-pass-title');if(_cfgBkpPassTitle)_cfgBkpPassTitle.textContent=t('backupPassSectionTitle');
+  const _bkpNoPassWarn=el('bkp-no-pass-warn');if(_bkpNoPassWarn)_bkpNoPassWarn.textContent=t('backupPassWarn');
+  const _cfgBkpNewPassLbl=el('cfg-bkp-new-pass-lbl');if(_cfgBkpNewPassLbl)_cfgBkpNewPassLbl.textContent=t('backupNewPassLbl');
+  const _cfgBkpPass1=el('cfg-bkp-pass1');if(_cfgBkpPass1)_cfgBkpPass1.placeholder=t('backupNewPassPh');
+  const _cfgBkpConfirmLbl=el('cfg-bkp-confirm-pass-lbl');if(_cfgBkpConfirmLbl)_cfgBkpConfirmLbl.textContent=t('backupConfirmPassLbl');
+  const _cfgBkpPass2=el('cfg-bkp-pass2');if(_cfgBkpPass2)_cfgBkpPass2.placeholder=t('backupRepeatPassPh');
+  const _cfgBkpSecWarn=el('cfg-bkp-sec-warn');if(_cfgBkpSecWarn)_cfgBkpSecWarn.textContent=t('backupPassSecWarn');
+  const _cfgBkpSaveBtn=el('cfg-bkp-save-btn');if(_cfgBkpSaveBtn)_cfgBkpSaveBtn.textContent=t('backupSaveBtn');
+  const _bkpRmBtn=el('bkp-rm-btn');if(_bkpRmBtn)_bkpRmBtn.textContent=t('backupRemoveBtn');
+  // Inactivity section
+  const _cfgInactSectLbl=el('cfg-inactivity-section-lbl');if(_cfgInactSectLbl)_cfgInactSectLbl.textContent=t('inactivitySectionTitle');
+  const _cfgInactTogLbl=el('cfg-inactivity-toggle-lbl');if(_cfgInactTogLbl)_cfgInactTogLbl.textContent=t('inactivityToggleLbl');
+  const _cfgInactMinsLbl=el('cfg-inactivity-mins-lbl');if(_cfgInactMinsLbl)_cfgInactMinsLbl.textContent=t('inactivityMinutesLbl');
+  // Notifications section
+  const _cfgNotifSectLbl=el('cfg-notif-section-lbl');if(_cfgNotifSectLbl)_cfgNotifSectLbl.textContent=t('notifSectionTitle');
+  const _cfgLowStockLbl=el('cfg-low-stock-threshold-lbl');if(_cfgLowStockLbl)_cfgLowStockLbl.textContent=t('lowStockThresholdLbl');
+  const _cfgLowStockInfo=el('cfg-low-stock-threshold-info');if(_cfgLowStockInfo)_cfgLowStockInfo.textContent=t('lowStockThresholdInfo');
+  // Admin confirm section
+  const _cfgAdminConfSectLbl=el('cfg-admin-confirm-section-lbl');if(_cfgAdminConfSectLbl)_cfgAdminConfSectLbl.textContent=t('adminConfirmSectionTitle');
+  const _cfgAdminExemptLbl=el('cfg-admin-exempt-toggle-lbl');if(_cfgAdminExemptLbl)_cfgAdminExemptLbl.textContent=t('adminExemptToggleLbl');
+  const _cfgAdminExemptInfo=el('cfg-admin-exempt-info');if(_cfgAdminExemptInfo)_cfgAdminExemptInfo.textContent=t('adminExemptInfo');
+  // Notification panel
+  const _notifPanelTitle=el('notif-panel-title');if(_notifPanelTitle)_notifPanelTitle.textContent=t('notifPanelTitle');
+  const _notifMarkReadBtn=el('notif-mark-read-btn');if(_notifMarkReadBtn)_notifMarkReadBtn.textContent=t('notifMarkAllRead');
+  // Audit modal
+  const _audTitle=el('aud-title');if(_audTitle)_audTitle.textContent=t('auditTitle');
+  const _audThDate=el('aud-th-date');if(_audThDate)_audThDate.textContent=t('auditColDate');
+  const _audThTime=el('aud-th-time');if(_audThTime)_audThTime.textContent=t('auditColTime');
+  const _audThUser=el('aud-th-user');if(_audThUser)_audThUser.textContent=t('auditColUser');
+  const _audThAction=el('aud-th-action');if(_audThAction)_audThAction.textContent=t('auditColAction');
+  const _audThDetail=el('aud-th-detail');if(_audThDetail)_audThDetail.textContent=t('auditColDetail');
+  const _audThBefore=el('aud-th-before');if(_audThBefore)_audThBefore.textContent=t('auditColBefore');
+  const _audThAfter=el('aud-th-after');if(_audThAfter)_audThAfter.textContent=t('auditColAfter');
   // Category form
   const _catNL=el('cat-name-lbl');if(_catNL)_catNL.textContent=t('catNameLbl');
   const _catLT=el('cat-list-title');if(_catLT)_catLT.textContent=t('catListTitle');
@@ -2004,10 +2153,10 @@ async function saveDB(){
   if(candidate&&candidate.lockedUntil&&new Date(candidate.lockedUntil)>new Date()){
     const minsLeft=Math.max(1,Math.ceil((new Date(candidate.lockedUntil)-Date.now())/60000));
     logAction('Login fallido','Cuenta bloqueada · '+u+' · '+minsLeft+' min restantes');
-    el('lerr').textContent='⛔ Cuenta bloqueada. Intenta en '+minsLeft+' min.';
+    el('lerr').textContent=t('accountLockedPrefix')+minsLeft+t('accountLockedSuffix');
     el('lerr').style.display='block';
     el('lp').value='';
-    setTimeout(()=>{el('lerr').style.display='none';el('lerr').textContent='Usuario o contraseña incorrectos';},3500);
+    setTimeout(()=>{el('lerr').style.display='none';el('lerr').textContent=t('loginErr');},3500);
     return;
   }
 
@@ -2044,12 +2193,12 @@ async function saveDB(){
         candidate.lockedUntil=new Date(Date.now()+5*60*1000).toISOString();
         candidate.failedAttempts=0;
         logAction('Login fallido','BLOQUEADO tras 5 intentos · '+u);
-        el('lerr').textContent='⛔ Demasiados intentos. Cuenta bloqueada 5 min.';
-        setTimeout(()=>{el('lerr').style.display='none';el('lerr').textContent='Usuario o contraseña incorrectos';},4000);
+        el('lerr').textContent=t('tooManyAttempts');
+        setTimeout(()=>{el('lerr').style.display='none';el('lerr').textContent=t('loginErr');},4000);
       }else{
         logAction('Login fallido','Contraseña incorrecta · '+u+' ('+candidate.failedAttempts+'/5)');
-        el('lerr').textContent='Contraseña incorrecta ('+candidate.failedAttempts+'/5)';
-        setTimeout(()=>{el('lerr').style.display='none';el('lerr').textContent='Usuario o contraseña incorrectos';},2500);
+        el('lerr').textContent=t('wrongPassPrefix')+candidate.failedAttempts+t('wrongPassSuffix');
+        setTimeout(()=>{el('lerr').style.display='none';el('lerr').textContent=t('loginErr');},2500);
       }
       saveDB();
     }else{
@@ -2081,21 +2230,22 @@ function _continueAfterLogin(found){
 function resetUserPass(id){
   var u=db.users.find(function(x){return x.id===id;});
   if(!u)return;
-  if(!confirm('¿Resetear contraseña de '+u.name+'?\nSe generará una contraseña temporal que el empleado deberá cambiar al iniciar sesión.'))return;
-  var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',tmp='';
-  for(var i=0;i<6;i++)tmp+=chars[Math.floor(Math.random()*chars.length)];
-  u.pass=bcrypt?bcrypt.hashSync(tmp,10):tmp;
-  u.tempPassword=true;
-  logAction('Contraseña reseteada',u.name+' ('+u.user+')');
-  saveDB();
-  el('rp-uname').textContent=u.name;
-  el('rp-code').textContent=tmp;
-  openOv('ov-reset-pass');
+  confirm2(t('resetPassConfirmPre')+u.name+t('resetPassConfirmSuf'),function(){
+    var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',tmp='';
+    for(var i=0;i<6;i++)tmp+=chars[Math.floor(Math.random()*chars.length)];
+    u.pass=bcrypt?bcrypt.hashSync(tmp,10):tmp;
+    u.tempPassword=true;
+    logAction('Contraseña reseteada',u.name+' ('+u.user+')');
+    saveDB();
+    el('rp-uname').textContent=u.name;
+    el('rp-code').textContent=tmp;
+    openOv('ov-reset-pass');
+  });
 }
 function doForceChPass(){
   var p1=el('fcp-p1').value,p2=el('fcp-p2').value,errEl=el('fcp-err');
-  if(p1.length<4){errEl.textContent='Mínimo 4 caracteres';return;}
-  if(p1!==p2){errEl.textContent='Las contraseñas no coinciden';return;}
+  if(p1.length<4){errEl.textContent=t('min4chars');return;}
+  if(p1!==p2){errEl.textContent=t('passwordsNoMatch');return;}
   errEl.textContent='';
   curUser.pass=bcrypt?bcrypt.hashSync(p1,10):p1;
   delete curUser.tempPassword;
@@ -2104,7 +2254,7 @@ function doForceChPass(){
   saveDB();
   el('fcp-p1').value='';el('fcp-p2').value='';
   closeOv('ov-force-chpass');
-  toast('✅ Contraseña actualizada');
+  toast(t('passUpdated'));
   _continueAfterLogin(curUser);
 }
 
@@ -2140,7 +2290,7 @@ function openAudit(){
   const sel=el('aud-filter-user');
   if(sel){
     const users=[...new Set(db.auditLog.map(function(e){return e.userName;}).filter(Boolean))].sort();
-    sel.innerHTML='<option value="">Todos los usuarios</option>'+users.map(function(u){return '<option value="'+escHtml(u)+'">'+escHtml(u)+'</option>';}).join('');
+    sel.innerHTML='<option value="">'+t('auditAllUsers')+'</option>'+users.map(function(u){return '<option value="'+escHtml(u)+'">'+escHtml(u)+'</option>';}).join('');
   }
   el('aud-date-from').value='';el('aud-date-to').value='';
   renderAuditTable();
@@ -2161,7 +2311,7 @@ function renderAuditTable(){
   if(dTo){const t2=new Date(dTo);t2.setHours(23,59,59,999);entries=entries.filter(function(e){const ts=parseInt(e.id,36);return isNaN(ts)||new Date(ts)<=t2;});}
   const acColors={'Venta anulada':'#ef4444','Login fallido':'#f97316','Usuario eliminado':'#f97316','Contraseña reseteada':'#f59e0b','Descuento aplicado':'#8b5cf6','Producto eliminado':'#ef4444','Usuario creado':'#10b981','Usuario editado':'#3b82f6','Abono de crédito':'#10b981','Cierre de turno':'#6366f1','Precio editado':'#f59e0b'};
   const tbody=el('aud-tbody');
-  if(!entries.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--tx3)">Sin registros</td></tr>';el('aud-count').textContent='';return;}
+  if(!entries.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--tx3)">'+t('auditNoRecords')+'</td></tr>';el('aud-count').textContent='';return;}
   tbody.innerHTML=entries.map(function(e){
     const col=acColors[e.accion]||'var(--tx2)';
     return '<tr style="border-bottom:1px solid var(--b1)">'
@@ -2174,10 +2324,10 @@ function renderAuditTable(){
       +'<td style="padding:5px 8px;font-size:.72rem;color:var(--tx3)">'+escHtml(e.despues||'')+'</td>'
       +'</tr>';
   }).join('');
-  el('aud-count').textContent=entries.length+' registros'+(db.auditLog.length>entries.length?' (de '+db.auditLog.length+' totales)':'');
+  el('aud-count').textContent=entries.length+t('auditRecordsSuffix')+(db.auditLog.length>entries.length?' (de '+db.auditLog.length+' totales)':'');
 }
 function exportAuditCSV(){
-  if(!db.auditLog||!db.auditLog.length){toast('Sin registros de auditoría');return;}
+  if(!db.auditLog||!db.auditLog.length){toast(t('auditNoRecordsExport'));return;}
   const fUser=(el('aud-filter-user')||{value:''}).value;
   const dFrom=(el('aud-date-from')||{value:''}).value;
   const dTo=(el('aud-date-to')||{value:''}).value;
@@ -2186,7 +2336,7 @@ function exportAuditCSV(){
   if(dFrom){const f=new Date(dFrom);entries=entries.filter(function(e){const ts=parseInt(e.id,36);return isNaN(ts)||new Date(ts)>=f;});}
   if(dTo){const t2=new Date(dTo);t2.setHours(23,59,59,999);entries=entries.filter(function(e){const ts=parseInt(e.id,36);return isNaN(ts)||new Date(ts)<=t2;});}
   const esc=function(v){return'"'+String(v==null?'':v).replace(/"/g,'""')+'"';};
-  const rows=[['Fecha','Hora','Usuario','Acción','Detalle','Antes','Después']];
+  const rows=[[t('auditColDate'),t('auditColTime'),t('auditColUser'),t('auditColAction'),t('auditColDetail'),t('auditColBefore'),t('auditColAfter')]];
   entries.forEach(function(e){rows.push([e.fecha||'',e.hora||'',e.userName||'',e.accion||'',e.detalle||'',e.antes||'',e.despues||'']);});
   const csv=rows.map(function(r){return r.map(esc).join(',');}).join('\r\n');
   const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
@@ -2389,7 +2539,7 @@ function requireAdminCode(accionTexto,callback){
   _adminConfirmCb=callback;_adminConfirmLabel=accionTexto;
   pinVal='';updatePinDisp();
   el('pin-err').style.display='none';
-  const pt=el('pin-title');if(pt)pt.textContent='Código Admin requerido';
+  const pt=el('pin-title');if(pt)pt.textContent=t('adminCodeRequired');
   const pc=el('pin-action-ctx');
   if(pc){pc.textContent=accionTexto;pc.style.display='block';}
   openOv('ov-pin');
@@ -2397,7 +2547,7 @@ function requireAdminCode(accionTexto,callback){
 function _cancelAdminConfirm(){
   if(_adminConfirmCb){
     _adminConfirmCb=null;_adminConfirmLabel='';
-    const pt=el('pin-title');if(pt)pt.textContent='Código de acceso';
+    const pt=el('pin-title');if(pt)pt.textContent=t('pinTitle');
     const pc=el('pin-action-ctx');if(pc){pc.textContent='';pc.style.display='none';}
   }
   closeOv('ov-pin');
@@ -2407,7 +2557,7 @@ function saveAdminExemptCfg(){
   db.settings.adminExemptFromConfirm=(el('cfg-admin-exempt')||{}).checked!==false;
   saveDB();
   logAction('Configuración admin-exempt actualizada','adminExemptFromConfirm:'+db.settings.adminExemptFromConfirm);
-  toast('✅ Configuración guardada');
+  toast(t('configSaved'));
 }
 
 // PIN
@@ -2445,7 +2595,7 @@ function verifyPin(){
     if(_adminConfirmCb){
       const _cb=_adminConfirmCb;const _lbl=_adminConfirmLabel;
       _adminConfirmCb=null;_adminConfirmLabel='';
-      const pt=el('pin-title');if(pt)pt.textContent='Código de acceso';
+      const pt=el('pin-title');if(pt)pt.textContent=t('pinTitle');
       const pc=el('pin-action-ctx');if(pc){pc.textContent='';pc.style.display='none';}
       logAction('Autorizado con código admin',_lbl);
       _cb();
@@ -2925,14 +3075,14 @@ function savePayMethods(){
 function calcChange(){
   const total=getFinalTotal(),recv=parseFloat(cashIn)||0,box=el('chgbox');
   if(!box)return;
-  if(!cashIn){box.textContent='Pago exacto por defecto';box.className='chgbox';}
-  else if(recv<total){box.textContent='⚠ Insuficiente — '+dolr(total-recv);box.className='chgbox neg';}
+  if(!cashIn){box.textContent=t('exactPayment');box.className='chgbox';}
+  else if(recv<total){box.textContent=t('insufficientPrefix')+dolr(total-recv);box.className='chgbox neg';}
   else{box.textContent=t('change')+': '+dolr(recv-total);box.className='chgbox';}
 }
 function openCheckoutModal(){
   if(!cart.length)return;
   const tax=getTaxCalc();const cfg=db.cfg||{};
-  el('ck-title').textContent='✓ Cobrar Orden #'+db.orderNum;
+  el('ck-title').textContent=t('chargeOrderPrefix')+db.orderNum;
   el('ck-sub').textContent=dolr(cfg.taxEnabled?tax.subtotal:getCartTotal());
   const taxRow=el('ck-tax-row');
   if(taxRow){
@@ -3093,7 +3243,7 @@ function _updateBkpPassUI(){
   var has=_hasBackupCfg();
   var warn=el('bkp-no-pass-warn');if(warn)warn.style.display=has?'none':'';
   var rmBtn=el('bkp-rm-btn');if(rmBtn)rmBtn.style.display=has?'':'none';
-  var ok=el('bkp-pass-ok');if(ok)ok.textContent=has?(_bkpKey?'🔐 Cifrado activo · llave en sesión':'🔐 Contraseña configurada · ingresa para activar cifrado'):'';
+  var ok=el('bkp-pass-ok');if(ok)ok.textContent=has?(_bkpKey?t('encryptionActive'):t('encryptionConfigured')):'';
 }
 function _openBkpPassModal(title,desc,pending){
   _bkpPending=pending;
@@ -3106,20 +3256,20 @@ function _openBkpPassModal(title,desc,pending){
 function _submitBkpPass(){
   var pass=(el('bkp-modal-pass')||{}).value;
   var errEl=el('bkp-modal-err');if(errEl)errEl.textContent='';
-  if(!pass){if(errEl)errEl.textContent='Ingresa la contraseña';return;}
+  if(!pass){if(errEl)errEl.textContent=t('enterPassword');return;}
   if(!_bkpPending){closeOv('ov-bkp-pass');return;}
   try{
     if(_bkpPending.mode==='import'){
       var plain=_decryptBkpObj(_bkpPending.data,pass);
       var parsed=JSON.parse(plain);
       var data=parsed.db||parsed;
-      if(!data.products&&!data.sales){if(errEl)errEl.textContent='Archivo inválido tras descifrado';return;}
+      if(!data.products&&!data.sales){if(errEl)errEl.textContent=t('invalidFileDecrypt');return;}
       closeOv('ov-bkp-pass');_bkpPending=null;
       if(el('bkp-modal-pass'))el('bkp-modal-pass').value='';
       _doImportData(data);
     }else if(_bkpPending.mode==='unlock'){
       if(bcrypt&&db.settings&&db.settings.backupPassHash&&!bcrypt.compareSync(pass,db.settings.backupPassHash)){
-        if(errEl)errEl.textContent='Contraseña incorrecta';return;
+        if(errEl)errEl.textContent=t('wrongPassword');return;
       }
       _bkpKey=_deriveBackupKey(pass,db.settings.backupKeySalt);
       var cb=_bkpPending.cb;_bkpPending=null;
@@ -3142,7 +3292,7 @@ function _submitBkpPass(){
       });
     }
   }catch(e){
-    if(errEl)errEl.textContent='Contraseña incorrecta o archivo corrupto';
+    if(errEl)errEl.textContent=t('wrongPassOrCorrupt');
   }
 }
 function _doImportData(data){
@@ -3163,11 +3313,11 @@ function _doImportData(data){
 function saveBackupPass(){
   var p1=(el('cfg-bkp-pass1')||{}).value,p2=(el('cfg-bkp-pass2')||{}).value;
   var errEl=el('bkp-pass-err');if(errEl)errEl.textContent='';
-  if(!p1){if(errEl)errEl.textContent='Ingresa una contraseña';return;}
-  if(p1.length<6){if(errEl)errEl.textContent='Mínimo 6 caracteres';return;}
-  if(p1!==p2){if(errEl)errEl.textContent='Las contraseñas no coinciden';return;}
+  if(!p1){if(errEl)errEl.textContent=t('enterAPassword');return;}
+  if(p1.length<6){if(errEl)errEl.textContent=t('min6chars');return;}
+  if(p1!==p2){if(errEl)errEl.textContent=t('passwordsNoMatch');return;}
   var nc=_nodeCrypto();
-  if(!nc){if(errEl)errEl.textContent='Error: módulo crypto no disponible';return;}
+  if(!nc){if(errEl)errEl.textContent=t('cryptoUnavailable');return;}
   try{
     var salt=nc.randomBytes(32).toString('hex');
     var hash=bcrypt?bcrypt.hashSync(p1,10):p1;
@@ -3181,11 +3331,11 @@ function saveBackupPass(){
     logAction('Contraseña de respaldo '+(hadPass?'cambiada':'configurada'));
     saveDB();
     _updateBkpPassUI();
-    toast('🔐 Contraseña de respaldo guardada');
+    toast(t('backupPassSaved'));
   }catch(e){if(errEl)errEl.textContent='Error: '+e.message;}
 }
 function removeBackupPass(){
-  confirm2('¿Quitar la contraseña de respaldo? Los nuevos backups no se cifrarán. Los backups cifrados anteriores no se podrán recuperar sin la contraseña.',function(){
+  confirm2(t('removeBackupPassConfirm'),function(){
     if(!db.settings)db.settings={};
     db.settings.backupPassHash=null;
     db.settings.backupKeySalt=null;
@@ -3193,7 +3343,7 @@ function removeBackupPass(){
     logAction('Contraseña de respaldo eliminada');
     saveDB();
     _updateBkpPassUI();
-    toast('✅ Contraseña de respaldo eliminada');
+    toast(t('backupPassRemoved'));
   });
 }
 
@@ -3222,13 +3372,13 @@ function saveInactivityCfg(){
   db.settings.inactivityMinutes=Math.max(1,parseInt((el('cfg-inactivity-mins')||{}).value)||10);
   saveDB();
   _resetInactivityTimer();
-  toast('✅ Bloqueo por inactividad guardado');
+  toast(t('inactivitySaved'));
 }
 function saveLowStockCfg(){
   if(!db.settings)db.settings={};
   db.settings.lowStockThreshold=Math.max(0,parseInt((el('cfg-low-stock-threshold')||{}).value)||5);
   saveDB();calcNotifs();
-  toast('✅ Umbral de stock bajo guardado');
+  toast(t('lowStockThresholdSaved'));
 }
 function _isModalCritical(){
   const ck=el('ov-checkout');if(ck&&ck.classList.contains('open'))return true;
@@ -3263,7 +3413,7 @@ function _onInactivityTimeout(){
   }
   logAction('Cierre por inactividad',_userName+' · '+((db.settings&&db.settings.inactivityMinutes)||10)+' min sin actividad');
   _sessionLogout();
-  toast('🔒 Sesión bloqueada por inactividad'+(cart&&cart.length?' — carrito guardado':''));
+  toast(t('sessionLockedInactivity')+(cart&&cart.length?' '+t('cartSaved'):''));
 }
 function _sessionLogout(){
   _stopInactivityTimer();_bkpKey=null;
@@ -3296,7 +3446,7 @@ function doQuickLock(){
   }
   logAction('Sesión bloqueada manualmente',_uName);
   _sessionLogout();
-  toast('🔒 Sesión bloqueada'+(_hadCart?' — carrito guardado':''));
+  toast(t('sessionLocked')+(_hadCart?' '+t('cartSaved'):''));
 }
 (function(){
   var _ev=['mousemove','click','keydown','touchstart'];
@@ -5086,11 +5236,11 @@ function calcNotifs(){
     if(diff<0){
       const id='ovrd-'+s.id;
       fresh.push({id,type:'overdue',color:'#ef4444',read:readIds.has(id),
-        msg:client+' — '+dolr(owed)+' vencido hace '+Math.abs(diff)+'d'});
+        msg:client+' — '+dolr(owed)+' '+t('notifOverdueBy')+' '+Math.abs(diff)+'d'});
     }else if(diff<=3){
       const id='soon-'+s.id;
       fresh.push({id,type:'due_soon',color:'#f59e0b',read:readIds.has(id),
-        msg:client+' — '+dolr(owed)+' vence en '+diff+(diff===1?'d':' días')});
+        msg:client+' — '+dolr(owed)+' '+t('notifDueIn')+' '+diff+(diff===1?'d':' '+t('notifDays'))});
     }
   });
 
@@ -5101,7 +5251,7 @@ function calcNotifs(){
     if((p.stock||0)<=_pMin){
       const id='stock-'+p.id;
       fresh.push({id,type:'low_stock',color:'#f97316',read:readIds.has(id),
-        msg:p.name+' — '+(p.stock||0)+' u. (mín: '+_pMin+')'});
+        msg:p.name+' — '+(p.stock||0)+' '+t('notifUnitsMin')+' '+_pMin+')'});
     }
   });
 
@@ -5137,11 +5287,11 @@ function toggleNotifPanel(){
 function openNotifPanel(){
   calcNotifs();
   const icons={overdue:'🔴',due_soon:'🟡',low_stock:'🟠',update:'🔵'};
-  const labels={overdue:'Vencido',due_soon:'Por vencer',low_stock:'Stock bajo',update:'Actualización'};
+  const labels={overdue:t('notifLabelOverdue'),due_soon:t('notifLabelDueSoon'),low_stock:t('notifLabelLowStock'),update:t('notifLabelUpdate')};
   const list=el('notif-list');
   if(!list)return;
   if(!_notifs.length){
-    list.innerHTML='<div style="padding:20px;text-align:center;color:var(--tx3);font-size:.85rem">✅ Sin notificaciones pendientes</div>';
+    list.innerHTML='<div style="padding:20px;text-align:center;color:var(--tx3);font-size:.85rem">'+t('notifEmpty')+'</div>';
   }else{
     list.innerHTML=_notifs.map(function(n){
       return '<div class="notif-row'+(n.read?' read':'')+'" onclick="_notifClick(\''+n.id+'\')">'
