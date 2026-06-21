@@ -809,7 +809,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
           </select>
           <input class="fi sinp" id="vnt-srch" placeholder="🔍 # orden o cliente..." style="flex:1;min-width:110px" oninput="renderVentasList()">
         </div>
-        <div id="vnt-summary" style="font-size:.82rem;font-weight:700;color:var(--gn);margin-bottom:8px"></div>
+        <div id="vnt-summary" style="font-size:.82rem;font-weight:700;color:var(--gn);margin-bottom:6px"></div>
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <button class="btn btn-s" style="font-size:.76rem;padding:4px 10px" onclick="exportVentasCSV()">📥 CSV</button>
+          <button class="btn btn-s" style="font-size:.76rem;padding:4px 10px" onclick="printReporteVentas()">🖨️ PDF</button>
+        </div>
         <div id="vnt-list" style="max-height:260px;overflow-y:auto;margin-bottom:14px"></div>
       </div>
       <!-- COMPRAS DE INVENTARIO -->
@@ -894,10 +898,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
             <div id="cred-count-badge" style="font-size:1rem;font-weight:700;color:var(--tx2)">0</div>
           </div>
         </div>
-        <div style="display:flex;gap:5px;margin-bottom:12px">
+        <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
           <button class="btn btn-p" id="cred-f-pend" data-f="pending" onclick="setCredFilter('pending')">Pendientes</button>
           <button class="btn btn-s" id="cred-f-paid" data-f="paid" onclick="setCredFilter('paid')">Pagados</button>
           <button class="btn btn-s" id="cred-f-all" data-f="all" onclick="setCredFilter('all')">Todos</button>
+          <button class="btn btn-s" style="margin-left:auto;font-size:.76rem;padding:4px 10px" onclick="exportCreditosCSV()">📥 CSV</button>
         </div>
         <div id="cred-tab-list"></div>
       </div>
@@ -4098,6 +4103,111 @@ function renderVentasList(){
       +'<div style="font-size:.72rem;margin-top:2px"><span style="color:'+col+';font-weight:600">'+lPm+'</span>'+credBadge+'</div>'
       +'</div>';
   }).join('');
+}
+function exportVentasCSV(){
+  var period=(el('vnt-period')||{value:'mes'}).value;
+  var range=getDateRange(period);
+  var method=(el('vnt-method')||{value:''}).value;
+  var srch=((el('vnt-srch')||{value:''}).value||'').toLowerCase().trim();
+  var pmLabel={cash:'Efectivo',card:'Tarjeta',transf:'Transferencia',credit:'Crédito',split:'Dividido',openAccount:'Cuenta abierta'};
+  var sales=(db.sales||[]).filter(function(s){
+    if(s.status!=='active')return false;
+    var d=new Date(s.date);
+    if(d<range.start||d>range.end)return false;
+    if(method&&s.payMethod!==method)return false;
+    if(srch){var rn=String(s.rnum||s.id).toLowerCase(),cl=(s.creditClient||'').toLowerCase();if(!rn.includes(srch)&&!cl.includes(srch))return false;}
+    return true;
+  });
+  var esc=function(v){return'"'+String(v==null?'':v).replace(/"/g,'""')+'"';};
+  var rows=[['Fecha','Hora','Orden','Items','Método de Pago','Total','Cajero','Estado','Cliente']];
+  sales.forEach(function(s){
+    var d=new Date(s.date);
+    var items=(s.items||[]).map(function(i){return i.name+' x'+i.qty+' ('+dolr(i.price)+')';}).join('; ');
+    var metodo=pmLabel[s.payMethod]||s.payMethod||'';
+    var estado=s.payMethod==='credit'?(s.creditStatus==='paid'?'Crédito pagado':'Crédito pendiente'):'Completada';
+    rows.push([d.toLocaleDateString(),d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}),'#'+(s.rnum||s.id),items,metodo,s.total.toFixed(2),s.cashier||'',estado,s.creditClient||'']);
+  });
+  var csv=rows.map(function(r){return r.map(esc).join(',');}).join('\r\n');
+  var blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='ventas_'+period+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(url);
+  toast('📥 CSV: '+sales.length+' ventas');
+}
+function printReporteVentas(){
+  var period=(el('vnt-period')||{value:'mes'}).value;
+  var range=getDateRange(period);
+  var method=(el('vnt-method')||{value:''}).value;
+  var srch=((el('vnt-srch')||{value:''}).value||'').toLowerCase().trim();
+  var pmLabel={cash:'Efectivo',card:'Tarjeta',transf:'Transferencia',credit:'Crédito',split:'Dividido',openAccount:'Cuenta abierta'};
+  var sales=(db.sales||[]).filter(function(s){
+    if(s.status!=='active')return false;
+    var d=new Date(s.date);if(d<range.start||d>range.end)return false;
+    if(method&&s.payMethod!==method)return false;
+    if(srch){var rn=String(s.rnum||s.id).toLowerCase(),cl=(s.creditClient||'').toLowerCase();if(!rn.includes(srch)&&!cl.includes(srch))return false;}
+    return true;
+  });
+  var c=db.cfg||{};
+  var logoH=(c.logo||LOGO)?'<img src="'+(c.logo||LOGO)+'" style="width:45px;height:45px;object-fit:contain;vertical-align:middle;margin-right:8px">':'';
+  var bizName=c.bizName||'4K POS';
+  var total=sales.reduce(function(s,x){return s+x.total;},0);
+  var credAmt=sales.filter(function(s){return s.payMethod==='credit'&&s.creditStatus!=='paid';}).reduce(function(s,x){return s+x.total;},0);
+  var pnames={hoy:'Hoy',semana:'Esta semana',mes:'Este mes',todo:'Todo el período'};
+  var pLabel=(pnames[period]||period)+(method?' · '+(pmLabel[method]||method):'')+(srch?' · Búsqueda: '+srch:'');
+  var rows=sales.map(function(s){
+    var d=new Date(s.date);
+    var items=(s.items||[]).map(function(i){return escHtml(i.name)+' x'+i.qty;}).join(', ');
+    var metodo=pmLabel[s.payMethod]||s.payMethod||'';
+    var estado=s.payMethod==='credit'?(s.creditStatus==='paid'?'Crédito pagado':'Crédito pend.'):'Completada';
+    return '<tr><td>'+d.toLocaleDateString()+'</td><td>'+d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})+'</td>'
+      +'<td>#'+(s.rnum||s.id)+'</td><td style="font-size:10px">'+items+'</td><td>'+metodo+'</td>'
+      +'<td style="text-align:right;font-weight:600">$'+s.total.toFixed(2)+'</td>'
+      +'<td style="font-size:10px">'+escHtml(s.cashier||'—')+'</td>'
+      +'<td style="font-size:10px">'+estado+(s.creditClient?' · '+escHtml(s.creditClient):'')+'</td></tr>';
+  }).join('');
+  var html='<html><head><title>Reporte Ventas</title><style>'
+    +'body{font-family:Arial,sans-serif;font-size:12px;margin:24px;color:#111}'
+    +'table{width:100%;border-collapse:collapse;margin-top:8px}'
+    +'th{background:#1e3a8a;color:#fff;padding:5px 7px;text-align:left;font-size:11px}'
+    +'td{padding:4px 7px;border-bottom:1px solid #eee;vertical-align:top}'
+    +'.sum{background:#f0f4ff;padding:8px 12px;border-radius:4px;display:flex;gap:20px;margin:10px 0;font-size:12px;flex-wrap:wrap}'
+    +'@media print{.sum{-webkit-print-color-adjust:exact;print-color-adjust:exact}th{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'
+    +'</style></head><body>'
+    +'<div style="display:flex;align-items:center;margin-bottom:4px">'+logoH+'<div>'
+    +'<div style="font-size:16px;font-weight:700">'+escHtml(bizName)+'</div>'
+    +'<div style="font-size:11px;color:#666">Reporte de Ventas — '+escHtml(pLabel)+'</div></div></div>'
+    +'<div class="sum"><span><b>Ventas:</b> '+sales.length+'</span><span><b>Total:</b> $'+total.toFixed(2)+'</span>'
+    +'<span><b>Cobrado:</b> $'+(total-credAmt).toFixed(2)+'</span>'
+    +(credAmt>0?'<span style="color:#dc2626"><b>Crédito pendiente:</b> $'+credAmt.toFixed(2)+'</span>':'')
+    +'</div>'
+    +'<table><thead><tr><th>Fecha</th><th>Hora</th><th>Orden</th><th>Items</th><th>Método</th><th>Total</th><th>Cajero</th><th>Estado</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table>'
+    +'<div style="margin-top:12px;font-size:10px;color:#999">Generado: '+new Date().toLocaleString()+'</div>'
+    +'</body></html>';
+  var w=window.open('','_blank','width=960,height=640');
+  if(w){w.document.write(html);w.document.close();w.focus();setTimeout(function(){w.print();},400);}
+}
+function exportCreditosCSV(){
+  var pending=_getPendingCredits();
+  var paidList=(db.sales||[]).filter(function(s){return s.payMethod==='credit'&&s.creditStatus==='paid';})
+    .map(function(s){return{client:s.creditClient||'—',cedula:s.creditCedula||'',total:s.total,paid:s.creditPaid||s.total,date:s.date,dueDate:s.creditDueDate||null,_paid:true};});
+  var list=[];
+  if(_credFilter==='pending')list=pending.map(function(c){return Object.assign({},c,{_paid:false});});
+  else if(_credFilter==='paid')list=paidList;
+  else list=pending.map(function(c){return Object.assign({},c,{_paid:false});}).concat(paidList);
+  var esc=function(v){return'"'+String(v==null?'':v).replace(/"/g,'""')+'"';};
+  var rows=[['Cliente','Cédula/ID','Fecha Venta','Fecha Límite','Total','Abonado','Pendiente','Estado']];
+  list.forEach(function(c){
+    var d=new Date(c.date);
+    var limite=c.dueDate?new Date(c.dueDate).toLocaleDateString():'—';
+    var pend=(c.total-(c.paid||0));
+    var estado=(c._paid||(pend<=0))?'Pagado':'Pendiente';
+    rows.push([c.client||'—',c.cedula||'',d.toLocaleDateString(),limite,c.total.toFixed(2),(c.paid||0).toFixed(2),pend.toFixed(2),estado]);
+  });
+  var csv=rows.map(function(r){return r.map(esc).join(',');}).join('\r\n');
+  var blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='creditos_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(url);
+  toast('📥 CSV: '+list.length+' créditos');
 }
 let _credFilter='pending';
 function setCredFilter(f){
