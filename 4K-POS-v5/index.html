@@ -466,7 +466,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <!-- PIN -->
 <div class="ov" id="ov-pin">
   <div class="modal mnarrow">
-    <div class="mh"><h3>🔐 <span id="pin-title">Código de acceso</span></h3><button class="mx" onclick="closeOv('ov-pin')">✕</button></div>
+    <div class="mh"><h3>🔐 <span id="pin-title">Código de acceso</span></h3><button class="mx" onclick="_cancelAdminConfirm()">✕</button></div>
+    <div id="pin-action-ctx" style="display:none;font-size:.74rem;color:var(--tx3);text-align:center;padding:6px 14px 0;line-height:1.45"></div>
     <div class="mb" style="text-align:center">
       <div class="pin-disp" id="pin-disp">_ _ _ _</div>
       <div class="pin-grid" id="pin-grid"></div>
@@ -664,6 +665,13 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <div class="fg" style="margin-top:10px"><label class="lbl">Minutos sin actividad</label><input type="number" class="fi" id="cfg-inactivity-mins" min="1" max="120" step="1" placeholder="10"></div>
         </div>
         <div class="frow"><button class="btn btn-p" onclick="saveInactivityCfg()">💾 Guardar</button></div>
+        <div class="sep-line"></div>
+        <div class="slbl">Confirmación Admin</div>
+        <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:8px">
+          <div class="tog"><span class="tog-label">🔐 Admin exento de re-confirmar</span><label class="tog-sw"><input type="checkbox" id="cfg-admin-exempt"><span class="slider"></span></label></div>
+          <div style="font-size:.7rem;color:var(--tx3);margin-top:6px">Si está activo, los usuarios Admin no necesitan ingresar el código para acciones destructivas. Los cajeros con permiso elevado siempre lo necesitan.</div>
+        </div>
+        <div class="frow"><button class="btn btn-p" onclick="saveAdminExemptCfg()">💾 Guardar</button></div>
         <div class="sep-line"></div>
         <div class="slbl">Impuesto</div>
         <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:10px">
@@ -1512,7 +1520,7 @@ let db={products:[],categories:[],sales:[],returns:[],orderNum:1,adminCode:'1234
   drawerPort:'COM3',drawerAuto:true,
   cfg:{bizName:'4K Negocio',bizSub:'',thanks:'¡Gracias por tu compra! 💕',phone:'',s1:'',s2:'',qr:'',logo:'',timeFormat:'12h',taxEnabled:false,taxName:'Impuesto',taxRate:0,taxIncluded:false},
   facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true,shifts:[],auditLog:[],
-  settings:{inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null}};
+  settings:{inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null,adminExemptFromConfirm:true}};
 let cart=[],payMethod='cash',cashIn='',discount={type:'pct',value:0,active:false};
 let currentView='categories',currentCategory=null;
 let editingAccountId=null;
@@ -1919,7 +1927,7 @@ async function loadDB(){
       if(d.openAccounts)db.openAccounts=d.openAccounts;
       if(d.returns)db.returns=d.returns;
       if(d.auditLog)db.auditLog=d.auditLog;
-      if(d.settings)db.settings=Object.assign({inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null},d.settings);
+      if(d.settings)db.settings=Object.assign({inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null,adminExemptFromConfirm:true},d.settings);
     }
  }catch(e){console.error(e);}
 
@@ -2109,10 +2117,12 @@ function logAction(accion,detalle,antes,despues){
 function delUser(id){
   var u=db.users.find(function(x){return x.id===id;});
   if(!u)return;
-  confirm2('¿Eliminar usuario '+u.name+'?',function(){
-    logAction('Usuario eliminado',u.name+' ('+u.role+')');
-    db.users=db.users.filter(function(x){return x.id!==id;});
-    saveDB();renderUserList();renderLoginUsers();
+  requireAdminCode('Eliminar usuario '+u.name+' ('+u.role+')',function(){
+    confirm2('¿Eliminar usuario '+u.name+'?',function(){
+      logAction('Usuario eliminado',u.name+' ('+u.role+')');
+      db.users=db.users.filter(function(x){return x.id!==id;});
+      saveDB();renderUserList();renderLoginUsers();
+    });
   });
 }
 function openAudit(){
@@ -2375,6 +2385,39 @@ function forceAdminLogout(){
   confirm2(lang==='en'?'Force close shift with cash difference?':'¿Forzar cierre con diferencia de efectivo?',doLogout);
 }
 
+// ── DOBLE CONFIRMACIÓN CON CÓDIGO ADMIN ────────
+var _adminConfirmCb=null;
+var _adminConfirmLabel='';
+
+function requireAdminCode(accionTexto,callback){
+  if(curUser&&curUser.role==='admin'&&(db.settings&&db.settings.adminExemptFromConfirm)!==false){
+    logAction('Acción autorizada (admin exento)',accionTexto);
+    callback();return;
+  }
+  _adminConfirmCb=callback;_adminConfirmLabel=accionTexto;
+  pinVal='';updatePinDisp();
+  el('pin-err').style.display='none';
+  const pt=el('pin-title');if(pt)pt.textContent='Código Admin requerido';
+  const pc=el('pin-action-ctx');
+  if(pc){pc.textContent=accionTexto;pc.style.display='block';}
+  openOv('ov-pin');
+}
+function _cancelAdminConfirm(){
+  if(_adminConfirmCb){
+    _adminConfirmCb=null;_adminConfirmLabel='';
+    const pt=el('pin-title');if(pt)pt.textContent='Código de acceso';
+    const pc=el('pin-action-ctx');if(pc){pc.textContent='';pc.style.display='none';}
+  }
+  closeOv('ov-pin');
+}
+function saveAdminExemptCfg(){
+  if(!db.settings)db.settings={};
+  db.settings.adminExemptFromConfirm=(el('cfg-admin-exempt')||{}).checked!==false;
+  saveDB();
+  logAction('Configuración admin-exempt actualizada','adminExemptFromConfirm:'+db.settings.adminExemptFromConfirm);
+  toast('✅ Configuración guardada');
+}
+
 // PIN
 function reqPin(target){
   if(curUser&&curUser.role==='admin'){runTarget(target);return;}
@@ -2405,8 +2448,17 @@ function pinPress(k){
   updatePinDisp();
 }
 function verifyPin(){
-  if(pinVal===db.adminCode){closeOv('ov-pin');pinVal='';runTarget(pinTarget);}
-  else{el('pin-err').style.display='block';pinVal='';updatePinDisp();setTimeout(()=>el('pin-err').style.display='none',1500);}
+  if(pinVal===db.adminCode){
+    closeOv('ov-pin');pinVal='';
+    if(_adminConfirmCb){
+      const _cb=_adminConfirmCb;const _lbl=_adminConfirmLabel;
+      _adminConfirmCb=null;_adminConfirmLabel='';
+      const pt=el('pin-title');if(pt)pt.textContent='Código de acceso';
+      const pc=el('pin-action-ctx');if(pc){pc.textContent='';pc.style.display='none';}
+      logAction('Autorizado con código admin',_lbl);
+      _cb();
+    }else{runTarget(pinTarget);}
+  }else{el('pin-err').style.display='block';pinVal='';updatePinDisp();setTimeout(()=>el('pin-err').style.display='none',1500);}
 }
 (function buildPin(){
   const g=el('pin-grid');
@@ -2502,7 +2554,19 @@ function editProd(id){
   else{el('p-prev').innerHTML='📷';el('p-data').value='';}
   admTab('t-prods',document.querySelector('#adm-tabs .btn'));
 }
-function delProd(id){const _dp=db.products.find(x=>x.id===id);confirm2('¿Eliminar producto?',()=>{db.products=db.products.filter(x=>x.id!==id);cart=cart.filter(x=>x.id!==id);if(_dp)logAction('Producto eliminado',_dp.name+((_dp.bc)?' · #'+_dp.bc:'')+' · '+dolr(_dp.price||0));saveDB();renderProdList();renderProds();renderCart();});}
+function delProd(id){
+  const _dp=db.products.find(x=>x.id===id);if(!_dp)return;
+  const _doDelProd=function(){
+    confirm2('¿Eliminar producto '+_dp.name+'?',function(){
+      db.products=db.products.filter(x=>x.id!==id);cart=cart.filter(x=>x.id!==id);
+      logAction('Producto eliminado',_dp.name+((_dp.bc)?' · #'+_dp.bc:'')+' · '+dolr(_dp.price||0));
+      saveDB();renderProdList();renderProds();renderCart();
+    });
+  };
+  if((_dp.stock||0)>0){
+    requireAdminCode('Eliminar '+_dp.name+' (Stock: '+(_dp.stock||0)+')',_doDelProd);
+  }else{_doDelProd();}
+}
 function clearProd(){['p-eid','p-name','p-price','p-cost','p-stock','p-minstock','p-bc'].forEach(id=>el(id).value='');el('p-cat').value='';const mr=el('p-margin-row');if(mr)mr.style.display='none';imgClear('p-prev','p-data','p-file');}
 function renderProdList(){
   const e2=el('prod-list');
@@ -2692,11 +2756,13 @@ function showInvCountResult(){
 function applyInvCount(){
   const counted=_readInvCountInputs();
   if(!Object.keys(counted).length){toast('⚠ '+t('noDataToAdjust'));return;}
-  confirm2(t('adjustStockConfirm'),function(){
-    db.products.forEach(p=>{if(counted[p.id]!==undefined)p.stock=counted[p.id];});
-    saveDB();renderInv();renderProds();
-    closeOv('ov-inv-count');closeOv('ov-inv-result');
-    toast(t('stockAdjusted'));
+  requireAdminCode('Ajuste de inventario ('+Object.keys(counted).length+' productos)',function(){
+    confirm2(t('adjustStockConfirm'),function(){
+      db.products.forEach(p=>{if(counted[p.id]!==undefined)p.stock=counted[p.id];});
+      saveDB();renderInv();renderProds();
+      closeOv('ov-inv-count');closeOv('ov-inv-result');
+      toast(t('stockAdjusted'));
+    });
   });
 }
 function exportCSV(){
@@ -3664,7 +3730,12 @@ function doCreditPayment(full){
   toast('✓ '+dolr(actual)+' '+t('creditPaid'));
 }
 function payCreditFull(key){
-  _cpayKey=key;doCreditPayment(true);
+  const _pfc=_getPendingCredits().find(function(x){return x._key===key;});
+  if(!_pfc)return;
+  const _owed=_pfc.total-_pfc.paid;
+  requireAdminCode('Marcar crédito pagado: '+_pfc.client+' '+dolr(_owed),function(){
+    _cpayKey=key;doCreditPayment(true);
+  });
 }
 
 function openSaveOA(){
@@ -3733,14 +3804,18 @@ function _doLoadOA(oa){
 }
 
 function deleteOA(id){
-  confirm2('¿Eliminar esta cuenta abierta?',function(){
-    const list=_loadOAs().filter(x=>x.id!==id);
-    _saveOAs(list);
-    renderOAList();
-    updateOACounter();
-    if(!list.length)closeOv('ov-oa-mgr');
-    toast('🗑️ Cuenta eliminada');
-  });
+  const _oa=_loadOAs().find(x=>x.id===id);if(!_oa)return;
+  const _doDelOA=function(){
+    confirm2('¿Eliminar esta cuenta abierta?',function(){
+      const list=_loadOAs().filter(x=>x.id!==id);
+      _saveOAs(list);renderOAList();updateOACounter();
+      if(!list.length)closeOv('ov-oa-mgr');
+      toast('🗑️ Cuenta eliminada');
+    });
+  };
+  if((_oa.items||[]).length>0){
+    requireAdminCode('Eliminar cuenta: '+(_oa.ref||_oa.name||id)+' ('+(_oa.items||[]).length+' items, '+dolr(_oa.total||0)+')',_doDelOA);
+  }else{_doDelOA();}
 }
   function showRcpt(sale){
   const c=db.cfg;
@@ -3873,11 +3948,13 @@ function delReturn(id){
 }
 function doCancel(id){
   const sale=db.sales.find(s=>s.id==id);if(!sale||sale.status!=='active')return;
-  confirm2('¿CANCELAR Orden #'+(sale.rnum||id)+' ('+dolr(sale.total)+')?',()=>{
-    sale.status='cancelled';sale.cancelDate=new Date().toISOString();
-    sale.items.forEach(item=>{const p=db.products.find(x=>x.id===item.id);if(p)p.stock+=item.qty;});
-    logAction('Venta anulada','#'+(sale.rnum||sale.id)+' · '+dolr(sale.total));
-    saveDB();renderActions('cancel');renderProds();toast('🗑 Cancelado');
+  requireAdminCode('Anular Orden #'+(sale.rnum||id)+' '+dolr(sale.total),function(){
+    confirm2('¿CANCELAR Orden #'+(sale.rnum||id)+' ('+dolr(sale.total)+')?',()=>{
+      sale.status='cancelled';sale.cancelDate=new Date().toISOString();
+      sale.items.forEach(item=>{const p=db.products.find(x=>x.id===item.id);if(p)p.stock+=item.qty;});
+      logAction('Venta anulada','#'+(sale.rnum||sale.id)+' · '+dolr(sale.total));
+      saveDB();renderActions('cancel');renderProds();toast('🗑 Cancelado');
+    });
   });
 }
 
@@ -4234,6 +4311,7 @@ function loadAdminModal(){
   el('cfg-drawer-port').value=db.drawerPort||'COM3';el('cfg-drawer-auto').checked=db.drawerAuto!==false;
   const _tf=(db.cfg&&db.cfg.timeFormat)||'12h';const _b12=el('cfg-time-12h'),_b24=el('cfg-time-24h');if(_b12)_b12.className=_tf==='12h'?'btn btn-p':'btn btn-s';if(_b24)_b24.className=_tf==='24h'?'btn btn-p':'btn btn-s';
   if(db.cfg.logo)el('logo-prev').innerHTML='<img src="'+db.cfg.logo+'" style="width:100%;height:100%;object-fit:contain">';
+  if(el('cfg-admin-exempt'))el('cfg-admin-exempt').checked=(db.settings&&db.settings.adminExemptFromConfirm)!==false;
   if(el('cfg-inactivity-enabled'))el('cfg-inactivity-enabled').checked=(db.settings&&db.settings.inactivityLockEnabled)!==false;
   if(el('cfg-inactivity-mins'))el('cfg-inactivity-mins').value=(db.settings&&db.settings.inactivityMinutes)||10;
   if(el('cfg-tax-enabled'))el('cfg-tax-enabled').checked=(db.cfg&&db.cfg.taxEnabled)===true;
