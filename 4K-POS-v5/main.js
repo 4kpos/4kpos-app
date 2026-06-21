@@ -100,7 +100,7 @@ function createWindow() {
   win.once('ready-to-show', () => win.show())
   win.setMenuBarVisibility(false)
 
-  win.webContents.on('devtools-opened', () => { win.webContents.closeDevTools() })
+  if (!isDev) win.webContents.on('devtools-opened', () => { win.webContents.closeDevTools() })
 }
 
 // ── Ventana de activación de licencia ────────────────
