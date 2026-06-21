@@ -675,7 +675,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="sep-line"></div>
         <div class="slbl">Impuesto</div>
         <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:10px">
-          <div class="tog" style="margin-bottom:10px"><span class="tog-label">🧾 Cobrar impuesto</span><label class="tog-sw"><input type="checkbox" id="cfg-tax-enabled"><span class="slider"></span></label></div>
+          <div class="tog" style="margin-bottom:10px"><span class="tog-label">🧾 Cobrar impuesto</span><label class="tog-sw"><input type="checkbox" id="cfg-tax-enabled" onchange="if(!db.cfg)db.cfg={};db.cfg.taxEnabled=this.checked"><span class="slider"></span></label></div>
           <div class="fg" style="margin-bottom:8px"><label class="lbl">Nombre del impuesto</label><input type="text" class="fi" id="cfg-tax-name" placeholder="Ej: IVA, ITBIS, Sales Tax" maxlength="30"></div>
           <div class="fg" style="margin-bottom:8px"><label class="lbl">Tasa (%)</label><input type="number" class="fi" id="cfg-tax-rate" min="0" max="100" step="0.01" placeholder="Ej: 18"></div>
           <div class="tog"><span class="tog-label" style="font-size:.78rem">Precio ya incluye impuesto (desglosar)</span><label class="tog-sw"><input type="checkbox" id="cfg-tax-included"><span class="slider"></span></label></div>
@@ -3005,7 +3005,7 @@ function getTaxCalc(){
 function getFinalTotal(){return getTaxCalc().total;}
 function saveTaxCfg(){
   if(!db.cfg)db.cfg={};
-  db.cfg.taxEnabled=(el('cfg-tax-enabled')||{}).checked===true;
+  db.cfg.taxEnabled=db.cfg.taxEnabled===true;
   db.cfg.taxName=((el('cfg-tax-name')||{}).value||'Impuesto').trim()||'Impuesto';
   db.cfg.taxRate=Math.max(0,parseFloat((el('cfg-tax-rate')||{}).value)||0);
   db.cfg.taxIncluded=(el('cfg-tax-included')||{}).checked===true;
