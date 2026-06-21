@@ -2211,23 +2211,6 @@ function syncShiftStatus(status){
     db.cfg.shiftClosedAt=now;
   }
   saveDB();
-  const _sp={status:status,user:userName};
-  if(status==='open')_sp.openedAt=now; else _sp.closedAt=now;
-  fetch(SUPA_URL+'/rest/v1/pos_data',{
-    method:'POST',
-    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
-    body:JSON.stringify({id:'shift_status',value:JSON.stringify(_sp)})
-  }).catch(function(){});
-}
-function syncCreditSummary(){
-  const pending=_getPendingCredits();
-  const totalPending=pending.reduce(function(s,c){return s+(c.total-c.paid);},0);
-  const val=JSON.stringify({totalPending:Math.round(totalPending*100)/100,count:pending.length,updatedAt:new Date().toISOString()});
-  fetch(SUPA_URL+'/rest/v1/pos_data',{
-    method:'POST',
-    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
-    body:JSON.stringify({id:'credit_summary',value:val})
-  }).catch(function(){});
 }
 function syncCreditDirect(){
   try{
@@ -2259,8 +2242,6 @@ function startApp(){
   renderCart();
   updateLicBadge();updateDashBtn();
   updateOACounter();_startNotifTimer();
-  syncCreditSummary();
-  if(!window._cSyncInt)window._cSyncInt=setInterval(syncCreditSummary,30000);
   if(!window._cdSyncInt){window._cdSyncInt=setInterval(syncCreditDirect,30000);setTimeout(syncCreditDirect,3000);}
   setEl('ord-lbl','#'+db.orderNum);
   if(_restoredFromBackup){toast('🔄 Datos restaurados del backup automático');_restoredFromBackup=false;}
@@ -3534,7 +3515,6 @@ function confirmCreditSale(){
   db.credits.push({id:Date.now().toString(),saleId:db.orderNum,custId:cust.id,client:name,cedula:cust.cedula||'',total,paid:0,date:new Date().toISOString(),payments:[],items:JSON.parse(JSON.stringify(cart))});
   db.orderNum++;
   saveDB();
-  syncCreditSummary();
   if(editingAccountId){const ls=_loadOAs().filter(x=>x.id!==editingAccountId);_saveOAs(ls);editingAccountId=null;}
   closeOv('ov-credit-sale');
   showRcpt(sale);
@@ -3724,7 +3704,6 @@ function doCreditPayment(full){
   }
   saveDB();
   logAction('Abono de crédito',c.client+' · '+dolr(actual)+(actual<owed?' (parcial)':' (pago total)'));
-  syncCreditSummary();
   closeOv('ov-credit-pay');
   renderCreditsPanel();
   renderAdmCredits();
@@ -4936,7 +4915,7 @@ function contaTab(tab,e2){
   if(e2)e2.className='btn btn-p '+(e2.dataset.extraClass||'').trim();
   if(tab==='ct-fac'){loadFacProds();renderVentasList();}
   if(tab==='ct-comp'){compLoadProds();renderCompList();}
-  if(tab==='ct-cred'){syncCreditSummary();renderContaCredits();}
+  if(tab==='ct-cred'){renderContaCredits();}
   if(tab==='ct-graf')setTimeout(renderGraf,50);
 }
 
