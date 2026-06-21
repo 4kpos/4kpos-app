@@ -65,6 +65,15 @@ function saveData(data) {
   fs.writeFileSync(dataPath, JSON.stringify(data, null, 2))
 }
 
+const auditArchivePath = path.join(app.getPath('userData'), 'auditlog-archive.json')
+ipcMain.handle('append-audit-archive', (_, entries) => {
+  try {
+    let existing = []
+    try { existing = JSON.parse(fs.readFileSync(auditArchivePath, 'utf8')) } catch(e) {}
+    fs.writeFileSync(auditArchivePath, JSON.stringify(existing.concat(entries || [])))
+  } catch(e) {}
+})
+
 // ── Ventana principal del POS ──────────────────
 function createWindow() {
   const win = new BrowserWindow({
