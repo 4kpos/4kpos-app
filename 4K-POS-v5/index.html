@@ -1114,6 +1114,34 @@ select.fi option{background:var(--s2);color:var(--tx);}
   </div>
 </div>
 
+<!-- RESET PASS RESULT -->
+<div class="ov" id="ov-reset-pass">
+  <div class="modal" style="max-width:340px;text-align:center;padding:24px 20px">
+    <div style="font-size:1.05rem;font-weight:700;margin-bottom:10px">🔑 Contraseña reseteada</div>
+    <div style="font-size:.82rem;color:var(--tx2);margin-bottom:2px">Usuario: <b id="rp-uname"></b></div>
+    <div style="background:var(--b1);border-radius:8px;padding:18px 14px;margin:14px 0">
+      <div style="font-size:.7rem;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Contraseña temporal</div>
+      <div id="rp-code" style="font-size:2.2rem;font-weight:800;letter-spacing:.2em;font-family:monospace;color:var(--ac)"></div>
+    </div>
+    <div style="font-size:.74rem;color:var(--tx3);line-height:1.5;margin-bottom:18px">Anótala — no se mostrará otra vez.<br>El empleado deberá cambiarla al iniciar sesión.</div>
+    <button class="btn btn-p" onclick="closeOv('ov-reset-pass')" style="width:100%">Entendido ✓</button>
+  </div>
+</div>
+
+<!-- FORCE CHANGE PASSWORD -->
+<div class="ov" id="ov-force-chpass">
+  <div class="modal mnarrow">
+    <div style="font-size:1rem;font-weight:700;margin-bottom:6px">🔐 Cambia tu contraseña</div>
+    <div style="font-size:.78rem;color:var(--tx3);line-height:1.5;margin-bottom:16px">Tu cuenta tiene una contraseña temporal.<br>Debes establecer una nueva antes de continuar.</div>
+    <div class="fi-lbl">Nueva contraseña</div>
+    <input class="fi sinp" type="password" id="fcp-p1" placeholder="Mínimo 4 caracteres" autocomplete="new-password" style="margin-bottom:8px" onkeydown="if(event.key==='Enter')el('fcp-p2').focus()">
+    <div class="fi-lbl">Confirmar contraseña</div>
+    <input class="fi sinp" type="password" id="fcp-p2" placeholder="Repite la contraseña" autocomplete="new-password" onkeydown="if(event.key==='Enter')doForceChPass()">
+    <div id="fcp-err" style="color:#ef4444;font-size:.76rem;margin-top:6px;min-height:18px"></div>
+    <div class="frow" style="margin-top:12px"><button class="btn btn-p" onclick="doForceChPass()" style="flex:1">💾 Guardar nueva contraseña</button></div>
+  </div>
+</div>
+
 <!-- CALC -->
 <div class="fcalc" id="fcalc">
   <div class="fch" id="fc-drag">
@@ -1881,11 +1909,12 @@ async function saveDB(){
     const tbu=el('tb-user');if(tbu){const sn=found.name.replace(/</g,'&lt;');const ini=found.name.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('');tbu.innerHTML='<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#1e3a8a;border:1.5px solid rgba(255,255,255,.4);font-size:10px;font-weight:800;flex-shrink:0;vertical-align:middle;color:#fff">'+ini+'</span> '+sn;tbu.style.display='';};
     applyUserPerms();
 
-    if(!db.cfg||!db.cfg.shiftOpen){
-      setEl('so-fund',dolr(db.fundAmount||0));
-      setEl('so-user',t('shiftWelcome')+', '+found.name);
-      el('shift-open-screen').classList.add('show');
-    }else startApp();
+    if(found.tempPassword){
+      el('fcp-p1').value='';el('fcp-p2').value='';el('fcp-err').textContent='';
+      openOv('ov-force-chpass');
+      return;
+    }
+    _continueAfterLogin(found);
   }else{
     el('lerr').style.display='block';
     el('lp').value='';
@@ -1899,6 +1928,43 @@ function renderLoginUsers(){
   el('lu').innerHTML=db.users.map(u=>
     '<option value="'+u.user+'">'+u.name+'</option>'
   ).join('');
+}
+
+function _continueAfterLogin(found){
+  found=found||curUser;
+  if(!db.cfg||!db.cfg.shiftOpen){
+    setEl('so-fund',dolr(db.fundAmount||0));
+    setEl('so-user',t('shiftWelcome')+', '+found.name);
+    el('shift-open-screen').classList.add('show');
+  }else startApp();
+}
+function resetUserPass(id){
+  var u=db.users.find(function(x){return x.id===id;});
+  if(!u)return;
+  if(!confirm('¿Resetear contraseña de '+u.name+'?\nSe generará una contraseña temporal que el empleado deberá cambiar al iniciar sesión.'))return;
+  var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',tmp='';
+  for(var i=0;i<6;i++)tmp+=chars[Math.floor(Math.random()*chars.length)];
+  u.pass=bcrypt?bcrypt.hashSync(tmp,10):tmp;
+  u.tempPassword=true;
+  saveDB();
+  el('rp-uname').textContent=u.name;
+  el('rp-code').textContent=tmp;
+  openOv('ov-reset-pass');
+}
+function doForceChPass(){
+  var p1=el('fcp-p1').value,p2=el('fcp-p2').value,errEl=el('fcp-err');
+  if(p1.length<4){errEl.textContent='Mínimo 4 caracteres';return;}
+  if(p1!==p2){errEl.textContent='Las contraseñas no coinciden';return;}
+  errEl.textContent='';
+  curUser.pass=bcrypt?bcrypt.hashSync(p1,10):p1;
+  delete curUser.tempPassword;
+  var idx=db.users.findIndex(function(x){return x.id===curUser.id;});
+  if(idx>=0){db.users[idx].pass=curUser.pass;delete db.users[idx].tempPassword;}
+  saveDB();
+  el('fcp-p1').value='';el('fcp-p2').value='';
+  closeOv('ov-force-chpass');
+  toast('✅ Contraseña actualizada');
+  _continueAfterLogin(curUser);
 }
 
 setTimeout(renderLoginUsers,500);
@@ -3610,10 +3676,11 @@ function renderUserList(){
     '<div class="pli">'+
       '<div class="pli-thumb" style="background:var(--acg);color:var(--ac)">'+u.name[0]+'</div>'+
       '<div class="pli-info">'+
-      '<div class="pli-name">'+u.name+'</div>'+
+      '<div class="pli-name">'+u.name+(u.tempPassword?'<span style="margin-left:6px;font-size:.66rem;color:#f59e0b;font-weight:700;vertical-align:middle">⏳ temp</span>':'')+'</div>'+
       '<div class="pli-meta">'+u.user+' · '+u.role+'</div>'+
       '</div>'+
-      '<button class="btn btn-s" onclick="editUser(\''+u.id+'\')">🖊️</button>'+
+      '<button class="btn btn-s" onclick="editUser(\''+u.id+'\')" style="font-size:.72rem;padding:4px 7px" title="Editar">🖊️</button>'+
+      '<button class="btn btn-s" onclick="resetUserPass(\''+u.id+'\')" style="font-size:.72rem;padding:4px 7px;color:#f59e0b" title="Resetear contraseña">🔑</button>'+
 (u.id!=='1'
  ?'<button class="xb" onclick="delUser(\''+u.id+'\')">✕</button>'
  :'')+
