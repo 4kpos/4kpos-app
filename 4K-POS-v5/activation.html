@@ -333,6 +333,73 @@
     color: var(--accent);
     text-decoration: none;
   }
+
+  /* ── Sección de extensión offline ── */
+  .device-code-block {
+    background: rgba(0,212,255,0.05);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .device-code-block small {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .device-code-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.35em;
+    cursor: text;
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  .device-code-hint {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .btn-extend {
+    background: linear-gradient(135deg, #00c47d, #009e63);
+    color: #000;
+  }
+
+  .btn-extend:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,196,125,0.3);
+  }
+
+  .btn-extend:active:not(:disabled) { transform: translateY(0); }
+
+  .btn-extend:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .ext-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 24px 0;
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .ext-divider::before,
+  .ext-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
 </style>
 </head>
 <body>
@@ -390,6 +457,44 @@
     </p>
   </div>
 
+  <!-- EXTENSIÓN OFFLINE — visible solo cuando reason === offline_expired -->
+  <div id="offline-extend-area" style="display:none">
+    <h2 class="title">Sin conexión</h2>
+    <p class="subtitle">Tu licencia está activa pero no se ha verificado en más de 15 días. Conéctate a internet para continuar, o ingresa un código de extensión.</p>
+
+    <div class="device-code-block">
+      <small>Código de dispositivo — envíalo a soporte</small>
+      <div class="device-code-value" id="device-code-display">—</div>
+      <div class="device-code-hint">Haz clic para copiar</div>
+    </div>
+
+    <div class="ext-divider">código de extensión</div>
+
+    <label for="ext-code-input">Código de extensión (8 caracteres)</label>
+    <div class="input-wrap">
+      <input
+        type="text"
+        id="ext-code-input"
+        placeholder="XXXXXXXX"
+        maxlength="8"
+        autocomplete="off"
+        spellcheck="false"
+        style="text-align:center;font-size:20px;letter-spacing:0.25em"
+      >
+    </div>
+    <div id="ext-error-msg" class="error-msg"></div>
+
+    <button class="btn btn-extend" id="extend-btn" onclick="doExtend()">
+      <span class="btn-text">✓ Extender 15 días sin internet</span>
+      <div class="spinner"></div>
+    </button>
+
+    <p class="footer-note" style="margin-top:20px">
+      ¿Recuperaste internet? <a href="#" onclick="restartClean()">Reiniciar y verificar</a><br>
+      Soporte: <a href="#">soporte@4kpos.com</a>
+    </p>
+  </div>
+
   <div id="success-overlay" class="success-overlay">
     <div class="success-icon">✓</div>
     <h3>¡Activado!</h3>
@@ -411,12 +516,102 @@ ipcRenderer.on('activation-reason', (event, reason) => {
   const messages = {
     'no_license':        '📋 No hay licencia activada en este equipo.',
     'hardware_mismatch': '⚠️ El hardware de este equipo no coincide con la licencia guardada. Por favor activa nuevamente.',
-    'offline_expired':   '📡 Sin conexión a internet y la licencia no ha sido verificada en más de 7 días. Conéctate para continuar.',
+    'offline_expired':   '📡 Sin conexión a internet y la licencia no ha sido verificada en más de 15 días.',
     'license_invalid':   '❌ Tu licencia fue desactivada o venció. Contáctanos para renovar.',
   };
+
+  if (reason === 'offline_expired') {
+    // Ocultar el formulario de activación, mostrar la sección de extensión offline
+    document.getElementById('form-area').style.display = 'none';
+    document.getElementById('offline-extend-area').style.display = 'block';
+
+    // Cargar el código de dispositivo vía IPC
+    ipcRenderer.invoke('get-device-code').then(code => {
+      const el = document.getElementById('device-code-display');
+      if (el) {
+        el.textContent = code || '—';
+        el.onclick = () => {
+          if (code) {
+            navigator.clipboard.writeText(code).then(() => {
+              el.textContent = '✓ Copiado';
+              setTimeout(() => { el.textContent = code; }, 1500);
+            }).catch(() => {});
+          }
+        };
+      }
+    });
+    return;
+  }
+
   if (reason && reason !== 'no_license') {
     banner.textContent = messages[reason] || `Error: ${reason}`;
     banner.classList.add('show');
+  }
+});
+
+// ── Extensión offline ──────────────────────────────────────
+async function doExtend() {
+  const extInput = document.getElementById('ext-code-input');
+  const btn = document.getElementById('extend-btn');
+  const errEl = document.getElementById('ext-error-msg');
+  const deviceCode = document.getElementById('device-code-display').textContent;
+  const extensionCode = (extInput.value || '').trim().toUpperCase();
+
+  if (!extensionCode || extensionCode.length !== 8) {
+    showExtError('Ingresa el código de 8 caracteres que recibirste de soporte.');
+    extInput.classList.add('error');
+    return;
+  }
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+  clearExtError();
+
+  const result = await ipcRenderer.invoke('extend-license-offline', { deviceCode, extensionCode });
+
+  btn.classList.remove('loading');
+  btn.disabled = false;
+
+  if (result && result.ok) {
+    document.getElementById('offline-extend-area').style.display = 'none';
+    document.getElementById('success-overlay').classList.add('show');
+    document.querySelector('.success-overlay h3').textContent = '¡Extendido!';
+    document.querySelector('.success-overlay p').textContent = 'Gracia offline extendida 15 días.\nReiniciando 4K POS...';
+    setTimeout(() => { ipcRenderer.invoke('restart-clean'); }, 2000);
+  } else {
+    showExtError((result && result.error) || 'Código inválido. Verifica con soporte.');
+    extInput.classList.add('error');
+  }
+}
+
+function showExtError(msg) {
+  const el = document.getElementById('ext-error-msg');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function clearExtError() {
+  const el = document.getElementById('ext-error-msg');
+  if (el) { el.classList.remove('show'); }
+  const inp = document.getElementById('ext-code-input');
+  if (inp) inp.classList.remove('error');
+}
+
+function restartClean() {
+  ipcRenderer.invoke('restart-clean');
+}
+
+// Auto-uppercase y limpieza del input de código de extensión
+document.addEventListener('DOMContentLoaded', () => {
+  const extInput = document.getElementById('ext-code-input');
+  if (extInput) {
+    extInput.addEventListener('input', function() {
+      this.value = this.value.replace(/[^A-Z0-9]/gi, '').toUpperCase().slice(0, 8);
+      clearExtError();
+    });
+    extInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') doExtend();
+    });
   }
 });
 

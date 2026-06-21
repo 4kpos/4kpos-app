@@ -18,6 +18,11 @@ jobs:
         working-directory: 4K-POS-v5
         run: npm install --legacy-peer-deps
 
+      - name: Inject extension code secret
+        shell: bash
+        run: |
+          sed -i "s|__EXT_CODE_SECRET__|${{ secrets.EXT_CODE_SECRET }}|g" "4K-POS-v5/license.js"
+
       - name: Build exe
         working-directory: 4K-POS-v5
         run: npx electron-builder --win --publish always

@@ -3,7 +3,7 @@ const path = require('path')
 const fs = require('fs')
 const os = require('os')
 const crypto = require('crypto')
-const { activateLicense, verifyLicense, getLicenseInfo, getHardwareId } = require('./license')
+const { activateLicense, verifyLicense, getLicenseInfo, getHardwareId, getDeviceCode, extendLicenseOffline, readLocalLicense } = require('./license')
 
 const logFile = path.join(app.getPath('userData'), 'update-log.txt')
 function logUpdate(msg) {
@@ -168,6 +168,19 @@ ipcMain.handle('activate-license', async (_, licenseKey) => {
 ipcMain.handle('get-license-info', () => getLicenseInfo())
 ipcMain.handle('get-hardware-id', () => getHardwareId())
 ipcMain.handle('get-machine-id', () => getMachineId())
+
+// ── Extensión offline ─────────────────────────────────────
+ipcMain.handle('get-device-code', () => {
+  const local = readLocalLicense()
+  if (!local) return null
+  return getDeviceCode(local)
+})
+
+ipcMain.handle('extend-license-offline', (_, { deviceCode, extensionCode }) => {
+  return extendLicenseOffline(deviceCode, extensionCode)
+})
+
+ipcMain.handle('restart-clean', () => { app.relaunch(); app.exit(0) })
 
 // ── IPC: cerrar app ────────────────────────────
 ipcMain.handle('exit-app', () => { app.quit() })
