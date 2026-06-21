@@ -644,6 +644,20 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px" id="cfg-backup-info">Automático cada 5 min · silencioso</div>
         <div style="font-size:.72rem;color:var(--tx3);margin-bottom:8px">Último respaldo: <span id="last-backup-lbl" style="color:var(--gn)">—</span></div>
         <div class="sep-line"></div>
+        <div class="slbl">Contraseña de Respaldo</div>
+        <div id="bkp-no-pass-warn" style="font-size:.73rem;padding:8px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);border-radius:6px;color:#f59e0b;margin-bottom:8px">⚠️ Tus backups no están cifrados — configura una contraseña para proteger las exportaciones.</div>
+        <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:8px">
+          <div class="fg" style="margin-bottom:8px"><label class="lbl">Nueva contraseña</label><input type="password" class="fi" id="cfg-bkp-pass1" placeholder="Mín. 6 caracteres" autocomplete="new-password"></div>
+          <div class="fg"><label class="lbl">Confirmar contraseña</label><input type="password" class="fi" id="cfg-bkp-pass2" placeholder="Repetir contraseña" autocomplete="new-password"></div>
+        </div>
+        <div style="font-size:.71rem;color:#ef4444;background:rgba(239,68,68,.08);border-radius:6px;padding:8px;margin-bottom:8px">⚠️ Si olvidas esta contraseña, <strong>NO podrás recuperar</strong> los backups cifrados. Guárdala en un lugar seguro.</div>
+        <div id="bkp-pass-err" style="color:#ef4444;font-size:.73rem;min-height:16px;margin-bottom:4px"></div>
+        <div class="frow" style="gap:8px;margin-bottom:6px">
+          <button class="btn btn-p" onclick="saveBackupPass()" style="flex:1">🔐 Guardar contraseña</button>
+          <button class="btn btn-s" id="bkp-rm-btn" style="color:#ef4444;display:none" onclick="removeBackupPass()">Quitar</button>
+        </div>
+        <div id="bkp-pass-ok" style="font-size:.72rem;color:var(--gn);min-height:16px;margin-bottom:4px"></div>
+        <div class="sep-line"></div>
         <div class="slbl">Bloqueo por Inactividad</div>
         <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:10px">
           <div class="tog"><span class="tog-label">⏱ Bloquear por inactividad</span><label class="tog-sw"><input type="checkbox" id="cfg-inactivity-enabled"><span class="slider"></span></label></div>
@@ -1185,6 +1199,18 @@ select.fi option{background:var(--s2);color:var(--tx);}
   </div>
 </div>
 
+<div class="ov" id="ov-bkp-pass">
+  <div class="modal mnarrow">
+    <div class="mh"><h3 id="bkp-modal-title">🔐 Contraseña de respaldo</h3><button class="cls" onclick="closeOv('ov-bkp-pass');_bkpPending=null">✕</button></div>
+    <div id="bkp-modal-desc" style="font-size:.8rem;color:var(--tx3);margin-bottom:14px"></div>
+    <input class="fi" type="password" id="bkp-modal-pass" placeholder="Contraseña de respaldo" autocomplete="current-password" onkeydown="if(event.key==='Enter')_submitBkpPass()">
+    <div id="bkp-modal-err" style="color:#ef4444;font-size:.75rem;margin-top:6px;min-height:16px"></div>
+    <div class="frow" style="margin-top:14px;gap:8px">
+      <button class="btn btn-s" onclick="closeOv('ov-bkp-pass');_bkpPending=null">Cancelar</button>
+      <button class="btn btn-p" onclick="_submitBkpPass()" style="flex:1">Confirmar</button>
+    </div>
+  </div>
+</div>
 <!-- CALC -->
 <div class="fcalc" id="fcalc">
   <div class="fch" id="fc-drag">
@@ -1474,7 +1500,7 @@ let db={products:[],categories:[],sales:[],returns:[],orderNum:1,adminCode:'1234
   drawerPort:'COM3',drawerAuto:true,
   cfg:{bizName:'4K Negocio',bizSub:'',thanks:'¡Gracias por tu compra! 💕',phone:'',s1:'',s2:'',qr:'',logo:'',timeFormat:'12h'},
   facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true,shifts:[],auditLog:[],
-  settings:{inactivityLockEnabled:true,inactivityMinutes:10}};
+  settings:{inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null}};
 let cart=[],payMethod='cash',cashIn='',discount={type:'pct',value:0,active:false};
 let currentView='categories',currentCategory=null;
 let editingAccountId=null;
@@ -1881,7 +1907,7 @@ async function loadDB(){
       if(d.openAccounts)db.openAccounts=d.openAccounts;
       if(d.returns)db.returns=d.returns;
       if(d.auditLog)db.auditLog=d.auditLog;
-      if(d.settings)db.settings=Object.assign({inactivityLockEnabled:true,inactivityMinutes:10},d.settings);
+      if(d.settings)db.settings=Object.assign({inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null},d.settings);
     }
  }catch(e){console.error(e);}
 
@@ -2297,7 +2323,7 @@ function calcCashDiff(){
   }
 }
 function doLogout(){
-  _stopInactivityTimer();
+  _stopInactivityTimer();_bkpKey=null;
   // Save shift record
   if(!db.shifts)db.shifts=[];
   const _shiftActive=_getShiftSales();
@@ -2929,6 +2955,145 @@ function _oaKey(){return '4kpos_open_accounts';}
 function _loadOAs(){try{return JSON.parse(localStorage.getItem(_oaKey())||'[]');}catch(e){return[];}}
 function _saveOAs(list){localStorage.setItem(_oaKey(),JSON.stringify(list));updateOACounter();}
 
+// ── CIFRADO DE BACKUPS ──────────────────────────
+var _bkpKey=null;   // Buffer con clave AES-256 derivada (en memoria, se borra al cerrar sesión)
+var _bkpPending=null; // { mode:'import'|'unlock'|'restore-auto', data?, cb? }
+
+function _nodeCrypto(){try{return require('crypto');}catch(e){return null;}}
+function _hasBackupCfg(){return !!(db.settings&&db.settings.backupPassHash&&db.settings.backupKeySalt);}
+function _deriveBackupKey(pass,saltHex){
+  var nc=_nodeCrypto();if(!nc)throw new Error('crypto no disponible');
+  return nc.scryptSync(pass,Buffer.from(saltHex,'hex'),32);
+}
+function _decryptBkpObjWithKey(obj,key){
+  var nc=_nodeCrypto();if(!nc)throw new Error('crypto no disponible');
+  var iv=Buffer.from(obj.iv,'hex');
+  var tag=Buffer.from(obj.tag,'hex');
+  var data=Buffer.from(obj.data,'base64');
+  var dc=nc.createDecipheriv('aes-256-gcm',key,iv);
+  dc.setAuthTag(tag);
+  return dc.update(data)+dc.final('utf8');
+}
+function _decryptBkpObj(obj,pass){
+  return _decryptBkpObjWithKey(obj,_deriveBackupKey(pass,obj.salt));
+}
+function _encryptBkpStr(jsonStr){
+  if(!_bkpKey)throw new Error('Llave de respaldo no disponible');
+  var nc=_nodeCrypto();if(!nc)throw new Error('crypto no disponible');
+  var iv=nc.randomBytes(16);
+  var cipher=nc.createCipheriv('aes-256-gcm',_bkpKey,iv);
+  var enc=Buffer.concat([cipher.update(jsonStr,'utf8'),cipher.final()]);
+  var tag=cipher.getAuthTag();
+  return JSON.stringify({encrypted:true,v:1,salt:db.settings.backupKeySalt,iv:iv.toString('hex'),tag:tag.toString('hex'),data:enc.toString('base64')});
+}
+function _updateBkpPassUI(){
+  var has=_hasBackupCfg();
+  var warn=el('bkp-no-pass-warn');if(warn)warn.style.display=has?'none':'';
+  var rmBtn=el('bkp-rm-btn');if(rmBtn)rmBtn.style.display=has?'':'none';
+  var ok=el('bkp-pass-ok');if(ok)ok.textContent=has?(_bkpKey?'🔐 Cifrado activo · llave en sesión':'🔐 Contraseña configurada · ingresa para activar cifrado'):'';
+}
+function _openBkpPassModal(title,desc,pending){
+  _bkpPending=pending;
+  var t=el('bkp-modal-title');if(t)t.textContent=title;
+  var d=el('bkp-modal-desc');if(d)d.textContent=desc;
+  var err=el('bkp-modal-err');if(err)err.textContent='';
+  var inp=el('bkp-modal-pass');if(inp){inp.value='';setTimeout(function(){inp.focus();},80);}
+  openOv('ov-bkp-pass');
+}
+function _submitBkpPass(){
+  var pass=(el('bkp-modal-pass')||{}).value;
+  var errEl=el('bkp-modal-err');if(errEl)errEl.textContent='';
+  if(!pass){if(errEl)errEl.textContent='Ingresa la contraseña';return;}
+  if(!_bkpPending){closeOv('ov-bkp-pass');return;}
+  try{
+    if(_bkpPending.mode==='import'){
+      var plain=_decryptBkpObj(_bkpPending.data,pass);
+      var parsed=JSON.parse(plain);
+      var data=parsed.db||parsed;
+      if(!data.products&&!data.sales){if(errEl)errEl.textContent='Archivo inválido tras descifrado';return;}
+      closeOv('ov-bkp-pass');_bkpPending=null;
+      if(el('bkp-modal-pass'))el('bkp-modal-pass').value='';
+      _doImportData(data);
+    }else if(_bkpPending.mode==='unlock'){
+      if(bcrypt&&db.settings&&db.settings.backupPassHash&&!bcrypt.compareSync(pass,db.settings.backupPassHash)){
+        if(errEl)errEl.textContent='Contraseña incorrecta';return;
+      }
+      _bkpKey=_deriveBackupKey(pass,db.settings.backupKeySalt);
+      var cb=_bkpPending.cb;_bkpPending=null;
+      if(el('bkp-modal-pass'))el('bkp-modal-pass').value='';
+      closeOv('ov-bkp-pass');
+      _updateBkpPassUI();
+      if(cb)cb();
+    }else if(_bkpPending.mode==='restore-auto'){
+      var plain2=_decryptBkpObj(_bkpPending.data,pass);
+      var parsed2=JSON.parse(plain2);
+      var data2=parsed2.db||parsed2;
+      _bkpKey=_deriveBackupKey(pass,_bkpPending.data.salt);
+      _bkpPending=null;
+      if(el('bkp-modal-pass'))el('bkp-modal-pass').value='';
+      closeOv('ov-bkp-pass');
+      _updateBkpPassUI();
+      confirm2('¿Restaurar backup? Se perderán los cambios no guardados.',function(){
+        Object.assign(db,data2);saveDB();showCategories();renderCart();
+        toast('✅ Backup restaurado');
+      });
+    }
+  }catch(e){
+    if(errEl)errEl.textContent='Contraseña incorrecta o archivo corrupto';
+  }
+}
+function _doImportData(data){
+  confirm2('¿Restaurar datos desde este archivo? Se perderán cambios no guardados.',function(){
+    if(data.products)db.products=data.products;
+    if(data.categories)db.categories=data.categories;
+    if(data.sales)db.sales=data.sales;
+    if(data.orderNum)db.orderNum=data.orderNum;
+    if(data.cfg)db.cfg=Object.assign(db.cfg,data.cfg);
+    if(data.users&&data.users.length)db.users=data.users;
+    if(data.openAccounts)db.openAccounts=data.openAccounts;
+    if(data.customers)db.customers=data.customers;
+    if(data.payMethods)db.payMethods=Object.assign(db.payMethods,data.payMethods);
+    saveDB();showCategories();renderCart();
+    toast('✅ Datos importados correctamente');
+  });
+}
+function saveBackupPass(){
+  var p1=(el('cfg-bkp-pass1')||{}).value,p2=(el('cfg-bkp-pass2')||{}).value;
+  var errEl=el('bkp-pass-err');if(errEl)errEl.textContent='';
+  if(!p1){if(errEl)errEl.textContent='Ingresa una contraseña';return;}
+  if(p1.length<6){if(errEl)errEl.textContent='Mínimo 6 caracteres';return;}
+  if(p1!==p2){if(errEl)errEl.textContent='Las contraseñas no coinciden';return;}
+  var nc=_nodeCrypto();
+  if(!nc){if(errEl)errEl.textContent='Error: módulo crypto no disponible';return;}
+  try{
+    var salt=nc.randomBytes(32).toString('hex');
+    var hash=bcrypt?bcrypt.hashSync(p1,10):p1;
+    if(!db.settings)db.settings={};
+    var hadPass=_hasBackupCfg();
+    db.settings.backupPassHash=hash;
+    db.settings.backupKeySalt=salt;
+    _bkpKey=_deriveBackupKey(p1,salt);
+    if(el('cfg-bkp-pass1'))el('cfg-bkp-pass1').value='';
+    if(el('cfg-bkp-pass2'))el('cfg-bkp-pass2').value='';
+    logAction('Contraseña de respaldo '+(hadPass?'cambiada':'configurada'));
+    saveDB();
+    _updateBkpPassUI();
+    toast('🔐 Contraseña de respaldo guardada');
+  }catch(e){if(errEl)errEl.textContent='Error: '+e.message;}
+}
+function removeBackupPass(){
+  confirm2('¿Quitar la contraseña de respaldo? Los nuevos backups no se cifrarán. Los backups cifrados anteriores no se podrán recuperar sin la contraseña.',function(){
+    if(!db.settings)db.settings={};
+    db.settings.backupPassHash=null;
+    db.settings.backupKeySalt=null;
+    _bkpKey=null;
+    logAction('Contraseña de respaldo eliminada');
+    saveDB();
+    _updateBkpPassUI();
+    toast('✅ Contraseña de respaldo eliminada');
+  });
+}
+
 // BACKUP AUTOMÁTICO
 let _restoredFromBackup=false;
 function toastQuick(m){const e=el('toast');if(!e)return;e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2000);}
@@ -2936,7 +3101,10 @@ function doAutoBackup(){
   if(!db||(!db.products.length&&!db.sales.length))return;
   try{
     const ts=new Date().toISOString();
-    localStorage.setItem('4kpos_backup',JSON.stringify({ts,db:JSON.parse(JSON.stringify(db))}));
+    const _payload=JSON.stringify({ts,db:JSON.parse(JSON.stringify(db))});
+    let _stored=_payload;
+    if(_bkpKey&&_hasBackupCfg()){try{_stored=_encryptBkpStr(_payload);}catch(e){}}
+    localStorage.setItem('4kpos_backup',_stored);
     localStorage.setItem('4kpos_backup_ts',ts);
     const lbl=el('last-backup-lbl');if(lbl)lbl.textContent=new Date(ts).toLocaleString(lang);
   }catch(e){}
@@ -2989,7 +3157,7 @@ function _onInactivityTimeout(){
   toast('🔒 Sesión bloqueada por inactividad'+(cart&&cart.length?' — carrito guardado':''));
 }
 function _sessionLogout(){
-  _stopInactivityTimer();
+  _stopInactivityTimer();_bkpKey=null;
   if(!curUser)return;
   if(_notifInterval){clearInterval(_notifInterval);_notifInterval=null;}
   closeNotifPanel();_notifs=[];_updateNotifBadge();
@@ -3021,6 +3189,23 @@ function restoreFromBackup(){
   return false;
 }
 function exportDB(){
+  if(_hasBackupCfg()){
+    if(!_bkpKey){
+      _openBkpPassModal('🔐 Cifrar exportación','Ingresa tu contraseña de respaldo para cifrar el archivo.',{mode:'unlock',cb:exportDB});
+      return;
+    }
+    try{
+      const _plain=JSON.stringify({ts:new Date().toISOString(),version:'4kpos-v5',db:db});
+      const _encJson=_encryptBkpStr(_plain);
+      const blob=new Blob([_encJson],{type:'application/json'});
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download='4kpos-backup-enc-'+new Date().toISOString().slice(0,10)+'.json';
+      a.click();URL.revokeObjectURL(a.href);
+      toast('🔐 Datos exportados y cifrados');
+      return;
+    }catch(e){toast('⚠ Error al cifrar: '+e.message);return;}
+  }
   const data=JSON.stringify({ts:new Date().toISOString(),version:'4kpos-v5',db:db},null,2);
   const blob=new Blob([data],{type:'application/json'});
   const a=document.createElement('a');
@@ -3035,21 +3220,14 @@ function importDB(input){
   reader.onload=function(ev){
     try{
       const parsed=JSON.parse(ev.target.result);
+      if(parsed.encrypted){
+        input.value='';
+        _openBkpPassModal('🔐 Descifrar respaldo','Este archivo está cifrado. Ingresa la contraseña de respaldo para importarlo.',{mode:'import',data:parsed});
+        return;
+      }
       const data=parsed.db||parsed;
       if(!data.products&&!data.sales){toast('⚠ Archivo inválido');return;}
-      confirm2('¿Restaurar datos desde este archivo? Se perderán cambios no guardados.',function(){
-        if(data.products)db.products=data.products;
-        if(data.categories)db.categories=data.categories;
-        if(data.sales)db.sales=data.sales;
-        if(data.orderNum)db.orderNum=data.orderNum;
-        if(data.cfg)db.cfg=Object.assign(db.cfg,data.cfg);
-        if(data.users&&data.users.length)db.users=data.users;
-        if(data.openAccounts)db.openAccounts=data.openAccounts;
-        if(data.customers)db.customers=data.customers;
-        if(data.payMethods)db.payMethods=Object.assign(db.payMethods,data.payMethods);
-        saveDB();showCategories();renderCart();
-        toast('✅ Datos importados correctamente');
-      });
+      _doImportData(data);
     }catch(err){toast('⚠ Error al leer archivo');}
     input.value='';
   };
@@ -3064,6 +3242,15 @@ function toggleBackupList(){
     const raw=localStorage.getItem('4kpos_backup');
     if(!raw){list.innerHTML='<div style="font-size:.75rem;color:var(--tx3)">No hay backup guardado</div>';return;}
     const saved=JSON.parse(raw);
+    if(saved.encrypted){
+      const ts=localStorage.getItem('4kpos_backup_ts')||'';
+      const lbl=ts?new Date(ts).toLocaleString('es',{dateStyle:'medium',timeStyle:'short'}):'—';
+      list.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">'
+        +'<div><div style="font-size:.78rem;color:var(--tx);font-weight:600">🔐 '+lbl+'</div>'
+        +'<div style="font-size:.7rem;color:var(--tx3)">Backup cifrado</div></div>'
+        +'<button class="btn btn-s" style="font-size:.72rem;padding:3px 8px" onclick="restoreBackup()">Restaurar</button></div>';
+      return;
+    }
     const d=new Date(saved.ts);
     const lbl=d.toLocaleString('es',{dateStyle:'medium',timeStyle:'short'});
     const cnt=(saved.db&&saved.db.products||[]).length;
@@ -3076,7 +3263,21 @@ function toggleBackupList(){
 function restoreBackup(){
   try{
     const raw=localStorage.getItem('4kpos_backup');if(!raw){toast('⚠ Backup no encontrado');return;}
-    const saved=JSON.parse(raw);if(!saved||!saved.db){toast('⚠ Backup inválido');return;}
+    const saved=JSON.parse(raw);if(!saved){toast('⚠ Backup inválido');return;}
+    if(saved.encrypted){
+      if(_bkpKey&&_hasBackupCfg()){
+        try{
+          const plain=_decryptBkpObjWithKey(saved,_bkpKey);
+          const parsed=JSON.parse(plain);const data2=parsed.db||parsed;
+          confirm2('¿Restaurar backup cifrado? Se perderán los cambios no guardados.',function(){
+            Object.assign(db,data2);saveDB();showCategories();renderCart();toast('✅ Backup restaurado');
+          });return;
+        }catch(e){}
+      }
+      _openBkpPassModal('🔐 Descifrar respaldo','Ingresa la contraseña de respaldo para restaurar.',{mode:'restore-auto',data:saved});
+      return;
+    }
+    if(!saved.db){toast('⚠ Backup inválido');return;}
     confirm2('¿Restaurar backup? Se perderán los cambios no guardados.',function(){
       Object.assign(db,saved.db);saveDB();showCategories();renderCart();
       toast('✅ Backup restaurado');
@@ -3977,6 +4178,7 @@ function loadAdminModal(){
   if(db.cfg.logo)el('logo-prev').innerHTML='<img src="'+db.cfg.logo+'" style="width:100%;height:100%;object-fit:contain">';
   if(el('cfg-inactivity-enabled'))el('cfg-inactivity-enabled').checked=(db.settings&&db.settings.inactivityLockEnabled)!==false;
   if(el('cfg-inactivity-mins'))el('cfg-inactivity-mins').value=(db.settings&&db.settings.inactivityMinutes)||10;
+  _updateBkpPassUI();
 }
 function admTab(tab,e2){
   ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits'].forEach(t=>{const el2=el(t);if(el2)el2.style.display='none';});
