@@ -5,6 +5,30 @@ const os = require('os')
 const crypto = require('crypto')
 const { activateLicense, verifyLicense, getLicenseInfo, getHardwareId, getDeviceCode, extendLicenseOffline, readLocalLicense } = require('./license')
 
+// DevTools solo en desarrollo — se declara PRIMERO, antes de cualquier require que spawne procesos
+const isDev = !app.isPackaged
+
+// Suprimir ventanas CMD de procesos hijos en Windows (producción)
+// DEBE estar ANTES de require('electron-updater') para que electron-updater cargue con spawn ya parchado
+if (process.platform === 'win32' && !isDev) {
+  const _cp = require('child_process')
+  ;['spawn', 'fork', 'execFile'].forEach(function(m) {
+    const _orig = _cp[m]
+    _cp[m] = function(cmd, args, opts) {
+      const rest = Array.prototype.slice.call(arguments, 3)
+      if (typeof opts === 'object' && opts !== null) opts = Object.assign({}, opts, {windowsHide: true})
+      else opts = {windowsHide: true}
+      return _orig.apply(_cp, [cmd, args, opts].concat(rest))
+    }
+  })
+  const _origExec = _cp.exec
+  _cp.exec = function(cmd, opts, cb) {
+    if (typeof opts === 'function') { cb = opts; opts = {windowsHide: true} }
+    else opts = Object.assign({}, opts || {}, {windowsHide: true})
+    return _origExec.call(_cp, cmd, opts, cb)
+  }
+}
+
 const logFile = path.join(app.getPath('userData'), 'update-log.txt')
 function logUpdate(msg) {
   try { fs.appendFileSync(logFile, new Date().toISOString() + ' ' + msg + '\n') } catch(e) {}
@@ -38,16 +62,6 @@ try {
   setTimeout(() => { logUpdate('Auto check starting'); autoUpdater.checkForUpdatesAndNotify() }, 10000)
 } catch(e) {
   logUpdate('FAILED to load electron-updater: ' + e.message)
-}
-
-// DevTools solo en desarrollo (auto-detectado: true cuando no está empaquetado)
-const isDev = !app.isPackaged
-
-// Suppress CMD console windows from child processes on Windows in production
-if (process.platform === 'win32' && !isDev) {
-  const _cp = require('child_process')
-  const _origSpawn = _cp.spawn
-  _cp.spawn = (cmd, args, opts) => _origSpawn(cmd, args, Object.assign({}, opts, {windowsHide: true}))
 }
 
 // ── ID único de máquina ────────────────────────
