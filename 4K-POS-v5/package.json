@@ -23,7 +23,8 @@
       {
         "provider": "github",
         "owner": "4kpos",
-        "repo": "4kpos-app"
+        "repo": "4kpos-app",
+        "releaseType": "release"
       }
     ],
     "directories": {
