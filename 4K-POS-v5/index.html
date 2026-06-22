@@ -1300,6 +1300,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 // Supabase anon key — get it from: Supabase dashboard → Settings → API → Project API keys → "anon public"
 const APP_VERSION = (function(){try{return require('./package.json').version;}catch(e){return '5.3.0';}})();
 let bcrypt; try{bcrypt=require('bcryptjs');}catch(e){console.warn('bcryptjs no disponible:',e.message);}
+let _shiftStatusId='shift_status_main';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6YWxuaGx1d3R5b3R1eHdrcXJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDg2OTEsImV4cCI6MjA5NTkyNDY5MX0.qtaMdroQMP4CIARsStkSWx6vGU-T5id98zczaGKGAvk';
 const SUPA_URL = 'https://izalnhluwtyotuxwkqrh.supabase.co';
 let ipcRenderer = { invoke: async function(){ return null; }, on: function(){} };
@@ -2153,6 +2154,7 @@ async function loadDB(){
   if(!db.products.length&&!db.sales.length){_restoredFromBackup=restoreFromBackup();}
 
   try{const li=await ipcRenderer.invoke('get-license-info');if(li&&li.key)db._lic=li.key;}catch(e){}
+  ipcRenderer.invoke('get-device-code').then(function(code){if(code)_shiftStatusId='shift_status_'+code;}).catch(function(){});
   if(db._lic){(async function(){
     // 1. Pull: sync minStock and categories from Supabase back to local
     try{
@@ -2492,10 +2494,11 @@ function syncCreditDirect(){
 }
 function syncShiftStatusDirect(payload){
   try{
+    var p=Object.assign({},payload,{pcId:_shiftStatusId.replace('shift_status_','')});
     fetch(SUPA_URL+'/rest/v1/categories',{
       method:'POST',
       headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
-      body:JSON.stringify({id:'shift_status',name:JSON.stringify(payload),license_key:db._lic||''})
+      body:JSON.stringify({id:_shiftStatusId,name:JSON.stringify(p),license_key:db._lic||''})
     }).catch(function(){});
   }catch(e){}
 }
