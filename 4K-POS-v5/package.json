@@ -1,6 +1,6 @@
 {
   "name": "4k-pos",
-  "version": "5.4.0",
+  "version": "5.4.1",
   "description": "4K POS - Sistema de Punto de Venta",
   "main": "main.js",
   "repository": {
@@ -40,7 +40,10 @@
       "allowToChangeInstallationDirectory": true,
       "language": "3082",
       "multiLanguageInstaller": true,
-      "installerLanguages": ["es_ES", "en_US"],
+      "installerLanguages": [
+        "es_ES",
+        "en_US"
+      ],
       "warningsAsErrors": false
     },
     "files": [
