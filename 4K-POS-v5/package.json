@@ -45,7 +45,11 @@
     "files": [
       "**/*",
       "!dist/**",
-      "!node_modules/**"
+      "!node_modules/**",
+      "!*.bat",
+      "!*.cmd",
+      "!*.ps1",
+      "!*.vbs"
     ]
   },
   "devDependencies": {

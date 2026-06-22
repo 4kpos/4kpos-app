@@ -2316,6 +2316,9 @@ function saveWriteNote(){
   db.cfg.pendingShiftNote=val.trim()||null;
   saveDB();
   _updateNoteBadge();
+  if(db.cfg.shiftOpen){
+    syncShiftStatusDirect({active:true,currentUser:db.cfg.shiftUser||'',shiftOpenedAt:db.cfg.shiftOpenAt||new Date().toISOString(),lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg.pendingShiftNote});
+  }
   closeOv('ov-write-note');
   toast(val.trim()?'📋 '+(lang==='en'?'Note saved':'Nota guardada'):'📋 '+(lang==='en'?'Note cleared':'Nota eliminada'));
 }
@@ -3523,7 +3526,7 @@ function _onInactivityTimeout(){
     _saveOAs(_oaList);
   }
   logAction('Cierre por inactividad',_userName+' · '+((db.settings&&db.settings.inactivityMinutes)||10)+' min sin actividad');
-  syncShiftStatusDirect({active:true,currentUser:_userName,lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString()});
+  syncShiftStatusDirect({active:true,currentUser:_userName,lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg&&db.cfg.pendingShiftNote||null});
   _sessionLogout();
   toast(t('sessionLockedInactivity')+(cart&&cart.length?' '+t('cartSaved'):''));
 }
@@ -3557,7 +3560,7 @@ function doQuickLock(){
     _saveOAs(_oaList);
   }
   logAction('Sesión bloqueada manualmente',_uName);
-  syncShiftStatusDirect({active:true,currentUser:_uName,lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString()});
+  syncShiftStatusDirect({active:true,currentUser:_uName,lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg&&db.cfg.pendingShiftNote||null});
   _sessionLogout();
   toast(t('sessionLocked')+(_hadCart?' '+t('cartSaved'):''));
 }
