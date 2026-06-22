@@ -20,6 +20,21 @@ jobs:
         working-directory: 4K-POS-v5
         run: npm install --legacy-peer-deps
 
+      - name: Bump patch version
+        shell: bash
+        run: |
+          cd 4K-POS-v5
+          CURRENT=$(node -p "require('./package.json').version")
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          NEW="$MAJOR.$MINOR.$((PATCH + 1))"
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version='$NEW';fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n');"
+          git config user.email "github-actions@github.com"
+          git config user.name "GitHub Actions"
+          git add package.json
+          git commit -m "chore: bump version to $NEW [skip ci]"
+          git push
+          echo "Version bumped: $CURRENT → $NEW"
+
       - name: Inject extension code secret
         shell: bash
         run: |

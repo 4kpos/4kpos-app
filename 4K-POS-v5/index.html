@@ -452,6 +452,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div class="hmi" style="color:#3b82f6" onclick="closeHMenu();openDashQR()">📱 <span>Dashboard</span></div>
   <div class="hmi" style="color:#10b981" id="hm-update" onclick="closeHMenu();checkUpdates()">⬆️ <span id="hm-update-txt">Buscar actualizaciones</span></div>
   <div class="hmi" style="color:#8b5cf6;display:none" id="hm-audit" onclick="closeHMenu();openAudit()">📋 <span id="hm-audit-txt">Auditoría</span></div>
+  <div class="hmi" style="color:#f59e0b" id="hm-abonos" onclick="closeHMenu();openAbonosList()">💰 <span id="hm-abonos-txt">Abonos de crédito</span></div>
   <div class="hmi" style="color:#fbbf24" id="hm-note" onclick="closeHMenu();openWriteNote()">📋 <span id="hm-note-txt">Nota para el próximo turno</span></div>
   <div class="hmi" style="color:#f87171" onclick="doQuickLock()">🔒 <span id="hm-lock-txt">Bloquear sesión</span></div>
   <div id="hm-ver" style="padding:8px 16px;font-size:.68rem;color:var(--tx3);text-align:center;border-top:1px solid var(--b1);cursor:default;user-select:none"></div>
@@ -1190,6 +1191,42 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <button class="btn btn-g" onclick="doCreditPayment(true)" id="cpay-full-btn">✓ <span id="cpay-full-txt">Total</span></button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ABONO RÁPIDO (cualquier usuario) -->
+<div class="ov" id="ov-abono">
+  <div class="modal mnarrow">
+    <div class="mh"><h3>💰 Registrar Abono</h3><button class="mx" onclick="closeOv('ov-abono')">✕</button></div>
+    <div class="mb">
+      <div style="background:var(--s2);border-radius:var(--rs);padding:10px 12px;margin-bottom:12px">
+        <div style="font-weight:700;font-size:.9rem;color:var(--tx)" id="abono-client-name"></div>
+        <div style="font-size:.8rem;color:var(--am);margin-top:3px">Pendiente: <span id="abono-pending" style="font-family:monospace;font-weight:700"></span></div>
+      </div>
+      <div class="fg" style="margin-bottom:10px">
+        <label class="lbl">Monto a abonar</label>
+        <input type="number" class="fi" id="abono-amount" min="0.01" step="0.01" placeholder="0.00" oninput="if(parseFloat(this.value)>_abonoMax)this.value=_abonoMax">
+      </div>
+      <div class="fg" style="margin-bottom:14px">
+        <label class="lbl">Método de pago</label>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button id="abono-m-cash" class="btn btn-p" onclick="setAbonoMethod('cash')" style="flex:1">💵 Efectivo</button>
+          <button id="abono-m-card" class="btn btn-s" onclick="setAbonoMethod('card')" style="flex:1">💳 Tarjeta</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-p" onclick="confirmAbono()" style="flex:1;padding:10px">✓ Confirmar</button>
+        <button class="btn btn-s" onclick="closeOv('ov-abono')" style="flex:1;padding:10px">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LISTA DE ABONOS (menú hamburguesa, sin permiso) -->
+<div class="ov" id="ov-abonos-list">
+  <div class="modal">
+    <div class="mh"><h3>💰 Abonos de Crédito</h3><button class="mx" onclick="closeOv('ov-abonos-list')">✕</button></div>
+    <div class="mb" id="abonos-list-body"></div>
   </div>
 </div>
 
@@ -3878,7 +3915,8 @@ function _dueBadge(dueDate){
 function _buildCreditCard(c,compact){
   const owed=c.total-c.paid;
   const dateStr=new Date(c.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
-  const btns='<div style="display:flex;gap:6px;margin-top:8px">'
+  const btns='<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'
+    +'<button class="btn btn-p" style="font-size:.75rem" onclick="openAbono(\''+c._key+'\')">💰 Abonar</button>'
     +'<button class="btn btn-s" style="font-size:.75rem" onclick="openCreditPay(\''+c._key+'\')">💵 '+t('partialPayment')+'</button>'
     +'<button class="btn btn-g" style="font-size:.75rem" onclick="payCreditFull(\''+c._key+'\')">✅ '+t('markPaid')+'</button>'
     +'</div>';
@@ -3938,6 +3976,64 @@ function renderAdmCredits(){
   const list=el('adm-credits-list');if(!list)return;
   if(!pending.length){list.innerHTML='<p style="color:var(--tx3);padding:20px 0;text-align:center">'+t('noPendingCredits')+'</p>';return;}
   list.innerHTML=pending.map(function(c){return _buildCreditCard(c,false);}).join('');
+}
+// ── ABONO RÁPIDO (cualquier usuario logueado) ─────────────
+let _abonoKey=null,_abonoMethod='cash',_abonoMax=0;
+function openAbono(key){
+  const c=_getPendingCredits().find(function(x){return x._key===key;});if(!c)return;
+  _abonoKey=key;_abonoMax=Math.round((c.total-c.paid)*100)/100;
+  const nameEl=el('abono-client-name');if(nameEl)nameEl.textContent=c.client+(c.cedula?' · CI '+c.cedula:'');
+  const pendEl=el('abono-pending');if(pendEl)pendEl.textContent=dolr(_abonoMax);
+  const amt=el('abono-amount');if(amt){amt.value='';amt.max=_abonoMax;}
+  setAbonoMethod('cash');
+  openOv('ov-abono');
+  setTimeout(function(){const i=el('abono-amount');if(i){i.focus();i.select();}},120);
+}
+function setAbonoMethod(m){
+  _abonoMethod=m;
+  const cash=el('abono-m-cash'),card=el('abono-m-card');
+  if(cash)cash.className='btn '+(m==='cash'?'btn-p':'btn-s');
+  if(card)card.className='btn '+(m==='card'?'btn-p':'btn-s');
+}
+function confirmAbono(){
+  if(!_abonoKey)return;
+  const c=_getPendingCredits().find(function(x){return x._key===_abonoKey;});if(!c)return;
+  const owed=c.total-c.paid;
+  const amt=Math.min(parseFloat((el('abono-amount')||{}).value)||0,owed);
+  if(!amt||amt<=0){toast('⚠ Ingresa un monto válido');return;}
+  const now=new Date().toISOString();
+  const cashP=_abonoMethod==='cash'?amt:0,cardP=_abonoMethod==='card'?amt:0;
+  const payRec={date:now,amount:amt,method:_abonoMethod,cashPart:cashP,cardPart:cardP};
+  if(c._src==='sale'){
+    const s=(db.sales||[]).find(function(x){return x.id===c.saleId;});if(!s)return;
+    s.creditPaid=(s.creditPaid||0)+amt;
+    if(!s.creditPayments)s.creditPayments=[];
+    s.creditPayments.push(payRec);
+    s.creditStatus=s.creditPaid>=s.total?'paid':'partial';
+  }else{
+    const cr=(db.credits||[]).find(function(x){return x.id===c._credId;});if(!cr)return;
+    cr.paid+=amt;cr.payments.push(payRec);
+  }
+  saveDB();
+  logAction('Abono registrado','Cliente: '+c.client+' · Monto: '+dolr(amt)+' · Usuario: '+(curUser?curUser.name:'—'));
+  closeOv('ov-abono');
+  renderCreditsPanel();renderAdmCredits();calcNotifs();
+  const ctCred=el('ct-cred');if(ctCred&&ctCred.style.display!=='none')renderContaCredits();
+  renderAbonosList();
+  toast('✓ Abono '+dolr(amt)+' — '+c.client+(amt>=owed?' · ✅ Pagado':''));
+}
+function openAbonosList(){
+  renderAbonosList();
+  openOv('ov-abonos-list');
+}
+function renderAbonosList(){
+  const list=el('abonos-list-body');if(!list)return;
+  const pending=_getPendingCredits();
+  if(!pending.length){
+    list.innerHTML='<div style="padding:24px;text-align:center;color:var(--tx3);font-size:.85rem">Sin créditos pendientes ✓</div>';
+    return;
+  }
+  list.innerHTML=pending.map(function(c){return _buildCreditCard(c,true);}).join('');
 }
 let _cpayKey=null;
 let _cpayMethod='cash';
