@@ -43,6 +43,13 @@ try {
 // DevTools solo en desarrollo (auto-detectado: true cuando no está empaquetado)
 const isDev = !app.isPackaged
 
+// Suppress CMD console windows from child processes on Windows in production
+if (process.platform === 'win32' && !isDev) {
+  const _cp = require('child_process')
+  const _origSpawn = _cp.spawn
+  _cp.spawn = (cmd, args, opts) => _origSpawn(cmd, args, Object.assign({}, opts, {windowsHide: true}))
+}
+
 // ── ID único de máquina ────────────────────────
 function getMachineId() {
   const info = os.hostname() + os.platform() + os.arch() + (os.cpus()[0]?.model || '')

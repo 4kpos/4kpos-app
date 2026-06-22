@@ -776,6 +776,16 @@ select.fi option{background:var(--s2);color:var(--tx);}
   </div>
 </div>
 
+<!-- NOTA DE TURNO ANTERIOR -->
+<div id="shift-note-screen" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:7001;display:none;align-items:center;justify-content:center;">
+  <div class="sobox" style="max-width:400px;text-align:left">
+    <div style="font-size:1.4rem;margin-bottom:6px;text-align:center">📋</div>
+    <div style="font-weight:800;font-size:.95rem;margin-bottom:10px;color:var(--tx);text-align:center" id="sn-title">Nota del turno anterior</div>
+    <div id="sn-text" style="background:var(--s2);border:1.5px solid var(--b2);border-radius:var(--rs);padding:12px;font-size:.88rem;color:var(--tx2);white-space:pre-wrap;margin-bottom:16px;max-height:180px;overflow-y:auto"></div>
+    <button class="btn btn-p" style="width:100%;padding:11px" id="sn-btn" onclick="dismissShiftNote()">✓ Entendido</button>
+  </div>
+</div>
+
 <!-- LOGOUT -->
 <div class="ov" id="ov-logout">
   <div class="modal mnarrow" style="display:flex;flex-direction:column;overflow-y:hidden">
@@ -791,6 +801,10 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div style="font-weight:700;font-size:.85rem;margin-bottom:8px;color:var(--tx)" id="lo-cash-close-lbl">Efectivo en caja</div>
         <div class="fg"><label class="lbl" id="lo-declared-lbl">Efectivo declarado</label><input type="number" class="fi" id="lo-declared-cash" placeholder="0.00" step="0.01" oninput="calcCashDiff()"></div>
         <div style="margin-top:8px;font-size:.85rem" id="lo-cash-diff-box"></div>
+      </div>
+      <div style="margin-top:12px">
+        <label class="lbl" id="lo-note-lbl">📋 Nota para el próximo turno</label>
+        <textarea id="lo-shift-note" class="fi" rows="2" placeholder="Escribe aquí tu nota..." style="resize:none;width:100%;font-size:.8rem;height:54px"></textarea>
       </div>
     </div>
     <div style="padding:10px 16px 14px;border-top:1.5px solid var(--b1);background:var(--s1);display:flex;flex-direction:column;gap:6px;flex-shrink:0">
@@ -1412,6 +1426,7 @@ const T = {
     dashboardBtn:'📱 Dashboard móvil',dashboardProOnly:'El dashboard móvil está disponible en el plan Pro. Actualiza tu plan para acceder.',
     checkUpdates:'Buscar actualizaciones',
     offlineDaysLeft:'días restantes sin internet',
+    shiftNoteLabel:'📋 Nota para el próximo turno',shiftNoteTitle:'Nota del turno anterior',shiftNotePh:'Escribe aquí tu nota...',shiftNoteBtn:'✓ Entendido',
     // Login lock / attempts
     accountLockedPrefix:'⛔ Cuenta bloqueada. Intenta en ',accountLockedSuffix:' min.',
     tooManyAttempts:'⛔ Demasiados intentos. Cuenta bloqueada 5 min.',
@@ -1573,6 +1588,7 @@ const T = {
     dashboardBtn:'📱 Mobile Dashboard',dashboardProOnly:'Mobile dashboard is available on the Pro plan. Upgrade your plan to access.',
     checkUpdates:'Check for updates',
     offlineDaysLeft:'days left offline',
+    shiftNoteLabel:'📋 Note for next shift',shiftNoteTitle:'Note from previous shift',shiftNotePh:'Write your note here...',shiftNoteBtn:'✓ Got it',
     // Login lock / attempts
     accountLockedPrefix:'⛔ Account locked. Try in ',accountLockedSuffix:' min.',
     tooManyAttempts:'⛔ Too many attempts. Account locked 5 min.',
@@ -1711,6 +1727,10 @@ function applyLang(){
   const _loFundLbl=el('lo-fund-lbl');if(_loFundLbl)_loFundLbl.textContent=t('fundLbl');
   const _loPrint=el('lo-print-btn');if(_loPrint)_loPrint.textContent=t('printReport');
   const _loConfirm=el('lo-confirm-btn');if(_loConfirm)_loConfirm.textContent=t('closeShiftConfirm');
+  const _loNoteLbl=el('lo-note-lbl');if(_loNoteLbl)_loNoteLbl.textContent=t('shiftNoteLabel');
+  const _loNoteFld=el('lo-shift-note');if(_loNoteFld)_loNoteFld.placeholder=t('shiftNotePh');
+  const _snTitle=el('sn-title');if(_snTitle)_snTitle.textContent=t('shiftNoteTitle');
+  const _snBtn=el('sn-btn');if(_snBtn)_snBtn.textContent=t('shiftNoteBtn');
   // Cart
   const _cartttl=el('cart-ttl-txt');if(_cartttl)_cartttl.textContent=t('order');
   const _clrbtn=el('clr-btn');if(_clrbtn)_clrbtn.textContent=t('clear');
@@ -2232,11 +2252,27 @@ function renderLoginUsers(){
 
 function _continueAfterLogin(found){
   found=found||curUser;
+  const _note=db.cfg&&db.cfg.pendingShiftNote;
+  if(_note){
+    el('sn-text').textContent=_note;
+    el('shift-note-screen').style.display='flex';
+    db.cfg.pendingShiftNote=null;
+    saveDB();
+    return;
+  }
+  _proceedAfterLogin(found);
+}
+function _proceedAfterLogin(found){
+  found=found||curUser;
   if(!db.cfg||!db.cfg.shiftOpen){
     setEl('so-fund',dolr(db.fundAmount||0));
     setEl('so-user',t('shiftWelcome')+', '+found.name);
     el('shift-open-screen').classList.add('show');
   }else startApp();
+}
+function dismissShiftNote(){
+  el('shift-note-screen').style.display='none';
+  _proceedAfterLogin(curUser);
 }
 function resetUserPass(id){
   var u=db.users.find(function(x){return x.id===id;});
@@ -2375,12 +2411,13 @@ function syncShiftStatus(status){
     db.cfg.shiftUser=userName;
     db.cfg.shiftOpenAt=now;
     db.cfg.shiftClosedAt=null;
-    syncShiftStatusDirect({active:true,currentUser:userName,shiftOpenedAt:now,updatedAt:now});
+    syncShiftStatusDirect({active:true,currentUser:userName,shiftOpenedAt:now,updatedAt:now,note:null});
   }else{
     db.cfg.shiftOpen=false;
     db.cfg.shiftUser=userName;
     db.cfg.shiftClosedAt=now;
-    syncShiftStatusDirect({active:false,currentUser:userName,shiftClosedAt:now,updatedAt:now});
+    const _syncNote=db.cfg&&db.cfg.pendingShiftNote||null;
+    syncShiftStatusDirect({active:false,currentUser:userName,shiftClosedAt:now,updatedAt:now,note:_syncNote});
   }
   saveDB();
 }
@@ -2532,6 +2569,9 @@ function doLogout(){
   const _expCash2=(_bpS.cash||0)+(_aboS.cashPart||0);
   const _diff2=Math.round((_decl2-_expCash2)*100)/100;
   logAction('Cierre de turno',_shiftActive.length+' ventas · Efectivo: '+dolr(_bpS.cash||0)+(_diff2!==0?' · Descuadre: '+(_diff2<0?'-':'+')+'$'+Math.abs(_diff2).toFixed(2):''));
+  const _noteVal=(el('lo-shift-note')||{}).value||'';
+  if(!db.cfg)db.cfg={};
+  db.cfg.pendingShiftNote=_noteVal.trim()||null;
   syncShiftStatus('closed');
   if(_notifInterval){clearInterval(_notifInterval);_notifInterval=null;}
   closeNotifPanel();_notifs=[];_updateNotifBadge();
@@ -4243,6 +4283,7 @@ function openLogout(){
   el('lo-report').innerHTML=report;
   const cashFld=el('lo-declared-cash');if(cashFld)cashFld.value='';
   const cashDiffBox=el('lo-cash-diff-box');if(cashDiffBox)cashDiffBox.innerHTML='';
+  const noteFld=el('lo-shift-note');if(noteFld)noteFld.value='';
   const confirmBtn=el('lo-confirm-btn');if(confirmBtn)confirmBtn.disabled=true;
   const forceBtn=el('lo-force-btn');if(forceBtn)forceBtn.style.display='none';
   openOv('ov-logout');
