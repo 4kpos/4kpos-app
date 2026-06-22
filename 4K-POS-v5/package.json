@@ -18,7 +18,7 @@
   "build": {
     "appId": "com.4kpos.app",
     "productName": "4K POS",
-    "asar": false,
+    "asar": true,
     "publish": [
       {
         "provider": "github",

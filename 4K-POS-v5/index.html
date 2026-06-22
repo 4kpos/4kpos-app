@@ -48,6 +48,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 #notif-btn{background:none;border:none;cursor:pointer;font-size:1.05rem;padding:4px 5px;position:relative;color:var(--tx2);line-height:1;border-radius:8px;display:flex;align-items:center;}
 #notif-btn:hover{background:var(--s2);}
 #notif-badge{display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;border-radius:50%;font-size:.58rem;font-weight:800;min-width:15px;height:15px;align-items:center;justify-content:center;padding:0 2px;line-height:1;box-shadow:0 0 0 2px var(--bg);}
+#note-btn{background:none;border:none;cursor:pointer;font-size:1.05rem;padding:4px 5px;position:relative;color:var(--tx2);line-height:1;border-radius:8px;display:none;align-items:center;}
+#note-btn:hover{background:var(--s2);}
+#note-badge{display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;border-radius:50%;font-size:.58rem;font-weight:800;min-width:15px;height:15px;align-items:center;justify-content:center;padding:0 2px;line-height:1;box-shadow:0 0 0 2px var(--bg);}
 #notif-panel{display:none;position:fixed;top:60px;right:10px;width:320px;max-height:440px;overflow-y:auto;background:var(--s1);border:1.5px solid var(--b2);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.45);z-index:8501;}
 #notif-panel-hdr{padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;justify-content:space-between;align-items:center;font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;}
 .notif-row{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--b1);cursor:pointer;align-items:flex-start;transition:background .15s;}
@@ -370,6 +373,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <div class="lic-badge lic-ok" id="lic-badge" style="display:none">✓</div>
     <span class="lic-badge lic-warn" id="offline-countdown" style="display:none"></span>
     <button id="notif-btn" onclick="toggleNotifPanel()" title="Notificaciones">🔔<span id="notif-badge">0</span></button>
+    <button id="note-btn" onclick="openWriteNote()" title="Nota para el próximo turno">📬<span id="note-badge">1</span></button>
   </div>
   <div style="display:flex;gap:5px">
     <div style="position:relative">
@@ -382,7 +386,6 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <button class="tbtn" id="lang-toggle-btn" onclick="switchLang()" title="Cambiar idioma / Switch language">🌐</button>
     <button class="tbtn" onclick="toggleCalc()">🧮</button>
     <button class="tbtn" onclick="toggleTheme()" id="tbtn-theme">🌙</button>
-    <button class="tbtn" id="tbtn-note" onclick="openWriteNote()" title="Nota para el próximo turno" style="display:none">📋</button>
     <button class="tbtn" onclick="openLogout()" style="color:var(--rd)" title="Cerrar turno">🚪</button>
   </div>
 </div>
@@ -1756,7 +1759,7 @@ function applyLang(){
   const _wnSave=el('wn-save-btn');if(_wnSave)_wnSave.textContent=t('writeNoteSave');
   const _wnNote=el('wn-note');if(_wnNote)_wnNote.placeholder=t('shiftNotePh');
   const _hmNoteTxt=el('hm-note-txt');if(_hmNoteTxt)_hmNoteTxt.textContent=t('writeNoteMenu');
-  const _tbNote=el('tbtn-note');if(_tbNote)_tbNote.title=t('writeNoteMenu');
+  const _tbNote=el('note-btn');if(_tbNote)_tbNote.title=t('writeNoteMenu');
   // Cart
   const _cartttl=el('cart-ttl-txt');if(_cartttl)_cartttl.textContent=t('order');
   const _clrbtn=el('clr-btn');if(_clrbtn)_clrbtn.textContent=t('clear');
@@ -2284,6 +2287,7 @@ function _continueAfterLogin(found){
     el('shift-note-screen').style.display='flex';
     db.cfg.pendingShiftNote=null;
     saveDB();
+    _updateNoteBadge();
     return;
   }
   _proceedAfterLogin(found);
@@ -2311,6 +2315,7 @@ function saveWriteNote(){
   if(!db.cfg)db.cfg={};
   db.cfg.pendingShiftNote=val.trim()||null;
   saveDB();
+  _updateNoteBadge();
   closeOv('ov-write-note');
   toast(val.trim()?'📋 '+(lang==='en'?'Note saved':'Nota guardada'):'📋 '+(lang==='en'?'Note cleared':'Nota eliminada'));
 }
@@ -2495,7 +2500,8 @@ function startApp(){
   el('login-screen').style.display='none';
   el('topbar').style.display='flex';
   el('app-main').style.display='flex';
-  const _tnote=el('tbtn-note');if(_tnote)_tnote.style.display='';
+  const _tnote=el('note-btn');if(_tnote)_tnote.style.display='flex';
+  _updateNoteBadge();
 
   showCategories();
   renderCart();
@@ -2617,7 +2623,8 @@ function doLogout(){
   if(_notifInterval){clearInterval(_notifInterval);_notifInterval=null;}
   closeNotifPanel();_notifs=[];_updateNotifBadge();
   closeOv('ov-logout');curUser=null;cart=[];cashIn='';
-  const _tnote2=el('tbtn-note');if(_tnote2)_tnote2.style.display='none';
+  const _tnote2=el('note-btn');if(_tnote2)_tnote2.style.display='none';
+  _updateNoteBadge();
   // hideMainUI();
   el('shift-open-screen').classList.remove('show');
   setEl('usr-lbl','—');
@@ -5382,6 +5389,13 @@ function _updateNotifBadge(){
     badge.style.display='none';
     btn.style.color='';
   }
+}
+
+function _updateNoteBadge(){
+  const badge=el('note-badge');
+  if(!badge)return;
+  const hasNote=!!(db&&db.cfg&&db.cfg.pendingShiftNote);
+  badge.style.display=hasNote?'flex':'none';
 }
 
 function toggleNotifPanel(){
