@@ -790,7 +790,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <textarea id="wn-note" class="fi" placeholder="Escribe aquí tu nota..." style="resize:none;width:100%;font-size:.88rem;height:100px"></textarea>
     </div>
     <div style="padding:10px 16px 14px;border-top:1.5px solid var(--b1);background:var(--s1);display:flex;gap:8px;flex-shrink:0">
-      <button class="btn" style="flex:1;background:var(--s2);border:1.5px solid var(--b1);color:var(--tx2);padding:11px" id="wn-skip-btn" onclick="closeOv('ov-write-note')">Omitir</button>
+      <button class="btn" style="flex:1;background:var(--s2);border:1.5px solid var(--b1);color:var(--tx2);padding:11px" id="wn-skip-btn" onclick="skipWriteNote()">Omitir</button>
       <button class="btn btn-p" style="flex:2;padding:11px" id="wn-save-btn" onclick="saveWriteNote()">💾 Guardar nota</button>
     </div>
   </div>
@@ -2309,6 +2309,13 @@ function openWriteNote(){
   if(fld)fld.value=(db.cfg&&db.cfg.pendingShiftNote)||'';
   openOv('ov-write-note');
   setTimeout(function(){if(fld)fld.focus();},100);
+}
+function skipWriteNote(){
+  if(!db.cfg)db.cfg={};
+  db.cfg.pendingShiftNote=null;
+  saveDB();
+  _updateNoteBadge();
+  closeOv('ov-write-note');
 }
 function saveWriteNote(){
   const val=(el('wn-note')||{}).value||'';
