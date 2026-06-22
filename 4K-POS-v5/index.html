@@ -991,6 +991,10 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <button class="btn btn-s" id="cred-f-all" data-f="all" onclick="setCredFilter('all')">Todos</button>
           <button class="btn btn-s" style="margin-left:auto;font-size:.76rem;padding:4px 10px" onclick="exportCreditosCSV()">📥 CSV</button>
         </div>
+        <div style="position:relative;margin-bottom:8px">
+          <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:.85rem;color:var(--tx3);pointer-events:none">🔍</span>
+          <input type="text" id="cred-search" class="fi" style="padding-left:30px" placeholder="Buscar por nombre o cédula..." oninput="setCredSearch(this.value)">
+        </div>
         <div id="cred-tab-list"></div>
       </div>
     </div>
@@ -1198,7 +1202,13 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <div class="ov" id="ov-abonos-list">
   <div class="modal">
     <div class="mh"><h3>💰 Abonos de Crédito</h3><button class="mx" onclick="closeOv('ov-credit-pay');closeOv('ov-abonos-list')">✕</button></div>
-    <div class="mb" id="abonos-list-body"></div>
+    <div class="mb">
+      <div style="position:relative;margin-bottom:10px">
+        <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:.85rem;color:var(--tx3);pointer-events:none">🔍</span>
+        <input type="text" id="abono-search" class="fi" style="padding-left:30px" placeholder="Buscar por nombre o cédula..." oninput="setAbonoSearch(this.value)">
+      </div>
+      <div id="abonos-list-body"></div>
+    </div>
   </div>
 </div>
 
@@ -3950,20 +3960,31 @@ function renderAdmCredits(){
   list.innerHTML=pending.map(function(c){return _buildCreditCard(c,false);}).join('');
 }
 let _abonoFromList=false;
+let _abonoSearch='';
 function openAbonoFromList(key){
   closeOv('ov-abonos-list');
   _abonoFromList=true;
   openCreditPay(key);
 }
 function openAbonosList(){
+  _abonoSearch='';
+  const si=el('abono-search');if(si)si.value='';
   renderAbonosList();
   openOv('ov-abonos-list');
 }
+function setAbonoSearch(val){_abonoSearch=val;renderAbonosList();}
 function renderAbonosList(){
   const list=el('abonos-list-body');if(!list)return;
-  const pending=_getPendingCredits();
+  let pending=_getPendingCredits();
+  if(_abonoSearch){
+    const _aq=_abonoSearch.toLowerCase();
+    pending=pending.filter(function(c){return (c.client||'').toLowerCase().includes(_aq)||(c.cedula||'').toLowerCase().includes(_aq);});
+  }
   if(!pending.length){
-    list.innerHTML='<div style="padding:24px;text-align:center;color:var(--tx3);font-size:.85rem">Sin créditos pendientes ✓</div>';
+    const msg=_abonoSearch
+      ?'No se encontraron créditos para \''+_abonoSearch.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'\'':
+      'Sin créditos pendientes ✓';
+    list.innerHTML='<div style="padding:24px;text-align:center;color:var(--tx3);font-size:.85rem">'+msg+'</div>';
     return;
   }
   list.innerHTML=pending.map(function(c){return _buildCreditCard(c,true,true);}).join('');
@@ -5216,12 +5237,14 @@ function exportCreditosCSV(){
   toast('📥 CSV: '+list.length+' créditos');
 }
 let _credFilter='pending';
+let _credSearch='';
 function setCredFilter(f){
   _credFilter=f;
   ['pend','paid','all'].forEach(function(x){const b=el('cred-f-'+x);if(b)b.className='btn btn-s';});
   const ab=el('cred-f-'+f);if(ab)ab.className='btn btn-p';
   renderContaCredits();
 }
+function setCredSearch(val){_credSearch=val;renderContaCredits();}
 function renderContaCredits(){
   const pending=_getPendingCredits();
   const totalOwed=pending.reduce(function(s,c){return s+(c.total-c.paid);},0);
@@ -5241,9 +5264,15 @@ function renderContaCredits(){
   if(_credFilter==='pending')display=pending;
   else if(_credFilter==='paid')display=paidSales;
   else display=[].concat(pending,paidSales).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  if(_credSearch){
+    const _cq=_credSearch.toLowerCase();
+    display=display.filter(function(c){return (c.client||'').toLowerCase().includes(_cq)||(c.cedula||'').toLowerCase().includes(_cq);});
+  }
   const list=el('cred-tab-list');if(!list)return;
   if(!display.length){
-    const msg=_credFilter==='paid'?t('noPaidCredits'):_credFilter==='pending'?t('noPendingCredits'):t('noCredits');
+    const msg=_credSearch
+      ?'No se encontraron créditos para \''+_credSearch.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'\''
+      :(_credFilter==='paid'?t('noPaidCredits'):_credFilter==='pending'?t('noPendingCredits'):t('noCredits'));
     list.innerHTML='<div style="color:var(--tx3);text-align:center;padding:20px 0;font-size:.84rem">'+msg+'</div>';
     return;
   }
