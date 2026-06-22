@@ -1197,7 +1197,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <!-- LISTA DE ABONOS (menú hamburguesa, sin permiso) -->
 <div class="ov" id="ov-abonos-list">
   <div class="modal">
-    <div class="mh"><h3>💰 Abonos de Crédito</h3><button class="mx" onclick="closeOv('ov-abonos-list')">✕</button></div>
+    <div class="mh"><h3>💰 Abonos de Crédito</h3><button class="mx" onclick="closeOv('ov-credit-pay');closeOv('ov-abonos-list')">✕</button></div>
     <div class="mb" id="abonos-list-body"></div>
   </div>
 </div>
@@ -3884,11 +3884,12 @@ function _dueBadge(dueDate){
   if(diff<=3)return '<span style="display:inline-block;font-size:.68rem;font-weight:700;color:#92400e;background:#fbbf24;border-radius:4px;padding:1px 6px;margin-left:6px">'+t('creditDueSoon')+' '+diff+' d</span>';
   return '<span style="display:inline-block;font-size:.68rem;color:var(--gn);border:1px solid var(--gn);border-radius:4px;padding:1px 6px;margin-left:6px">'+t('creditDueOn')+' '+due.toLocaleDateString()+'</span>';
 }
-function _buildCreditCard(c,compact){
+function _buildCreditCard(c,compact,fromList){
   const owed=c.total-c.paid;
   const dateStr=new Date(c.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+  const _abonoFn=fromList?'openAbonoFromList':'openCreditPay';
   const btns='<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'
-    +'<button class="btn btn-p" style="font-size:.75rem" onclick="openCreditPay(\''+c._key+'\')">💰 Abonar</button>'
+    +'<button class="btn btn-p" style="font-size:.75rem" onclick="'+_abonoFn+'(\''+c._key+'\')">💰 Abonar</button>'
     +'<button class="btn btn-g" style="font-size:.75rem" onclick="payCreditFull(\''+c._key+'\')">✅ '+t('markPaid')+'</button>'
     +'</div>';
   const dueBadge=_dueBadge(c.dueDate);
@@ -3948,6 +3949,12 @@ function renderAdmCredits(){
   if(!pending.length){list.innerHTML='<p style="color:var(--tx3);padding:20px 0;text-align:center">'+t('noPendingCredits')+'</p>';return;}
   list.innerHTML=pending.map(function(c){return _buildCreditCard(c,false);}).join('');
 }
+let _abonoFromList=false;
+function openAbonoFromList(key){
+  closeOv('ov-abonos-list');
+  _abonoFromList=true;
+  openCreditPay(key);
+}
 function openAbonosList(){
   renderAbonosList();
   openOv('ov-abonos-list');
@@ -3959,7 +3966,7 @@ function renderAbonosList(){
     list.innerHTML='<div style="padding:24px;text-align:center;color:var(--tx3);font-size:.85rem">Sin créditos pendientes ✓</div>';
     return;
   }
-  list.innerHTML=pending.map(function(c){return _buildCreditCard(c,true);}).join('');
+  list.innerHTML=pending.map(function(c){return _buildCreditCard(c,true,true);}).join('');
 }
 let _cpayKey=null;
 let _cpayMethod='cash';
@@ -4050,7 +4057,7 @@ function doCreditPayment(full){
   calcNotifs();
   const ctCred=el('ct-cred');
   if(ctCred&&ctCred.style.display!=='none')renderContaCredits();
-  renderAbonosList();
+  if(_abonoFromList){_abonoFromList=false;openAbonosList();}else{renderAbonosList();}
   toast('✓ '+dolr(actual)+' '+t('creditPaid'));
 }
 function payCreditFull(key){
