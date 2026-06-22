@@ -18,7 +18,11 @@ const OFFLINE_GRACE_DAYS = 15
 // Este valor es un placeholder: GitHub Actions lo reemplaza en build time
 // con el valor del GitHub Secret EXT_CODE_SECRET.
 // NUNCA escribas el valor real aquí.
-const EXT_CODE_SECRET = '__EXT_CODE_SECRET__'
+// En dev: $env:EXT_CODE_SECRET = "secreto"; npx electron .
+const EXT_CODE_SECRET = (() => {
+  const baked = '__EXT_CODE_SECRET__'
+  return baked !== '__EXT_CODE_SECRET__' ? baked : (process.env.EXT_CODE_SECRET || '__EXT_CODE_SECRET__')
+})()
 
 // Alfabeto sin caracteres ambiguos (0/O, 1/I/L)
 const EXT_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'

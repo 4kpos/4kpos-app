@@ -84,7 +84,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      devTools: true
+      devTools: isDev
     },
     title: '4K POS',
     icon: path.join(__dirname, 'assets', 'logo.ico'),

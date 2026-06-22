@@ -368,6 +368,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <div class="clk" id="clk">00:00:00</div>
     <span id="wifi-dot" style="display:flex;align-items:center;flex-shrink:0;margin:0 2px;align-self:center;cursor:default" title="Conectado"><svg id="wifi-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></span>
     <div class="lic-badge lic-ok" id="lic-badge" style="display:none">✓</div>
+    <span class="lic-badge lic-warn" id="offline-countdown" style="display:none"></span>
     <button id="notif-btn" onclick="toggleNotifPanel()" title="Notificaciones">🔔<span id="notif-badge">0</span></button>
   </div>
   <div style="display:flex;gap:5px">
@@ -1410,6 +1411,7 @@ const T = {
     invSrch:'🔍 Nombre o código de barras...',icSrch:'🔍 Buscar nombre o código...',creditSrch:'🔍 Buscar por nombre o cédula...',optional:'(opcional)',
     dashboardBtn:'📱 Dashboard móvil',dashboardProOnly:'El dashboard móvil está disponible en el plan Pro. Actualiza tu plan para acceder.',
     checkUpdates:'Buscar actualizaciones',
+    offlineDaysLeft:'días restantes sin internet',
     // Login lock / attempts
     accountLockedPrefix:'⛔ Cuenta bloqueada. Intenta en ',accountLockedSuffix:' min.',
     tooManyAttempts:'⛔ Demasiados intentos. Cuenta bloqueada 5 min.',
@@ -1570,6 +1572,7 @@ const T = {
     invSrch:'🔍 Name or barcode...',icSrch:'🔍 Search name or code...',creditSrch:'🔍 Search by name or ID...',optional:'(optional)',
     dashboardBtn:'📱 Mobile Dashboard',dashboardProOnly:'Mobile dashboard is available on the Pro plan. Upgrade your plan to access.',
     checkUpdates:'Check for updates',
+    offlineDaysLeft:'days left offline',
     // Login lock / attempts
     accountLockedPrefix:'⛔ Account locked. Try in ',accountLockedSuffix:' min.',
     tooManyAttempts:'⛔ Too many attempts. Account locked 5 min.',
@@ -1982,14 +1985,15 @@ function setConnDot(ok){
   const d=el('wifi-dot');if(d)d.title=ok?(lang==='en'?'Connected':'Conectado'):(lang==='en'?'No connection':'Sin conexión');
 }
 function checkConn(){setConnDot(navigator.onLine);}
-window.addEventListener('online',()=>setConnDot(true));
-window.addEventListener('offline',()=>setConnDot(false));
+window.addEventListener('online',()=>{setConnDot(true);updateLicBadge();});
+window.addEventListener('offline',()=>{setConnDot(false);updateLicBadge();});
 checkConn();
 
 // LICENSE BADGE
 function updateLicBadge(){
   ipcRenderer.invoke('get-license-info').then(function(info){
-    if(!info){el('lic-badge').textContent='⚠ Sin licencia';el('lic-badge').className='lic-badge lic-err';el('lic-badge').style.display='block';return;}
+    const cdown=el('offline-countdown');
+    if(!info){el('lic-badge').textContent='⚠ Sin licencia';el('lic-badge').className='lic-badge lic-err';el('lic-badge').style.display='block';if(cdown)cdown.style.display='none';return;}
     const plan=(info.plan||'').toUpperCase();
     if(info.expires_at){
       const days=Math.ceil((new Date(info.expires_at)-Date.now())/(864e5));
@@ -1997,6 +2001,13 @@ function updateLicBadge(){
       else{el('lic-badge').textContent='✓ '+plan+' · '+days+'d';el('lic-badge').className='lic-badge lic-ok';}
     }else{el('lic-badge').textContent='✓ '+plan;el('lic-badge').className='lic-badge lic-ok';}
     el('lic-badge').style.display='block';
+    // Offline countdown — visible solo cuando faltan 5 días o menos y no hay internet
+    if(cdown&&info.last_verified&&!navigator.onLine){
+      const diffDays=(Date.now()-new Date(info.last_verified).getTime())/(864e5);
+      const daysLeft=Math.floor(15-diffDays);
+      if(daysLeft>=0&&daysLeft<=5){cdown.textContent='⚠️ '+daysLeft+' '+t('offlineDaysLeft');cdown.style.display='';}
+      else{cdown.style.display='none';}
+    }else if(cdown){cdown.style.display='none';}
   }).catch(function(){});
 }
 
@@ -2364,10 +2375,12 @@ function syncShiftStatus(status){
     db.cfg.shiftUser=userName;
     db.cfg.shiftOpenAt=now;
     db.cfg.shiftClosedAt=null;
+    syncShiftStatusDirect({active:true,currentUser:userName,shiftOpenedAt:now,updatedAt:now});
   }else{
     db.cfg.shiftOpen=false;
     db.cfg.shiftUser=userName;
     db.cfg.shiftClosedAt=now;
+    syncShiftStatusDirect({active:false,currentUser:userName,shiftClosedAt:now,updatedAt:now});
   }
   saveDB();
 }
@@ -2382,6 +2395,15 @@ function syncCreditDirect(){
       method:'POST',
       headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
       body:JSON.stringify({id:'credit_summary',name:JSON.stringify(body),license_key:db._lic||''})
+    }).catch(function(){});
+  }catch(e){}
+}
+function syncShiftStatusDirect(payload){
+  try{
+    fetch(SUPA_URL+'/rest/v1/categories',{
+      method:'POST',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify({id:'shift_status',name:JSON.stringify(payload),license_key:db._lic||''})
     }).catch(function(){});
   }catch(e){}
 }
@@ -3412,6 +3434,7 @@ function _onInactivityTimeout(){
     _saveOAs(_oaList);
   }
   logAction('Cierre por inactividad',_userName+' · '+((db.settings&&db.settings.inactivityMinutes)||10)+' min sin actividad');
+  syncShiftStatusDirect({active:true,currentUser:_userName,lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString()});
   _sessionLogout();
   toast(t('sessionLockedInactivity')+(cart&&cart.length?' '+t('cartSaved'):''));
 }
@@ -3445,6 +3468,7 @@ function doQuickLock(){
     _saveOAs(_oaList);
   }
   logAction('Sesión bloqueada manualmente',_uName);
+  syncShiftStatusDirect({active:true,currentUser:_uName,lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString()});
   _sessionLogout();
   toast(t('sessionLocked')+(_hadCart?' '+t('cartSaved'):''));
 }

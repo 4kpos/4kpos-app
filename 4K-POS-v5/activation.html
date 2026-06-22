@@ -525,6 +525,15 @@ ipcRenderer.on('activation-reason', (event, reason) => {
     document.getElementById('form-area').style.display = 'none';
     document.getElementById('offline-extend-area').style.display = 'block';
 
+    // Mostrar días exactos transcurridos sin verificar
+    ipcRenderer.invoke('get-license-info').then(function(info) {
+      if (info && info.last_verified) {
+        const diffDays = Math.floor((Date.now() - new Date(info.last_verified).getTime()) / (1000 * 60 * 60 * 24));
+        const sub = document.querySelector('#offline-extend-area .subtitle');
+        if (sub) sub.textContent = 'Tu licencia está activa pero llevas ' + diffDays + ' día' + (diffDays !== 1 ? 's' : '') + ' sin verificar (máx. 15). Conéctate a internet o ingresa un código de extensión.';
+      }
+    }).catch(function(){});
+
     // Cargar el código de dispositivo vía IPC
     ipcRenderer.invoke('get-device-code').then(code => {
       const el = document.getElementById('device-code-display');
