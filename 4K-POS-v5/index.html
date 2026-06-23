@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -1169,30 +1169,38 @@ select.fi option{background:var(--s2);color:var(--tx);}
   </div>
 </div>
 <!-- PAGO PARCIAL CRÉDITO -->
-<div class="ov" id="ov-credit-pay">
-  <div class="modal mnarrow">
+<div class="ov" id="ov-credit-pay" onkeydown="onCpayKey(event)">
+  <div class="modal" style="width:min(480px,98vw)">
     <div class="mh"><h3 id="cpay-title">💵 Recibir Pago</h3><button class="mx" onclick="closeOv('ov-credit-pay')">✕</button></div>
     <div class="mb">
-      <div style="font-weight:700;color:var(--tx);margin-bottom:4px" id="cpay-client"></div>
-      <div style="font-size:.8rem;color:var(--tx3);margin-bottom:10px"><span id="cpay-pending-lbl">Pendiente</span>: <span id="cpay-pending" style="color:var(--am);font-weight:700">$0.00</span></div>
-      <div class="fg" style="margin-bottom:8px">
-        <label class="lbl" id="cpay-method-lbl">Método de pago</label>
-        <div style="display:flex;gap:5px;margin-top:4px">
-          <button class="btn btn-p" id="cpay-m-cash" onclick="setCpayMethod('cash')">💵 <span id="cpay-m-cash-txt">Efectivo</span></button>
-          <button class="btn btn-s" id="cpay-m-card" onclick="setCpayMethod('card')">💳 <span id="cpay-m-card-txt">Tarjeta</span></button>
-          <button class="btn btn-s" id="cpay-m-split" onclick="setCpayMethod('split')">⚡ Split</button>
+      <div id="cpay-info" style="margin-bottom:12px"></div>
+      <div id="cpay-form-section">
+        <div class="fg" style="margin-bottom:8px">
+          <label class="lbl" id="cpay-method-lbl">Método de pago</label>
+          <div style="display:flex;gap:5px;margin-top:4px">
+            <button class="btn btn-p" id="cpay-m-cash" onclick="setCpayMethod('cash')">💵 <span id="cpay-m-cash-txt">Efectivo</span></button>
+            <button class="btn btn-s" id="cpay-m-card" onclick="setCpayMethod('card')">💳 <span id="cpay-m-card-txt">Tarjeta</span></button>
+            <button class="btn btn-s" id="cpay-m-split" onclick="setCpayMethod('split')">⚡ Split</button>
+          </div>
+        </div>
+        <div id="cpay-split-fields" style="display:none;margin-bottom:8px">
+          <div class="g2">
+            <div class="fg"><label class="lbl" id="cpay-split-cash-lbl">Efectivo</label><input type="number" class="fi" id="cpay-split-cash" placeholder="0.00" step="0.01" oninput="cpayCalcSplit()"></div>
+            <div class="fg"><label class="lbl" id="cpay-split-card-lbl">Tarjeta</label><input type="number" class="fi" id="cpay-split-card" placeholder="0.00" step="0.01" oninput="cpayCalcSplit()"></div>
+          </div>
+        </div>
+        <div class="fg"><label class="lbl" id="cpay-amount-lbl">Monto a abonar</label><input type="number" class="fi" id="cpay-amount" min="0" step="0.01" placeholder="0.00"></div>
+        <div class="frow" style="margin-top:12px;gap:8px">
+          <button class="btn btn-p" onclick="requestAbonoConfirm(false)" id="cpay-partial-btn" style="flex:1;padding:10px">💰 <span id="cpay-partial-txt">Confirmar abono</span></button>
+          <button class="btn btn-g" onclick="requestAbonoConfirm(true)" id="cpay-full-btn" style="flex:1;padding:10px">✅ <span id="cpay-full-txt">Pago total</span></button>
         </div>
       </div>
-      <div id="cpay-split-fields" style="display:none;margin-bottom:8px">
-        <div class="g2">
-          <div class="fg"><label class="lbl" id="cpay-split-cash-lbl">Efectivo</label><input type="number" class="fi" id="cpay-split-cash" placeholder="0.00" step="0.01" oninput="cpayCalcSplit()"></div>
-          <div class="fg"><label class="lbl" id="cpay-split-card-lbl">Tarjeta</label><input type="number" class="fi" id="cpay-split-card" placeholder="0.00" step="0.01" oninput="cpayCalcSplit()"></div>
+      <div id="cpay-confirm-section" style="display:none">
+        <div id="cpay-confirm-msg" style="background:var(--s2);border-radius:var(--rs);padding:14px;font-size:.9rem;line-height:1.6;margin-bottom:14px"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-p" id="cpay-confirm-yes" onclick="confirmAbonoFinal()" style="flex:1;padding:11px;font-size:.95rem">✅ Sí, confirmar</button>
+          <button class="btn btn-s" onclick="cancelConfirmAbono()" style="flex:1;padding:11px">↩ Cancelar</button>
         </div>
-      </div>
-      <div class="fg"><label class="lbl" id="cpay-amount-lbl">Monto a pagar</label><input type="number" class="fi" id="cpay-amount" min="0" step="0.01" placeholder="0.00"></div>
-      <div class="frow" style="margin-top:12px;gap:8px">
-        <button class="btn btn-p" onclick="doCreditPayment(false)" id="cpay-partial-btn">✓ <span id="cpay-partial-txt">Parcial</span></button>
-        <button class="btn btn-g" onclick="doCreditPayment(true)" id="cpay-full-btn">✓ <span id="cpay-full-txt">Total</span></button>
       </div>
     </div>
   </div>
@@ -1427,7 +1435,7 @@ const T = {
     filterPending:'Pendientes',filterPaid:'Pagados',filterAll:'Todos',
     creditTotalPending:'Crédito pendiente total',creditClients:'Clientes',
     lastPayment:'Último abono',noPaidCredits:'Sin créditos pagados.',noCredits:'Sin créditos registrados.',
-    payMethodLabel:'Método de pago',cpayPartialBtn:'Parcial',cpayTotalBtn:'Pago total',
+    payMethodLabel:'Método de pago',cpayPartialBtn:'Confirmar abono',cpayTotalBtn:'Pago total',
     todaySales:'Ventas del día',totalSalesLbl:'Total ventas',cashFromSales:'Efectivo en ventas',
     fundBoxLbl:'Fondo de caja',expectedCashLbl:'Efectivo esperado',
     creditPaymentsRcvd:'Pagos de crédito recibidos hoy',cashCreditPay:'Abonos en efectivo',cardCreditPay:'Abonos en tarjeta',
@@ -1590,7 +1598,7 @@ const T = {
     filterPending:'Pending',filterPaid:'Paid',filterAll:'All',
     creditTotalPending:'Total pending credit',creditClients:'Customers',
     lastPayment:'Last payment',noPaidCredits:'No paid credits.',noCredits:'No credits registered.',
-    payMethodLabel:'Payment method',cpayPartialBtn:'Partial',cpayTotalBtn:'Full payment',
+    payMethodLabel:'Payment method',cpayPartialBtn:'Confirm payment',cpayTotalBtn:'Full payment',
     todaySales:"Today's sales",totalSalesLbl:'Total sales',cashFromSales:'Cash from sales',
     fundBoxLbl:'Cash fund',expectedCashLbl:'Expected cash',
     creditPaymentsRcvd:'Credit payments received today',cashCreditPay:'Cash credit payments',cardCreditPay:'Card credit payments',
@@ -4015,10 +4023,10 @@ function openCreditPay(key){
   _cpayKey=key;
   const pending=_getPendingCredits();
   const c=pending.find(function(x){return x._key===key;});if(!c)return;
-  const owed=c.total-c.paid;
-  const cl=el('cpay-client');if(cl)cl.textContent=c.client+(c.cedula?' · CI '+c.cedula:'');
-  const pe=el('cpay-pending');if(pe)pe.textContent=dolr(owed);
-  const amt=el('cpay-amount');if(amt){amt.value='';amt.max=owed;}
+  const info=el('cpay-info');if(info)info.innerHTML=_buildCpayInfo(c);
+  const fs=el('cpay-form-section');if(fs)fs.style.display='block';
+  const cs=el('cpay-confirm-section');if(cs)cs.style.display='none';
+  const amt=el('cpay-amount');if(amt){amt.value='';amt.max=c.total-c.paid;}
   setCpayMethod('cash');
   openOv('ov-credit-pay');
   setTimeout(function(){const i=el('cpay-amount');if(i){i.focus();i.select();}},120);
@@ -4029,6 +4037,85 @@ function openCreditPay(key){
 // - El dashboard debe leer ventas con payMethod='credit' y mostrar sección de créditos
 // - Mostrar total pendiente, abonos recientes, y créditos pagados
 // - slim ya incluye creditClient/creditStatus/creditPaid en cada venta → el dashboard puede filtrar
+function _buildCpayInfo(c){
+  const owed=c.total-c.paid;
+  const dateStr=new Date(c.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+  const dueStr=c.dueDate?new Date(c.dueDate).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}):'Sin fecha límite';
+  const itemsHtml=(c.items||[]).map(function(it){
+    return '<div style="display:flex;justify-content:space-between;padding:2px 0">'
+      +'<span>'+(it.name||'?')+' \xd7'+it.qty+'</span><span>'+dolr((it.price||0)*it.qty)+'</span></div>';
+  }).join('')||'<div style="color:var(--tx3);font-size:.8rem">Sin detalle</div>';
+  const pays=c.payments||[];
+  const histHtml=pays.length?'<div style="margin-top:8px;border-top:1px solid var(--b1);padding-top:8px">'
+    +'<div style="font-size:.72rem;color:var(--tx3);font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Abonos anteriores</div>'
+    +pays.map(function(p){
+      const pd=new Date(p.date).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'2-digit'});
+      const mi=p.method==='card'?'💳':p.method==='split'?'⚡':'💵';
+      return '<div style="display:flex;justify-content:space-between;font-size:.8rem;padding:2px 0;color:var(--tx2)">'
+        +'<span>'+pd+' '+mi+'</span><span style="color:var(--gn)">+'+dolr(p.amount)+'</span></div>';
+    }).join('')+'</div>':'';
+  return '<div style="background:var(--s2);border-radius:var(--rs);padding:12px;font-size:.82rem">'
+    +'<div style="font-weight:700;color:var(--tx);font-size:.98rem;margin-bottom:2px">'
+    +(c.client||'—')+(c.cedula?'<span style="font-weight:400;color:var(--tx3)"> \xb7 CI '+c.cedula+'</span>':'')+'</div>'
+    +'<div style="color:var(--tx3);font-size:.76rem;margin-bottom:8px">📅 Venta: '+dateStr+' &nbsp;\xb7&nbsp; Vence: '+dueStr+'</div>'
+    +'<div style="border-top:1px solid var(--b1);padding-top:8px;margin-bottom:8px">'
+    +'<div style="font-size:.72rem;color:var(--tx3);font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Productos</div>'
+    +itemsHtml+'</div>'
+    +'<div style="display:flex;gap:8px;background:var(--s1);border-radius:8px;padding:8px 10px">'
+    +'<div style="flex:1;text-align:center"><div style="font-size:.7rem;color:var(--tx3)">Original</div><div style="font-weight:600">'+dolr(c.total)+'</div></div>'
+    +'<div style="flex:1;text-align:center"><div style="font-size:.7rem;color:var(--tx3)">Pagado</div><div style="font-weight:600;color:var(--gn)">'+dolr(c.paid)+'</div></div>'
+    +'<div style="flex:1;text-align:center"><div style="font-size:.7rem;color:var(--tx3)">Pendiente</div><div style="font-weight:700;color:var(--am)">'+dolr(owed)+'</div></div>'
+    +'</div>'
+    +histHtml
+    +'</div>';
+}
+let _cpayFull=false;
+function requestAbonoConfirm(full){
+  const pending=_getPendingCredits();
+  const c=pending.find(function(x){return x._key===_cpayKey;});if(!c)return;
+  const owed=c.total-c.paid;
+  let amt;
+  if(full){
+    amt=owed;
+  }else if(_cpayMethod==='split'){
+    const sc=parseFloat(el('cpay-split-cash').value)||0;
+    const sk=parseFloat(el('cpay-split-card').value)||0;
+    amt=sc+sk;
+    if(!amt){toast('⚠ '+t('amountLbl'));return;}
+  }else{
+    amt=parseFloat(el('cpay-amount').value)||0;
+    if(!amt||amt<=0){toast('⚠ '+t('amountLbl'));return;}
+  }
+  const actual=Math.min(amt,owed);
+  _cpayFull=full;
+  const mi=_cpayMethod==='card'?'💳':_cpayMethod==='split'?'⚡':'💵';
+  const resto=Math.max(0,owed-actual);
+  const msg='<div style="font-size:1.05rem;font-weight:700;margin-bottom:10px">¿Confirmar abono?</div>'
+    +'<div style="margin-bottom:4px">Cliente: <b>'+(c.client||'—')+'</b>'+(c.cedula?' <span style="color:var(--tx3);font-size:.82rem">CI '+c.cedula+'</span>':'')+'</div>'
+    +'<div style="font-size:1.5rem;font-weight:800;color:var(--am);margin:8px 0">'+dolr(actual)+'</div>'
+    +'<div style="color:var(--tx3);font-size:.83rem">'+mi+' '+(full||actual>=owed?'Pago total':'Abono parcial')
+    +(resto>0?' \xb7 Saldo restante: <span style="color:var(--am)">'+dolr(resto)+'</span>':'')+'</div>';
+  const msgEl=el('cpay-confirm-msg');if(msgEl)msgEl.innerHTML=msg;
+  const fs=el('cpay-form-section');if(fs)fs.style.display='none';
+  const cs=el('cpay-confirm-section');if(cs)cs.style.display='block';
+  setTimeout(function(){const b=el('cpay-confirm-yes');if(b)b.focus();},60);
+}
+function confirmAbonoFinal(){
+  const fs=el('cpay-form-section');if(fs)fs.style.display='block';
+  const cs=el('cpay-confirm-section');if(cs)cs.style.display='none';
+  doCreditPayment(_cpayFull);
+}
+function cancelConfirmAbono(){
+  const fs=el('cpay-form-section');if(fs)fs.style.display='block';
+  const cs=el('cpay-confirm-section');if(cs)cs.style.display='none';
+  setTimeout(function(){const i=el('cpay-amount');if(i)i.focus();},60);
+}
+function onCpayKey(e){
+  if(e.key!=='Enter')return;
+  const cs=el('cpay-confirm-section');
+  if(cs&&cs.style.display!=='none'){e.preventDefault();confirmAbonoFinal();}
+  else{e.preventDefault();requestAbonoConfirm(false);}
+}
 function doCreditPayment(full){
   const pending=_getPendingCredits();
   const c=pending.find(function(x){return x._key===_cpayKey;});if(!c)return;
@@ -4079,14 +4166,16 @@ function doCreditPayment(full){
   const ctCred=el('ct-cred');
   if(ctCred&&ctCred.style.display!=='none')renderContaCredits();
   if(_abonoFromList){_abonoFromList=false;openAbonosList();}else{renderAbonosList();}
-  toast('✓ '+dolr(actual)+' '+t('creditPaid'));
+  toast('✅ Abono registrado · '+dolr(actual)+(actual>=owed?' (pago total)':''));
 }
 function payCreditFull(key){
   const _pfc=_getPendingCredits().find(function(x){return x._key===key;});
   if(!_pfc)return;
   const _owed=_pfc.total-_pfc.paid;
-  requireAdminCode('Marcar crédito pagado: '+_pfc.client+' '+dolr(_owed),function(){
-    _cpayKey=key;doCreditPayment(true);
+  confirm2('¿Marcar como pagado total el crédito de '+_pfc.client+' ('+dolr(_owed)+')?',function(){
+    requireAdminCode('Marcar crédito pagado: '+_pfc.client+' '+dolr(_owed),function(){
+      _cpayKey=key;doCreditPayment(true);
+    });
   });
 }
 
