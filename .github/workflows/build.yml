@@ -40,6 +40,18 @@ jobs:
         run: |
           sed -i "s|__EXT_CODE_SECRET__|${{ secrets.EXT_CODE_SECRET }}|g" "4K-POS-v5/license.js"
 
+      - name: Auto-commit source changes
+        shell: bash
+        run: |
+          git config user.email "github-actions@github.com"
+          git config user.name "GitHub Actions"
+          git checkout -- 4K-POS-v5/license.js
+          git add .
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: auto-commit build assets [skip ci]"
+            git push
+          fi
+
       - name: Build exe
         working-directory: 4K-POS-v5
         run: npx electron-builder --win --publish always
