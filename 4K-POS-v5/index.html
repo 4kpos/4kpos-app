@@ -165,6 +165,11 @@ body.light .chgbox{color:#15803d!important;border-color:#15803d!important;backgr
 .cmb-item-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;background:var(--s2);border-radius:6px;padding:6px 8px;}
 .spc-type-btn{flex:1;padding:8px 4px;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx2);cursor:pointer;font-size:.78rem;font-weight:600;transition:all .2s;text-align:center;}
 .spc-type-btn.on{background:var(--acg);border-color:var(--ac);color:var(--ac);}
+.lbl-prev-wrap{background:#f0f0f0;border:1.5px dashed var(--b2);border-radius:8px;padding:14px;display:flex;justify-content:center;align-items:center;min-height:90px;overflow:hidden;}
+.lbl-sz-btn{flex:1;padding:8px 4px;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx2);cursor:pointer;font-size:.76rem;font-weight:600;transition:all .2s;text-align:center;line-height:1.3;}
+.lbl-sz-btn.on{background:var(--acg);border-color:var(--ac);color:var(--ac);}
+.inv-chk{width:15px;height:15px;cursor:pointer;accent-color:var(--ac);}
+@media print{body.lbl-pm>*:not(#lbl-print-area){display:none!important;}body.lbl-pm #lbl-print-area{display:block!important;}.lbl-grid{display:flex;flex-wrap:wrap;gap:3mm;}.lbl-itm{border:.4pt solid #ccc;box-sizing:border-box;overflow:hidden;page-break-inside:avoid;display:flex;flex-direction:column;font-family:Arial,Helvetica,sans-serif;padding:2mm;}@page{size:A4;margin:8mm;}}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;padding:10px;}
 .cat-card{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r);padding:8px 8px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .18s;text-align:center;min-height:150px;}
 .cat-card:hover{border-color:var(--ac);transform:scale(.97);}
@@ -717,6 +722,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <input type="text" class="sinp" id="inv-srch" placeholder="🔍 Nombre o código de barras..." oninput="renderInv()">
           <button class="btn btn-g" onclick="exportCSV()" id="inv-export-csv-btn">📥 CSV</button>
           <button class="btn btn-p" onclick="openInvCount()" id="inv-count-btn">📋 Contar</button>
+          <button class="btn btn-s" onclick="openLabelModal(null)" id="inv-lbl-btn">🏷️ Etiquetas</button>
+          <button class="btn btn-s" id="inv-lbl-sel-btn" style="display:none" onclick="printSelectedLabels()">🖨️ Seleccionados: <span id="inv-sel-cnt">0</span></button>
         </div>
         <div id="inv-cat-chips" style="display:flex;gap:6px;overflow-x:auto;flex-wrap:wrap;margin-bottom:6px"></div>
         <div id="inv-list"></div>
@@ -749,10 +756,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div class="slbl" id="cmb-form-title">Nuevo Combo</div>
         <div class="fg" style="margin-bottom:8px"><label class="lbl">Nombre</label><input type="text" class="fi" id="cmb-name" placeholder="Ej: Combo Familiar"></div>
         <div class="fg" style="margin-bottom:8px"><label class="lbl">Descripción</label><input type="text" class="fi" id="cmb-desc" placeholder="Descripción opcional"></div>
-        <div class="fg" style="margin-bottom:8px"><label class="lbl">Precio especial ($)</label><input type="number" class="fi" id="cmb-price" min="0" step="0.01" placeholder="0.00"></div>
+        <div class="fg" style="margin-bottom:8px"><label class="lbl">Precio especial ($)</label><input type="number" class="fi" id="cmb-price" min="0" step="0.01" placeholder="0.00" oninput="_updateCmbCostTotal()"></div>
         <div class="slbl" style="font-size:.78rem;margin-top:4px">Productos incluidos</div>
         <div id="cmb-items-list" style="margin-bottom:8px"></div>
-        <button class="btn btn-s" style="width:100%;margin-bottom:10px;font-size:.8rem" onclick="cmbAddItem()">+ Agregar producto</button>
+        <button class="btn btn-s" style="width:100%;margin-bottom:6px;font-size:.8rem" onclick="cmbAddItem()">+ Agregar producto</button>
+        <div id="cmb-cost-total" style="font-size:.78rem;color:var(--tx3);padding:6px 8px;background:var(--s2);border-radius:6px;margin-bottom:10px;min-height:24px"></div>
         <div class="tog" style="margin-bottom:10px"><span class="tog-label">Activo</span><label class="tog-sw"><input type="checkbox" id="cmb-active" checked><span class="slider"></span></label></div>
         <div class="frow" style="margin-bottom:16px">
           <button class="btn btn-p" id="cmb-save-btn" onclick="saveCombo()" style="flex:1">💾 Guardar Combo</button>
@@ -798,6 +806,36 @@ select.fi option{background:var(--s2);color:var(--tx);}
     </div>
   </div>
 </div>
+
+<!-- LABELS -->
+<div class="ov" id="ov-labels">
+  <div class="modal">
+    <div class="mh"><h3>🏷️ <span id="lbl-modal-title">Imprimir Etiquetas</span></h3><button class="mx" onclick="closeOv('ov-labels')">✕</button></div>
+    <div class="mb">
+      <div id="lbl-single-row" style="margin-bottom:10px">
+        <label class="lbl">Producto</label>
+        <select class="fi" id="lbl-prod-sel" onchange="renderLabelPreview()"></select>
+      </div>
+      <div id="lbl-multi-row" style="display:none;margin-bottom:10px;padding:8px;background:var(--s2);border-radius:var(--rs);font-size:.82rem;color:var(--tx2)" id="lbl-multi-info"></div>
+      <div style="margin-bottom:10px">
+        <label class="lbl" style="margin-bottom:5px;display:block">Tamaño de etiqueta</label>
+        <div style="display:flex;gap:6px">
+          <button class="lbl-sz-btn on" id="lbl-sz-sm" onclick="setLblSize('sm',this)">Pequeña<br><span style="font-size:.68rem;font-weight:400;opacity:.8">90×50mm</span></button>
+          <button class="lbl-sz-btn" id="lbl-sz-md" onclick="setLblSize('md',this)">Mediana<br><span style="font-size:.68rem;font-weight:400;opacity:.8">160×80mm</span></button>
+          <button class="lbl-sz-btn" id="lbl-sz-lg" onclick="setLblSize('lg',this)">Grande<br><span style="font-size:.68rem;font-weight:400;opacity:.8">200×100mm</span></button>
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:10px">
+        <label class="lbl">Copias por producto</label>
+        <input type="number" class="fi" id="lbl-qty" min="1" max="100" value="1" oninput="if(this.value>100)this.value=100;if(this.value<1)this.value=1">
+      </div>
+      <div class="slbl" style="margin-bottom:6px;font-size:.78rem">Vista previa</div>
+      <div class="lbl-prev-wrap" id="lbl-preview"></div>
+      <button class="btn btn-p" onclick="printLabels()" style="width:100%;margin-top:12px">🖨️ Imprimir / Guardar PDF</button>
+    </div>
+  </div>
+</div>
+<div id="lbl-print-area" style="display:none"></div>
 
 <!-- ACTIONS -->
 <div class="ov" id="ov-actions">
@@ -3095,20 +3133,25 @@ function renderInv(){
   const costCol=isAdm?('<th style="text-align:right;padding:6px 4px">'+t('fldCostPrice')+'</th>'):'';
   const priceCol=isAdm?('<th style="text-align:right;padding:6px 4px">'+t('fldPrice')+'</th>'):'';
   el('inv-list').innerHTML='<table style="width:100%;border-collapse:collapse;font-size:.83rem">'
-    +'<tr style="border-bottom:2px solid var(--b2);color:var(--tx3)"><th style="text-align:left;padding:6px 4px">'+t('product')+'</th>'
+    +'<tr style="border-bottom:2px solid var(--b2);color:var(--tx3)">'
+    +'<th style="padding:6px 4px"><input type="checkbox" class="inv-chk" id="inv-chk-all" onchange="invToggleAll(this)" title="Seleccionar todos"></th>'
+    +'<th style="text-align:left;padding:6px 4px">'+t('product')+'</th>'
     +costCol+priceCol
     +'<th style="text-align:right;padding:6px 4px">'+t('stock')+'</th>'
     +'<th style="text-align:right;padding:6px 4px">'+t('invValue')+'</th><th></th></tr>'
-    +list.map(p=>{
+    +list.map(function(p){
       const low=p.stock<=(p.minStock||5);
       const costTd=isAdm?('<td style="padding:7px 4px;text-align:right;font-family:monospace;color:var(--tx2)">'+(p.cost?dolr(p.cost):'—')+'</td><td style="padding:7px 4px;text-align:right;font-family:monospace;color:var(--gn)">'+dolr(p.price)+'</td>'):'';
+      const chk=_invSel.has(p.id)?'checked':'';
       return '<tr style="border-bottom:1px solid var(--b1)'+(low?';background:rgba(251,191,36,.05)':'')+'">'
+        +'<td style="padding:7px 4px"><input type="checkbox" class="inv-chk" '+chk+' onchange="invToggleSel(\''+p.id+'\')"></td>'
         +'<td style="padding:7px 4px;font-weight:600;color:var(--tx)">'+p.name+'</td>'
         +costTd
         +'<td style="padding:7px 4px;text-align:right;font-weight:700;color:'+(low?'var(--am)':'var(--tx)')+'">'+( p.stock||0)+'</td>'
         +'<td style="padding:7px 4px;text-align:right;font-family:monospace;color:var(--tx2)">'+dolr(p.price*(p.stock||0))+'</td>'
-        +'<td style="padding:7px 4px;display:flex;gap:4px"><button class="eb" onclick="editProd(\''+p.id+'\')">✏</button><button class="eb" onclick="qkStockModal(\''+p.id+'\')">📦</button></td></tr>';
+        +'<td style="padding:7px 4px;display:flex;gap:4px"><button class="eb" onclick="editProd(\''+p.id+'\')">✏</button><button class="eb" onclick="qkStockModal(\''+p.id+'\')">📦</button><button class="eb" onclick="openLabelModal(\''+p.id+'\')" title="Etiqueta">🏷️</button></td></tr>';
     }).join('')+'</table>';
+  _updateInvSelUI();
 }
 function qkStock(id){qkStockModal(id);}
 function qkStockModal(id){
@@ -5953,25 +5996,31 @@ function addComboToCart(comboId){
 var _cmbItems=[];
 function renderCmbItemsEditor(){
   const list=el('cmb-items-list');if(!list)return;
-  if(!_cmbItems.length){list.innerHTML='<div style="color:var(--tx3);font-size:.8rem;padding:6px 0">'+t('comboNoItems')+'</div>';return;}
+  if(!_cmbItems.length){list.innerHTML='<div style="color:var(--tx3);font-size:.8rem;padding:6px 0">'+t('comboNoItems')+'</div>';_updateCmbCostTotal();return;}
   list.innerHTML=_cmbItems.map(function(ci,idx){
-    const opts=db.products.map(function(pp){return '<option value="'+pp.id+'"'+(pp.id===ci.productId?' selected':'')+'>'+pp.name+'</option>';}).join('');
-    return '<div class="cmb-item-row"><select style="flex:1;background:var(--s2);border:1.5px solid var(--b1);border-radius:6px;padding:5px;font-size:.8rem;color:var(--tx)" onchange="cmbItemProd('+idx+',this.value)">'+opts+'</select><input type="number" min="1" value="'+ci.qty+'" style="width:52px;background:var(--s2);border:1.5px solid var(--b1);border-radius:6px;padding:5px;font-size:.8rem;color:var(--tx);text-align:center" onchange="cmbItemQty('+idx+',this.value)"><button style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:14px;padding:2px" onclick="cmbRemoveItem('+idx+')">✕</button></div>';
+    const pp=db.products.find(function(x){return x.id===ci.productId;});
+    const unitPr=pp?dolr(pp.price):'—';
+    const opts=db.products.map(function(p2){return '<option value="'+p2.id+'"'+(p2.id===ci.productId?' selected':'')+'>'+p2.name+'</option>';}).join('');
+    return '<div class="cmb-item-row"><select style="flex:2;background:var(--s2);border:1.5px solid var(--b1);border-radius:6px;padding:5px;font-size:.8rem;color:var(--tx)" onchange="cmbItemProd('+idx+',this.value)">'+opts+'</select>'
+      +'<span style="font-size:.74rem;color:var(--gn);font-weight:700;min-width:50px;text-align:right;flex-shrink:0">'+unitPr+'</span>'
+      +'<input type="number" min="1" value="'+ci.qty+'" style="width:48px;background:var(--s2);border:1.5px solid var(--b1);border-radius:6px;padding:5px;font-size:.8rem;color:var(--tx);text-align:center" onchange="cmbItemQty('+idx+',this.value)">'
+      +'<button style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:14px;padding:2px" onclick="cmbRemoveItem('+idx+')">✕</button></div>';
   }).join('');
+  _updateCmbCostTotal();
 }
 function cmbAddItem(){
   if(!db.products.length){toast('⚠ Sin productos');return;}
   _cmbItems.push({productId:db.products[0].id,qty:1});
   renderCmbItemsEditor();
 }
-function cmbItemProd(idx,val){_cmbItems[idx].productId=val;}
-function cmbItemQty(idx,val){_cmbItems[idx].qty=Math.max(1,parseInt(val)||1);}
+function cmbItemProd(idx,val){_cmbItems[idx].productId=val;renderCmbItemsEditor();}
+function cmbItemQty(idx,val){_cmbItems[idx].qty=Math.max(1,parseInt(val)||1);_updateCmbCostTotal();}
 function cmbRemoveItem(idx){_cmbItems.splice(idx,1);renderCmbItemsEditor();}
 function clearCombo(){
   el('cmb-eid').value='';el('cmb-name').value='';el('cmb-desc').value='';
   el('cmb-price').value='';el('cmb-active').checked=true;_cmbItems=[];
   const ft=el('cmb-form-title');if(ft)ft.textContent='Nuevo Combo';
-  renderCmbItemsEditor();
+  renderCmbItemsEditor();_updateCmbCostTotal();
 }
 function saveCombo(){
   const name=(el('cmb-name').value||'').trim();
@@ -6135,6 +6184,191 @@ function renderSpecialList(){
 }
 function initCombosTab(){renderCmbItemsEditor();renderComboList();}
 function initSpecialsTab(){populateSpcProducts();renderSpecialList();}
+
+// =================== COMBO COST CALCULATOR ===================
+function _updateCmbCostTotal(){
+  const box=el('cmb-cost-total');if(!box)return;
+  if(!_cmbItems.length){box.innerHTML='';return;}
+  let realCost=0;
+  _cmbItems.forEach(function(ci){
+    const p=db.products.find(function(x){return x.id===ci.productId;});
+    if(p)realCost+=p.price*ci.qty;
+  });
+  const specPrice=parseFloat((el('cmb-price')||{}).value)||0;
+  let html='Costo real de productos: <strong>'+dolr(realCost)+'</strong>';
+  if(specPrice>0){
+    const diff=realCost-specPrice;
+    if(diff>0)html+=' &nbsp;→&nbsp; Descuento aplicado: <strong style="color:var(--rd)">-'+dolr(diff)+'</strong>';
+    else if(diff<0)html+=' &nbsp;→&nbsp; <strong style="color:var(--am)">⚠ Precio especial supera costo real</strong>';
+    else html+=' &nbsp;→&nbsp; <strong style="color:var(--gn)">Sin descuento</strong>';
+  }
+  box.innerHTML=html;
+}
+
+// =================== INVENTORY SELECTION ===================
+var _invSel=new Set();
+function invToggleSel(id){
+  if(_invSel.has(id))_invSel.delete(id);else _invSel.add(id);
+  _updateInvSelUI();
+}
+function invToggleAll(chk){
+  const q=(el('inv-srch').value||'').toLowerCase();
+  const list=db.products.filter(function(p){
+    if(invCatFilter&&(p.cat||'')!==invCatFilter)return false;
+    return !q||p.name.toLowerCase().includes(q)||(p.bc||'').toLowerCase().includes(q);
+  });
+  list.forEach(function(p){if(chk.checked)_invSel.add(p.id);else _invSel.delete(p.id);});
+  renderInv();_updateInvSelUI();
+}
+function _updateInvSelUI(){
+  const btn=el('inv-lbl-sel-btn'),cnt=el('inv-sel-cnt');
+  if(btn)btn.style.display=_invSel.size>0?'':'none';
+  if(cnt)cnt.textContent=_invSel.size;
+}
+
+// =================== LABEL MODAL ===================
+var _lblSize='sm';
+var _lblPids=[];
+var _lblMulti=false;
+
+function setLblSize(size,btn){
+  _lblSize=size;
+  ['sm','md','lg'].forEach(function(k){const b=el('lbl-sz-'+k);if(b)b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderLabelPreview();
+}
+
+function openLabelModal(pid){
+  _lblMulti=false;
+  _lblPids=pid?[pid]:[];
+  const sel=el('lbl-prod-sel');
+  if(sel){
+    sel.innerHTML=db.products.map(function(p){return '<option value="'+p.id+'">'+p.name+' · '+dolr(p.price)+'</option>';}).join('');
+    if(pid)sel.value=pid;
+    else if(db.products.length)sel.value=db.products[0].id;
+  }
+  const sr=el('lbl-single-row');if(sr)sr.style.display='';
+  const mr=el('lbl-multi-row');if(mr)mr.style.display='none';
+  el('lbl-modal-title').textContent='Imprimir Etiqueta';
+  el('lbl-qty').value='1';
+  _lblSize='sm';
+  ['sm','md','lg'].forEach(function(k){const b=el('lbl-sz-'+k);if(b)b.classList[k==='sm'?'add':'remove']('on');});
+  renderLabelPreview();
+  openOv('ov-labels');
+}
+
+function printSelectedLabels(){
+  if(!_invSel.size){toast('⚠ Selecciona al menos un producto');return;}
+  _lblMulti=true;
+  _lblPids=[..._invSel];
+  const sr=el('lbl-single-row');if(sr)sr.style.display='none';
+  const mr=el('lbl-multi-row');
+  if(mr){mr.style.display='';mr.innerHTML='<strong>'+_lblPids.length+'</strong> productos seleccionados para imprimir etiquetas.';}
+  el('lbl-modal-title').textContent='Etiquetas múltiples';
+  el('lbl-qty').value='1';
+  _lblSize='sm';
+  ['sm','md','lg'].forEach(function(k){const b=el('lbl-sz-'+k);if(b)b.classList[k==='sm'?'add':'remove']('on');});
+  renderLabelPreview();
+  openOv('ov-labels');
+}
+
+function _htmlEsc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function _barcodeSvg(code,W,H){
+  if(!code)return'';
+  var bits=[];
+  bits.push(1,0,1,0,1); // start guard
+  for(var i=0;i<code.length;i++){
+    var c=code.charCodeAt(i);
+    for(var b=6;b>=0;b--)bits.push((c>>b)&1);
+    bits.push(0);
+  }
+  bits.push(1,0,1,0,1); // end guard
+  var bw=W/bits.length;
+  var rects='';
+  for(var j=0;j<bits.length;j++){
+    if(bits[j])rects+='<rect x="'+(j*bw).toFixed(1)+'" y="0" width="'+Math.max(0.8,bw).toFixed(1)+'" height="'+H+'" fill="#000"/>';
+  }
+  return'<svg width="'+W+'" height="'+H+'" xmlns="http://www.w3.org/2000/svg" style="display:block">'+rects+'</svg>';
+}
+
+function _buildOneLabelHTML(p,size){
+  const cat=(db.categories||[]).find(function(c){return c.id===p.cat;});
+  const catName=cat?cat.name:'';
+  const price=dolr(p.price);
+  const bc=p.bc||'';
+  const biz=db.cfg||{};
+  const bizName=biz.bizName||'4K Negocio';
+
+  if(size==='sm'){
+    return'<div class="lbl-itm" style="width:90mm;height:50mm;justify-content:center;align-items:center;text-align:center;gap:1mm">'
+      +'<div style="font-size:11pt;font-weight:700;line-height:1.2">'+_htmlEsc(p.name)+'</div>'
+      +(bc?'<div style="font-size:7.5pt;color:#888;letter-spacing:1.5px">'+_htmlEsc(bc)+'</div>':'')
+      +'<div style="font-size:20pt;font-weight:800;color:#000">'+price+'</div>'
+      +'</div>';
+  }
+  if(size==='md'){
+    return'<div class="lbl-itm" style="width:160mm;height:80mm;justify-content:space-between">'
+      +'<div><div style="font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:.5px">'+_htmlEsc(catName)+'</div>'
+      +'<div style="font-size:13pt;font-weight:700;line-height:1.2;margin-top:1mm">'+_htmlEsc(p.name)+'</div></div>'
+      +'<div style="text-align:center;margin:2mm 0"><div style="font-size:28pt;font-weight:800;color:#000">'+price+'</div></div>'
+      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,150,28)+'<div style="font-size:7pt;letter-spacing:2px;margin-top:1mm;color:#555">'+_htmlEsc(bc)+'</div></div>':'')
+      +'</div>';
+  }
+  // lg
+  const logoTag=biz.logo?('<img src="'+biz.logo+'" style="height:8mm;max-width:22mm;object-fit:contain;display:block">'):'';
+  return'<div class="lbl-itm" style="width:200mm;height:100mm;justify-content:space-between">'
+    +'<div style="display:flex;align-items:center;gap:2mm;padding-bottom:1.5mm;margin-bottom:1.5mm;border-bottom:.4pt solid #ddd">'
+    +logoTag+'<div style="font-size:9pt;font-weight:700;color:#222">'+_htmlEsc(bizName)+'</div></div>'
+    +'<div><div style="font-size:14pt;font-weight:800;line-height:1.2">'+_htmlEsc(p.name)+'</div>'
+    +(p.desc?'<div style="font-size:8.5pt;color:#666;margin-top:1mm">'+_htmlEsc(p.desc)+'</div>':(catName?'<div style="font-size:8.5pt;color:#999;margin-top:1mm">'+_htmlEsc(catName)+'</div>':''))
+    +'</div>'
+    +'<div style="display:flex;align-items:flex-end;justify-content:space-between">'
+    +'<div style="font-size:30pt;font-weight:800;color:#000">'+price+'</div>'
+    +(bc?'<div style="text-align:right">'+_barcodeSvg(bc,95,22)+'<div style="font-size:6.5pt;letter-spacing:2px;color:#555;margin-top:1mm">'+_htmlEsc(bc)+'</div></div>':'')
+    +'</div></div>';
+}
+
+function renderLabelPreview(){
+  const prev=el('lbl-preview');if(!prev)return;
+  var pid;
+  if(_lblMulti&&_lblPids.length){pid=_lblPids[0];}
+  else{const sel=el('lbl-prod-sel');pid=sel?sel.value:null;}
+  if(!pid&&_lblPids.length)pid=_lblPids[0];
+  const p=db.products.find(function(x){return x.id===pid;});
+  if(!p){prev.innerHTML='<div style="color:var(--tx3);font-size:.82rem">Sin producto seleccionado</div>';return;}
+  const scales={sm:0.55,md:0.32,lg:0.26};
+  const scale=scales[_lblSize]||0.5;
+  const inner=_buildOneLabelHTML(p,_lblSize);
+  prev.innerHTML='<div style="transform:scale('+scale+');transform-origin:top center;display:inline-block">'+inner+'</div>';
+  // Adjust wrapper height to scaled label
+  const hMap={sm:50,md:80,lg:100};
+  const hMM=hMap[_lblSize]||50;
+  prev.style.minHeight=Math.round(hMM*scale*3.78+28)+'px';
+}
+
+function printLabels(){
+  const qty=Math.max(1,Math.min(100,parseInt((el('lbl-qty')||{}).value)||1));
+  var pids;
+  if(_lblMulti&&_lblPids.length){pids=_lblPids;}
+  else{const sel=el('lbl-prod-sel');pids=sel&&sel.value?[sel.value]:(_lblPids.length?_lblPids:[]);}
+  if(!pids.length){toast('⚠ Sin producto seleccionado');return;}
+  const labels=[];
+  pids.forEach(function(pid){
+    const p=db.products.find(function(x){return x.id===pid;});
+    if(!p)return;
+    for(var i=0;i<qty;i++)labels.push(_buildOneLabelHTML(p,_lblSize));
+  });
+  if(!labels.length){toast('⚠ Sin etiquetas');return;}
+  const printArea=el('lbl-print-area');
+  printArea.innerHTML='<div class="lbl-grid">'+labels.join('')+'</div>';
+  closeOv('ov-labels');
+  document.body.classList.add('lbl-pm');
+  setTimeout(function(){
+    window.print();
+    setTimeout(function(){document.body.classList.remove('lbl-pm');printArea.innerHTML='';},500);
+  },80);
+}
 </script>
 </body>
 </html>
