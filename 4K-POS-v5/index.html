@@ -339,6 +339,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 .sb-section{font-size:.58rem;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:1.2px;text-transform:uppercase;padding:10px 14px 3px;white-space:nowrap;}
 .sb-item{display:flex;align-items:center;gap:10px;padding:7px 14px;cursor:pointer;color:rgba(255,255,255,.65);font-size:.8rem;font-weight:500;transition:background .12s,color .12s;white-space:nowrap;border-left:3px solid transparent;user-select:none;}
 .sb-item:hover{background:rgba(255,255,255,.07);color:#fff;}
+.sb-item:active{background:rgba(255,255,255,.13)!important;}
 .sb-item.active{background:rgba(46,117,182,.25);border-left-color:#2E75B6;color:#fff;}
 .sb-icon{font-size:1.05rem;flex-shrink:0;width:20px;text-align:center;line-height:1;}
 .sb-lbl{flex:1;overflow:hidden;text-overflow:ellipsis;}
@@ -346,19 +347,19 @@ select.fi option{background:var(--s2);color:var(--tx);}
 body.sb-open #topbar,body.sb-open #app-main,body.sb-open #botbar,body.sb-open #dashboard-screen{margin-left:200px;transition:margin-left .2s ease;}
 body.sb-open.sb-collapsed #topbar,body.sb-open.sb-collapsed #app-main,body.sb-open.sb-collapsed #botbar,body.sb-open.sb-collapsed #dashboard-screen{margin-left:56px;}
 /* ── DASHBOARD ───────────────────────────────────────────── */
-#dashboard-screen{display:none;flex:1;flex-direction:column;gap:16px;padding:20px;overflow-y:auto;background:var(--bg);}
+#dashboard-screen{display:none;flex:1;min-height:0;flex-direction:column;gap:16px;padding:20px;overflow-y:auto;background:var(--bg);}
 .db-hd{display:flex;align-items:baseline;gap:10px;flex-shrink:0;}
 .db-hd h2{font-size:1.1rem;font-weight:800;color:var(--tx);}
 .db-hd span{font-size:.75rem;color:var(--tx3);}
 .db-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
 @media (max-width:1000px){.db-kpis{grid-template-columns:repeat(2,1fr);}}
-.db-kpi{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);padding:14px 16px;}
+.db-kpi{background:var(--s2);border:1.5px solid var(--b2);border-radius:var(--r);padding:14px 16px;}
 .db-kpi .kpi-ico{font-size:1.2rem;margin-bottom:4px;}
 .db-kpi .kpi-lbl{font-size:.65rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
 .db-kpi .kpi-val{font-family:Courier New,monospace;font-size:1.3rem;font-weight:800;color:var(--tx);}
 .db-row{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;}
 @media (max-width:850px){.db-row{grid-template-columns:1fr;}}
-.db-card{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);padding:14px 16px;}
+.db-card{background:var(--s2);border:1.5px solid var(--b2);border-radius:var(--r);padding:14px 16px;}
 .db-card-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
 .db-card-hd h4{font-size:.72rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;}
 .db-toggle{display:flex;gap:3px;}
@@ -440,8 +441,8 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
   <div class="sb-logo" onclick="toggleSidebar()">
     <img id="sb-logo-img" src="" alt="4K POS">
     <div class="sb-logo-txt">
-      <span class="sbl-main">4K POS</span>
-      <span class="sbl-sub">4K Solutions</span>
+      <span class="sbl-main"><span style="color:#1e3a8a">4K</span> <span style="color:#1a7a3a">P</span><span style="color:#e6b800">O</span><span style="color:#cc1111">S</span></span>
+      <span class="sbl-sub"><span style="color:#1e3a8a">4K</span> <span style="color:#e6b800">Solutions</span></span>
     </div>
   </div>
   <div class="sb-user">
@@ -476,12 +477,19 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
     <div class="sb-item" id="sbi-credits" onclick="sbNav('credits')">
       <i class="ti ti-credit-card sb-icon"></i><span class="sb-lbl">Créditos</span>
     </div>
-    <div class="sb-item" id="sbi-abonos" onclick="sbNav('abonos')">
-      <i class="ti ti-cash sb-icon"></i><span class="sb-lbl">Abonos</span>
+    <div class="sb-section">Catálogo</div>
+    <div class="sb-item" id="sbi-combos" onclick="sbNav('combos')">
+      <i class="ti ti-package-export sb-icon"></i><span class="sb-lbl">Combos</span>
+    </div>
+    <div class="sb-item" id="sbi-specials" onclick="sbNav('specials')">
+      <i class="ti ti-star sb-icon"></i><span class="sb-lbl">Especiales</span>
     </div>
     <div class="sb-section">Más</div>
     <div class="sb-item" id="sbi-conta" onclick="sbNav('conta')">
       <i class="ti ti-book sb-icon"></i><span class="sb-lbl">Contabilidad</span>
+    </div>
+    <div class="sb-item" id="sbi-compras" onclick="sbNav('compras')">
+      <i class="ti ti-truck sb-icon"></i><span class="sb-lbl">Compras</span>
     </div>
     <div class="sb-item" id="sbi-audit" style="display:none" onclick="sbNav('audit')">
       <i class="ti ti-shield sb-icon"></i><span class="sb-lbl">Auditoría</span>
@@ -508,6 +516,9 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
     </div>
   </div>
 </div>
+
+<!-- SIDEBAR TOGGLE BTN -->
+<button id="sb-toggle-btn" onclick="toggleSidebar()" title="Colapsar/expandir menú" style="position:fixed;top:50%;left:200px;transform:translateY(-50%);width:20px;height:36px;background:#1E2A3A;border:1.5px solid rgba(255,255,255,.25);border-left:none;border-radius:0 6px 6px 0;color:rgba(255,255,255,.8);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.1rem;z-index:555;padding:0;transition:left .2s ease;line-height:1">‹</button>
 
 <!-- TOPBAR -->
 <div id="topbar" style="display:none">
@@ -1022,6 +1033,16 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
       <div class="fg" style="margin-bottom:10px">
         <label class="lbl">Copias por producto</label>
         <input type="number" class="fi" id="lbl-qty" min="1" max="100" value="1" oninput="if(this.value>100)this.value=100;if(this.value<1)this.value=1">
+      </div>
+      <div style="margin-bottom:10px">
+        <label class="lbl" style="margin-bottom:5px;display:block">Tipo de impresora</label>
+        <div style="display:flex;gap:6px">
+          <button class="lbl-sz-btn on" id="lbl-prn-normal" onclick="setLblPrinter('normal',this)" style="flex:1">📄 Normal<br><span style="font-size:.68rem;font-weight:400;opacity:.8">A4 / Carta</span></button>
+          <button class="lbl-sz-btn" id="lbl-prn-thermal" onclick="setLblPrinter('thermal',this)" style="flex:1">🧾 Térmica<br><span style="font-size:.68rem;font-weight:400;opacity:.8">80mm rollo</span></button>
+        </div>
+      </div>
+      <div id="lbl-thermal-info" style="display:none;background:var(--amb);color:var(--am);border-radius:var(--rs);padding:7px 10px;font-size:.75rem;margin-bottom:8px">
+        ⚠ En impresora térmica: el PDF se genera para hoja A4. Usa la opción "Tamaño de página personalizado 80mm" en el diálogo de impresión para impresoras de rollo.
       </div>
       <div class="slbl" style="margin-bottom:6px;font-size:.78rem">Vista previa</div>
       <div class="lbl-prev-wrap" id="lbl-preview"></div>
@@ -3117,12 +3138,22 @@ function reqPin(target){
   if(target==='cancel'&&pm.can){runTarget(target);return;}
   pinTarget=target;pinVal='';updatePinDisp();el('pin-err').style.display='none';openOv('ov-pin');
 }
+var _sbNextAdmTab=null;
+var _sbNextContaTab=null;
 function runTarget(t2){
-  if(t2==='admin'){loadAdminModal();openOv('ov-admin');}
+  if(t2==='admin'){
+    loadAdminModal();openOv('ov-admin');
+    if(_sbNextAdmTab){var _t=_sbNextAdmTab;_sbNextAdmTab=null;
+      var _btn=document.querySelector('#adm-tabs .btn[onclick*="'+_t+'"]');admTab(_t,_btn||undefined);}
+  }
   else if(t2==='returns'){renderActions('returns');openOv('ov-actions');}
   else if(t2==='cancel'){renderActions('cancel');openOv('ov-actions');}
   else if(t2==='sales'){renderSales();openOv('ov-sales');}
-  else if(t2==='conta'){openOv('ov-conta');loadContaPerms();renderConta();}
+  else if(t2==='conta'){
+    openOv('ov-conta');loadContaPerms();renderConta();
+    if(_sbNextContaTab){var _ct=_sbNextContaTab;_sbNextContaTab=null;
+      var _cb=document.querySelector('#conta-tabs .btn[onclick*="\''+_ct+'\'"]');contaTab(_ct,_cb||null);}
+  }
   else if(t2==='force-logout'){_execForceLogout();}
 }
 function forceLogout(){
@@ -6466,6 +6497,13 @@ function _updateInvSelUI(){
 var _lblSize='sm';
 var _lblPids=[];
 var _lblMulti=false;
+var _lblPrinter='normal';
+function setLblPrinter(type,btn){
+  _lblPrinter=type;
+  document.querySelectorAll('#lbl-prn-normal,#lbl-prn-thermal').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  var info=el('lbl-thermal-info');if(info)info.style.display=(type==='thermal')?'':'none';
+}
 
 function setLblSize(size,btn){
   _lblSize=size;
@@ -6487,8 +6525,11 @@ function openLabelModal(pid){
   const mr=el('lbl-multi-row');if(mr)mr.style.display='none';
   el('lbl-modal-title').textContent='Imprimir Etiqueta';
   el('lbl-qty').value='1';
-  _lblSize='sm';
+  _lblSize='sm';_lblPrinter='normal';
   ['sm','md','lg'].forEach(function(k){const b=el('lbl-sz-'+k);if(b)b.classList[k==='sm'?'add':'remove']('on');});
+  var _pnNorm=el('lbl-prn-normal'),_pnTherm=el('lbl-prn-thermal');
+  if(_pnNorm){_pnNorm.classList.add('on');}if(_pnTherm){_pnTherm.classList.remove('on');}
+  var _ti=el('lbl-thermal-info');if(_ti)_ti.style.display='none';
   renderLabelPreview();
   openOv('ov-labels');
 }
@@ -6502,8 +6543,11 @@ function printSelectedLabels(){
   if(mr){mr.style.display='';mr.innerHTML='<strong>'+_lblPids.length+'</strong> productos seleccionados para imprimir etiquetas.';}
   el('lbl-modal-title').textContent='Etiquetas múltiples';
   el('lbl-qty').value='1';
-  _lblSize='sm';
+  _lblSize='sm';_lblPrinter='normal';
   ['sm','md','lg'].forEach(function(k){const b=el('lbl-sz-'+k);if(b)b.classList[k==='sm'?'add':'remove']('on');});
+  var _pnNorm2=el('lbl-prn-normal'),_pnTherm2=el('lbl-prn-thermal');
+  if(_pnNorm2){_pnNorm2.classList.add('on');}if(_pnTherm2){_pnTherm2.classList.remove('on');}
+  var _ti2=el('lbl-thermal-info');if(_ti2)_ti2.style.display='none';
   renderLabelPreview();
   openOv('ov-labels');
 }
@@ -6607,6 +6651,12 @@ function printLabels(){
 }
 
 // ── SIDEBAR ──────────────────────────────────────────────────────────────────
+function _sbSetToggle(collapsed){
+  var btn=el('sb-toggle-btn');if(!btn)return;
+  btn.style.display='flex';
+  btn.textContent=collapsed?'›':'‹';
+  btn.style.left=collapsed?'56px':'200px';
+}
 function initSidebar(){
   var sb=el('sidebar');if(!sb)return;
   var logoSrc=document.querySelector('#login-screen img');
@@ -6616,6 +6666,7 @@ function initSidebar(){
   var coll=localStorage.getItem('4kpos_sidebar_collapsed')==='1';
   if(coll){sb.classList.add('collapsed');document.body.classList.add('sb-collapsed');}
   else{sb.classList.remove('collapsed');document.body.classList.remove('sb-collapsed');}
+  _sbSetToggle(coll);
   _sbUpdateUser();
   _sbUpdatePerms();
 }
@@ -6624,9 +6675,11 @@ function toggleSidebar(){
   var coll=sb.classList.toggle('collapsed');
   document.body.classList.toggle('sb-collapsed',coll);
   localStorage.setItem('4kpos_sidebar_collapsed',coll?'1':'0');
+  _sbSetToggle(coll);
 }
 function hideSidebar(){
   var sb=el('sidebar');if(sb)sb.style.display='none';
+  var btn=el('sb-toggle-btn');if(btn)btn.style.display='none';
   document.body.classList.remove('sb-open','sb-collapsed');
 }
 function _sbUpdateUser(){
@@ -6642,10 +6695,12 @@ function _sbUpdatePerms(){
   show('sbi-audit',isAdm);
   show('sbi-prods',(isAdm||pm.adm));
   show('sbi-inv',(isAdm||pm.adm));
+  show('sbi-combos',(isAdm||pm.adm));
+  show('sbi-specials',(isAdm||pm.adm));
   show('sbi-sales',(isAdm||pm.sal));
   show('sbi-returns',(isAdm||pm.ret));
   show('sbi-credits',(isAdm||pm.adm||pm.sal));
-  show('sbi-abonos',(isAdm||pm.adm||pm.sal));
+  show('sbi-compras',(isAdm||pm.conta));
   show('sbi-conta',(isAdm||pm.conta));
   show('sbi-cfg',isAdm);
 }
@@ -6660,12 +6715,17 @@ function sbNav(screen){
     if(mainEl)mainEl.style.display='none';
     if(dashEl)dashEl.style.display='flex';
     refreshDashboard();
-  }else if(screen==='prods'||screen==='inv'||screen==='cfg'){reqPin('admin');}
+  }else if(screen==='prods'){_sbNextAdmTab='t-prods';reqPin('admin');}
+  else if(screen==='inv'){_sbNextAdmTab='t-inv';reqPin('admin');}
+  else if(screen==='cfg'){_sbNextAdmTab='t-cfg';reqPin('admin');}
+  else if(screen==='combos'){_sbNextAdmTab='t-combos';reqPin('admin');}
+  else if(screen==='specials'){_sbNextAdmTab='t-specials';reqPin('admin');}
   else if(screen==='labels'){openLabelModal(null);}
   else if(screen==='sales'){reqPin('sales');}
   else if(screen==='returns'){reqPin('returns');}
-  else if(screen==='credits'||screen==='abonos'){openAbonosList();}
+  else if(screen==='credits'){openCreditsPanel();}
   else if(screen==='conta'){reqPin('conta');}
+  else if(screen==='compras'){_sbNextContaTab='ct-comp';reqPin('conta');}
   else if(screen==='audit'){openAudit();}
 }
 
