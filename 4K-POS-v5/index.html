@@ -155,6 +155,16 @@ body.light .pli-meta{font-size:.73rem!important;color:#3d3d58!important;}
 body.light .pcard-name{color:#1a1a1a!important;font-weight:700!important;}
 body.light .pcard-price{color:#15803d!important;font-weight:700!important;}
 body.light .chgbox{color:#15803d!important;border-color:#15803d!important;background:rgba(21,128,61,0.08)!important;}
+.spc-badge{position:absolute;top:6px;left:6px;border-radius:5px;padding:2px 6px;font-size:10px;font-weight:800;line-height:1.4;z-index:1;letter-spacing:.2px;pointer-events:none;}
+.spc-badge.disc{background:#f59e0b;color:#000;}
+.spc-badge.bogo{background:#8b5cf6;color:#fff;}
+.spc-badge.qty{background:#3b82f6;color:#fff;}
+.combo-badge{position:absolute;top:6px;left:6px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:5px;padding:2px 6px;font-size:10px;font-weight:800;z-index:1;pointer-events:none;}
+.ci-spc-tag{font-size:.68rem;color:var(--am);font-weight:700;margin-top:1px;}
+.ci-combo-tag{font-size:.65rem;color:var(--ac);font-weight:600;margin-top:1px;}
+.cmb-item-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;background:var(--s2);border-radius:6px;padding:6px 8px;}
+.spc-type-btn{flex:1;padding:8px 4px;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx2);cursor:pointer;font-size:.78rem;font-weight:600;transition:all .2s;text-align:center;}
+.spc-type-btn.on{background:var(--acg);border-color:var(--ac);color:var(--ac);}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;padding:10px;}
 .cat-card{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r);padding:8px 8px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .18s;text-align:center;min-height:150px;}
 .cat-card:hover{border-color:var(--ac);transform:scale(.97);}
@@ -497,6 +507,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <button class="btn btn-s" onclick="admTab('t-cfg',this)">⚙️ <span id="tab-cfg-txt">Config</span></button>
         <button class="btn btn-s" onclick="admTab('t-inv',this)">📋 <span id="tab-inv-txt">Inventario</span></button>
         <button class="btn btn-s" onclick="admTab('t-cust',this)">👥 <span id="tab-cust-txt">Clientes</span></button>
+        <button class="btn btn-s" onclick="admTab('t-combos',this)">🍱 <span id="tab-combos-txt">Combos</span></button>
+        <button class="btn btn-s" onclick="admTab('t-specials',this)">⭐ <span id="tab-specials-txt">Especiales</span></button>
       </div>
       <!-- PRODUCTS -->
       <div id="t-prods">
@@ -730,6 +742,58 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div style="font-size:.77rem;color:var(--tx3);margin-bottom:12px" id="credits-count-lbl"></div>
         <div id="adm-credits-list"></div>
       </div>
+      </div>
+      <!-- COMBOS -->
+      <div id="t-combos" style="display:none">
+        <input type="hidden" id="cmb-eid">
+        <div class="slbl" id="cmb-form-title">Nuevo Combo</div>
+        <div class="fg" style="margin-bottom:8px"><label class="lbl">Nombre</label><input type="text" class="fi" id="cmb-name" placeholder="Ej: Combo Familiar"></div>
+        <div class="fg" style="margin-bottom:8px"><label class="lbl">Descripción</label><input type="text" class="fi" id="cmb-desc" placeholder="Descripción opcional"></div>
+        <div class="fg" style="margin-bottom:8px"><label class="lbl">Precio especial ($)</label><input type="number" class="fi" id="cmb-price" min="0" step="0.01" placeholder="0.00"></div>
+        <div class="slbl" style="font-size:.78rem;margin-top:4px">Productos incluidos</div>
+        <div id="cmb-items-list" style="margin-bottom:8px"></div>
+        <button class="btn btn-s" style="width:100%;margin-bottom:10px;font-size:.8rem" onclick="cmbAddItem()">+ Agregar producto</button>
+        <div class="tog" style="margin-bottom:10px"><span class="tog-label">Activo</span><label class="tog-sw"><input type="checkbox" id="cmb-active" checked><span class="slider"></span></label></div>
+        <div class="frow" style="margin-bottom:16px">
+          <button class="btn btn-p" id="cmb-save-btn" onclick="saveCombo()" style="flex:1">💾 Guardar Combo</button>
+          <button class="btn btn-s" onclick="clearCombo()">↺</button>
+        </div>
+        <div class="slbl" id="cmb-list-title">Combos registrados</div>
+        <div id="cmb-list"></div>
+      </div>
+      <!-- ESPECIALES -->
+      <div id="t-specials" style="display:none">
+        <input type="hidden" id="spc-eid">
+        <div class="slbl" id="spc-form-title">Nuevo Especial</div>
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <button class="spc-type-btn on" id="spc-type-disc" onclick="setSpcType('discount',this)">🏷️ Desc %</button>
+          <button class="spc-type-btn" id="spc-type-bogo" onclick="setSpcType('bogo',this)">2×1</button>
+          <button class="spc-type-btn" id="spc-type-qty" onclick="setSpcType('qty_price',this)">📦 x Cantidad</button>
+        </div>
+        <div class="fg" style="margin-bottom:8px"><label class="lbl">Producto</label><select class="fi" id="spc-product"></select></div>
+        <div id="spc-fields-discount">
+          <div class="g2">
+            <div class="fg"><label class="lbl">Descuento (%)</label><input type="number" class="fi" id="spc-pct" min="1" max="99" placeholder="20"></div>
+            <div class="fg"><label class="lbl">Fecha inicio</label><input type="date" class="fi" id="spc-start"></div>
+          </div>
+          <div class="fg" style="margin-bottom:8px"><label class="lbl">Fecha fin</label><input type="date" class="fi" id="spc-end"></div>
+        </div>
+        <div id="spc-fields-bogo" style="display:none">
+          <div style="font-size:.78rem;color:var(--tx3);padding:8px;background:var(--s2);border-radius:var(--rs);margin-bottom:8px" id="spc-bogo-info">Lleva 2, paga 1. Se aplica automáticamente al agregar 2 o más unidades al carrito.</div>
+        </div>
+        <div id="spc-fields-qty" style="display:none">
+          <div class="g2">
+            <div class="fg"><label class="lbl">Cantidad mínima</label><input type="number" class="fi" id="spc-minqty" min="2" placeholder="6"></div>
+            <div class="fg"><label class="lbl">Precio especial ($)</label><input type="number" class="fi" id="spc-specprice" min="0" step="0.01" placeholder="0.00"></div>
+          </div>
+        </div>
+        <div class="tog" style="margin-bottom:10px;margin-top:8px"><span class="tog-label">Activo</span><label class="tog-sw"><input type="checkbox" id="spc-active" checked><span class="slider"></span></label></div>
+        <div class="frow" style="margin-bottom:16px">
+          <button class="btn btn-p" id="spc-save-btn" onclick="saveSpecial()" style="flex:1">💾 Guardar Especial</button>
+          <button class="btn btn-s" onclick="clearSpecial()">↺</button>
+        </div>
+        <div class="slbl" id="spc-list-title">Especiales registrados</div>
+        <div id="spc-list"></div>
       </div>
     </div>
   </div>
@@ -1548,6 +1612,18 @@ const T = {
     noCreditsFoundFor:'No se encontraron créditos para',noPendingCreditsCheck:'Sin créditos pendientes ✓',
     cpayProductsSec:'Productos',cpayNoDetail:'Sin detalle',cpayPriorPayments:'Abonos anteriores',
     cpayVenta:'📅 Venta: ',cpayVence:'Vence: ',cpayNoLimit:'Sin fecha límite',
+    tabCombos:'Combos',tabSpecials:'Especiales',combosCategory:'Combos',comboAvailable:'disponibles',
+    comboSaved:'✅ Combo guardado',comboDelConfirm:'¿Eliminar combo ',comboDeleted:'✓ Combo eliminado',
+    comboNoItems:'Sin productos. Agrega al menos uno.',comboNoName:'⚠ Nombre requerido',
+    comboNoPrice:'⚠ Precio requerido',comboNoItemsErr:'⚠ Agrega al menos un producto',
+    comboNone:'Sin combos registrados.',comboList:'Combos registrados',
+    specialSaved:'✅ Especial guardado',specialDelConfirm:'¿Eliminar especial?',specialDeleted:'✓ Especial eliminado',
+    specialNone:'Sin especiales registrados.',specialList:'Especiales registrados',
+    specialNoProduct:'⚠ Selecciona un producto',specialPctInvalid:'⚠ Descuento inválido (1-99%)',
+    specialMinQtyInvalid:'⚠ Cantidad mínima debe ser 2+',specialSpecPriceInvalid:'⚠ Precio especial inválido',
+    specialActiveStatus:'● Activo',specialInactiveStatus:'○ Inactivo',specialOutOfRange:'⏳ Fuera de rango',
+    specialBogoInfo:'Lleva 2, paga 1. Se aplica automáticamente al agregar 2 o más unidades al carrito.',
+    stockInsufficientFor:'⚠ Stock insuficiente para: ',comboSubitemsLabel:'Incluye: ',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -1731,6 +1807,18 @@ const T = {
     noCreditsFoundFor:'No credits found for',noPendingCreditsCheck:'No pending credits ✓',
     cpayProductsSec:'Products',cpayNoDetail:'No detail',cpayPriorPayments:'Prior payments',
     cpayVenta:'📅 Sale: ',cpayVence:'Due: ',cpayNoLimit:'No due date',
+    tabCombos:'Combos',tabSpecials:'Specials',combosCategory:'Combos',comboAvailable:'available',
+    comboSaved:'✅ Combo saved',comboDelConfirm:'Delete combo ',comboDeleted:'✓ Combo deleted',
+    comboNoItems:'No products. Add at least one.',comboNoName:'⚠ Name required',
+    comboNoPrice:'⚠ Price required',comboNoItemsErr:'⚠ Add at least one product',
+    comboNone:'No combos registered.',comboList:'Registered combos',
+    specialSaved:'✅ Special saved',specialDelConfirm:'Delete special?',specialDeleted:'✓ Special deleted',
+    specialNone:'No specials registered.',specialList:'Registered specials',
+    specialNoProduct:'⚠ Select a product',specialPctInvalid:'⚠ Invalid discount (1-99%)',
+    specialMinQtyInvalid:'⚠ Minimum quantity must be 2+',specialSpecPriceInvalid:'⚠ Invalid special price',
+    specialActiveStatus:'● Active',specialInactiveStatus:'○ Inactive',specialOutOfRange:'⏳ Out of range',
+    specialBogoInfo:'Buy 2, get 1 free. Applied automatically when 2+ units are added to cart.',
+    stockInsufficientFor:'⚠ Insufficient stock for: ',comboSubitemsLabel:'Includes: ',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -1743,7 +1831,7 @@ let db={products:[],categories:[],sales:[],returns:[],orderNum:1,adminCode:'1234
   fundAmount:0,customers:[],credits:[],payMethods:{cash:true,card:true,transf:true,openAccounts:true,credit:false},
   drawerPort:'COM3',drawerAuto:true,
   cfg:{bizName:'4K Negocio',bizSub:'',thanks:'¡Gracias por tu compra! 💕',phone:'',s1:'',s2:'',qr:'',logo:'',timeFormat:'12h',taxEnabled:false,taxName:'Impuesto',taxRate:0,taxIncluded:false},
-  facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true,shifts:[],auditLog:[],
+  facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true,shifts:[],auditLog:[],combos:[],specials:[],
   settings:{inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null,adminExemptFromConfirm:true,lowStockThreshold:5}};
 let cart=[],payMethod='cash',cashIn='',discount={type:'pct',value:0,active:false};
 let currentView='categories',currentCategory=null;
@@ -1903,6 +1991,8 @@ function applyLang(){
   const _tabCfg=el('tab-cfg-txt');if(_tabCfg)_tabCfg.textContent=t('tabCfg');
   const _tabInv=el('tab-inv-txt');if(_tabInv)_tabInv.textContent=t('tabInv');
   const _tabCust=el('tab-cust-txt');if(_tabCust)_tabCust.textContent=t('tabCust');
+  const _tabCombos=el('tab-combos-txt');if(_tabCombos)_tabCombos.textContent=t('tabCombos');
+  const _tabSpecials=el('tab-specials-txt');if(_tabSpecials)_tabSpecials.textContent=t('tabSpecials');
   // Product form labels
   const _lblPN=el('lbl-p-name');if(_lblPN)_lblPN.textContent=t('fldName');
   const _lblPCat=el('lbl-p-cat');if(_lblPCat)_lblPCat.textContent=t('fldCategory');
@@ -2236,6 +2326,8 @@ async function loadDB(){
       if(d.returns)db.returns=d.returns;
       if(d.auditLog)db.auditLog=d.auditLog;
       if(d.settings)db.settings=Object.assign({inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null,adminExemptFromConfirm:true},d.settings);
+      if(d.combos)db.combos=d.combos;
+      if(d.specials)db.specials=d.specials;
     }
  }catch(e){console.error(e);}
 
@@ -2946,10 +3038,24 @@ function renderProdList(){
 }
 function renderProds(){
   const g=el('pgrid'),q=(el('srch')?el('srch').value||'':'').toLowerCase();
+  // Combos view
+  if(currentCategory==='__combos__'){
+    const combos=(db.combos||[]).filter(x=>x.active&&(!q||x.name.toLowerCase().includes(q)));
+    if(!combos.length){g.innerHTML='<div class="egrid-empty">'+t('noProducts')+'</div>';return;}
+    const inCartCmb={};cart.forEach(function(c){if(c.isCombo)inCartCmb[c.comboId]=(inCartCmb[c.comboId]||0)+c.qty;});
+    g.innerHTML=combos.map(function(cmb){
+      const qty=inCartCmb[cmb.id]||0;
+      const imgH=cmb.img?('<img class="pcard-img" src="'+cmb.img+'" alt="'+cmb.name+'">'):'<div class="pcard-ph">🍱</div>';
+      const badge=qty>0?('<div class="pbadge">'+qty+'</div>'):'';
+      const itemNames=(cmb.items||[]).map(function(ci){const p=db.products.find(function(x){return x.id===ci.productId;});return (p?p.name:'?')+(ci.qty>1?'×'+ci.qty:'');}).join(' · ');
+      return '<div class="pcard" onclick="addComboToCart(\''+cmb.id+'\')"><div class="combo-badge">COMBO</div>'+imgH+'<div class="pcard-name">'+cmb.name+'</div><div style="font-size:.68rem;color:var(--tx3);margin:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">'+((cmb.desc||itemNames)||'')+'</div><div class="pcard-bottom"><div class="pcard-price">'+dolr(cmb.price)+'</div></div>'+badge+'</div>';
+    }).join('');
+    return;
+  }
   const list=db.products.filter(p=>(!currentCategory||currentCategory==='all'||p.cat===currentCategory)&&(!q||p.name.toLowerCase().includes(q)||(p.bc||'').includes(q)));
   if(!list.length){g.innerHTML='<div class="egrid-empty">'+t('noProducts')+'</div>';return;}
-  const inCart={};cart.forEach(c=>inCart[c.id]=(inCart[c.id]||0)+c.qty);
-  g.innerHTML=list.map(p=>{
+  const inCart={};cart.forEach(function(c){if(!c.isCombo)inCart[c.id]=(inCart[c.id]||0)+c.qty;});
+  g.innerHTML=list.map(function(p){
     const qty=inCart[p.id]||0;
     const imgH=p.img?('<img class="pcard-img" src="'+p.img+'" alt="'+p.name+'">'):'<div class="pcard-ph">'+p.name[0]+'</div>';
     const badge=qty>0?('<div class="pbadge">'+qty+'</div>'):'';
@@ -2957,7 +3063,14 @@ function renderProds(){
     const oc=p.stock<=0?'':'addToCart(\''+p.id+'\')';
     const minSt=p.minStock||5;
     const stkH=p.stock<=0?('<div class="pcard-stk">'+t('outOfStock')+'</div>'):('<div class="pcard-stk'+(p.stock<=minSt?' low':'')+'">'+t('stock')+': '+p.stock+'</div>');
-    return '<div class="'+cls+'" onclick="'+oc+'">'+imgH+'<div class="pcard-name">'+p.name+'</div><div class="pcard-bottom"><div class="pcard-price">'+dolr(p.price)+'</div>'+stkH+'</div>'+badge+'</div>';
+    const _sp=_getActiveSpecial(p.id);
+    let spBadge='';
+    if(_sp){
+      if(_sp.type==='discount')spBadge='<div class="spc-badge disc">-'+_sp.pct+'%</div>';
+      else if(_sp.type==='bogo')spBadge='<div class="spc-badge bogo">2×1</div>';
+      else if(_sp.type==='qty_price')spBadge='<div class="spc-badge qty">+'+_sp.minQty+'u</div>';
+    }
+    return '<div class="'+cls+'" onclick="'+oc+'">'+spBadge+imgH+'<div class="pcard-name">'+p.name+'</div><div class="pcard-bottom"><div class="pcard-price">'+dolr(p.price)+'</div>'+stkH+'</div>'+badge+'</div>';
   }).join('');
 }
 
@@ -3193,7 +3306,7 @@ function addToCart(pid){
 function changeQty(pid,d){const item=cart.find(x=>x.id===pid);if(!item)return;item.qty+=d;if(item.qty<=0)cart=cart.filter(x=>x.id!==pid);renderCart();renderProds();}
 function clearCart(){cart=[];cashIn='';discount={type:'pct',value:0,active:false};editingAccountId=null;renderCart();renderProds();calcChange();}
 function renderCart(){
-  const total=cart.reduce((s,c)=>s+c.price*c.qty,0);
+  const total=getCartTotal();
   const cnt=cart.reduce((s,c)=>s+c.qty,0);
   const _rcTax=getTaxCalc();const finalTotal=_rcTax.total;const discAmt=getDiscountAmt();
   setEl('ccnt',cart.length.toString());setEl('csub',dolr(total));setEl('citems',cnt.toString());setEl('ctotal',dolr(finalTotal));
@@ -3202,10 +3315,22 @@ function renderCart(){
   el('cobrar').disabled=!cart.length;updateCobrar();
   el('cempty').style.display=cart.length?'none':'flex';
   const list=el('clist');list.querySelectorAll('.citem').forEach(e=>e.remove());
-  cart.forEach(item=>{
+  cart.forEach(function(item){
     const div=document.createElement('div');div.className='citem';
-    const th=item.img?('<img class="ci-img" src="'+item.img+'" alt="">'):('<div class="ci-ph">'+item.name[0]+'</div>');
-    div.innerHTML=th+'<div class="ci-inf"><div class="ci-name">'+item.name+'</div><div class="ci-uprice">'+dolr(item.price)+' c/u</div></div><div class="ci-qty"><button class="qb" onclick="changeQty(\''+item.id+'\',-1)">−</button><span class="qn" style="cursor:pointer;min-width:26px;border-bottom:1.5px dashed var(--tx3)" onclick="qtyInputMode(\''+item.id+'\',this)" title="Clic para editar cantidad">'+item.qty+'</span><button class="qb" onclick="changeQty(\''+item.id+'\',1)">+</button></div><div class="ci-tot">'+dolr(item.price*item.qty)+'</div><button class="ci-del" onclick="changeQty(\''+item.id+'\',-99)">✕</button>';
+    const th=item.img?('<img class="ci-img" src="'+item.img+'" alt="">'):('<div class="ci-ph">'+(item.name[0]||'?')+'</div>');
+    const effTotal=getItemEffectiveTotal(item);
+    let extraTag='';
+    if(item.isCombo){
+      extraTag='<div class="ci-combo-tag">🍱 COMBO</div>';
+    }else{
+      const _sp=_getActiveSpecial(item.id);
+      if(_sp){
+        if(_sp.type==='discount')extraTag='<div class="ci-spc-tag">🏷️ -'+_sp.pct+'%</div>';
+        else if(_sp.type==='bogo')extraTag='<div class="ci-spc-tag">2×1</div>';
+        else if(_sp.type==='qty_price'&&item.qty>=_sp.minQty)extraTag='<div class="ci-spc-tag">📦 precio especial</div>';
+      }
+    }
+    div.innerHTML=th+'<div class="ci-inf"><div class="ci-name">'+item.name+'</div>'+extraTag+'<div class="ci-uprice">'+dolr(item.price)+' c/u</div></div><div class="ci-qty"><button class="qb" onclick="changeQty(\''+item.id+'\',-1)">−</button><span class="qn" style="cursor:pointer;min-width:26px;border-bottom:1.5px dashed var(--tx3)" onclick="qtyInputMode(\''+item.id+'\',this)" title="Clic para editar cantidad">'+item.qty+'</span><button class="qb" onclick="changeQty(\''+item.id+'\',1)">+</button></div><div class="ci-tot">'+dolr(effTotal)+'</div><button class="ci-del" onclick="changeQty(\''+item.id+'\',-99)">✕</button>';
     list.appendChild(div);
   });
   calcChange();
@@ -3223,7 +3348,7 @@ function showCategories(){
 function showProducts(catId){
   currentView='products';currentCategory=catId;
   el('cat-view').style.display='none';el('prod-view').style.display='';
-  const name=catId==='all'?t('all'):(db.categories.find(c=>c.id===catId)||{name:t('tabCats')}).name;
+  const name=catId==='all'?t('all'):catId==='__combos__'?t('combosCategory'):(db.categories.find(c=>c.id===catId)||{name:t('tabCats')}).name;
   el('back-cat-name').textContent=name;
   renderProds();
 }
@@ -3238,6 +3363,13 @@ function renderCategories(){
   const allCard=document.createElement('div');allCard.className='cat-card';
   allCard.innerHTML='<div class="cc-img" style="font-size:1.8rem">🛍️</div><div class="cc-name">'+t('all')+'</div><div class="cc-cnt">'+allCnt+' '+t('product')+'s</div>';
   allCard.onclick=()=>showProducts('all');grid.appendChild(allCard);
+  // Combos card
+  const _activeCombos=(db.combos||[]).filter(x=>x.active);
+  if(_activeCombos.length){
+    const cmbCard=document.createElement('div');cmbCard.className='cat-card';
+    cmbCard.innerHTML='<div class="cc-img" style="font-size:1.8rem">🍱</div><div class="cc-name">'+t('combosCategory')+'</div><div class="cc-cnt">'+_activeCombos.length+' '+t('comboAvailable')+'</div>';
+    cmbCard.onclick=()=>showProducts('__combos__');grid.appendChild(cmbCard);
+  }
   // Category cards
   db.categories.forEach(cat=>{
     const cnt=db.products.filter(p=>p.cat===cat.id).length;
@@ -3350,7 +3482,7 @@ function calcSplitChange(){
   if(sum<total){box.textContent='⚠ '+t('missingAmt')+' '+dolr(total-sum);box.className='chgbox neg';return;}
   box.textContent=t('cashChange')+': '+dolr(c-(total-k));box.className='chgbox';
 }
-function getCartTotal(){return cart.reduce((s,c)=>s+c.price*c.qty,0);}
+function getCartTotal(){return cart.reduce((s,c)=>s+getItemEffectiveTotal(c),0);}
 function getDiscountAmt(){
   const sub=getCartTotal();
   if(!discount.active||!discount.value)return 0;
@@ -3414,7 +3546,7 @@ function checkout(){
     if(payMethod==='cash' && cashIn && recv<total){toast(t('insufficientAmt'));return;}
     chg=recv-total;
   }
-  cart.forEach(item=>{const p=db.products.find(x=>x.id===item.id);if(p)p.stock=Math.max(0,(p.stock||0)-item.qty);});
+  cart.forEach(function(item){if(item.isCombo){(item.comboItems||[]).forEach(function(ci){const p=db.products.find(function(x){return x.id===ci.productId;});if(p)p.stock=Math.max(0,(p.stock||0)-ci.qty*item.qty);});}else{const p=db.products.find(function(x){return x.id===item.id;});if(p)p.stock=Math.max(0,(p.stock||0)-item.qty);}});
   const rnum=String(db.orderNum).padStart(6,'0');
   const rcode='4K-'+rnum+'-'+Date.now().toString(36).toUpperCase();
   const payLabels={cash:t('cash'),card:t('card'),transf:t('transfer'),split:t('split')};
@@ -3909,7 +4041,7 @@ function confirmCreditSale(){
   if(!cust){toast('⚠ Cliente no encontrado');return;}
   const name=cust.name;
   const total=getFinalTotal();
-  cart.forEach(item=>{const p=db.products.find(x=>x.id===item.id);if(p)p.stock=Math.max(0,(p.stock||0)-item.qty);});
+  cart.forEach(function(item){if(item.isCombo){(item.comboItems||[]).forEach(function(ci){const p=db.products.find(function(x){return x.id===ci.productId;});if(p)p.stock=Math.max(0,(p.stock||0)-ci.qty*item.qty);});}else{const p=db.products.find(function(x){return x.id===item.id;});if(p)p.stock=Math.max(0,(p.stock||0)-item.qty);}});
   const rnum=String(db.orderNum).padStart(6,'0');
   const rcode='4K-'+rnum+'-'+Date.now().toString(36).toUpperCase();
   const dueVal=(el('credit-due-date')||{}).value||null;
@@ -4336,7 +4468,13 @@ function deleteOA(id){
   const now=new Date(sale.date);
   setEl('r-date',now.toLocaleDateString()+' '+fmtTime());
   setEl('r-num','#'+sale.rnum);
-  el('r-lines').innerHTML=sale.items.map(i=>'<div class="rline"><span class="rl">'+i.name+' ×'+i.qty+'</span><span class="ra">'+dolr(i.price*i.qty)+'</span></div>').join('');
+  el('r-lines').innerHTML=sale.items.map(function(i){
+    let sub='<div class="rline"><span class="rl">'+i.name+' \xd7'+i.qty+'</span><span class="ra">'+dolr(getItemEffectiveTotal(i))+'</span></div>';
+    if(i.isCombo&&i.comboItems&&i.comboItems.length){
+      sub+='<div style="padding-left:14px;margin-bottom:2px">'+(i.comboItems.map(function(ci){return '<div style="font-size:.72rem;color:var(--tx3)">  • '+(ci.productName||ci.productId)+' \xd7'+ci.qty+'</div>';})).join('')+'</div>';
+    }
+    return sub;
+  }).join('');
   const _rTaxRow=el('r-tax-row');
   if(_rTaxRow){
     if(sale.taxAmount!=null&&sale.taxAmount>0){
@@ -4832,12 +4970,14 @@ function loadAdminModal(){
   _updateBkpPassUI();
 }
 function admTab(tab,e2){
-  ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits'].forEach(t=>{const el2=el(t);if(el2)el2.style.display='none';});
+  ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits','t-combos','t-specials'].forEach(t=>{const el2=el(t);if(el2)el2.style.display='none';});
   el(tab).style.display='block';
   document.querySelectorAll('#adm-tabs .btn').forEach(b=>b.className='btn btn-s');
   if(e2)e2.className='btn btn-p';
   if(tab==='t-inv')renderInv();
   if(tab==='t-credits')renderAdmCredits();
+  if(tab==='t-combos')initCombosTab();
+  if(tab==='t-specials')initSpecialsTab();
 }
 
 // CONTABILIDAD
@@ -5765,6 +5905,236 @@ document.addEventListener('keydown', function(e) {
     else{_buf='';_t=0;}
   }, true); // capture phase: fires before all bubble-phase listeners
 })();
+
+// =================== SPECIALS ENGINE ===================
+function _getActiveSpecial(productId){
+  if(!db.specials||!db.specials.length)return null;
+  const today=new Date().toISOString().slice(0,10);
+  return db.specials.find(function(s){
+    if(!s.active||s.productId!==productId)return false;
+    if(s.type==='discount')return(!s.startDate||today>=s.startDate)&&(!s.endDate||today<=s.endDate);
+    return true;
+  })||null;
+}
+function getItemEffectiveTotal(item){
+  if(item.isCombo)return Math.round(item.price*item.qty*100)/100;
+  const s=_getActiveSpecial(item.id);
+  if(!s)return Math.round(item.price*item.qty*100)/100;
+  if(s.type==='discount')return Math.round(item.price*(1-s.pct/100)*item.qty*100)/100;
+  if(s.type==='bogo')return Math.round(Math.ceil(item.qty/2)*item.price*100)/100;
+  if(s.type==='qty_price')return Math.round((item.qty>=s.minQty?s.specialPrice:item.price)*item.qty*100)/100;
+  return Math.round(item.price*item.qty*100)/100;
+}
+
+// =================== COMBOS — CART ===================
+function addComboToCart(comboId){
+  const cmb=(db.combos||[]).find(function(x){return x.id===comboId;});
+  if(!cmb||!cmb.active)return;
+  for(var _ci=0;_ci<(cmb.items||[]).length;_ci++){
+    const ci=cmb.items[_ci];const p=db.products.find(function(x){return x.id===ci.productId;});
+    if(!p||p.stock<ci.qty){toast(t('stockInsufficientFor')+(p?p.name:ci.productId));return;}
+  }
+  const eid='combo_'+cmb.id;
+  const ex=cart.find(function(x){return x.id===eid;});
+  if(ex){
+    for(var _ci2=0;_ci2<(cmb.items||[]).length;_ci2++){
+      const ci=cmb.items[_ci2];const p=db.products.find(function(x){return x.id===ci.productId;});
+      if(!p||p.stock<ci.qty*(ex.qty+1)){toast('⚠ '+t('outOfStock'));return;}
+    }
+    ex.qty++;
+  }else{
+    const cItems=(cmb.items||[]).map(function(ci){const p=db.products.find(function(x){return x.id===ci.productId;});return {productId:ci.productId,productName:p?p.name:ci.productId,qty:ci.qty};});
+    cart.push({id:eid,comboId:cmb.id,isCombo:true,name:cmb.name,price:cmb.price,qty:1,img:cmb.img||'',comboItems:cItems,desc:cmb.desc||''});
+  }
+  renderCart();renderProds();toast('✓ '+cmb.name);
+}
+
+// =================== COMBOS — ADMIN ===================
+var _cmbItems=[];
+function renderCmbItemsEditor(){
+  const list=el('cmb-items-list');if(!list)return;
+  if(!_cmbItems.length){list.innerHTML='<div style="color:var(--tx3);font-size:.8rem;padding:6px 0">'+t('comboNoItems')+'</div>';return;}
+  list.innerHTML=_cmbItems.map(function(ci,idx){
+    const opts=db.products.map(function(pp){return '<option value="'+pp.id+'"'+(pp.id===ci.productId?' selected':'')+'>'+pp.name+'</option>';}).join('');
+    return '<div class="cmb-item-row"><select style="flex:1;background:var(--s2);border:1.5px solid var(--b1);border-radius:6px;padding:5px;font-size:.8rem;color:var(--tx)" onchange="cmbItemProd('+idx+',this.value)">'+opts+'</select><input type="number" min="1" value="'+ci.qty+'" style="width:52px;background:var(--s2);border:1.5px solid var(--b1);border-radius:6px;padding:5px;font-size:.8rem;color:var(--tx);text-align:center" onchange="cmbItemQty('+idx+',this.value)"><button style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:14px;padding:2px" onclick="cmbRemoveItem('+idx+')">✕</button></div>';
+  }).join('');
+}
+function cmbAddItem(){
+  if(!db.products.length){toast('⚠ Sin productos');return;}
+  _cmbItems.push({productId:db.products[0].id,qty:1});
+  renderCmbItemsEditor();
+}
+function cmbItemProd(idx,val){_cmbItems[idx].productId=val;}
+function cmbItemQty(idx,val){_cmbItems[idx].qty=Math.max(1,parseInt(val)||1);}
+function cmbRemoveItem(idx){_cmbItems.splice(idx,1);renderCmbItemsEditor();}
+function clearCombo(){
+  el('cmb-eid').value='';el('cmb-name').value='';el('cmb-desc').value='';
+  el('cmb-price').value='';el('cmb-active').checked=true;_cmbItems=[];
+  const ft=el('cmb-form-title');if(ft)ft.textContent='Nuevo Combo';
+  renderCmbItemsEditor();
+}
+function saveCombo(){
+  const name=(el('cmb-name').value||'').trim();
+  const price=parseFloat(el('cmb-price').value)||0;
+  if(!name){toast(t('comboNoName'));return;}
+  if(!price){toast(t('comboNoPrice'));return;}
+  if(!_cmbItems.length){toast(t('comboNoItemsErr'));return;}
+  if(!db.combos)db.combos=[];
+  const eid=el('cmb-eid').value;
+  const prevImg=eid?((db.combos.find(function(x){return x.id===eid;})||{}).img||''):'';
+  const combo={id:eid||Date.now().toString(),name:name,desc:(el('cmb-desc').value||'').trim(),price:price,items:JSON.parse(JSON.stringify(_cmbItems)),active:el('cmb-active').checked,img:prevImg};
+  if(eid){
+    const i=db.combos.findIndex(function(x){return x.id===eid;});
+    if(i>=0)db.combos[i]=combo;
+    logAction('Combo editado',name+' \xb7 '+dolr(price));
+  }else{
+    db.combos.push(combo);
+    logAction('Combo creado',name+' \xb7 '+dolr(price));
+  }
+  saveDB();clearCombo();renderComboList();renderCategories();
+  toast(t('comboSaved'));
+}
+function editCombo(id){
+  const c=(db.combos||[]).find(function(x){return x.id===id;});if(!c)return;
+  el('cmb-eid').value=c.id;el('cmb-name').value=c.name;
+  el('cmb-desc').value=c.desc||'';el('cmb-price').value=c.price;
+  el('cmb-active').checked=c.active!==false;
+  const ft=el('cmb-form-title');if(ft)ft.textContent='Editar Combo';
+  _cmbItems=JSON.parse(JSON.stringify(c.items||[]));
+  renderCmbItemsEditor();
+  const n=el('cmb-name');if(n)n.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function deleteCombo(id){
+  const c=(db.combos||[]).find(function(x){return x.id===id;});if(!c)return;
+  confirm2(t('comboDelConfirm')+c.name+'?',function(){
+    db.combos=db.combos.filter(function(x){return x.id!==id;});
+    logAction('Combo eliminado',c.name);
+    saveDB();renderComboList();renderCategories();
+    toast(t('comboDeleted'));
+  });
+}
+function toggleCombo(id){
+  const c=(db.combos||[]).find(function(x){return x.id===id;});if(!c)return;
+  c.active=!c.active;
+  logAction(c.active?'Combo activado':'Combo desactivado',c.name);
+  saveDB();renderComboList();renderCategories();
+}
+function renderComboList(){
+  const list=el('cmb-list');if(!list)return;
+  const combos=db.combos||[];
+  if(!combos.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:12px 0">'+t('comboNone')+'</div>';return;}
+  list.innerHTML=combos.map(function(c){
+    const itemNames=(c.items||[]).map(function(ci){const p=db.products.find(function(x){return x.id===ci.productId;});return (p?p.name:'?')+(ci.qty>1?' \xd7'+ci.qty:'');}).join(', ');
+    return '<div class="pli"><div class="pli-info"><div class="pli-name">🍱 '+c.name+'</div><div class="pli-meta">'+dolr(c.price)+' \xb7 '+itemNames+'</div></div>'+
+      '<div style="display:flex;align-items:center;gap:4px"><span style="font-size:.72rem;color:'+(c.active?'var(--gn)':'var(--tx3)')+';font-weight:700">'+(c.active?'● Activo':'○ Inactivo')+'</span>'+
+      '<button class="eb" onclick="toggleCombo(\''+c.id+'\')">⏯</button>'+
+      '<button class="eb" onclick="editCombo(\''+c.id+'\')">✏</button>'+
+      '<button class="xb" onclick="deleteCombo(\''+c.id+'\')">✕</button></div></div>';
+  }).join('');
+}
+
+// =================== SPECIALS — ADMIN ===================
+var _spcType='discount';
+function setSpcType(type,btn){
+  _spcType=type;
+  ['disc','bogo','qty'].forEach(function(k){const b=el('spc-type-'+k);if(b)b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  const fd=el('spc-fields-discount');if(fd)fd.style.display=type==='discount'?'':'none';
+  const fb=el('spc-fields-bogo');if(fb)fb.style.display=type==='bogo'?'':'none';
+  const fq=el('spc-fields-qty');if(fq)fq.style.display=type==='qty_price'?'':'none';
+}
+function populateSpcProducts(){
+  const sel=el('spc-product');if(!sel)return;
+  sel.innerHTML=db.products.map(function(p){return '<option value="'+p.id+'">'+p.name+' \xb7 '+dolr(p.price)+'</option>';}).join('');
+}
+function clearSpecial(){
+  el('spc-eid').value='';el('spc-active').checked=true;
+  setSpcType('discount',el('spc-type-disc'));
+  el('spc-pct').value='';el('spc-start').value='';el('spc-end').value='';
+  if(el('spc-minqty'))el('spc-minqty').value='';
+  if(el('spc-specprice'))el('spc-specprice').value='';
+  const ft=el('spc-form-title');if(ft)ft.textContent='Nuevo Especial';
+  populateSpcProducts();
+}
+function saveSpecial(){
+  const pid=(el('spc-product')||{}).value;if(!pid){toast(t('specialNoProduct'));return;}
+  const prod=db.products.find(function(x){return x.id===pid;});
+  if(!db.specials)db.specials=[];
+  const eid=el('spc-eid').value;
+  var spc={id:eid||Date.now().toString(),type:_spcType,productId:pid,active:el('spc-active').checked};
+  if(_spcType==='discount'){
+    const pct=parseFloat(el('spc-pct').value)||0;
+    if(!pct||pct<=0||pct>=100){toast(t('specialPctInvalid'));return;}
+    spc.pct=pct;spc.startDate=el('spc-start').value;spc.endDate=el('spc-end').value;
+  }else if(_spcType==='qty_price'){
+    const mq=parseInt((el('spc-minqty')||{}).value)||0;
+    const sp=parseFloat((el('spc-specprice')||{}).value)||0;
+    if(!mq||mq<2){toast(t('specialMinQtyInvalid'));return;}
+    if(!sp||sp<=0){toast(t('specialSpecPriceInvalid'));return;}
+    spc.minQty=mq;spc.specialPrice=sp;
+  }
+  const typeLabel={discount:'Descuento %',bogo:'2\xd71',qty_price:'Por cantidad'}[_spcType]||_spcType;
+  if(eid){
+    const i=db.specials.findIndex(function(x){return x.id===eid;});if(i>=0)db.specials[i]=spc;
+    logAction('Especial editado',typeLabel+' \xb7 '+(prod?prod.name:pid));
+  }else{
+    db.specials.push(spc);
+    logAction('Especial creado',typeLabel+' \xb7 '+(prod?prod.name:pid));
+  }
+  saveDB();clearSpecial();renderSpecialList();renderProds();
+  toast(t('specialSaved'));
+}
+function editSpecial(id){
+  const s=(db.specials||[]).find(function(x){return x.id===id;});if(!s)return;
+  el('spc-eid').value=s.id;populateSpcProducts();
+  const sel=el('spc-product');if(sel)sel.value=s.productId;
+  el('spc-active').checked=s.active!==false;
+  const typeBtn={discount:'disc',bogo:'bogo',qty_price:'qty'}[s.type];
+  setSpcType(s.type,typeBtn?el('spc-type-'+typeBtn):null);
+  if(s.type==='discount'){el('spc-pct').value=s.pct||'';el('spc-start').value=s.startDate||'';el('spc-end').value=s.endDate||'';}
+  else if(s.type==='qty_price'){if(el('spc-minqty'))el('spc-minqty').value=s.minQty||'';if(el('spc-specprice'))el('spc-specprice').value=s.specialPrice||'';}
+  const ft=el('spc-form-title');if(ft)ft.textContent='Editar Especial';
+}
+function deleteSpecial(id){
+  const s=(db.specials||[]).find(function(x){return x.id===id;});if(!s)return;
+  const prod=db.products.find(function(x){return x.id===s.productId;});
+  confirm2(t('specialDelConfirm'),function(){
+    db.specials=db.specials.filter(function(x){return x.id!==id;});
+    logAction('Especial eliminado',(prod?prod.name:s.productId));
+    saveDB();renderSpecialList();renderProds();toast(t('specialDeleted'));
+  });
+}
+function toggleSpecial(id){
+  const s=(db.specials||[]).find(function(x){return x.id===id;});if(!s)return;
+  const prod=db.products.find(function(x){return x.id===s.productId;});
+  s.active=!s.active;
+  logAction(s.active?'Especial activado':'Especial desactivado',(prod?prod.name:s.productId));
+  saveDB();renderSpecialList();renderProds();
+}
+function renderSpecialList(){
+  const list=el('spc-list');if(!list)return;
+  const specials=db.specials||[];
+  if(!specials.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:12px 0">'+t('specialNone')+'</div>';return;}
+  const today=new Date().toISOString().slice(0,10);
+  list.innerHTML=specials.map(function(s){
+    const prod=db.products.find(function(x){return x.id===s.productId;});
+    const pName=prod?prod.name:'(producto eliminado)';
+    var detail='';
+    if(s.type==='discount')detail='-'+s.pct+'% \xb7 '+(s.startDate||'—')+' → '+(s.endDate||'—');
+    else if(s.type==='bogo')detail='Lleva 2 paga 1';
+    else if(s.type==='qty_price')detail='+'+s.minQty+' u. → '+dolr(s.specialPrice)+' c/u';
+    const isDateOk=s.type!=='discount'||((!s.startDate||today>=s.startDate)&&(!s.endDate||today<=s.endDate));
+    const statusColor=!s.active?'var(--tx3)':isDateOk?'var(--gn)':'var(--am)';
+    const statusTxt=!s.active?t('specialInactiveStatus'):isDateOk?t('specialActiveStatus'):t('specialOutOfRange');
+    return '<div class="pli"><div class="pli-info"><div class="pli-name">⭐ '+pName+'</div><div class="pli-meta">'+detail+'</div></div>'+
+      '<div style="display:flex;align-items:center;gap:4px"><span style="font-size:.72rem;color:'+statusColor+';font-weight:700">'+statusTxt+'</span>'+
+      '<button class="eb" onclick="toggleSpecial(\''+s.id+'\')">⏯</button>'+
+      '<button class="eb" onclick="editSpecial(\''+s.id+'\')">✏</button>'+
+      '<button class="xb" onclick="deleteSpecial(\''+s.id+'\')">✕</button></div></div>';
+  }).join('');
+}
+function initCombosTab(){renderCmbItemsEditor();renderComboList();}
+function initSpecialsTab(){populateSpcProducts();renderSpecialList();}
 </script>
 </body>
 </html>
