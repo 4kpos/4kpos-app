@@ -787,7 +787,11 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <div class="fg" style="margin-bottom:8px"><label class="lbl">Fecha fin</label><input type="date" class="fi" id="spc-end"></div>
         </div>
         <div id="spc-fields-bogo" style="display:none">
-          <div style="font-size:.78rem;color:var(--tx3);padding:8px;background:var(--s2);border-radius:var(--rs);margin-bottom:8px" id="spc-bogo-info">Lleva 2, paga 1. Se aplica automáticamente al agregar 2 o más unidades al carrito.</div>
+          <div class="g2" style="margin-bottom:8px">
+            <div class="fg"><label class="lbl">Lleva (compra)</label><input type="number" class="fi" id="spc-buy-qty" min="2" max="99" value="2" placeholder="2"></div>
+            <div class="fg"><label class="lbl">Paga (cobrar)</label><input type="number" class="fi" id="spc-pay-qty" min="1" max="99" value="1" placeholder="1"></div>
+          </div>
+          <div style="font-size:.75rem;color:var(--tx3);padding:6px 8px;background:var(--s2);border-radius:var(--rs)">Ej: Lleva 2 paga 1 = 2×1 · Lleva 3 paga 2 = 3×2. Se aplica por grupos al agregar al carrito.</div>
         </div>
         <div id="spc-fields-qty" style="display:none">
           <div class="g2">
@@ -3105,7 +3109,7 @@ function renderProds(){
     let spBadge='';
     if(_sp){
       if(_sp.type==='discount')spBadge='<div class="spc-badge disc">-'+_sp.pct+'%</div>';
-      else if(_sp.type==='bogo')spBadge='<div class="spc-badge bogo">2×1</div>';
+      else if(_sp.type==='bogo'){const _bq=_sp.buyQty||2,_pq=_sp.payQty||1;spBadge='<div class="spc-badge bogo">'+_bq+'\xd7'+_pq+'</div>';}
       else if(_sp.type==='qty_price')spBadge='<div class="spc-badge qty">+'+_sp.minQty+'u</div>';
     }
     return '<div class="'+cls+'" onclick="'+oc+'">'+spBadge+imgH+'<div class="pcard-name">'+p.name+'</div><div class="pcard-bottom"><div class="pcard-price">'+dolr(p.price)+'</div>'+stkH+'</div>'+badge+'</div>';
@@ -3369,7 +3373,7 @@ function renderCart(){
       const _sp=_getActiveSpecial(item.id);
       if(_sp){
         if(_sp.type==='discount')extraTag='<div class="ci-spc-tag">🏷️ -'+_sp.pct+'%</div>';
-        else if(_sp.type==='bogo')extraTag='<div class="ci-spc-tag">2×1</div>';
+        else if(_sp.type==='bogo'){const _bq=_sp.buyQty||2,_pq=_sp.payQty||1;extraTag='<div class="ci-spc-tag">'+_bq+'\xd7'+_pq+'</div>';}
         else if(_sp.type==='qty_price'&&item.qty>=_sp.minQty)extraTag='<div class="ci-spc-tag">📦 precio especial</div>';
       }
     }
@@ -5964,7 +5968,7 @@ function getItemEffectiveTotal(item){
   const s=_getActiveSpecial(item.id);
   if(!s)return Math.round(item.price*item.qty*100)/100;
   if(s.type==='discount')return Math.round(item.price*(1-s.pct/100)*item.qty*100)/100;
-  if(s.type==='bogo')return Math.round(Math.ceil(item.qty/2)*item.price*100)/100;
+  if(s.type==='bogo'){const bq=s.buyQty||2,pq=s.payQty||1;const g=Math.floor(item.qty/bq);return Math.round((g*pq+(item.qty%bq))*item.price*100)/100;}
   if(s.type==='qty_price')return Math.round((item.qty>=s.minQty?s.specialPrice:item.price)*item.qty*100)/100;
   return Math.round(item.price*item.qty*100)/100;
 }
@@ -6002,7 +6006,7 @@ function renderCmbItemsEditor(){
     const unitPr=pp?dolr(pp.price):'—';
     const opts=db.products.map(function(p2){return '<option value="'+p2.id+'"'+(p2.id===ci.productId?' selected':'')+'>'+p2.name+'</option>';}).join('');
     return '<div class="cmb-item-row"><select style="flex:2;background:var(--s2);border:1.5px solid var(--b1);border-radius:6px;padding:5px;font-size:.8rem;color:var(--tx)" onchange="cmbItemProd('+idx+',this.value)">'+opts+'</select>'
-      +'<span style="font-size:.74rem;color:var(--gn);font-weight:700;min-width:50px;text-align:right;flex-shrink:0">'+unitPr+'</span>'
+      +'<span style="font-size:.82rem;color:var(--gn);font-weight:800;min-width:62px;text-align:right;flex-shrink:0;font-family:Courier New,monospace">'+unitPr+'</span>'
       +'<input type="number" min="1" value="'+ci.qty+'" style="width:48px;background:var(--s2);border:1.5px solid var(--b1);border-radius:6px;padding:5px;font-size:.8rem;color:var(--tx);text-align:center" onchange="cmbItemQty('+idx+',this.value)">'
       +'<button style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:14px;padding:2px" onclick="cmbRemoveItem('+idx+')">✕</button></div>';
   }).join('');
@@ -6102,6 +6106,8 @@ function clearSpecial(){
   el('spc-pct').value='';el('spc-start').value='';el('spc-end').value='';
   if(el('spc-minqty'))el('spc-minqty').value='';
   if(el('spc-specprice'))el('spc-specprice').value='';
+  if(el('spc-buy-qty'))el('spc-buy-qty').value='2';
+  if(el('spc-pay-qty'))el('spc-pay-qty').value='1';
   const ft=el('spc-form-title');if(ft)ft.textContent='Nuevo Especial';
   populateSpcProducts();
 }
@@ -6115,6 +6121,11 @@ function saveSpecial(){
     const pct=parseFloat(el('spc-pct').value)||0;
     if(!pct||pct<=0||pct>=100){toast(t('specialPctInvalid'));return;}
     spc.pct=pct;spc.startDate=el('spc-start').value;spc.endDate=el('spc-end').value;
+  }else if(_spcType==='bogo'){
+    const bq=Math.max(2,parseInt((el('spc-buy-qty')||{}).value)||2);
+    const pq=Math.max(1,parseInt((el('spc-pay-qty')||{}).value)||1);
+    if(pq>=bq){toast('⚠ "Paga" debe ser menor que "Lleva"');return;}
+    spc.buyQty=bq;spc.payQty=pq;
   }else if(_spcType==='qty_price'){
     const mq=parseInt((el('spc-minqty')||{}).value)||0;
     const sp=parseFloat((el('spc-specprice')||{}).value)||0;
@@ -6122,7 +6133,8 @@ function saveSpecial(){
     if(!sp||sp<=0){toast(t('specialSpecPriceInvalid'));return;}
     spc.minQty=mq;spc.specialPrice=sp;
   }
-  const typeLabel={discount:'Descuento %',bogo:'2\xd71',qty_price:'Por cantidad'}[_spcType]||_spcType;
+  const _bogoLabel=_spcType==='bogo'?(spc.buyQty+'\xd7'+spc.payQty):'2\xd71';
+  const typeLabel={discount:'Descuento %',bogo:_bogoLabel,qty_price:'Por cantidad'}[_spcType]||_spcType;
   if(eid){
     const i=db.specials.findIndex(function(x){return x.id===eid;});if(i>=0)db.specials[i]=spc;
     logAction('Especial editado',typeLabel+' \xb7 '+(prod?prod.name:pid));
@@ -6141,6 +6153,7 @@ function editSpecial(id){
   const typeBtn={discount:'disc',bogo:'bogo',qty_price:'qty'}[s.type];
   setSpcType(s.type,typeBtn?el('spc-type-'+typeBtn):null);
   if(s.type==='discount'){el('spc-pct').value=s.pct||'';el('spc-start').value=s.startDate||'';el('spc-end').value=s.endDate||'';}
+  else if(s.type==='bogo'){if(el('spc-buy-qty'))el('spc-buy-qty').value=s.buyQty||2;if(el('spc-pay-qty'))el('spc-pay-qty').value=s.payQty||1;}
   else if(s.type==='qty_price'){if(el('spc-minqty'))el('spc-minqty').value=s.minQty||'';if(el('spc-specprice'))el('spc-specprice').value=s.specialPrice||'';}
   const ft=el('spc-form-title');if(ft)ft.textContent='Editar Especial';
 }
@@ -6170,7 +6183,7 @@ function renderSpecialList(){
     const pName=prod?prod.name:'(producto eliminado)';
     var detail='';
     if(s.type==='discount')detail='-'+s.pct+'% \xb7 '+(s.startDate||'—')+' → '+(s.endDate||'—');
-    else if(s.type==='bogo')detail='Lleva 2 paga 1';
+    else if(s.type==='bogo')detail='Lleva '+(s.buyQty||2)+' paga '+(s.payQty||1);
     else if(s.type==='qty_price')detail='+'+s.minQty+' u. → '+dolr(s.specialPrice)+' c/u';
     const isDateOk=s.type!=='discount'||((!s.startDate||today>=s.startDate)&&(!s.endDate||today<=s.endDate));
     const statusColor=!s.active?'var(--tx3)':isDateOk?'var(--gn)':'var(--am)';
@@ -6195,14 +6208,27 @@ function _updateCmbCostTotal(){
     if(p)realCost+=p.price*ci.qty;
   });
   const specPrice=parseFloat((el('cmb-price')||{}).value)||0;
-  let html='Costo real de productos: <strong>'+dolr(realCost)+'</strong>';
+  const mono='font-family:Courier New,monospace;font-size:.88rem;font-weight:800';
+  let html='<div style="display:grid;grid-template-columns:auto 1fr;gap:3px 10px;align-items:baseline">'
+    +'<span style="color:var(--tx3)">Precio real:</span>'
+    +'<span style="color:var(--gn);'+mono+'">'+dolr(realCost)+'</span>';
   if(specPrice>0){
-    const diff=realCost-specPrice;
-    if(diff>0)html+=' &nbsp;→&nbsp; Descuento aplicado: <strong style="color:var(--rd)">-'+dolr(diff)+'</strong>';
-    else if(diff<0)html+=' &nbsp;→&nbsp; <strong style="color:var(--am)">⚠ Precio especial supera costo real</strong>';
-    else html+=' &nbsp;→&nbsp; <strong style="color:var(--gn)">Sin descuento</strong>';
+    const saving=realCost-specPrice;
+    const pct=realCost>0?Math.round(Math.abs(saving)/realCost*100):0;
+    html+='<span style="color:var(--tx3)">Precio combo:</span>'
+      +'<span style="'+mono+'">'+dolr(specPrice)+'</span>';
+    if(saving>0){
+      html+='<span style="color:var(--tx3)">Ahorro:</span>'
+        +'<span style="color:#3b82f6;'+mono+'">'+dolr(saving)+' ('+pct+'%)</span>';
+    }else if(saving<0){
+      html+='<span style="color:var(--am)">⚠ Nota:</span>'
+        +'<span style="color:var(--am);font-weight:700">precio combo supera costo real</span>';
+    }else{
+      html+='<span style="color:var(--tx3)">Ahorro:</span>'
+        +'<span style="color:var(--tx3)">sin descuento</span>';
+    }
   }
-  box.innerHTML=html;
+  box.innerHTML=html+'</div>';
 }
 
 // =================== INVENTORY SELECTION ===================
