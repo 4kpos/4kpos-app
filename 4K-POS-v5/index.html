@@ -2554,6 +2554,7 @@ function startApp(){
   updateLicBadge();updateDashBtn();
   updateOACounter();_startNotifTimer();
   if(!window._cdSyncInt){window._cdSyncInt=setInterval(syncCreditDirect,30000);setTimeout(syncCreditDirect,3000);}
+  if(!window._shiftHbInt){window._shiftHbInt=setInterval(function(){if(db.cfg&&db.cfg.shiftOpen&&curUser){syncShiftStatusDirect({active:true,currentUser:curUser.name,shiftOpenedAt:db.cfg.shiftOpenAt||new Date().toISOString(),lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg.pendingShiftNote||null});}},5*60*1000);}
   setEl('ord-lbl','#'+db.orderNum);
   if(_restoredFromBackup){toast('🔄 Datos restaurados del backup automático');_restoredFromBackup=false;}
   const bts=localStorage.getItem('4kpos_backup_ts');
@@ -2640,6 +2641,7 @@ function calcCashDiff(){
 }
 function doLogout(){
   _stopInactivityTimer();_bkpKey=null;
+  if(window._shiftHbInt){clearInterval(window._shiftHbInt);window._shiftHbInt=null;}
   // Save shift record
   if(!db.shifts)db.shifts=[];
   const _shiftActive=_getShiftSales();
