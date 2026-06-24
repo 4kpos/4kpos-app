@@ -171,7 +171,7 @@ body.light .chgbox{color:#15803d!important;border-color:#15803d!important;backgr
 .lbl-sz-btn{flex:1;padding:8px 4px;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx2);cursor:pointer;font-size:.76rem;font-weight:600;transition:all .2s;text-align:center;line-height:1.3;}
 .lbl-sz-btn.on{background:var(--acg);border-color:var(--ac);color:var(--ac);}
 .inv-chk{width:15px;height:15px;cursor:pointer;accent-color:var(--ac);}
-@media print{body.lbl-pm>*:not(#lbl-print-area){display:none!important;}body.lbl-pm #lbl-print-area{display:block!important;}.lbl-grid{display:flex;flex-wrap:wrap;gap:3mm;}.lbl-itm{border:.4pt solid #ccc;box-sizing:border-box;overflow:hidden;page-break-inside:avoid;display:flex;flex-direction:column;font-family:Arial,Helvetica,sans-serif;padding:2mm;}@page{size:A4;margin:8mm;}}
+@media print{body.lbl-pm>*:not(#lbl-print-area){display:none!important;}body.lbl-pm #lbl-print-area{display:block!important;}.lbl-grid{display:flex;flex-wrap:wrap;gap:3mm;}.lbl-itm{border:.4pt solid #ccc;box-sizing:border-box;overflow:hidden;page-break-inside:avoid;display:flex;flex-direction:column;font-family:Arial,Helvetica,sans-serif;padding:2mm;}@page{size:8.5in 11in;margin:.25in;}}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;padding:10px;}
 .cat-card{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r);padding:8px 8px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .18s;text-align:center;min-height:150px;}
 .cat-card:hover{border-color:var(--ac);transform:scale(.97);}
@@ -6537,7 +6537,7 @@ function setLblSize(size,btn){
 }
 function renderPagePreview(){
   var pgPrev=el('lbl-page-preview');if(!pgPrev)return;
-  var layouts={'1x2':{cols:5,rows:13},'2x2':{cols:4,rows:7}};
+  var layouts={'1x2':{cols:4,rows:10},'2x2':{cols:4,rows:5}};
   var layout=layouts[_lblSize];
   if(!layout){pgPrev.innerHTML='';return;}
   var perPage=layout.cols*layout.rows;
@@ -6546,9 +6546,9 @@ function renderPagePreview(){
   var totalLabels=totalPids*qty;
   var totalPages=Math.ceil(totalLabels/perPage);
   var infoEl=el('lbl-pages-info');
-  if(infoEl)infoEl.textContent=totalLabels+' etiqueta'+(totalLabels!==1?'s':'')+' · '+totalPages+' hoja'+(totalPages!==1?'s':'')+' de A4';
-  // Preview dims: proportional A4, 240px wide
-  var pW=240;var pH=Math.round(pW*297/210);
+  if(infoEl)infoEl.textContent=totalLabels+' etiqueta'+(totalLabels!==1?'s':'')+' · '+totalPages+' hoja'+(totalPages!==1?'s':'')+' carta';
+  // Preview dims: proporcional Letter (8.5×11), 240px ancho
+  var pW=240;var pH=Math.round(pW*11/8.5);
   var mPx=Math.round(pW*8/210);
   var iW=pW-mPx*2;var iH=pH-mPx*2;
   var cW=iW/layout.cols;var cH=iH/layout.rows;
@@ -6643,30 +6643,26 @@ function _buildOneLabelHTML(p,size){
   var biz=db.cfg||{};
   var bizName=biz.bizName||'4K Negocio';
 
-  // 1×2" (25×50mm): negocio · nombre · precio en caja · barcode
+  // 1×2" (50×25mm horizontal): negocio · nombre · precio · barcode
   if(size==='1x2'){
-    return'<div class="lbl-itm" style="width:25mm;height:50mm;padding:1mm 1.2mm;justify-content:space-between;align-items:center;text-align:center">'
-      +'<div style="font-size:5pt;color:#777;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
-      +'<div style="font-size:7.5pt;font-weight:800;line-height:1.2;color:#111;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
-      +'<div style="background:#1E3A5F;color:#fff;padding:.8mm 1.5mm;border-radius:.8mm;width:100%;box-sizing:border-box">'
-      +'<div style="font-size:13pt;font-weight:800;line-height:1">'+price+'</div>'
-      +'</div>'
-      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,80,16)+'<div style="font-size:5.5pt;letter-spacing:.5px;color:#777;margin-top:.3mm;line-height:1">'+_htmlEsc(bc)+'</div></div>':'')
+    return'<div class="lbl-itm" style="width:50mm;height:25mm;padding:1mm 1.5mm;justify-content:space-between;border:.5px solid #ccc">'
+      +'<div style="font-size:6pt;color:#000;line-height:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
+      +'<div style="font-size:9pt;font-weight:800;line-height:1.2;color:#000;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
+      +'<div style="font-size:14pt;font-weight:800;line-height:1;color:#000">'+price+'</div>'
+      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,150,14)+'<div style="font-size:5.5pt;letter-spacing:.5px;color:#000;margin-top:.3mm;line-height:1">'+_htmlEsc(bc)+'</div></div>':'')
       +'</div>';
   }
 
   // 2×2" (50×50mm): negocio · nombre · categoría · precio · barcode
   if(size==='2x2'){
-    return'<div class="lbl-itm" style="width:50mm;height:50mm;padding:1.5mm 2mm;justify-content:space-between">'
+    return'<div class="lbl-itm" style="width:50mm;height:50mm;padding:1.5mm 2mm;justify-content:space-between;border:.5px solid #ccc">'
       +'<div>'
-      +'<div style="font-size:5pt;color:#777;line-height:1">'+_htmlEsc(bizName)+'</div>'
-      +'<div style="font-size:9pt;font-weight:800;line-height:1.2;color:#111;margin-top:.5mm">'+_htmlEsc(p.name)+'</div>'
-      +(catName?'<div style="font-size:5.5pt;color:#888;text-transform:uppercase;letter-spacing:.3px;margin-top:.3mm">'+_htmlEsc(catName)+'</div>':'')
+      +'<div style="font-size:6pt;color:#000;line-height:1">'+_htmlEsc(bizName)+'</div>'
+      +'<div style="font-size:9pt;font-weight:800;line-height:1.2;color:#000;margin-top:.5mm">'+_htmlEsc(p.name)+'</div>'
+      +(catName?'<div style="font-size:5.5pt;color:#000;text-transform:uppercase;letter-spacing:.3px;margin-top:.3mm">'+_htmlEsc(catName)+'</div>':'')
       +'</div>'
-      +'<div style="background:#1E3A5F;color:#fff;padding:1.5mm 3mm;border-radius:1.2mm;display:inline-block">'
-      +'<div style="font-size:16pt;font-weight:800;line-height:1">'+price+'</div>'
-      +'</div>'
-      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,170,22)+'<div style="font-size:5.5pt;letter-spacing:1px;color:#666;margin-top:.5mm">'+_htmlEsc(bc)+'</div></div>':'')
+      +'<div style="font-size:16pt;font-weight:800;line-height:1;color:#000">'+price+'</div>'
+      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,170,22)+'<div style="font-size:5.5pt;letter-spacing:1px;color:#000;margin-top:.5mm">'+_htmlEsc(bc)+'</div></div>':'')
       +'</div>';
   }
 
@@ -6698,15 +6694,13 @@ function _buildPreviewLabelHTML(p,size){
   var bizName=biz.bizName||'4K Negocio';
   var base='font-family:Arial,Helvetica,sans-serif;box-sizing:border-box;background:#fff;color:#111;display:flex;flex-direction:column;border:1px solid #ccc;border-radius:3px;';
 
-  // 1×2": 90×180px (proporcional a 25×50mm escala 3.6×)
+  // 1×2": 200×100px (proporcional 50×25mm horizontal, escala 4×)
   if(size==='1x2'){
-    return'<div style="'+base+'width:90px;height:180px;padding:4px 5px;justify-content:space-between;align-items:center;text-align:center">'
-      +'<div style="font-size:8px;color:#888;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
-      +'<div style="font-size:10px;font-weight:800;line-height:1.2;color:#111;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
-      +'<div style="background:#1E3A5F;color:#fff;padding:3px 5px;border-radius:3px;width:100%;box-sizing:border-box">'
-      +'<div style="font-size:17px;font-weight:800;line-height:1">'+price+'</div>'
-      +'</div>'
-      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,75,18)+'<div style="font-size:8px;letter-spacing:.5px;color:#777;margin-top:1px">'+_htmlEsc(bc)+'</div></div>':'')
+    return'<div style="'+base+'width:200px;height:100px;padding:5px 7px;justify-content:space-between">'
+      +'<div style="font-size:8px;color:#000;line-height:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
+      +'<div style="font-size:12px;font-weight:800;line-height:1.2;color:#000;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
+      +'<div style="font-size:18px;font-weight:800;line-height:1;color:#000">'+price+'</div>'
+      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,185,14)+'<div style="font-size:7px;letter-spacing:.5px;color:#000;margin-top:1px">'+_htmlEsc(bc)+'</div></div>':'')
       +'</div>';
   }
 
@@ -6714,14 +6708,12 @@ function _buildPreviewLabelHTML(p,size){
   if(size==='2x2'){
     return'<div style="'+base+'width:190px;height:190px;padding:8px 10px;justify-content:space-between">'
       +'<div>'
-      +'<div style="font-size:8px;color:#888;line-height:1">'+_htmlEsc(bizName)+'</div>'
-      +'<div style="font-size:14px;font-weight:800;line-height:1.2;color:#111;margin-top:2px">'+_htmlEsc(p.name)+'</div>'
-      +(catName?'<div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.3px;margin-top:1px">'+_htmlEsc(catName)+'</div>':'')
+      +'<div style="font-size:8px;color:#000;line-height:1">'+_htmlEsc(bizName)+'</div>'
+      +'<div style="font-size:12px;font-weight:800;line-height:1.2;color:#000;margin-top:2px">'+_htmlEsc(p.name)+'</div>'
+      +(catName?'<div style="font-size:9px;color:#000;text-transform:uppercase;letter-spacing:.3px;margin-top:1px">'+_htmlEsc(catName)+'</div>':'')
       +'</div>'
-      +'<div style="display:inline-block;background:#1E3A5F;color:#fff;padding:5px 10px;border-radius:4px">'
-      +'<div style="font-size:24px;font-weight:800;line-height:1">'+price+'</div>'
-      +'</div>'
-      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,155,20)+'<div style="font-size:9px;letter-spacing:1px;color:#666;margin-top:2px">'+_htmlEsc(bc)+'</div></div>':'')
+      +'<div style="font-size:18px;font-weight:800;line-height:1;color:#000">'+price+'</div>'
+      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,155,20)+'<div style="font-size:7px;letter-spacing:1px;color:#000;margin-top:2px">'+_htmlEsc(bc)+'</div></div>':'')
       +'</div>';
   }
 
@@ -6776,8 +6768,8 @@ function printLabels(){
     printArea.innerHTML='<style>@media print{@page{size:'+pgW+' auto;margin:0;}.lbl-itm{page-break-after:always;break-after:page;}}</style>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-start">'+labels.join('')+'</div>';
   }else{
-    var cols=_lblSize==='1x2'?5:4;
-    printArea.innerHTML='<div style="display:grid;grid-template-columns:repeat('+cols+',1fr);gap:1mm">'+labels.join('')+'</div>';
+    printArea.innerHTML='<style>@media print{@page{size:8.5in 11in;margin:.25in;}}</style>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1mm">'+labels.join('')+'</div>';
   }
   closeOv('ov-labels');
   document.body.classList.add('lbl-pm');
