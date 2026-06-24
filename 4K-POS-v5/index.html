@@ -1047,8 +1047,8 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
           <button class="lbl-sz-btn" id="lbl-prn-thermal" onclick="setLblPrinter('thermal',this)" style="flex:1">🧾 Térmica<br><span style="font-size:.68rem;font-weight:400;opacity:.8">80mm rollo</span></button>
         </div>
       </div>
-      <div id="lbl-thermal-info" style="display:none;background:var(--amb);color:var(--am);border-radius:var(--rs);padding:7px 10px;font-size:.75rem;margin-bottom:8px">
-        ⚠ En impresora térmica: el PDF se genera para hoja A4. Usa la opción "Tamaño de página personalizado 80mm" en el diálogo de impresión para impresoras de rollo.
+      <div id="lbl-thermal-info" style="display:none;background:var(--acg);color:var(--ac);border-radius:var(--rs);padding:7px 10px;font-size:.75rem;margin-bottom:8px">
+        ℹ Modo térmica 80mm activo — la página se configura automáticamente a 80mm de ancho al imprimir. Una etiqueta por hoja.
       </div>
       <div class="slbl" style="margin-bottom:6px;font-size:.78rem">Vista previa</div>
       <div class="lbl-prev-wrap" id="lbl-preview"></div>
@@ -2961,11 +2961,11 @@ function startApp(){
   applyPayMethods();
   el('login-screen').style.display='none';
   el('topbar').style.display='flex';
-  el('app-main').style.display='none';
-  var _dashEl=el('dashboard-screen');if(_dashEl)_dashEl.style.display='flex';
+  el('app-main').style.display='flex';
+  var _dashEl=el('dashboard-screen');if(_dashEl)_dashEl.style.display='none';
   const _tnote=el('note-btn');if(_tnote)_tnote.style.display='flex';
   initSidebar();
-  sbNav('dash');
+  sbNav('pos');
   _updateNoteBadge();
   if(db.cfg&&db.cfg.shiftOpen&&curUser){
     syncShiftStatusDirect({active:true,currentUser:curUser.name,shiftOpenedAt:db.cfg.shiftOpenAt||new Date().toISOString(),lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg.pendingShiftNote||null});
@@ -6528,6 +6528,7 @@ function setLblPrinter(type,btn){
   document.querySelectorAll('#lbl-prn-normal,#lbl-prn-thermal').forEach(function(b){b.classList.remove('on');});
   if(btn)btn.classList.add('on');
   var info=el('lbl-thermal-info');if(info)info.style.display=(type==='thermal')?'':'none';
+  renderLabelPreview();
 }
 
 function setLblSize(size,btn){
@@ -6594,66 +6595,82 @@ function _barcodeSvg(code,W,H){
   for(var j=0;j<bits.length;j++){
     if(bits[j])rects+='<rect x="'+(j*bw).toFixed(1)+'" y="0" width="'+Math.max(0.8,bw).toFixed(1)+'" height="'+H+'" fill="#000"/>';
   }
-  return'<svg width="'+W+'" height="'+H+'" xmlns="http://www.w3.org/2000/svg" style="display:block">'+rects+'</svg>';
+  return'<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:100%">'+rects+'</svg>';
 }
 
 function _buildOneLabelHTML(p,size){
-  const cat=(db.categories||[]).find(function(c){return c.id===p.cat;});
-  const catName=cat?cat.name:'';
-  const price=dolr(p.price);
-  const bc=p.bc||'';
-  const biz=db.cfg||{};
-  const bizName=biz.bizName||'4K Negocio';
+  var cat=(db.categories||[]).find(function(c){return c.id===p.cat;});
+  var catName=cat?cat.name:'';
+  var price=dolr(p.price);
+  var bc=p.bc||'';
+  var biz=db.cfg||{};
+  var bizName=biz.bizName||'4K Negocio';
 
-  if(size==='sm'){
-    return'<div class="lbl-itm" style="width:90mm;height:50mm;justify-content:space-between;align-items:center;text-align:center;padding:2mm 3mm">'
-      +'<div style="font-size:11pt;font-weight:800;line-height:1.2;color:#111;word-break:break-word">'+_htmlEsc(p.name)+'</div>'
-      +(bc?'<div>'+_barcodeSvg(bc,78,13)+'<div style="font-size:5.5pt;color:#888;letter-spacing:1px;margin-top:.5mm">'+_htmlEsc(bc)+'</div></div>':'')
-      +'<div style="font-size:22pt;font-weight:800;color:#000;line-height:1">'+price+'</div>'
+  // Térmica 80mm: centrado, auto-altura, una por página
+  if(_lblPrinter==='thermal'){
+    return'<div class="lbl-itm" style="width:76mm;padding:3mm 2mm;text-align:center;box-sizing:border-box;align-items:center">'
+      +'<div style="font-size:12pt;font-weight:800;line-height:1.3;color:#111;margin-bottom:2.5mm;word-break:break-word">'+_htmlEsc(p.name)+'</div>'
+      +'<div style="font-size:22pt;font-weight:800;color:#000;line-height:1;margin-bottom:2.5mm">'+price+'</div>'
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,265,42)+'<div style="font-size:6pt;letter-spacing:1.5px;color:#666;margin-top:1mm">'+_htmlEsc(bc)+'</div></div>':'')
+      +'<div style="border-top:.4pt dashed #bbb;width:100%;margin-top:3mm"></div>'
       +'</div>';
   }
+
+  // Pequeña 90×50mm: nombre → precio → código de barras
+  if(size==='sm'){
+    return'<div class="lbl-itm" style="width:90mm;height:50mm;justify-content:space-between;align-items:center;text-align:center;padding:2.5mm 3mm">'
+      +'<div style="font-size:11pt;font-weight:800;line-height:1.2;color:#111;word-break:break-word;width:100%">'+_htmlEsc(p.name)+'</div>'
+      +'<div style="font-size:22pt;font-weight:800;color:#000;line-height:1">'+price+'</div>'
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,310,36)+'<div style="font-size:5.5pt;letter-spacing:1px;color:#777;margin-top:.5mm">'+_htmlEsc(bc)+'</div></div>':'')
+      +'</div>';
+  }
+
+  // Mediana 160×80mm: nombre+categoría → precio → código de barras
   if(size==='md'){
     return'<div class="lbl-itm" style="width:160mm;height:80mm;justify-content:space-between;padding:3mm 4mm">'
       +'<div>'
-      +'<div style="font-size:14pt;font-weight:800;line-height:1.2;color:#111">'+_htmlEsc(p.name)+'</div>'
-      +(catName?'<div style="font-size:7.5pt;color:#888;margin-top:.5mm;text-transform:uppercase;letter-spacing:.4px">'+_htmlEsc(catName)+'</div>':'')
+      +'<div style="font-size:13pt;font-weight:800;line-height:1.2;color:#111">'+_htmlEsc(p.name)+'</div>'
+      +(catName?'<div style="font-size:7.5pt;color:#888;margin-top:.5mm;text-transform:uppercase;letter-spacing:.5px">'+_htmlEsc(catName)+'</div>':'')
       +'</div>'
-      +'<div style="text-align:center"><div style="font-size:30pt;font-weight:800;color:#000;line-height:1">'+price+'</div></div>'
-      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,145,28)+'<div style="font-size:7pt;letter-spacing:2px;margin-top:1mm;color:#555">'+_htmlEsc(bc)+'</div></div>':'<div style="text-align:center;font-size:8pt;color:#bbb">–</div>')
+      +'<div style="text-align:center"><div style="font-size:28pt;font-weight:800;color:#000;line-height:1">'+price+'</div></div>'
+      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,560,46)+'<div style="font-size:7pt;letter-spacing:2px;color:#555;margin-top:1mm">'+_htmlEsc(bc)+'</div></div>':'')
       +'</div>';
   }
-  // lg
-  const logoTag=biz.logo?('<img src="'+biz.logo+'" style="height:9mm;max-width:24mm;object-fit:contain;display:block">'):'';
+
+  // Grande 200×100mm: negocio → nombre → precio en caja de color → código de barras
+  var logoTag=biz.logo?('<img src="'+biz.logo+'" style="height:9mm;max-width:24mm;object-fit:contain;display:block">'):'';
   return'<div class="lbl-itm" style="width:200mm;height:100mm;justify-content:space-between;padding:3mm 5mm">'
     +'<div style="display:flex;align-items:center;gap:3mm;padding-bottom:2mm;border-bottom:.4pt solid #ccc">'
-    +logoTag+'<div style="font-size:10pt;font-weight:800;color:#222;letter-spacing:.3px">'+_htmlEsc(bizName)+'</div></div>'
-    +'<div>'
-    +'<div style="font-size:16pt;font-weight:800;line-height:1.2;color:#111">'+_htmlEsc(p.name)+'</div>'
-    +(p.desc?'<div style="font-size:8.5pt;color:#666;margin-top:1mm">'+_htmlEsc(p.desc)+'</div>':(catName?'<div style="font-size:8pt;color:#999;margin-top:.5mm;text-transform:uppercase;letter-spacing:.4px">'+_htmlEsc(catName)+'</div>':''))
+    +logoTag+'<div style="font-size:9.5pt;font-weight:800;color:#222;letter-spacing:.3px">'+_htmlEsc(bizName)+'</div></div>'
+    +'<div style="font-size:15pt;font-weight:800;line-height:1.2;color:#111">'+_htmlEsc(p.name)+'</div>'
+    +'<div style="display:inline-block;background:#1E3A5F;color:#fff;padding:2.5mm 5mm;border-radius:2mm">'
+    +'<div style="font-size:28pt;font-weight:800;line-height:1">'+price+'</div>'
     +'</div>'
-    +'<div style="display:flex;align-items:flex-end;justify-content:space-between">'
-    +'<div style="font-size:32pt;font-weight:800;color:#000;line-height:1">'+price+'</div>'
-    +(bc?'<div style="text-align:right">'+_barcodeSvg(bc,95,22)+'<div style="font-size:6.5pt;letter-spacing:2px;color:#555;margin-top:1mm">'+_htmlEsc(bc)+'</div></div>':'')
-    +'</div>'
+    +(bc?'<div>'+_barcodeSvg(bc,340,42)+'<div style="font-size:6.5pt;letter-spacing:2px;color:#555;margin-top:1mm">'+_htmlEsc(bc)+'</div></div>':'')
     +'</div>';
 }
 
 function renderLabelPreview(){
-  const prev=el('lbl-preview');if(!prev)return;
+  var prev=el('lbl-preview');if(!prev)return;
   var pid;
   if(_lblMulti&&_lblPids.length){pid=_lblPids[0];}
-  else{const sel=el('lbl-prod-sel');pid=sel?sel.value:null;}
+  else{var sel=el('lbl-prod-sel');pid=sel?sel.value:null;}
   if(!pid&&_lblPids.length)pid=_lblPids[0];
-  const p=db.products.find(function(x){return x.id===pid;});
+  var p=db.products.find(function(x){return x.id===pid;});
   if(!p){prev.innerHTML='<div style="color:var(--tx3);font-size:.82rem">Sin producto seleccionado</div>';return;}
-  const scales={sm:0.55,md:0.32,lg:0.26};
-  const scale=scales[_lblSize]||0.5;
-  const inner=_buildOneLabelHTML(p,_lblSize);
-  prev.innerHTML='<div style="transform:scale('+scale+');transform-origin:top left;display:inline-block;background:#fff;color:#000;padding:2mm">'+inner+'</div>';
-  // Adjust wrapper height to scaled label
-  const hMap={sm:50,md:80,lg:100};
-  const hMM=hMap[_lblSize]||50;
-  prev.style.minHeight=Math.round(hMM*scale*3.78+28)+'px';
+  var thermal=_lblPrinter==='thermal';
+  var scale,wH;
+  if(thermal){
+    scale=0.75;wH=200;
+  }else{
+    var scaleMap={sm:0.55,md:0.32,lg:0.26};
+    scale=scaleMap[_lblSize]||0.5;
+    var hMap={sm:50,md:80,lg:100};
+    wH=Math.round((hMap[_lblSize]||50)*scale*3.78+32);
+  }
+  var inner=_buildOneLabelHTML(p,_lblSize);
+  prev.innerHTML='<div style="transform:scale('+scale+');transform-origin:top center;display:inline-block;background:#fff;color:#000">'+inner+'</div>';
+  prev.style.minHeight=wH+'px';
 }
 
 function printLabels(){
@@ -6670,7 +6687,12 @@ function printLabels(){
   });
   if(!labels.length){toast('⚠ Sin etiquetas');return;}
   const printArea=el('lbl-print-area');
-  printArea.innerHTML='<div class="lbl-grid">'+labels.join('')+'</div>';
+  if(_lblPrinter==='thermal'){
+    printArea.innerHTML='<style>@media print{@page{size:80mm auto;margin:0;}.lbl-itm{page-break-after:always;break-after:page;}}</style>'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-start">'+labels.join('')+'</div>';
+  }else{
+    printArea.innerHTML='<div class="lbl-grid">'+labels.join('')+'</div>';
+  }
   closeOv('ov-labels');
   document.body.classList.add('lbl-pm');
   setTimeout(function(){
