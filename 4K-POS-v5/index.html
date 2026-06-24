@@ -6742,6 +6742,7 @@ function setDbPeriod(p,btn){
   _renderDbChart();
 }
 function refreshDashboard(){
+  if(!db||!db.sales){setTimeout(refreshDashboard,150);return;}
   var dateEl=el('db-date');
   if(dateEl)dateEl.textContent=new Date().toLocaleDateString(lang,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   var today=new Date().toDateString();
@@ -6750,11 +6751,23 @@ function refreshDashboard(){
   var ventasHoy=todaySales.reduce(function(sum,s){return sum+(s.total||0);},0);
   var txCount=todaySales.length;
   var pendingCred=sales.filter(function(s){return s.payMethod==='credit'&&s.creditStatus!=='paid'&&(s.total-(s.creditPaid||0))>0;});
-  var totalCred=pendingCred.reduce(function(sum,s){return sum+((s.total||0)-(s.creditPaid||0));},0);
+  var legacyCreds=(db.credits||[]).filter(function(c){return (c.total||0)-(c.paid||0)>0;});
+  var totalCred=pendingCred.reduce(function(sum,s){return sum+((s.total||0)-(s.creditPaid||0));},0)
+    +legacyCreds.reduce(function(sum,c){return sum+((c.total||0)-(c.paid||0));},0);
+  var nowMs=Date.now();
+  var overdueCount=pendingCred.filter(function(s){return s.dueDate&&new Date(s.dueDate).getTime()<nowMs;}).length
+    +legacyCreds.filter(function(c){return c.dueDate&&new Date(c.dueDate).getTime()<nowMs;}).length;
   var ticketProm=txCount>0?ventasHoy/txCount:0;
   setEl('db-kpi-ventas',dolr(ventasHoy));
   setEl('db-kpi-tx',txCount.toString());
   setEl('db-kpi-cred',dolr(totalCred));
+  var credKpiEl=el('db-kpi-cred');
+  if(credKpiEl){
+    var credSub=credKpiEl.nextElementSibling;
+    if(!credSub||!credSub.dataset.credSub){credSub=document.createElement('div');credSub.dataset.credSub='1';credKpiEl.parentNode.insertBefore(credSub,credKpiEl.nextSibling);}
+    credSub.textContent=overdueCount>0?('⚠ '+overdueCount+' vencido'+(overdueCount>1?'s':'')):'';
+    credSub.style.cssText=overdueCount>0?'font-size:.65rem;color:#EF4444;margin-top:2px':'';
+  }
   setEl('db-kpi-ticket',dolr(ticketProm));
   _renderDbChart();
   _renderDbTop5();
@@ -6792,7 +6805,8 @@ function _renderDbChart(){
 }
 function _renderDbTop5(){
   var el5=el('db-top5');if(!el5)return;
-  var sales=db.sales||[];
+  var today=new Date().toDateString();
+  var sales=(db.sales||[]).filter(function(s){return new Date(s.date).toDateString()===today;});
   var counts={};
   sales.forEach(function(s){
     if(s.status==='cancelled'||s.status==='returned')return;
@@ -6804,7 +6818,7 @@ function _renderDbTop5(){
     });
   });
   var top5=Object.values(counts).sort(function(a,b){return b.qty-a.qty;}).slice(0,5);
-  if(!top5.length){el5.innerHTML='<p style="font-size:.75rem;color:var(--tx3);text-align:center;padding:12px">Sin datos</p>';return;}
+  if(!top5.length){el5.innerHTML='<p style="font-size:.75rem;color:var(--tx3);text-align:center;padding:12px">Sin ventas hoy</p>';return;}
   el5.innerHTML='<table class="db-top5"><tr><th>#</th><th>Producto</th><th style="text-align:right">Cant.</th><th style="text-align:right">Total</th></tr>'
     +top5.map(function(p,i){return '<tr><td style="color:var(--tx3)">'+(i+1)+'</td><td style="font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.name+'</td><td style="text-align:right;font-weight:700">'+p.qty+'</td><td style="text-align:right;font-family:monospace;color:var(--gn)">'+dolr(p.revenue)+'</td></tr>';}).join('')+'</table>';
 }
