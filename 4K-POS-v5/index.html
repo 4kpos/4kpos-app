@@ -166,7 +166,7 @@ body.light .chgbox{color:#15803d!important;border-color:#15803d!important;backgr
 .cmb-item-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;background:var(--s2);border-radius:6px;padding:6px 8px;}
 .spc-type-btn{flex:1;padding:8px 4px;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx2);cursor:pointer;font-size:.78rem;font-weight:600;transition:all .2s;text-align:center;}
 .spc-type-btn.on{background:var(--acg);border-color:var(--ac);color:var(--ac);}
-.lbl-prev-wrap{background:#f0f0f0;border:1.5px dashed var(--b2);border-radius:8px;padding:14px;display:flex;justify-content:center;align-items:flex-start;min-height:90px;overflow:hidden;}
+.lbl-prev-wrap{background:#e8e8e8;border:1.5px dashed var(--b2);border-radius:8px;padding:12px;display:flex;justify-content:center;align-items:flex-start;min-height:60px;overflow:auto;}
 .lbl-itm{display:flex;flex-direction:column;font-family:Arial,Helvetica,sans-serif;box-sizing:border-box;color:#111;}
 .lbl-sz-btn{flex:1;padding:8px 4px;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx2);cursor:pointer;font-size:.76rem;font-weight:600;transition:all .2s;text-align:center;line-height:1.3;}
 .lbl-sz-btn.on{background:var(--acg);border-color:var(--ac);color:var(--ac);}
@@ -6650,6 +6650,56 @@ function _buildOneLabelHTML(p,size){
     +'</div>';
 }
 
+function _buildPreviewLabelHTML(p,size){
+  var cat=(db.categories||[]).find(function(c){return c.id===p.cat;});
+  var catName=cat?cat.name:'';
+  var price=dolr(p.price);
+  var bc=p.bc||'';
+  var biz=db.cfg||{};
+  var bizName=biz.bizName||'4K Negocio';
+  var base='font-family:Arial,Helvetica,sans-serif;box-sizing:border-box;background:#fff;color:#111;display:flex;flex-direction:column;border:1px solid #d0d0d0;border-radius:3px;';
+
+  if(_lblPrinter==='thermal'){
+    return'<div style="'+base+'width:240px;padding:10px 8px;align-items:center;text-align:center;gap:0">'
+      +'<div style="font-size:13px;font-weight:800;line-height:1.3;color:#111;margin-bottom:6px;word-break:break-word;width:100%">'+_htmlEsc(p.name)+'</div>'
+      +'<div style="font-size:22px;font-weight:800;color:#000;line-height:1;margin-bottom:6px">'+price+'</div>'
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,200,30)+'<div style="font-size:11px;letter-spacing:1.5px;color:#666;margin-top:3px">'+_htmlEsc(bc)+'</div></div>':'')
+      +'<div style="border-top:1px dashed #bbb;width:100%;margin-top:8px"></div>'
+      +'</div>';
+  }
+
+  if(size==='sm'){
+    return'<div style="'+base+'width:280px;height:155px;justify-content:space-between;align-items:center;text-align:center;padding:8px 10px">'
+      +'<div style="font-size:13px;font-weight:800;line-height:1.2;color:#111;word-break:break-word;width:100%">'+_htmlEsc(p.name)+'</div>'
+      +'<div style="font-size:22px;font-weight:800;color:#000;line-height:1">'+price+'</div>'
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,240,28)+'<div style="font-size:11px;letter-spacing:1px;color:#777;margin-top:2px">'+_htmlEsc(bc)+'</div></div>':'')
+      +'</div>';
+  }
+
+  if(size==='md'){
+    return'<div style="'+base+'width:380px;height:190px;justify-content:space-between;padding:10px 12px">'
+      +'<div>'
+      +'<div style="font-size:14px;font-weight:800;line-height:1.2;color:#111">'+_htmlEsc(p.name)+'</div>'
+      +(catName?'<div style="font-size:11px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:.5px">'+_htmlEsc(catName)+'</div>':'')
+      +'</div>'
+      +'<div style="text-align:center"><div style="font-size:28px;font-weight:800;color:#000;line-height:1">'+price+'</div></div>'
+      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,340,34)+'<div style="font-size:11px;letter-spacing:2px;color:#555;margin-top:3px">'+_htmlEsc(bc)+'</div></div>':'')
+      +'</div>';
+  }
+
+  // lg preview: 420×210px
+  var logoTag=biz.logo?('<img src="'+biz.logo+'" style="height:28px;max-width:60px;object-fit:contain;display:block">'):'';
+  return'<div style="'+base+'width:420px;height:210px;justify-content:space-between;padding:10px 14px">'
+    +'<div style="display:flex;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid #ccc">'
+    +logoTag+'<div style="font-size:11px;font-weight:800;color:#222">'+_htmlEsc(bizName)+'</div></div>'
+    +'<div style="font-size:15px;font-weight:800;line-height:1.2;color:#111">'+_htmlEsc(p.name)+'</div>'
+    +'<div style="display:inline-block;background:#1E3A5F;color:#fff;padding:6px 14px;border-radius:4px">'
+    +'<div style="font-size:26px;font-weight:800;line-height:1">'+price+'</div>'
+    +'</div>'
+    +(bc?'<div>'+_barcodeSvg(bc,280,32)+'<div style="font-size:11px;letter-spacing:2px;color:#555;margin-top:3px">'+_htmlEsc(bc)+'</div></div>':'')
+    +'</div>';
+}
+
 function renderLabelPreview(){
   var prev=el('lbl-preview');if(!prev)return;
   var pid;
@@ -6658,19 +6708,8 @@ function renderLabelPreview(){
   if(!pid&&_lblPids.length)pid=_lblPids[0];
   var p=db.products.find(function(x){return x.id===pid;});
   if(!p){prev.innerHTML='<div style="color:var(--tx3);font-size:.82rem">Sin producto seleccionado</div>';return;}
-  var thermal=_lblPrinter==='thermal';
-  var scale,wH;
-  if(thermal){
-    scale=0.75;wH=200;
-  }else{
-    var scaleMap={sm:0.55,md:0.32,lg:0.26};
-    scale=scaleMap[_lblSize]||0.5;
-    var hMap={sm:50,md:80,lg:100};
-    wH=Math.round((hMap[_lblSize]||50)*scale*3.78+32);
-  }
-  var inner=_buildOneLabelHTML(p,_lblSize);
-  prev.innerHTML='<div style="transform:scale('+scale+');transform-origin:top center;display:inline-block;background:#fff;color:#000">'+inner+'</div>';
-  prev.style.minHeight=wH+'px';
+  prev.innerHTML=_buildPreviewLabelHTML(p,_lblSize);
+  prev.style.minHeight='';
 }
 
 function printLabels(){
