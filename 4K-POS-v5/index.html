@@ -1027,61 +1027,28 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
         <label class="lbl">Producto</label>
         <select class="fi" id="lbl-prod-sel" onchange="renderLabelPreview()"></select>
       </div>
-      <div id="lbl-multi-row" style="display:none;margin-bottom:10px;padding:8px;background:var(--s2);border-radius:var(--rs);font-size:.82rem;color:var(--tx2)" id="lbl-multi-info"></div>
+      <div id="lbl-multi-row" style="display:none;margin-bottom:10px;padding:8px;background:var(--s2);border-radius:var(--rs);font-size:.82rem;color:var(--tx2)"></div>
       <div style="margin-bottom:10px">
-        <label class="lbl" style="margin-bottom:5px;display:block">Tamaño de etiqueta</label>
-        <div style="display:flex;gap:6px">
-          <button class="lbl-sz-btn on" id="lbl-sz-sm" onclick="setLblSize('sm',this)">Pequeña<br><span style="font-size:.68rem;font-weight:400;opacity:.8">90×50mm</span></button>
-          <button class="lbl-sz-btn" id="lbl-sz-md" onclick="setLblSize('md',this)">Mediana<br><span style="font-size:.68rem;font-weight:400;opacity:.8">160×80mm</span></button>
-          <button class="lbl-sz-btn" id="lbl-sz-lg" onclick="setLblSize('lg',this)">Grande<br><span style="font-size:.68rem;font-weight:400;opacity:.8">200×100mm</span></button>
+        <label class="lbl" style="margin-bottom:5px;display:block">Formato</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <button class="lbl-sz-btn on" id="lbl-sz-1x2" onclick="setLblSize('1x2',this)">📋 1×2"<br><span style="font-size:.68rem;font-weight:400;opacity:.8">25×50mm · precio</span></button>
+          <button class="lbl-sz-btn" id="lbl-sz-2x2" onclick="setLblSize('2x2',this)">📋 2×2"<br><span style="font-size:.68rem;font-weight:400;opacity:.8">50×50mm · producto</span></button>
+          <button class="lbl-sz-btn" id="lbl-sz-t58" onclick="setLblSize('t58',this)">🧾 Térmica 58mm<br><span style="font-size:.68rem;font-weight:400;opacity:.8">58mm rollo</span></button>
+          <button class="lbl-sz-btn" id="lbl-sz-t80" onclick="setLblSize('t80',this)">🧾 Térmica 80mm<br><span style="font-size:.68rem;font-weight:400;opacity:.8">80mm rollo</span></button>
         </div>
       </div>
-      <div class="fg" style="margin-bottom:10px">
-        <label class="lbl">Copias por producto</label>
-        <input type="text" inputmode="numeric" pattern="[0-9]*" class="fi" id="lbl-qty" value="1" onfocus="this.select()" oninput="var v=parseInt(this.value)||1;if(v>100)this.value=100;else if(v<1)this.value=1;renderLabelPreview()">
-      </div>
-      <div style="margin-bottom:10px">
-        <label class="lbl" style="margin-bottom:5px;display:block">Tipo de impresora</label>
-        <div style="display:flex;gap:6px">
-          <button class="lbl-sz-btn on" id="lbl-prn-normal" onclick="setLblPrinter('normal',this)" style="flex:1">📄 Normal<br><span style="font-size:.68rem;font-weight:400;opacity:.8">A4 / Carta</span></button>
-          <button class="lbl-sz-btn" id="lbl-prn-thermal" onclick="setLblPrinter('thermal',this)" style="flex:1">🧾 Térmica<br><span style="font-size:.68rem;font-weight:400;opacity:.8">80mm rollo</span></button>
+      <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:10px">
+        <div class="fg" style="flex:0 0 90px">
+          <label class="lbl">Copias</label>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" class="fi" id="lbl-qty" value="1" onfocus="this.select()" oninput="var v=parseInt(this.value)||1;if(v>100)this.value=100;else if(v<1)this.value=1;renderLabelPreview()">
         </div>
+        <div id="lbl-pages-info" style="font-size:.78rem;color:var(--ac);font-weight:600;padding-bottom:10px;flex:1"></div>
       </div>
       <div id="lbl-thermal-info" style="display:none;background:var(--acg);color:var(--ac);border-radius:var(--rs);padding:7px 10px;font-size:.75rem;margin-bottom:8px">
-        ℹ Modo térmica 80mm activo — la página se configura automáticamente a 80mm de ancho al imprimir. Una etiqueta por hoja.
+        ℹ Una etiqueta por hoja — la página se configura automáticamente al imprimir.
       </div>
-      <!-- Layout A4/Carta -->
-      <div id="lbl-layout-row" style="margin-bottom:10px;padding:10px;background:var(--s2);border-radius:var(--rs)">
-        <div style="display:flex;gap:12px">
-          <div style="flex:1">
-            <div style="font-size:.72rem;color:var(--tx3);margin-bottom:5px;font-weight:600;letter-spacing:.4px">COLUMNAS</div>
-            <div style="display:flex;gap:4px">
-              <button class="chip" id="lbl-col-1" onclick="setLblCols(1,this)">1</button>
-              <button class="chip" id="lbl-col-2" onclick="setLblCols(2,this)">2</button>
-              <button class="chip on" id="lbl-col-3" onclick="setLblCols(3,this)">3</button>
-              <button class="chip" id="lbl-col-4" onclick="setLblCols(4,this)">4</button>
-            </div>
-          </div>
-          <div style="flex:1">
-            <div style="font-size:.72rem;color:var(--tx3);margin-bottom:5px;font-weight:600;letter-spacing:.4px">FILAS POR PÁGINA</div>
-            <div style="display:flex;gap:4px">
-              <button class="chip" id="lbl-row-2" onclick="setLblRows(2,this)">2</button>
-              <button class="chip" id="lbl-row-3" onclick="setLblRows(3,this)">3</button>
-              <button class="chip" id="lbl-row-4" onclick="setLblRows(4,this)">4</button>
-              <button class="chip on" id="lbl-row-5" onclick="setLblRows(5,this)">5</button>
-              <button class="chip" id="lbl-row-6" onclick="setLblRows(6,this)">6</button>
-            </div>
-          </div>
-        </div>
-        <div id="lbl-layout-info" style="font-size:.75rem;color:var(--tx3);margin-top:6px"></div>
-        <div id="lbl-layout-warn" style="display:none;font-size:.74rem;background:rgba(245,158,11,.12);color:#F59E0B;border-radius:var(--rs);padding:5px 8px;margin-top:6px">
-          ⚠ Las etiquetas pueden quedar cortadas — reduce columnas o filas
-        </div>
-      </div>
-      <!-- Vista previa etiqueta individual -->
       <div class="slbl" style="margin-bottom:6px;font-size:.78rem">Vista previa de etiqueta</div>
       <div class="lbl-prev-wrap" id="lbl-preview" style="margin-bottom:12px"></div>
-      <!-- Vista previa hoja A4 -->
       <div id="lbl-page-section" style="margin-bottom:12px">
         <div class="slbl" style="margin-bottom:6px;font-size:.78rem">Vista previa de hoja</div>
         <div id="lbl-page-preview" style="display:flex;flex-direction:column;align-items:center;overflow-x:auto"></div>
@@ -6553,84 +6520,60 @@ function _updateInvSelUI(){
 }
 
 // =================== LABEL MODAL ===================
-var _lblSize='sm';
+var _lblSize='1x2';
 var _lblPids=[];
 var _lblMulti=false;
 var _lblPrinter='normal';
-var _lblCols=3;
-var _lblRows=5;
-function setLblPrinter(type,btn){
-  _lblPrinter=type;
-  document.querySelectorAll('#lbl-prn-normal,#lbl-prn-thermal').forEach(function(b){b.classList.remove('on');});
-  if(btn)btn.classList.add('on');
-  var info=el('lbl-thermal-info');if(info)info.style.display=(type==='thermal')?'':'none';
-  var normal=(type!=='thermal');
-  var lr=el('lbl-layout-row');if(lr)lr.style.display=normal?'':'none';
-  var ps=el('lbl-page-section');if(ps)ps.style.display=normal?'':'none';
-  renderLabelPreview();
-}
-
 function setLblSize(size,btn){
   _lblSize=size;
-  ['sm','md','lg'].forEach(function(k){const b=el('lbl-sz-'+k);if(b)b.classList.remove('on');});
+  ['1x2','2x2','t58','t80'].forEach(function(k){var b=el('lbl-sz-'+k);if(b)b.classList.remove('on');});
   if(btn)btn.classList.add('on');
+  var thermal=(size==='t58'||size==='t80');
+  _lblPrinter=thermal?'thermal':'normal';
+  var ti=el('lbl-thermal-info');if(ti)ti.style.display=thermal?'':'none';
+  var ps=el('lbl-page-section');if(ps)ps.style.display=thermal?'none':'';
+  var pi=el('lbl-pages-info');if(pi&&thermal)pi.textContent='';
   renderLabelPreview();
-}
-function setLblCols(n,btn){
-  _lblCols=n;
-  [1,2,3,4].forEach(function(i){var b=el('lbl-col-'+i);if(b)b.classList.toggle('on',i===n);});
-  renderPagePreview();
-}
-function setLblRows(n,btn){
-  _lblRows=n;
-  [2,3,4,5,6].forEach(function(i){var b=el('lbl-row-'+i);if(b)b.classList.toggle('on',i===n);});
-  renderPagePreview();
 }
 function renderPagePreview(){
   var pgPrev=el('lbl-page-preview');if(!pgPrev)return;
-  // Fit check (mm)
-  var dims={sm:{w:90,h:50},md:{w:160,h:80},lg:{w:200,h:100}};
-  var dim=dims[_lblSize]||{w:90,h:50};
-  var cellWmm=194/_lblCols; var cellHmm=281/_lblRows;
-  var fits=(cellWmm>=dim.w)&&(cellHmm>=dim.h);
-  // Info + warning
-  var perPage=_lblCols*_lblRows;
+  var layouts={'1x2':{cols:5,rows:13},'2x2':{cols:4,rows:7}};
+  var layout=layouts[_lblSize];
+  if(!layout){pgPrev.innerHTML='';return;}
+  var perPage=layout.cols*layout.rows;
   var qty=Math.max(1,parseInt((el('lbl-qty')||{}).value)||1);
   var totalPids=_lblMulti?_lblPids.length:1;
   var totalLabels=totalPids*qty;
   var totalPages=Math.ceil(totalLabels/perPage);
-  var infoEl=el('lbl-layout-info');
-  if(infoEl)infoEl.textContent=perPage+' etiquetas por página ('+_lblCols+' col × '+_lblRows+' filas)';
-  var warn=el('lbl-layout-warn');if(warn)warn.style.display=fits?'none':'';
+  var infoEl=el('lbl-pages-info');
+  if(infoEl)infoEl.textContent=totalLabels+' etiqueta'+(totalLabels!==1?'s':'')+' · '+totalPages+' hoja'+(totalPages!==1?'s':'')+' de A4';
   // Preview dims: proportional A4, 240px wide
   var pW=240;var pH=Math.round(pW*297/210);
   var mPx=Math.round(pW*8/210);
   var iW=pW-mPx*2;var iH=pH-mPx*2;
-  var cW=iW/_lblCols;var cH=iH/_lblRows;
-  var nameSz=Math.max(6,Math.floor(cH*0.18));
-  var priceSz=Math.max(8,Math.floor(cH*0.28));
-  // Product for preview
+  var cW=iW/layout.cols;var cH=iH/layout.rows;
+  var nameSz=Math.max(5,Math.floor(cH*0.18));
+  var priceSz=Math.max(7,Math.floor(cH*0.30));
   var pid;
   if(_lblMulti&&_lblPids.length)pid=_lblPids[0];
   else{var sel=el('lbl-prod-sel');pid=sel?sel.value:null;}
   if(!pid&&_lblPids.length)pid=_lblPids[0];
   var p=db.products.find(function(x){return x.id===pid;});
-  // Build grid cells
   var cells='';
   for(var i=0;i<perPage;i++){
     var hasLbl=i<totalLabels;
     var content='';
     if(p&&hasLbl){
-      content='<div style="font-size:'+nameSz+'px;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">'+_htmlEsc(p.name)+'</div>'
+      content='<div style="font-size:'+nameSz+'px;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;line-height:1.1">'+_htmlEsc(p.name)+'</div>'
         +'<div style="font-size:'+priceSz+'px;font-weight:800;color:#000;line-height:1">'+dolr(p.price)+'</div>';
     }
-    cells+='<div style="border:0.5px solid '+(fits?'#ccc':'#e88')+';background:'+(hasLbl?'#fff':'#f0f0f0')+';display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;overflow:hidden;padding:1px;box-sizing:border-box">'+content+'</div>';
+    cells+='<div style="border:0.5px solid #ccc;background:'+(hasLbl?'#fff':'#f0f0f0')+';display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;overflow:hidden;padding:1px;box-sizing:border-box">'+content+'</div>';
   }
   var pagesNote=totalPages>1?'<div style="font-size:.73rem;color:var(--tx3);margin-bottom:5px">Página 1 de '+totalPages+'</div>':'';
   pgPrev.innerHTML=pagesNote
     +'<div style="background:#c8c8c8;padding:4px;display:inline-block;box-shadow:2px 3px 8px rgba(0,0,0,.25)">'
     +'<div style="background:#fff;border:1px solid #aaa;width:'+pW+'px;height:'+pH+'px;position:relative;overflow:hidden">'
-    +'<div style="position:absolute;inset:'+mPx+'px;display:grid;grid-template-columns:repeat('+_lblCols+',1fr);grid-template-rows:repeat('+_lblRows+',1fr);gap:0">'
+    +'<div style="position:absolute;inset:'+mPx+'px;display:grid;grid-template-columns:repeat('+layout.cols+',1fr);grid-template-rows:repeat('+layout.rows+',1fr);gap:0">'
     +cells+'</div></div></div>';
 }
 
@@ -6647,11 +6590,10 @@ function openLabelModal(pid){
   const mr=el('lbl-multi-row');if(mr)mr.style.display='none';
   el('lbl-modal-title').textContent='Imprimir Etiqueta';
   el('lbl-qty').value='1';
-  _lblSize='sm';_lblPrinter='normal';
-  ['sm','md','lg'].forEach(function(k){const b=el('lbl-sz-'+k);if(b)b.classList[k==='sm'?'add':'remove']('on');});
-  var _pnNorm=el('lbl-prn-normal'),_pnTherm=el('lbl-prn-thermal');
-  if(_pnNorm){_pnNorm.classList.add('on');}if(_pnTherm){_pnTherm.classList.remove('on');}
+  _lblSize='1x2';_lblPrinter='normal';
+  ['1x2','2x2','t58','t80'].forEach(function(k){var b=el('lbl-sz-'+k);if(b)b.classList.toggle('on',k==='1x2');});
   var _ti=el('lbl-thermal-info');if(_ti)_ti.style.display='none';
+  var _ps=el('lbl-page-section');if(_ps)_ps.style.display='';
   renderLabelPreview();
   openOv('ov-labels');
 }
@@ -6665,11 +6607,10 @@ function printSelectedLabels(){
   if(mr){mr.style.display='';mr.innerHTML='<strong>'+_lblPids.length+'</strong> productos seleccionados para imprimir etiquetas.';}
   el('lbl-modal-title').textContent='Etiquetas múltiples';
   el('lbl-qty').value='1';
-  _lblSize='sm';_lblPrinter='normal';
-  ['sm','md','lg'].forEach(function(k){const b=el('lbl-sz-'+k);if(b)b.classList[k==='sm'?'add':'remove']('on');});
-  var _pnNorm2=el('lbl-prn-normal'),_pnTherm2=el('lbl-prn-thermal');
-  if(_pnNorm2){_pnNorm2.classList.add('on');}if(_pnTherm2){_pnTherm2.classList.remove('on');}
+  _lblSize='1x2';_lblPrinter='normal';
+  ['1x2','2x2','t58','t80'].forEach(function(k){var b=el('lbl-sz-'+k);if(b)b.classList.toggle('on',k==='1x2');});
   var _ti2=el('lbl-thermal-info');if(_ti2)_ti2.style.display='none';
+  var _ps2=el('lbl-page-section');if(_ps2)_ps2.style.display='';
   renderLabelPreview();
   openOv('ov-labels');
 }
@@ -6702,47 +6643,49 @@ function _buildOneLabelHTML(p,size){
   var biz=db.cfg||{};
   var bizName=biz.bizName||'4K Negocio';
 
-  // Térmica 80mm: centrado, auto-altura, una por página
-  if(_lblPrinter==='thermal'){
-    return'<div class="lbl-itm" style="width:76mm;padding:3mm 2mm;text-align:center;box-sizing:border-box;align-items:center">'
-      +'<div style="font-size:12pt;font-weight:800;line-height:1.3;color:#111;margin-bottom:2.5mm;word-break:break-word">'+_htmlEsc(p.name)+'</div>'
-      +'<div style="font-size:22pt;font-weight:800;color:#000;line-height:1;margin-bottom:2.5mm">'+price+'</div>'
-      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,265,42)+'<div style="font-size:6pt;letter-spacing:1.5px;color:#666;margin-top:1mm">'+_htmlEsc(bc)+'</div></div>':'')
-      +'<div style="border-top:.4pt dashed #bbb;width:100%;margin-top:3mm"></div>'
-      +'</div>';
-  }
-
-  // Pequeña 90×50mm: nombre → precio → código de barras
-  if(size==='sm'){
-    return'<div class="lbl-itm" style="width:90mm;height:50mm;justify-content:space-between;align-items:center;text-align:center;padding:2.5mm 3mm">'
-      +'<div style="font-size:11pt;font-weight:800;line-height:1.2;color:#111;word-break:break-word;width:100%">'+_htmlEsc(p.name)+'</div>'
-      +'<div style="font-size:22pt;font-weight:800;color:#000;line-height:1">'+price+'</div>'
-      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,310,36)+'<div style="font-size:5.5pt;letter-spacing:1px;color:#777;margin-top:.5mm">'+_htmlEsc(bc)+'</div></div>':'')
-      +'</div>';
-  }
-
-  // Mediana 160×80mm: nombre+categoría → precio → código de barras
-  if(size==='md'){
-    return'<div class="lbl-itm" style="width:160mm;height:80mm;justify-content:space-between;padding:3mm 4mm">'
-      +'<div>'
-      +'<div style="font-size:13pt;font-weight:800;line-height:1.2;color:#111">'+_htmlEsc(p.name)+'</div>'
-      +(catName?'<div style="font-size:7.5pt;color:#888;margin-top:.5mm;text-transform:uppercase;letter-spacing:.5px">'+_htmlEsc(catName)+'</div>':'')
+  // 1×2" (25×50mm): negocio · nombre · precio en caja · barcode
+  if(size==='1x2'){
+    return'<div class="lbl-itm" style="width:25mm;height:50mm;padding:1mm 1.2mm;justify-content:space-between;align-items:center;text-align:center">'
+      +'<div style="font-size:5pt;color:#777;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
+      +'<div style="font-size:7.5pt;font-weight:800;line-height:1.2;color:#111;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
+      +'<div style="background:#1E3A5F;color:#fff;padding:.8mm 1.5mm;border-radius:.8mm;width:100%;box-sizing:border-box">'
+      +'<div style="font-size:13pt;font-weight:800;line-height:1">'+price+'</div>'
       +'</div>'
-      +'<div style="text-align:center"><div style="font-size:28pt;font-weight:800;color:#000;line-height:1">'+price+'</div></div>'
-      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,560,46)+'<div style="font-size:7pt;letter-spacing:2px;color:#555;margin-top:1mm">'+_htmlEsc(bc)+'</div></div>':'')
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,80,16)+'<div style="font-size:5.5pt;letter-spacing:.5px;color:#777;margin-top:.3mm;line-height:1">'+_htmlEsc(bc)+'</div></div>':'')
       +'</div>';
   }
 
-  // Grande 200×100mm: negocio → nombre → precio en caja de color → código de barras
-  var logoTag=biz.logo?('<img src="'+biz.logo+'" style="height:9mm;max-width:24mm;object-fit:contain;display:block">'):'';
-  return'<div class="lbl-itm" style="width:200mm;height:100mm;justify-content:space-between;padding:3mm 5mm">'
-    +'<div style="display:flex;align-items:center;gap:3mm;padding-bottom:2mm;border-bottom:.4pt solid #ccc">'
-    +logoTag+'<div style="font-size:9.5pt;font-weight:800;color:#222;letter-spacing:.3px">'+_htmlEsc(bizName)+'</div></div>'
-    +'<div style="font-size:15pt;font-weight:800;line-height:1.2;color:#111">'+_htmlEsc(p.name)+'</div>'
-    +'<div style="display:inline-block;background:#1E3A5F;color:#fff;padding:2.5mm 5mm;border-radius:2mm">'
-    +'<div style="font-size:28pt;font-weight:800;line-height:1">'+price+'</div>'
-    +'</div>'
-    +(bc?'<div>'+_barcodeSvg(bc,340,42)+'<div style="font-size:6.5pt;letter-spacing:2px;color:#555;margin-top:1mm">'+_htmlEsc(bc)+'</div></div>':'')
+  // 2×2" (50×50mm): negocio · nombre · categoría · precio · barcode
+  if(size==='2x2'){
+    return'<div class="lbl-itm" style="width:50mm;height:50mm;padding:1.5mm 2mm;justify-content:space-between">'
+      +'<div>'
+      +'<div style="font-size:5pt;color:#777;line-height:1">'+_htmlEsc(bizName)+'</div>'
+      +'<div style="font-size:9pt;font-weight:800;line-height:1.2;color:#111;margin-top:.5mm">'+_htmlEsc(p.name)+'</div>'
+      +(catName?'<div style="font-size:5.5pt;color:#888;text-transform:uppercase;letter-spacing:.3px;margin-top:.3mm">'+_htmlEsc(catName)+'</div>':'')
+      +'</div>'
+      +'<div style="background:#1E3A5F;color:#fff;padding:1.5mm 3mm;border-radius:1.2mm;display:inline-block">'
+      +'<div style="font-size:16pt;font-weight:800;line-height:1">'+price+'</div>'
+      +'</div>'
+      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,170,22)+'<div style="font-size:5.5pt;letter-spacing:1px;color:#666;margin-top:.5mm">'+_htmlEsc(bc)+'</div></div>':'')
+      +'</div>';
+  }
+
+  // Térmica 58mm (54mm usable)
+  if(size==='t58'){
+    return'<div class="lbl-itm" style="width:54mm;padding:2.5mm 2mm;text-align:center;box-sizing:border-box;align-items:center">'
+      +'<div style="font-size:10pt;font-weight:800;line-height:1.3;color:#111;margin-bottom:2mm;word-break:break-word">'+_htmlEsc(p.name)+'</div>'
+      +'<div style="font-size:19pt;font-weight:800;color:#000;line-height:1;margin-bottom:2mm">'+price+'</div>'
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,197,36)+'<div style="font-size:5.5pt;letter-spacing:1.5px;color:#666;margin-top:1mm">'+_htmlEsc(bc)+'</div></div>':'')
+      +'<div style="border-top:.4pt dashed #bbb;width:100%;margin-top:2.5mm"></div>'
+      +'</div>';
+  }
+
+  // Térmica 80mm (76mm usable)
+  return'<div class="lbl-itm" style="width:76mm;padding:3mm 2mm;text-align:center;box-sizing:border-box;align-items:center">'
+    +'<div style="font-size:12pt;font-weight:800;line-height:1.3;color:#111;margin-bottom:2.5mm;word-break:break-word">'+_htmlEsc(p.name)+'</div>'
+    +'<div style="font-size:22pt;font-weight:800;color:#000;line-height:1;margin-bottom:2.5mm">'+price+'</div>'
+    +(bc?'<div style="width:100%">'+_barcodeSvg(bc,265,42)+'<div style="font-size:6pt;letter-spacing:1.5px;color:#666;margin-top:1mm">'+_htmlEsc(bc)+'</div></div>':'')
+    +'<div style="border-top:.4pt dashed #bbb;width:100%;margin-top:3mm"></div>'
     +'</div>';
 }
 
@@ -6753,46 +6696,51 @@ function _buildPreviewLabelHTML(p,size){
   var bc=p.bc||'';
   var biz=db.cfg||{};
   var bizName=biz.bizName||'4K Negocio';
-  var base='font-family:Arial,Helvetica,sans-serif;box-sizing:border-box;background:#fff;color:#111;display:flex;flex-direction:column;border:1px solid #d0d0d0;border-radius:3px;';
+  var base='font-family:Arial,Helvetica,sans-serif;box-sizing:border-box;background:#fff;color:#111;display:flex;flex-direction:column;border:1px solid #ccc;border-radius:3px;';
 
-  if(_lblPrinter==='thermal'){
-    return'<div style="'+base+'width:240px;padding:10px 8px;align-items:center;text-align:center;gap:0">'
-      +'<div style="font-size:13px;font-weight:800;line-height:1.3;color:#111;margin-bottom:6px;word-break:break-word;width:100%">'+_htmlEsc(p.name)+'</div>'
-      +'<div style="font-size:22px;font-weight:800;color:#000;line-height:1;margin-bottom:6px">'+price+'</div>'
-      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,200,30)+'<div style="font-size:11px;letter-spacing:1.5px;color:#666;margin-top:3px">'+_htmlEsc(bc)+'</div></div>':'')
-      +'<div style="border-top:1px dashed #bbb;width:100%;margin-top:8px"></div>'
-      +'</div>';
-  }
-
-  if(size==='sm'){
-    return'<div style="'+base+'width:280px;height:155px;justify-content:space-between;align-items:center;text-align:center;padding:8px 10px">'
-      +'<div style="font-size:13px;font-weight:800;line-height:1.2;color:#111;word-break:break-word;width:100%">'+_htmlEsc(p.name)+'</div>'
-      +'<div style="font-size:22px;font-weight:800;color:#000;line-height:1">'+price+'</div>'
-      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,240,28)+'<div style="font-size:11px;letter-spacing:1px;color:#777;margin-top:2px">'+_htmlEsc(bc)+'</div></div>':'')
-      +'</div>';
-  }
-
-  if(size==='md'){
-    return'<div style="'+base+'width:380px;height:190px;justify-content:space-between;padding:10px 12px">'
-      +'<div>'
-      +'<div style="font-size:14px;font-weight:800;line-height:1.2;color:#111">'+_htmlEsc(p.name)+'</div>'
-      +(catName?'<div style="font-size:11px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:.5px">'+_htmlEsc(catName)+'</div>':'')
+  // 1×2": 90×180px (proporcional a 25×50mm escala 3.6×)
+  if(size==='1x2'){
+    return'<div style="'+base+'width:90px;height:180px;padding:4px 5px;justify-content:space-between;align-items:center;text-align:center">'
+      +'<div style="font-size:8px;color:#888;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
+      +'<div style="font-size:10px;font-weight:800;line-height:1.2;color:#111;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
+      +'<div style="background:#1E3A5F;color:#fff;padding:3px 5px;border-radius:3px;width:100%;box-sizing:border-box">'
+      +'<div style="font-size:17px;font-weight:800;line-height:1">'+price+'</div>'
       +'</div>'
-      +'<div style="text-align:center"><div style="font-size:28px;font-weight:800;color:#000;line-height:1">'+price+'</div></div>'
-      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,340,34)+'<div style="font-size:11px;letter-spacing:2px;color:#555;margin-top:3px">'+_htmlEsc(bc)+'</div></div>':'')
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,75,18)+'<div style="font-size:8px;letter-spacing:.5px;color:#777;margin-top:1px">'+_htmlEsc(bc)+'</div></div>':'')
       +'</div>';
   }
 
-  // lg preview: 420×210px
-  var logoTag=biz.logo?('<img src="'+biz.logo+'" style="height:28px;max-width:60px;object-fit:contain;display:block">'):'';
-  return'<div style="'+base+'width:420px;height:210px;justify-content:space-between;padding:10px 14px">'
-    +'<div style="display:flex;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid #ccc">'
-    +logoTag+'<div style="font-size:11px;font-weight:800;color:#222">'+_htmlEsc(bizName)+'</div></div>'
-    +'<div style="font-size:15px;font-weight:800;line-height:1.2;color:#111">'+_htmlEsc(p.name)+'</div>'
-    +'<div style="display:inline-block;background:#1E3A5F;color:#fff;padding:6px 14px;border-radius:4px">'
-    +'<div style="font-size:26px;font-weight:800;line-height:1">'+price+'</div>'
-    +'</div>'
-    +(bc?'<div>'+_barcodeSvg(bc,280,32)+'<div style="font-size:11px;letter-spacing:2px;color:#555;margin-top:3px">'+_htmlEsc(bc)+'</div></div>':'')
+  // 2×2": 190×190px (proporcional 50×50mm escala 3.8×)
+  if(size==='2x2'){
+    return'<div style="'+base+'width:190px;height:190px;padding:8px 10px;justify-content:space-between">'
+      +'<div>'
+      +'<div style="font-size:8px;color:#888;line-height:1">'+_htmlEsc(bizName)+'</div>'
+      +'<div style="font-size:14px;font-weight:800;line-height:1.2;color:#111;margin-top:2px">'+_htmlEsc(p.name)+'</div>'
+      +(catName?'<div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.3px;margin-top:1px">'+_htmlEsc(catName)+'</div>':'')
+      +'</div>'
+      +'<div style="display:inline-block;background:#1E3A5F;color:#fff;padding:5px 10px;border-radius:4px">'
+      +'<div style="font-size:24px;font-weight:800;line-height:1">'+price+'</div>'
+      +'</div>'
+      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,155,20)+'<div style="font-size:9px;letter-spacing:1px;color:#666;margin-top:2px">'+_htmlEsc(bc)+'</div></div>':'')
+      +'</div>';
+  }
+
+  // Térmica 58mm: 200px ancho
+  if(size==='t58'){
+    return'<div style="'+base+'width:200px;padding:8px;align-items:center;text-align:center">'
+      +'<div style="font-size:12px;font-weight:800;line-height:1.3;color:#111;margin-bottom:6px;word-break:break-word;width:100%">'+_htmlEsc(p.name)+'</div>'
+      +'<div style="font-size:20px;font-weight:800;color:#000;line-height:1;margin-bottom:6px">'+price+'</div>'
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,170,28)+'<div style="font-size:9px;letter-spacing:1.5px;color:#666;margin-top:2px">'+_htmlEsc(bc)+'</div></div>':'')
+      +'<div style="border-top:1px dashed #bbb;width:100%;margin-top:6px"></div>'
+      +'</div>';
+  }
+
+  // Térmica 80mm: 280px ancho
+  return'<div style="'+base+'width:280px;padding:10px 8px;align-items:center;text-align:center">'
+    +'<div style="font-size:13px;font-weight:800;line-height:1.3;color:#111;margin-bottom:6px;word-break:break-word;width:100%">'+_htmlEsc(p.name)+'</div>'
+    +'<div style="font-size:22px;font-weight:800;color:#000;line-height:1;margin-bottom:6px">'+price+'</div>'
+    +(bc?'<div style="width:100%">'+_barcodeSvg(bc,240,30)+'<div style="font-size:10px;letter-spacing:1.5px;color:#666;margin-top:2px">'+_htmlEsc(bc)+'</div></div>':'')
+    +'<div style="border-top:1px dashed #bbb;width:100%;margin-top:8px"></div>'
     +'</div>';
 }
 
@@ -6823,11 +6771,13 @@ function printLabels(){
   });
   if(!labels.length){toast('⚠ Sin etiquetas');return;}
   const printArea=el('lbl-print-area');
-  if(_lblPrinter==='thermal'){
-    printArea.innerHTML='<style>@media print{@page{size:80mm auto;margin:0;}.lbl-itm{page-break-after:always;break-after:page;}}</style>'
+  if(_lblSize==='t58'||_lblSize==='t80'){
+    var pgW=_lblSize==='t58'?'58mm':'80mm';
+    printArea.innerHTML='<style>@media print{@page{size:'+pgW+' auto;margin:0;}.lbl-itm{page-break-after:always;break-after:page;}}</style>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-start">'+labels.join('')+'</div>';
   }else{
-    printArea.innerHTML='<div style="display:grid;grid-template-columns:repeat('+_lblCols+',1fr);gap:2mm">'+labels.join('')+'</div>';
+    var cols=_lblSize==='1x2'?5:4;
+    printArea.innerHTML='<div style="display:grid;grid-template-columns:repeat('+cols+',1fr);gap:1mm">'+labels.join('')+'</div>';
   }
   closeOv('ov-labels');
   document.body.classList.add('lbl-pm');
