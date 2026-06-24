@@ -40,7 +40,8 @@ let autoUpdater = null
 try {
   autoUpdater = require('electron-updater').autoUpdater
   logUpdate('electron-updater loaded OK')
-  logUpdate('App version: ' + app.getVersion())
+  logUpdate('App version (app.getVersion): ' + app.getVersion())
+  try { logUpdate('Package.json version: ' + require('./package.json').version) } catch(e) {}
   logUpdate('isPackaged: ' + app.isPackaged)
   logUpdate('Log file: ' + logFile)
   autoUpdater.logger = {
@@ -53,13 +54,22 @@ try {
   autoUpdater.autoDownload = true
   autoUpdater.autoInstallOnAppQuit = true
   autoUpdater.on('checking-for-update', () => { logUpdate('Checking...'); if (mainWindow) mainWindow.webContents.send('update-status', 'checking') })
-  autoUpdater.on('update-available', (i) => { logUpdate('Available: ' + JSON.stringify(i)); if (mainWindow) mainWindow.webContents.send('update-status', 'downloading') })
-  autoUpdater.on('update-not-available', () => { logUpdate('No update'); if (mainWindow) mainWindow.webContents.send('update-status', 'no-update') })
-  autoUpdater.on('download-progress', (p) => { logUpdate('Progress: ' + p.percent) })
-  autoUpdater.on('update-downloaded', () => { logUpdate('Downloaded'); if (mainWindow) mainWindow.webContents.send('update-status', 'ready') })
+  autoUpdater.on('update-available', (i) => {
+    logUpdate('Update available: current=' + app.getVersion() + ' → latest=' + (i && i.version))
+    if (mainWindow) mainWindow.webContents.send('update-status', 'downloading')
+  })
+  autoUpdater.on('update-not-available', (i) => {
+    logUpdate('No update: current=' + app.getVersion() + ' latest.yml=' + (i && i.version))
+    if (mainWindow) mainWindow.webContents.send('update-status', 'no-update')
+  })
+  autoUpdater.on('download-progress', (p) => { logUpdate('Progress: ' + Math.round(p.percent) + '%') })
+  autoUpdater.on('update-downloaded', (i) => {
+    logUpdate('Downloaded: ' + (i && i.version) + ' · will install on quit')
+    if (mainWindow) mainWindow.webContents.send('update-status', 'ready')
+  })
   autoUpdater.on('error', (e) => { logUpdate('Error: ' + e.message); if (mainWindow) mainWindow.webContents.send('update-status', 'error') })
-  ipcMain.on('check-updates', () => { logUpdate('Manual check triggered'); autoUpdater.checkForUpdatesAndNotify() })
-  setTimeout(() => { logUpdate('Auto check starting'); autoUpdater.checkForUpdatesAndNotify() }, 10000)
+  ipcMain.on('check-updates', () => { logUpdate('Manual check triggered'); autoUpdater.checkForUpdates() })
+  setTimeout(() => { logUpdate('Auto check starting'); autoUpdater.checkForUpdates() }, 10000)
 } catch(e) {
   logUpdate('FAILED to load electron-updater: ' + e.message)
 }

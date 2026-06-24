@@ -1668,18 +1668,25 @@ document.addEventListener('keydown', function(e) {
 });
 document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 // ── Auto-updater notifications ─────────────────
+var _manualUpdateCheck = false;
 try {
   ipcRenderer.on('update-status', function(e, status) {
-    if (status === 'checking') toast(t('updateChecking'));
-    if (status === 'downloading') toast(t('updateDownloading'));
-    if (status === 'no-update') toast(t('updateNone'));
     if (status === 'ready') {
-      if (confirm(t('updateReady'))) ipcRenderer.send('restart-for-update');
+      // Silent toast — autoInstallOnAppQuit handles installation automatically
+      toast(t('updateReady'));
+      _manualUpdateCheck = false;
+      return;
     }
-    if (status === 'error') toast(t('updateError'));
+    // Only show checking/downloading/no-update toasts on manual check
+    if (!_manualUpdateCheck) return;
+    if (status === 'checking') toast(t('updateChecking'));
+    else if (status === 'downloading') toast(t('updateDownloading'));
+    else if (status === 'no-update') { toast(t('updateNone')); _manualUpdateCheck = false; }
+    else if (status === 'error') { toast(t('updateError')); _manualUpdateCheck = false; }
   });
 } catch(e) {}
 function checkUpdates() {
+  _manualUpdateCheck = true;
   toast(t('updateChecking'));
   try { ipcRenderer.send('check-updates'); } catch(e) {}
 }
@@ -1862,7 +1869,7 @@ const T = {
     abonoRegisteredPre:'✅ Abono registrado · ',abonoFullSuffix:' (pago total)',
     payCreditFullPre:'¿Marcar como pagado total el crédito de ',
     updateChecking:'Buscando actualizaciones...',updateDownloading:'Descargando actualización...',
-    updateReady:'Actualización lista. ¿Reiniciar ahora?',updateNone:'Ya tienes la última versión',updateError:'Error al buscar actualizaciones',
+    updateReady:'✅ Actualización descargada · Se instalará al cerrar el programa',updateNone:'Ya tienes la última versión',updateError:'Error al buscar actualizaciones',
     noteSavedToast:'📋 Nota guardada',noteClearedToast:'📋 Nota eliminada',
     adminOnly:'Solo administrador',forceCloseConfirm:'¿Forzar cierre con diferencia de efectivo?',
     deleteUserConfirm:'¿Eliminar usuario ',deleteCatConfirm:'¿Eliminar categoría?',
@@ -2057,7 +2064,7 @@ const T = {
     abonoRegisteredPre:'✅ Payment recorded · ',abonoFullSuffix:' (full payment)',
     payCreditFullPre:'Mark credit as fully paid for ',
     updateChecking:'Checking for updates...',updateDownloading:'Downloading update...',
-    updateReady:'Update ready. Restart now?',updateNone:'Already on latest version',updateError:'Error checking for updates',
+    updateReady:'✅ Update downloaded · Will install when you close the app',updateNone:'Already on latest version',updateError:'Error checking for updates',
     noteSavedToast:'📋 Note saved',noteClearedToast:'📋 Note cleared',
     adminOnly:'Admin only',forceCloseConfirm:'Force close shift with cash difference?',
     deleteUserConfirm:'Delete user ',deleteCatConfirm:'Delete category?',
