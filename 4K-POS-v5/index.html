@@ -6101,13 +6101,12 @@ document.addEventListener('keydown',function(e){
 // ── NOTIFICATION CENTER ───────────────────────────────────────────────────────
 let _notifs=[];
 let _notifInterval=null;
+// Dismissed IDs son solo de sesión (en memoria, no localStorage).
+// Así las notificaciones reaparecen en cada arranque del POS aunque el stock siga bajo.
+let _notifDismissedSet=new Set();
 
-function _getNotifDismissed(){
-  try{return new Set(JSON.parse(localStorage.getItem('4kpos_notif_dismissed')||'[]'));}catch(e){return new Set();}
-}
-function _saveNotifDismissed(ids){
-  try{localStorage.setItem('4kpos_notif_dismissed',JSON.stringify([...ids]));}catch(e){}
-}
+function _getNotifDismissed(){ return _notifDismissedSet; }
+function _saveNotifDismissed(ids){ _notifDismissedSet=ids; }
 
 function calcNotifs(){
   const now=new Date();now.setHours(0,0,0,0);
@@ -6143,6 +6142,7 @@ function calcNotifs(){
   // Stock bajo — minStock por producto sobrescribe umbral global
   const _globalThr=(db.settings&&db.settings.lowStockThreshold!=null)?db.settings.lowStockThreshold:5;
   (db.products||[]).forEach(function(p){
+    if(p.active===false)return; // productos inactivos no generan alerta
     const _pMin=p.minStock!=null?p.minStock:_globalThr;
     const _stk=p.stock||0;
     if(_stk<=_pMin){
