@@ -400,6 +400,59 @@
     height: 1px;
     background: var(--border);
   }
+
+  /* Email request section */
+  input[type="email"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0.02em;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    text-transform: none;
+    box-sizing: border-box;
+  }
+  input[type="email"]::placeholder { color: var(--muted); }
+  input[type="email"]:focus {
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+  }
+  input[type="email"].error {
+    border-color: var(--error);
+    box-shadow: 0 0 0 3px rgba(255,71,87,0.1);
+  }
+  .btn-request {
+    background: linear-gradient(135deg, var(--accent2), #5b21b6);
+    color: #fff;
+  }
+  .btn-request:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(124,58,237,0.35);
+  }
+  .btn-request:active:not(:disabled) { transform: translateY(0); }
+  .btn-request:disabled { opacity: 0.5; cursor: not-allowed; }
+  .email-sent-box {
+    text-align: center;
+    padding: 8px 0;
+  }
+  .email-sent-icon {
+    width: 56px; height: 56px;
+    background: rgba(124,58,237,0.1);
+    border: 2px solid var(--accent2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 24px;
+    animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
 </style>
 </head>
 <body>
@@ -455,6 +508,35 @@
       ¿No tienes una licencia? <a href="#" onclick="openPurchase()">Compra aquí</a><br>
       ¿Problemas? Escríbenos a <a href="#">soporte@4kpos.com</a>
     </p>
+
+    <div class="ext-divider" style="margin:22px 0 18px">o solicita acceso por email</div>
+
+    <div id="email-request-area">
+      <label for="email-input">Tu correo electrónico</label>
+      <div class="input-wrap">
+        <input
+          type="email"
+          id="email-input"
+          placeholder="correo@ejemplo.com"
+          autocomplete="email"
+          spellcheck="false"
+        >
+      </div>
+      <div id="email-error-msg" class="error-msg"></div>
+      <button class="btn btn-request" id="request-btn" onclick="doRequestByEmail()">
+        <span class="btn-text">Solicitar licencia</span>
+        <div class="spinner" style="border-color:rgba(255,255,255,.25);border-top-color:#fff"></div>
+      </button>
+    </div>
+
+    <div id="email-sent-area" style="display:none">
+      <div class="email-sent-box">
+        <div class="email-sent-icon">📧</div>
+        <h3 style="font-size:16px;margin:0 0 6px;color:var(--accent2)">Revisa tu email</h3>
+        <p id="email-sent-to" style="font-size:13px;color:var(--muted);margin:0 0 4px"></p>
+        <p style="font-size:12px;color:var(--muted);margin:0">Cuando recibas tu código, ingrésalo arriba.</p>
+      </div>
+    </div>
   </div>
 
   <!-- EXTENSIÓN OFFLINE — visible solo cuando reason === offline_expired -->
@@ -686,6 +768,97 @@ function clearError() {
 
 function openPurchase() {
   shell.openExternal('https://4kpos.github.io/4kpos-dashboard/index.html');
+}
+
+// ── Solicitud de licencia por email ──────────────────────────
+const _POSAPI = 'https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const emailInp = document.getElementById('email-input');
+  if (emailInp) {
+    emailInp.addEventListener('input', clearEmailError);
+    emailInp.addEventListener('keydown', (e) => { if (e.key === 'Enter') doRequestByEmail(); });
+  }
+});
+
+async function doRequestByEmail() {
+  const input = document.getElementById('email-input');
+  const btn = document.getElementById('request-btn');
+  const emailVal = (input.value || '').trim().toLowerCase();
+
+  if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+    showEmailError('Ingresa un correo válido.');
+    input.classList.add('error');
+    return;
+  }
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+  clearEmailError();
+
+  try {
+    const res = await fetch(_POSAPI, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'request_license_by_email', email: emailVal }),
+    });
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      showEmailError(data.error || 'Error al procesar la solicitud. Intenta de nuevo.');
+      return;
+    }
+
+    if (data.found && data.license_id) {
+      // Licencia activa encontrada — activar automáticamente
+      showEmailStatus('✓ Licencia encontrada. Activando...');
+      const result = await ipcRenderer.invoke('activate-license', data.license_id);
+      if (!result.ok) {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        showEmailError('Error al activar: ' + (result.error || 'Ingresa el código manualmente arriba.'));
+      }
+      // Si ok, main.js reinicia la app automáticamente
+    } else {
+      // Solicitud registrada — mostrar confirmación
+      btn.classList.remove('loading');
+      document.getElementById('email-request-area').style.display = 'none';
+      document.getElementById('email-sent-to').textContent = 'Enviamos confirmación a: ' + emailVal;
+      document.getElementById('email-sent-area').style.display = 'block';
+    }
+  } catch (e) {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    showEmailError('Sin conexión. Verifica tu internet e intenta de nuevo.');
+  }
+}
+
+function showEmailError(msg) {
+  const el = document.getElementById('email-error-msg');
+  if (el) { el.textContent = msg; el.classList.add('show'); }
+  const inp = document.getElementById('email-input');
+  if (inp) inp.classList.add('error');
+}
+
+function clearEmailError() {
+  const el = document.getElementById('email-error-msg');
+  if (el) el.classList.remove('show');
+  const inp = document.getElementById('email-input');
+  if (inp) inp.classList.remove('error');
+}
+
+function showEmailStatus(msg) {
+  const area = document.getElementById('email-request-area');
+  let s = document.getElementById('email-inline-status');
+  if (!s) {
+    s = document.createElement('p');
+    s.id = 'email-inline-status';
+    s.style.cssText = 'text-align:center;font-size:13px;color:var(--success);margin:10px 0 0';
+    area.appendChild(s);
+  }
+  s.textContent = msg;
 }
 </script>
 </body>
