@@ -627,29 +627,29 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
   <div class="db-kpis">
     <div class="db-kpi">
       <div class="kpi-ico">💰</div>
-      <div class="kpi-lbl">Ventas hoy</div>
+      <div class="kpi-lbl" id="db-kpi-lbl-ventas">Ventas hoy</div>
       <div class="kpi-val" id="db-kpi-ventas">$0.00</div>
     </div>
     <div class="db-kpi">
       <div class="kpi-ico">🧾</div>
-      <div class="kpi-lbl">Transacciones</div>
+      <div class="kpi-lbl" id="db-kpi-lbl-tx">Transacciones</div>
       <div class="kpi-val" id="db-kpi-tx">0</div>
     </div>
     <div class="db-kpi">
       <div class="kpi-ico">💳</div>
-      <div class="kpi-lbl">Créditos pendientes</div>
+      <div class="kpi-lbl" id="db-kpi-lbl-cred">Créditos pendientes</div>
       <div class="kpi-val" id="db-kpi-cred">$0.00</div>
     </div>
     <div class="db-kpi">
       <div class="kpi-ico">🎫</div>
-      <div class="kpi-lbl">Ticket promedio</div>
+      <div class="kpi-lbl" id="db-kpi-lbl-ticket">Ticket promedio</div>
       <div class="kpi-val" id="db-kpi-ticket">$0.00</div>
     </div>
   </div>
   <div class="db-row">
     <div class="db-card">
       <div class="db-card-hd">
-        <h4>Ventas por período</h4>
+        <h4 id="db-h4-period">Ventas por período</h4>
         <div class="db-toggle">
           <button class="on" id="db-period-week" onclick="setDbPeriod('week',this)">Semana</button>
           <button id="db-period-month" onclick="setDbPeriod('month',this)">Mes</button>
@@ -658,12 +658,12 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
       <div class="db-chart" id="db-chart"></div>
     </div>
     <div class="db-card">
-      <div class="db-card-hd"><h4>Top 5 productos</h4></div>
+      <div class="db-card-hd"><h4 id="db-h4-top5">Top 5 productos</h4></div>
       <div class="db-top5" id="db-top5"></div>
     </div>
   </div>
   <div class="db-card">
-    <div class="db-card-hd"><h4>Semáforo de stock</h4></div>
+    <div class="db-card-hd"><h4 id="db-h4-stock">Semáforo de stock</h4></div>
     <div class="stk-list" id="db-stock"></div>
   </div>
 </div>
@@ -858,9 +858,9 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
         <input type="hidden" id="logo-data">
         <div class="g2">
           <div class="fg"><label class="lbl" id="cfg-biz-name-lbl">Nombre negocio</label><input type="text" class="fi" id="cfg-biz-name"></div>
-          <div class="fg"><label class="lbl">Subtítulo</label><input type="text" class="fi" id="cfg-biz-sub"></div>
+          <div class="fg"><label class="lbl" id="cfg-biz-sub-lbl">Subtítulo</label><input type="text" class="fi" id="cfg-biz-sub"></div>
         </div>
-        <div class="fg"><label class="lbl">Mensaje gracias</label><input type="text" class="fi" id="cfg-thanks"></div>
+        <div class="fg"><label class="lbl" id="cfg-thanks-lbl">Mensaje gracias</label><input type="text" class="fi" id="cfg-thanks"></div>
         <div class="fg"><label class="lbl" id="cfg-phone-lbl">Teléfono</label><input type="text" class="fi" id="cfg-phone"></div>
         <div class="g2">
           <div class="fg"><label class="lbl">Red social 1</label><input type="text" class="fi" id="cfg-s1"></div>
@@ -1186,13 +1186,13 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
 <!-- BLOQUEO LOGOUT POR CUENTAS ABIERTAS -->
 <div class="ov" id="ov-oa-block">
   <div class="modal mnarrow">
-    <div class="mh"><h3>⚠ Cuentas abiertas</h3><button class="mx" onclick="closeOv('ov-oa-block')">✕</button></div>
+    <div class="mh"><h3 id="oa-block-title">⚠ Cuentas abiertas</h3><button class="mx" onclick="closeOv('ov-oa-block')">✕</button></div>
     <div class="mb">
       <div id="oa-block-msg" style="margin-bottom:10px"></div>
       <div id="oa-block-list" style="max-height:180px;overflow-y:auto;border:1.5px solid var(--b1);border-radius:var(--rs);margin-bottom:14px"></div>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-s" style="flex:1" onclick="closeOv('ov-oa-block');openOAManager()">📖 Ver cuentas</button>
-        <button class="btn btn-d" style="flex:1" onclick="forceLogout()">🔑 Forzar cierre</button>
+        <button class="btn btn-s" style="flex:1" id="oa-block-view-btn" onclick="closeOv('ov-oa-block');openOAManager()">📖 Ver cuentas</button>
+        <button class="btn btn-d" style="flex:1" id="oa-block-force-btn" onclick="forceLogout()">🔑 Forzar cierre</button>
       </div>
     </div>
   </div>
@@ -1285,35 +1285,35 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
       <div id="ct-gst" style="display:none">
         <div id="gst-block" style="display:none;background:var(--rdb);border:1.5px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px;font-size:.83rem;color:var(--rd);margin-bottom:12px"><span id="gst-block-msg">🔒 Sin acceso a Gastos</span></div>
         <div id="gst-content">
-          <div class="slbl">Registrar Gasto</div>
+          <div class="slbl" id="gst-register-title">Registrar Gasto</div>
           <div class="g3">
-            <div class="fg"><label class="lbl">Concepto</label><input type="text" class="fi" id="gst-concepto"></div>
-            <div class="fg"><label class="lbl">Monto ($)</label><input type="number" class="fi" id="gst-monto" step="0.01"></div>
-            <div class="fg"><label class="lbl">Categoría</label>
+            <div class="fg"><label class="lbl" id="gst-concepto-lbl">Concepto</label><input type="text" class="fi" id="gst-concepto"></div>
+            <div class="fg"><label class="lbl" id="gst-monto-lbl">Monto ($)</label><input type="number" class="fi" id="gst-monto" step="0.01"></div>
+            <div class="fg"><label class="lbl" id="gst-cat-lbl">Categoría</label>
               <select class="fi" id="gst-cat">
-                <option value="operativo">Operativo</option><option value="inventario">Inventario</option>
-                <option value="servicios">Servicios</option><option value="nomina">Nómina</option>
-                <option value="marketing">Marketing</option><option value="otro">Otro</option>
+                <option value="operativo" id="gst-cat-op">Operativo</option><option value="inventario" id="gst-cat-inv">Inventario</option>
+                <option value="servicios" id="gst-cat-svc">Servicios</option><option value="nomina" id="gst-cat-payroll">Nómina</option>
+                <option value="marketing" id="gst-cat-mkt">Marketing</option><option value="otro" id="gst-cat-other">Otro</option>
               </select>
             </div>
           </div>
-          <div class="fg"><label class="lbl">Notas</label><input type="text" class="fi" id="gst-notes"></div>
-          <div class="frow"><button class="btn btn-p" onclick="saveGasto()">💾 Registrar</button><button class="btn btn-s" onclick="clearGasto()">↺</button></div>
-          <div class="slbl" style="display:flex;justify-content:space-between;align-items:center"><span>Gastos</span><span id="gst-period-total" style="font-weight:700;color:var(--rd);font-size:.78rem;text-transform:none;letter-spacing:0"></span></div><div id="gst-list"></div>
+          <div class="fg"><label class="lbl" id="gst-notes-lbl">Notas</label><input type="text" class="fi" id="gst-notes"></div>
+          <div class="frow"><button class="btn btn-p" id="gst-save-btn" onclick="saveGasto()">💾 Registrar</button><button class="btn btn-s" onclick="clearGasto()">↺</button></div>
+          <div class="slbl" style="display:flex;justify-content:space-between;align-items:center"><span id="gst-list-title">Gastos</span><span id="gst-period-total" style="font-weight:700;color:var(--rd);font-size:.78rem;text-transform:none;letter-spacing:0"></span></div><div id="gst-list"></div>
         </div>
       </div>
       <div id="ct-graf" style="display:none">
         <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
           <select class="fi" id="graf-type" style="width:180px" onchange="renderGraf()">
-            <option value="ventas-dia">Ventas por día</option>
-            <option value="ventas-prod">Ventas por producto</option>
-            <option value="gastos-cat">Gastos por categoría</option>
-            <option value="flujo">Ingresos vs Gastos</option>
+            <option value="ventas-dia" id="graf-type-day">Ventas por día</option>
+            <option value="ventas-prod" id="graf-type-prod">Ventas por producto</option>
+            <option value="gastos-cat" id="graf-type-exp-cat">Gastos por categoría</option>
+            <option value="flujo" id="graf-type-flow">Ingresos vs Gastos</option>
           </select>
           <select class="fi" id="graf-period" style="width:150px" onchange="renderGraf()">
-            <option value="7">7 días</option>
-            <option value="30" selected>30 días</option>
-            <option value="90">90 días</option>
+            <option value="7" id="graf-period-7">7 días</option>
+            <option value="30" selected id="graf-period-30">30 días</option>
+            <option value="90" id="graf-period-90">90 días</option>
           </select>
         </div>
         <canvas id="graf-canvas" style="width:100%;max-height:320px;background:var(--s2);border-radius:var(--rs);padding:10px"></canvas>
@@ -1480,9 +1480,9 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
       <div style="font-size:.8rem;color:var(--tx3);margin-bottom:8px;text-align:center">— o —</div>
       <button class="btn btn-s" style="width:100%;font-size:.8rem" onclick="showAddCustInline()">➕ <span id="credit-add-cust-btn-txt">Agregar nuevo cliente</span></button>
       <div id="credit-add-cust-form" style="display:none;margin-top:10px;border-top:1.5px solid var(--b1);padding-top:10px">
-        <div class="fg" style="margin-bottom:6px"><label class="lbl">Nombre completo <span style="color:var(--rd)">*</span></label><input type="text" class="fi" id="nc-name" placeholder="Juan Pérez"></div>
-        <div class="fg" style="margin-bottom:6px"><label class="lbl">Cédula / ID <span style="color:var(--rd)">*</span></label><input type="text" class="fi" id="nc-cedula" placeholder="0-000-000"></div>
-        <div class="fg" style="margin-bottom:8px"><label class="lbl">Teléfono</label><input type="text" class="fi" id="nc-phone" placeholder="(opcional)"></div>
+        <div class="fg" style="margin-bottom:6px"><label class="lbl" id="nc-name-lbl">Nombre completo <span style="color:var(--rd)">*</span></label><input type="text" class="fi" id="nc-name" placeholder="Juan Pérez"></div>
+        <div class="fg" style="margin-bottom:6px"><label class="lbl" id="nc-cedula-lbl">Cédula / ID <span style="color:var(--rd)">*</span></label><input type="text" class="fi" id="nc-cedula" placeholder="0-000-000"></div>
+        <div class="fg" style="margin-bottom:8px"><label class="lbl" id="nc-phone-lbl">Teléfono</label><input type="text" class="fi" id="nc-phone" placeholder="(opcional)"></div>
         <button class="btn btn-p" style="width:100%" onclick="saveNewCustAndSelect()">💾 Guardar y seleccionar</button>
       </div>
       <div id="credit-selected-cust" style="display:none;margin-top:10px;background:var(--acg);border:1.5px solid var(--ac);border-radius:var(--rs);padding:10px;position:relative">
@@ -1497,7 +1497,7 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
           <button class="btn btn-s" style="font-size:.72rem;padding:3px 8px" onclick="setCreditDue(7)">7 días</button>
           <button class="btn btn-s" style="font-size:.72rem;padding:3px 8px" onclick="setCreditDue(15)">15 días</button>
           <button class="btn btn-s" style="font-size:.72rem;padding:3px 8px" onclick="setCreditDue(30)">30 días</button>
-          <button class="btn btn-s" style="font-size:.72rem;padding:3px 8px" onclick="setCreditDue(0)">Personalizado</button>
+          <button class="btn btn-s" style="font-size:.72rem;padding:3px 8px" id="credit-due-custom-btn" onclick="setCreditDue(0)">Personalizado</button>
         </div>
         <input type="date" class="fi" id="credit-due-date" style="font-size:.82rem">
       </div>
@@ -1584,8 +1584,8 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
       <div id="rp-temp-lbl" style="font-size:.7rem;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Contraseña temporal</div>
       <div id="rp-code" style="font-size:2.2rem;font-weight:800;letter-spacing:.2em;font-family:monospace;color:var(--ac)"></div>
     </div>
-    <div style="font-size:.74rem;color:var(--tx3);line-height:1.5;margin-bottom:18px">Anótala — no se mostrará otra vez.<br>El empleado deberá cambiarla al iniciar sesión.</div>
-    <button class="btn btn-p" onclick="closeOv('ov-reset-pass')" style="width:100%">Entendido ✓</button>
+    <div style="font-size:.74rem;color:var(--tx3);line-height:1.5;margin-bottom:18px" id="rp-note">Anótala — no se mostrará otra vez.<br>El empleado deberá cambiarla al iniciar sesión.</div>
+    <button class="btn btn-p" id="rp-ok-btn" onclick="closeOv('ov-reset-pass')" style="width:100%">Entendido ✓</button>
   </div>
 </div>
 
@@ -1645,8 +1645,8 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
     <input class="fi" type="password" id="bkp-modal-pass" placeholder="Contraseña de respaldo" autocomplete="current-password" onkeydown="if(event.key==='Enter')_submitBkpPass()">
     <div id="bkp-modal-err" style="color:#ef4444;font-size:.75rem;margin-top:6px;min-height:16px"></div>
     <div class="frow" style="margin-top:14px;gap:8px">
-      <button class="btn btn-s" onclick="closeOv('ov-bkp-pass');_bkpPending=null">Cancelar</button>
-      <button class="btn btn-p" onclick="_submitBkpPass()" style="flex:1">Confirmar</button>
+      <button class="btn btn-s" id="bkp-cancel-btn" onclick="closeOv('ov-bkp-pass');_bkpPending=null">Cancelar</button>
+      <button class="btn btn-p" id="bkp-confirm-btn" onclick="_submitBkpPass()" style="flex:1">Confirmar</button>
     </div>
   </div>
 </div>
@@ -1946,6 +1946,30 @@ const T = {
     sbDashMobile:'Dashboard Móvil',sbSell:'Vender',sbLabels:'Etiquetas',
     sbNote:'Nota de turno',sbUpdates:'Actualizaciones',sbConfig:'Configuración',
     sbLock:'Bloquear',roleAdmin:'Administrador',roleCashierShort:'Cajero',
+    // Dashboard KPIs
+    kpiVentasHoy:'Ventas hoy',kpiTx:'Transacciones',kpiTicket:'Ticket promedio',
+    dbSalesByPeriod:'Ventas por período',dbTop5Prods:'Top 5 productos',dbStockLight:'Semáforo de stock',
+    dbPeriodWeek:'Semana',dbPeriodMonth:'Mes',
+    // OA block
+    oaViewAccounts:'📖 Ver cuentas',oaForceClose:'🔑 Forzar cierre',
+    // Credit sale modal
+    creditTotalLbl:'Total a crédito',creditSelectLbl:'Seleccionar cliente registrado',
+    creditAddCustBtn:'Agregar nuevo cliente',ncNameLbl:'Nombre completo',creditConfirmBtn:'✓ Registrar crédito',
+    cpayTitle:'💵 Recibir Pago',
+    // Expenses
+    gstRegisterTitle:'Registrar Gasto',gstConceptLbl:'Concepto',gstAmountLbl:'Monto ($)',
+    gstCatLbl:'Categoría',gstNotesLbl:'Notas',gstSaveBtn:'💾 Registrar',gstListTitle:'Gastos',
+    gstCatOp:'Operativo',gstCatInv:'Inventario',gstCatSvc:'Servicios',
+    gstCatPayroll:'Nómina',gstCatMkt:'Marketing',gstCatOther:'Otro',
+    // Graf
+    grafTypeDay:'Ventas por día',grafTypeProd:'Ventas por producto',
+    grafTypeExpCat:'Gastos por categoría',grafTypeFlow:'Ingresos vs Gastos',
+    grafPeriod7:'7 días',grafPeriod30:'30 días',grafPeriod90:'90 días',
+    // Misc
+    thanksDefault:'¡Gracias por tu compra! 💕',resetPassOkBtn:'Entendido ✓',
+    hmAbonosMenu:'Abonos de crédito',
+    rpNote:'Anótala — no se mostrará otra vez. El empleado deberá cambiarla al iniciar sesión.',
+    bkpModalPassPh:'Contraseña de respaldo',bkpConfirmBtn:'Confirmar',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -2173,6 +2197,30 @@ const T = {
     sbDashMobile:'Mobile Dashboard',sbSell:'Sell',sbLabels:'Labels',
     sbNote:'Shift note',sbUpdates:'Updates',sbConfig:'Settings',
     sbLock:'Lock',roleAdmin:'Admin',roleCashierShort:'Cashier',
+    // Dashboard KPIs
+    kpiVentasHoy:'Today sales',kpiTx:'Transactions',kpiTicket:'Avg. ticket',
+    dbSalesByPeriod:'Sales by period',dbTop5Prods:'Top 5 products',dbStockLight:'Stock status',
+    dbPeriodWeek:'Week',dbPeriodMonth:'Month',
+    // OA block
+    oaViewAccounts:'📖 View accounts',oaForceClose:'🔑 Force close',
+    // Credit sale modal
+    creditTotalLbl:'Credit total',creditSelectLbl:'Select registered customer',
+    creditAddCustBtn:'Add new customer',ncNameLbl:'Full name',creditConfirmBtn:'✓ Register credit',
+    cpayTitle:'💵 Receive Payment',
+    // Expenses
+    gstRegisterTitle:'Register Expense',gstConceptLbl:'Concept',gstAmountLbl:'Amount ($)',
+    gstCatLbl:'Category',gstNotesLbl:'Notes',gstSaveBtn:'💾 Register',gstListTitle:'Expenses',
+    gstCatOp:'Operational',gstCatInv:'Inventory',gstCatSvc:'Services',
+    gstCatPayroll:'Payroll',gstCatMkt:'Marketing',gstCatOther:'Other',
+    // Graf
+    grafTypeDay:'Sales by day',grafTypeProd:'Sales by product',
+    grafTypeExpCat:'Expenses by category',grafTypeFlow:'Income vs Expenses',
+    grafPeriod7:'7 days',grafPeriod30:'30 days',grafPeriod90:'90 days',
+    // Misc
+    thanksDefault:'Thank you for your purchase! 💕',resetPassOkBtn:'Got it ✓',
+    hmAbonosMenu:'Credit payments',
+    rpNote:'Write it down — it will not be shown again. The employee must change it on next login.',
+    bkpModalPassPh:'Backup password',bkpConfirmBtn:'Confirm',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -2587,6 +2635,77 @@ function applyLang(){
   const _spcActiveLbl=el('spc-active-lbl');if(_spcActiveLbl)_spcActiveLbl.textContent=t('activeLbl');
   const _spcSaveBtn=el('spc-save-btn');if(_spcSaveBtn)_spcSaveBtn.textContent=t('spcSaveBtn');
   const _spcListTitle=el('spc-list-title');if(_spcListTitle)_spcListTitle.textContent=t('specialList');
+  // Dashboard KPIs
+  const _dbKpiVentas=el('db-kpi-lbl-ventas');if(_dbKpiVentas)_dbKpiVentas.textContent=t('kpiVentasHoy');
+  const _dbKpiTx=el('db-kpi-lbl-tx');if(_dbKpiTx)_dbKpiTx.textContent=t('kpiTx');
+  const _dbKpiCred=el('db-kpi-lbl-cred');if(_dbKpiCred)_dbKpiCred.textContent=t('pendingCredits');
+  const _dbKpiTicket=el('db-kpi-lbl-ticket');if(_dbKpiTicket)_dbKpiTicket.textContent=t('kpiTicket');
+  const _dbH4Period=el('db-h4-period');if(_dbH4Period)_dbH4Period.textContent=t('dbSalesByPeriod');
+  const _dbH4Top5=el('db-h4-top5');if(_dbH4Top5)_dbH4Top5.textContent=t('dbTop5Prods');
+  const _dbH4Stock=el('db-h4-stock');if(_dbH4Stock)_dbH4Stock.textContent=t('dbStockLight');
+  const _dbPeriodWeek=el('db-period-week');if(_dbPeriodWeek)_dbPeriodWeek.textContent=t('dbPeriodWeek');
+  const _dbPeriodMonth=el('db-period-month');if(_dbPeriodMonth)_dbPeriodMonth.textContent=t('dbPeriodMonth');
+  // OA block modal
+  const _oaBlockTitle=el('oa-block-title');if(_oaBlockTitle)_oaBlockTitle.textContent='⚠ '+t('openAccounts');
+  const _oaBlockViewBtn=el('oa-block-view-btn');if(_oaBlockViewBtn)_oaBlockViewBtn.textContent=t('oaViewAccounts');
+  const _oaBlockForceBtn=el('oa-block-force-btn');if(_oaBlockForceBtn)_oaBlockForceBtn.textContent=t('oaForceClose');
+  // Credit sale modal
+  const _creditSaleTitle=el('credit-sale-title');if(_creditSaleTitle)_creditSaleTitle.textContent='💰 '+t('creditSale');
+  const _creditTotalLbl=el('credit-total-lbl');if(_creditTotalLbl)_creditTotalLbl.textContent=t('creditTotalLbl');
+  const _creditSelectLbl=el('credit-select-lbl');if(_creditSelectLbl)_creditSelectLbl.textContent=t('creditSelectLbl');
+  const _creditAddCustTxt=el('credit-add-cust-btn-txt');if(_creditAddCustTxt)_creditAddCustTxt.textContent=t('creditAddCustBtn');
+  const _ncNameLbl=el('nc-name-lbl');if(_ncNameLbl)_ncNameLbl.innerHTML=t('ncNameLbl')+' <span style="color:var(--rd)">*</span>';
+  const _ncCedulaLbl=el('nc-cedula-lbl');if(_ncCedulaLbl)_ncCedulaLbl.innerHTML=t('cedula')+' <span style="color:var(--rd)">*</span>';
+  const _ncPhoneLbl=el('nc-phone-lbl');if(_ncPhoneLbl)_ncPhoneLbl.textContent=t('phoneLbl');
+  const _creditDueLbl=el('credit-due-lbl');if(_creditDueLbl)_creditDueLbl.textContent=t('creditDueDateLbl');
+  const _creditDueCustomBtn=el('credit-due-custom-btn');if(_creditDueCustomBtn)_creditDueCustomBtn.textContent=t('creditDueCustom');
+  const _creditConfirmBtn=el('credit-confirm-btn');if(_creditConfirmBtn)_creditConfirmBtn.textContent=t('creditConfirmBtn');
+  // Credits pending title / cpay title
+  const _creditsTitle=el('credits-title');if(_creditsTitle)_creditsTitle.textContent='💳 '+t('pendingCredits');
+  const _cpayTitle=el('cpay-title');if(_cpayTitle)_cpayTitle.textContent=t('cpayTitle');
+  // Credit filter buttons
+  const _credFPend=el('cred-f-pend');if(_credFPend)_credFPend.textContent=t('filterPending');
+  const _credFPaid=el('cred-f-paid');if(_credFPaid)_credFPaid.textContent=t('filterPaid');
+  const _credFAll=el('cred-f-all');if(_credFAll)_credFAll.textContent=t('filterAll');
+  // Logout force button
+  const _loForceBtn=el('lo-force-btn');if(_loForceBtn)_loForceBtn.textContent='⚠️ '+t('forceClose');
+  // Expenses form
+  const _gstRegTitle=el('gst-register-title');if(_gstRegTitle)_gstRegTitle.textContent=t('gstRegisterTitle');
+  const _gstConceptLbl=el('gst-concepto-lbl');if(_gstConceptLbl)_gstConceptLbl.textContent=t('gstConceptLbl');
+  const _gstMontoLbl=el('gst-monto-lbl');if(_gstMontoLbl)_gstMontoLbl.textContent=t('gstAmountLbl');
+  const _gstCatLbl=el('gst-cat-lbl');if(_gstCatLbl)_gstCatLbl.textContent=t('gstCatLbl');
+  const _gstNotesLbl=el('gst-notes-lbl');if(_gstNotesLbl)_gstNotesLbl.textContent=t('gstNotesLbl');
+  const _gstSaveBtn=el('gst-save-btn');if(_gstSaveBtn)_gstSaveBtn.textContent=t('gstSaveBtn');
+  const _gstListTitle=el('gst-list-title');if(_gstListTitle)_gstListTitle.textContent=t('gstListTitle');
+  const _gstCatOp=el('gst-cat-op');if(_gstCatOp)_gstCatOp.textContent=t('gstCatOp');
+  const _gstCatInv=el('gst-cat-inv');if(_gstCatInv)_gstCatInv.textContent=t('gstCatInv');
+  const _gstCatSvc=el('gst-cat-svc');if(_gstCatSvc)_gstCatSvc.textContent=t('gstCatSvc');
+  const _gstCatPayroll=el('gst-cat-payroll');if(_gstCatPayroll)_gstCatPayroll.textContent=t('gstCatPayroll');
+  const _gstCatMkt=el('gst-cat-mkt');if(_gstCatMkt)_gstCatMkt.textContent=t('gstCatMkt');
+  const _gstCatOther=el('gst-cat-other');if(_gstCatOther)_gstCatOther.textContent=t('gstCatOther');
+  // Graf type/period options
+  const _grafTypeDay=el('graf-type-day');if(_grafTypeDay)_grafTypeDay.textContent=t('grafTypeDay');
+  const _grafTypeProd=el('graf-type-prod');if(_grafTypeProd)_grafTypeProd.textContent=t('grafTypeProd');
+  const _grafTypeExpCat=el('graf-type-exp-cat');if(_grafTypeExpCat)_grafTypeExpCat.textContent=t('grafTypeExpCat');
+  const _grafTypeFlow=el('graf-type-flow');if(_grafTypeFlow)_grafTypeFlow.textContent=t('grafTypeFlow');
+  const _grafPer7=el('graf-period-7');if(_grafPer7)_grafPer7.textContent=t('grafPeriod7');
+  const _grafPer30=el('graf-period-30');if(_grafPer30)_grafPer30.textContent=t('grafPeriod30');
+  const _grafPer90=el('graf-period-90');if(_grafPer90)_grafPer90.textContent=t('grafPeriod90');
+  // Conta period options (update remaining 3)
+  const _ctPeriod=el('ct-period');
+  if(_ctPeriod){if(_ctPeriod.options[1])_ctPeriod.options[1].text=t('thisWeek');if(_ctPeriod.options[2])_ctPeriod.options[2].text=t('thisMonth');if(_ctPeriod.options[3])_ctPeriod.options[3].text=t('vntPeriodAll');}
+  // Reset pass modal
+  const _rpNote=el('rp-note');if(_rpNote)_rpNote.textContent=t('rpNote');
+  const _rpOkBtn=el('rp-ok-btn');if(_rpOkBtn)_rpOkBtn.textContent=t('resetPassOkBtn');
+  // Config biz-sub and thanks labels
+  const _cfgBizSubLbl=el('cfg-biz-sub-lbl');if(_cfgBizSubLbl)_cfgBizSubLbl.textContent=t('bizSubLbl');
+  const _cfgThanksLbl=el('cfg-thanks-lbl');if(_cfgThanksLbl)_cfgThanksLbl.textContent=t('thanksLbl');
+  // Hamburger abonos
+  const _hmAbonosTxt=el('hm-abonos-txt');if(_hmAbonosTxt)_hmAbonosTxt.textContent=t('hmAbonosMenu');
+  // Backup modal
+  const _bkpModalPass=el('bkp-modal-pass');if(_bkpModalPass)_bkpModalPass.placeholder=t('bkpModalPassPh');
+  const _bkpCancelBtn=el('bkp-cancel-btn');if(_bkpCancelBtn)_bkpCancelBtn.textContent=t('cancel');
+  const _bkpConfBtn=el('bkp-confirm-btn');if(_bkpConfBtn)_bkpConfBtn.textContent=t('bkpConfirmBtn');
   // Sidebar sections
   const _sbSecMain=el('sb-sec-main');if(_sbSecMain)_sbSecMain.textContent=t('sbSecMain');
   const _sbSecInv=el('sb-sec-inv');if(_sbSecInv)_sbSecInv.textContent=t('tabInv');
@@ -4952,7 +5071,7 @@ function deleteOA(id){
   el('r-logo').src=c.logo||LOGO;
   setEl('r-biz',c.bizName||'4K Negocio');
   setEl('r-sub',c.bizSub||'');
-  setEl('r-ty',c.thanks||'¡Gracias por tu compra! 💕');
+  setEl('r-ty',c.thanks||t('thanksDefault'));
   let contact='';
   if(c.phone)contact+='📞 '+c.phone+'  ';
   if(c.s1)contact+=c.s1+'  ';
