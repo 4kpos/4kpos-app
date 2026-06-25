@@ -1970,6 +1970,7 @@ const T = {
     hmAbonosMenu:'Abonos de crédito',
     rpNote:'Anótala — no se mostrará otra vez. El empleado deberá cambiarla al iniciar sesión.',
     bkpModalPassPh:'Contraseña de respaldo',bkpConfirmBtn:'Confirmar',
+    userFieldsRequired:'Todos los campos requeridos',userAlreadyExists:'Usuario ya existe',userNotFound:'Usuario no encontrado',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -2221,6 +2222,7 @@ const T = {
     hmAbonosMenu:'Credit payments',
     rpNote:'Write it down — it will not be shown again. The employee must change it on next login.',
     bkpModalPassPh:'Backup password',bkpConfirmBtn:'Confirm',
+    userFieldsRequired:'All fields required',userAlreadyExists:'Username already taken',userNotFound:'User not found',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -5378,41 +5380,19 @@ function printShiftReport(){
 
 // USERS
 function saveUser(){
-  const name=el('u-name').value.trim(),user=el('u-user').value.trim(),pass=el('u-pass').value,role=el('u-role').value;
-  if(!name||!user||!pass){toast('⚠ Todos los campos requeridos');return;}
-  ipcRenderer.invoke('get-license-info').then(function(info){
-    const planLimit=(info&&['pro','lifetime'].includes((info.plan||'').toLowerCase()))?10:3;
-    const cnt=db.users.filter(u=>u.id!=='1').length;
-    if(cnt>=planLimit-1){
-      el('ulimit-warn').style.display='block';
-      el('ulimit-warn').textContent='⚠ Límite de plan alcanzado ('+planLimit+' usuarios). Actualiza a Pro para agregar más.';
-      return;
-    }
-    if(db.users.find(u=>u.user===user)){toast('⚠ Usuario ya existe');return;}
-    const perms={adm:el('pm-adm').checked,ret:el('pm-ret').checked,can:el('pm-can').checked,sal:el('pm-sal').checked,conta:el('pm-conta').checked,fac:el('pm-fac').checked,gst:el('pm-gst').checked,contaFull:el('pm-contaFull').checked};
-    db.users.push({id:Date.now().toString(),name,user,pass,role,perms});
-   saveDB();renderUserList();renderLoginUsers();clearUser();
-  }).catch(function(){
-    if(db.users.find(u=>u.user===user)){toast('⚠ Usuario ya existe');return;}
-    const perms={adm:el('pm-adm').checked,ret:el('pm-ret').checked,can:el('pm-can').checked,sal:el('pm-sal').checked,conta:el('pm-conta').checked,fac:el('pm-fac').checked,gst:el('pm-gst').checked,contaFull:el('pm-contaFull').checked};
-    db.users.push({id:Date.now().toString(),name,user,pass,role,perms});
-   saveDB();renderUserList();renderLoginUsers();clearUser();
-  });
-}
-function saveUser(){
   const name=el('u-name').value.trim(),
         user=el('u-user').value.trim(),
         pass=el('u-pass').value,
         role=el('u-role').value.trim();
 
   if(!name||!user||(!editingUserId&&!pass)||!role){
-    toast('⚠ Todos los campos requeridos');
+    toast('⚠ '+t('userFieldsRequired'));
     return;
   }
 
   const duplicate=db.users.find(u=>u.user===user && u.id!==editingUserId);
   if(duplicate){
-    toast('⚠ Usuario ya existe');
+    toast('⚠ '+t('userAlreadyExists'));
     return;
   }
 
@@ -5430,7 +5410,7 @@ function saveUser(){
   if(editingUserId){
     const u=db.users.find(x=>x.id===editingUserId);
     if(!u){
-      toast('⚠ Usuario no encontrado');
+      toast('⚠ '+t('userNotFound'));
       return;
     }
 
@@ -5441,6 +5421,10 @@ function saveUser(){
     u.perms=perms;
 
     logAction('Usuario editado',name+' ('+role+')');
+    saveDB();
+    renderUserList();
+    renderLoginUsers();
+    clearUser();
     toast('✓ Usuario actualizado: '+name);
   }else{
     ipcRenderer.invoke('get-license-info').then(function(info){
@@ -5465,6 +5449,7 @@ function saveUser(){
       logAction('Usuario creado',name+' ('+role+')');
       saveDB();
       renderUserList();
+      renderLoginUsers();
       clearUser();
       toast('✓ Usuario: '+name);
     }).catch(function(){
@@ -5480,16 +5465,13 @@ function saveUser(){
       logAction('Usuario creado',name+' ('+role+')');
       saveDB();
       renderUserList();
+      renderLoginUsers();
       clearUser();
       toast('✓ Usuario: '+name);
     });
 
     return;
   }
-
-  saveDB();
-  renderUserList();
-  clearUser();
 }
   function editUser(id){
   const u=db.users.find(x=>x.id===id);
@@ -6658,7 +6640,7 @@ function renderComboList(){
   list.innerHTML=combos.map(function(c){
     const itemNames=(c.items||[]).map(function(ci){const p=db.products.find(function(x){return x.id===ci.productId;});return (p?p.name:'?')+(ci.qty>1?' \xd7'+ci.qty:'');}).join(', ');
     return '<div class="pli"><div class="pli-info"><div class="pli-name">🍱 '+c.name+'</div><div class="pli-meta">'+dolr(c.price)+' \xb7 '+itemNames+'</div></div>'+
-      '<div style="display:flex;align-items:center;gap:4px"><span style="font-size:.72rem;color:'+(c.active?'var(--gn)':'var(--tx3)')+';font-weight:700">'+(c.active?'● Activo':'○ Inactivo')+'</span>'+
+      '<div style="display:flex;align-items:center;gap:4px"><span style="font-size:.72rem;color:'+(c.active?'var(--gn)':'var(--tx3)')+';font-weight:700">'+(c.active?t('specialActiveStatus'):t('specialInactiveStatus'))+'</span>'+
       '<button class="eb" onclick="toggleCombo(\''+c.id+'\')">⏯</button>'+
       '<button class="eb" onclick="editCombo(\''+c.id+'\')">✏</button>'+
       '<button class="xb" onclick="deleteCombo(\''+c.id+'\')">✕</button></div></div>';
