@@ -6224,10 +6224,7 @@ function closeNotifPanel(){
 }
 
 function _notifClick(id){
-  const n=_notifs.find(function(x){return x.id===id;});
-  if(n&&!n.read){n.read=true;}
-  _updateNotifBadge();
-  openNotifPanel();
+  _notifDismiss(id);
 }
 
 function _notifDismiss(id){
