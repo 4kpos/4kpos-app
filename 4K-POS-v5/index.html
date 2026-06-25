@@ -1665,7 +1665,7 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
 <div class="toast" id="toast"></div>
 <div id="notif-backdrop" onclick="closeNotifPanel()"></div>
 <div id="notif-panel">
-  <div id="notif-panel-hdr"><span id="notif-panel-title">🔔 Notificaciones</span><button id="notif-mark-read-btn" onclick="markAllNotifsRead()" style="background:none;border:none;cursor:pointer;font-size:.72rem;color:var(--ac);font-weight:600;padding:2px 6px">Marcar leídas</button></div>
+  <div id="notif-panel-hdr"><span id="notif-panel-title">🔔 Notificaciones</span><button id="notif-mark-read-btn" onclick="event.stopPropagation();markAllNotifsRead()" style="background:none;border:none;cursor:pointer;font-size:.72rem;color:var(--ac);font-weight:600;padding:2px 6px">Marcar leídas</button></div>
   <div id="notif-list"></div>
 </div>
 <div id="parea"></div>
@@ -6111,12 +6111,13 @@ function _saveNotifDismissed(ids){
 
 function calcNotifs(){
   const now=new Date();now.setHours(0,0,0,0);
-  // Merge in-memory read state + persisted dismissed IDs
   const dismissed=_getNotifDismissed();
-  const readIds=new Set([...dismissed,..._notifs.filter(function(n){return n.read;}).map(function(n){return n.id;})]);
-  const fresh=[];
+  // readIds: solo estado de lectura en memoria (NO incluye dismissed para no confundir)
+  const readIds=new Set(_notifs.filter(function(n){return n.read;}).map(function(n){return n.id;}));
+  const all=[];   // todas las condiciones activas (para referencia de cleanup)
+  const fresh=[]; // solo las no descartadas → van a _notifs
 
-  // Overdue & due-soon credits
+  // Créditos vencidos y próximos a vencer
   (db.sales||[]).forEach(function(s){
     if(s.payMethod!=='credit'||(s.creditStatus||'pending')==='paid')return;
     if(!s.creditDueDate)return;
@@ -6126,30 +6127,36 @@ function calcNotifs(){
     const owed=s.total-(s.creditPaid||0);
     if(diff<0){
       const id='ovrd-'+s.id;
-      fresh.push({id,type:'overdue',color:'#ef4444',read:readIds.has(id),
-        msg:client+' — '+dolr(owed)+' '+t('notifOverdueBy')+' '+Math.abs(diff)+'d'});
+      const n={id,type:'overdue',color:'#ef4444',read:readIds.has(id),
+        msg:client+' — '+dolr(owed)+' '+t('notifOverdueBy')+' '+Math.abs(diff)+'d'};
+      all.push(n);
+      if(!dismissed.has(id))fresh.push(n);
     }else if(diff<=3){
       const id='soon-'+s.id;
-      fresh.push({id,type:'due_soon',color:'#f59e0b',read:readIds.has(id),
-        msg:client+' — '+dolr(owed)+' '+t('notifDueIn')+' '+diff+(diff===1?'d':' '+t('notifDays'))});
+      const n={id,type:'due_soon',color:'#f59e0b',read:readIds.has(id),
+        msg:client+' — '+dolr(owed)+' '+t('notifDueIn')+' '+diff+(diff===1?'d':' '+t('notifDays'))};
+      all.push(n);
+      if(!dismissed.has(id))fresh.push(n);
     }
   });
 
-  // Low stock — per-product minStock overrides global threshold
+  // Stock bajo — minStock por producto sobrescribe umbral global
   const _globalThr=(db.settings&&db.settings.lowStockThreshold!=null)?db.settings.lowStockThreshold:5;
   (db.products||[]).forEach(function(p){
     const _pMin=p.minStock!=null?p.minStock:_globalThr;
     if((p.stock||0)<=_pMin){
       const id='stock-'+p.id;
-      fresh.push({id,type:'low_stock',color:'#f97316',read:readIds.has(id),
-        msg:p.name+' — '+(p.stock||0)+' '+t('notifUnitsMin')+' '+_pMin+')'});
+      const n={id,type:'low_stock',color:'#f97316',read:readIds.has(id),
+        msg:p.name+' — '+(p.stock||0)+' '+t('notifUnitsMin')+' '+_pMin+')'};
+      all.push(n);
+      if(!dismissed.has(id))fresh.push(n);
     }
   });
 
   _notifs=fresh;
-  // Remove stale dismissed IDs (credit paid → no longer active → auto-clears)
-  const activeIds=new Set(fresh.map(function(n){return n.id;}));
-  _saveNotifDismissed(new Set([...dismissed].filter(function(id){return activeIds.has(id);})));
+  // Limpiar IDs descartados cuya condición ya no existe (crédito pagado, stock repuesto)
+  const allIds=new Set(all.map(function(n){return n.id;}));
+  _saveNotifDismissed(new Set([...dismissed].filter(function(id){return allIds.has(id);})));
   _updateNotifBadge();
 }
 
@@ -6233,7 +6240,7 @@ function markAllNotifsRead(){
   _saveNotifDismissed(d);
   _notifs=[];
   _updateNotifBadge();
-  openNotifPanel();
+  closeNotifPanel();
 }
 
 function _startNotifTimer(){
