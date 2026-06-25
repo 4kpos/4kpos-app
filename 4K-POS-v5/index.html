@@ -6144,10 +6144,13 @@ function calcNotifs(){
   const _globalThr=(db.settings&&db.settings.lowStockThreshold!=null)?db.settings.lowStockThreshold:5;
   (db.products||[]).forEach(function(p){
     const _pMin=p.minStock!=null?p.minStock:_globalThr;
-    if((p.stock||0)<=_pMin){
+    const _stk=p.stock||0;
+    if(_stk<=_pMin){
       const id='stock-'+p.id;
-      const n={id,type:'low_stock',color:'#f97316',read:readIds.has(id),
-        msg:p.name+' — '+(p.stock||0)+' '+t('notifUnitsMin')+' '+_pMin+')'};
+      // Semáforo: rojo si stock=0, amarillo si stock>0 pero bajo
+      const stkColor=_stk===0?'#ef4444':'#fbbf24';
+      const n={id,type:'low_stock',color:stkColor,read:readIds.has(id),
+        msg:p.name+' — '+_stk+' '+t('notifUnitsMin')+' '+_pMin+')'};
       all.push(n);
       if(!dismissed.has(id))fresh.push(n);
     }
@@ -6191,7 +6194,7 @@ function toggleNotifPanel(){
 
 function openNotifPanel(){
   calcNotifs();
-  const icons={overdue:'🔴',due_soon:'🟡',low_stock:'🟠',update:'🔵'};
+  const icons={overdue:'🔴',due_soon:'🟡',update:'🔵'};
   const labels={overdue:t('notifLabelOverdue'),due_soon:t('notifLabelDueSoon'),low_stock:t('notifLabelLowStock'),update:t('notifLabelUpdate')};
   const list=el('notif-list');
   if(!list)return;
@@ -6200,7 +6203,7 @@ function openNotifPanel(){
   }else{
     list.innerHTML=_notifs.map(function(n){
       return '<div class="notif-row'+(n.read?' read':'')+'" onclick="_notifClick(\''+n.id+'\')">'
-        +'<span style="font-size:1rem;flex-shrink:0;margin-top:1px">'+(icons[n.type]||'🔵')+'</span>'
+        +'<span style="font-size:1rem;flex-shrink:0;margin-top:1px">'+(n.type==='low_stock'?(n.color==='#ef4444'?'🔴':'🟡'):(icons[n.type]||'🔵'))+'</span>'
         +'<div style="flex:1;min-width:0">'
           +'<div style="font-size:.68rem;font-weight:700;color:'+n.color+';text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px">'+(labels[n.type]||n.type)+'</div>'
           +'<div style="font-size:.82rem;color:var(--tx2)">'+n.msg+'</div>'
