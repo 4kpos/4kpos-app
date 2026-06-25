@@ -384,6 +384,19 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
 /* ── INVENTORY VIEW TOGGLE ───────────────────────────────── */
 .inv-view-btn{padding:4px 10px;font-size:.73rem;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx3);cursor:pointer;font-weight:600;display:flex;align-items:center;gap:4px;}
 .inv-view-btn.on{background:var(--acg);border-color:var(--ac);color:var(--ac);}
+/* Inventory toolbar */
+.inv-tb-btn{padding:5px 11px;font-size:.76rem;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx);cursor:pointer;font-weight:600;white-space:nowrap;transition:border-color .15s,color .15s;}
+.inv-tb-btn:hover:not(:disabled){border-color:var(--ac);color:var(--ac);}
+.inv-tb-btn:disabled{opacity:.38;cursor:not-allowed;}
+.inv-tb-btn.inv-tb-new{border-color:var(--ac);color:var(--ac);}
+.inv-tb-btn.inv-tb-danger:not(:disabled):hover{border-color:var(--rd);color:var(--rd);}
+/* Inventory table */
+.inv-tbl{width:100%;border-collapse:collapse;font-size:.82rem;}
+.inv-tbl th{padding:7px 6px;text-align:left;border-bottom:2px solid var(--b2);color:var(--tx3);font-weight:700;white-space:nowrap;}
+.inv-tbl td{padding:6px 6px;border-bottom:1px solid var(--b1);color:var(--tx);white-space:nowrap;}
+.inv-tbl tbody tr:nth-child(even) td{background:rgba(255,255,255,.025);}
+.inv-tbl tbody tr[data-pid]:hover td{background:rgba(99,102,241,.08);cursor:pointer;}
+.inv-tbl tbody tr[data-pid].inv-row-sel td{background:rgba(99,102,241,.16)!important;border-bottom-color:rgba(99,102,241,.28);}
 </style>
 </head>
 <body>
@@ -921,19 +934,26 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
       </div>
       <!-- INVENTORY -->
       <div id="t-inv" style="display:none">
-        <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center">
-          <input type="text" class="sinp" id="inv-srch" placeholder="🔍 Nombre o código de barras..." oninput="renderInv()">
-          <button class="btn btn-g" onclick="exportCSV()" id="inv-export-csv-btn">📥 CSV</button>
+        <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;align-items:center">
+          <input type="text" class="sinp" id="inv-srch" placeholder="🔍 Nombre o código de barras..." oninput="renderInv()" style="flex:1;min-width:160px">
           <button class="btn btn-p" onclick="openInvCount()" id="inv-count-btn">📋 Contar</button>
-          <button class="btn btn-s" onclick="openLabelModal(null)" id="inv-lbl-btn">🏷️ Etiquetas</button>
           <button class="btn btn-s" id="inv-lbl-sel-btn" style="display:none" onclick="printSelectedLabels()">🖨️ Seleccionados: <span id="inv-sel-cnt">0</span></button>
           <div style="display:flex;gap:4px;margin-left:auto">
             <button class="inv-view-btn on" id="inv-view-table" onclick="setInvView('table',this)" title="Vista tabla"><i class="ti ti-list"></i> Tabla</button>
-            <button class="inv-view-btn" id="inv-view-grid" onclick="setInvView('grid',this)" title="Vista cuadrícula"><i class="ti ti-grid-dots"></i> Grid</button>
+            <button class="inv-view-btn" id="inv-view-grid" onclick="setInvView('grid',this)" title="Vista tarjetas"><i class="ti ti-grid-dots"></i> Tarjetas</button>
           </div>
+        </div>
+        <div id="inv-table-toolbar" style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;align-items:center">
+          <button class="inv-tb-btn inv-tb-new" onclick="admTab('t-prods',document.querySelector('#adm-tabs .btn'))">➕ Nuevo</button>
+          <button class="inv-tb-btn" id="inv-tb-edit" disabled onclick="_invEditSel()">✏️ Editar</button>
+          <button class="inv-tb-btn inv-tb-danger" id="inv-tb-del" disabled onclick="_invDelSel()">🗑️ Eliminar</button>
+          <button class="inv-tb-btn" id="inv-tb-lbl" disabled onclick="_invLblSel()">🏷️ Etiqueta</button>
+          <button class="inv-tb-btn" onclick="exportCSV()">📥 CSV</button>
+          <button class="btn btn-s" onclick="openLabelModal(null)" id="inv-lbl-btn" style="margin-left:auto">🏷️ Etiquetas múltiples</button>
         </div>
         <div id="inv-cat-chips" style="display:flex;gap:6px;overflow-x:auto;flex-wrap:wrap;margin-bottom:6px"></div>
         <div id="inv-list"></div>
+        <div id="inv-table-footer" style="display:none;padding:8px 4px;font-size:.8rem;color:var(--tx2);border-top:1px solid var(--b1);margin-top:4px"></div>
       </div>
       <!-- CUSTOMERS -->
       <div id="t-cust" style="display:none">
@@ -3299,7 +3319,8 @@ function delProd(id){
     confirm2('¿Eliminar producto '+_dp.name+'?',function(){
       db.products=db.products.filter(x=>x.id!==id);cart=cart.filter(x=>x.id!==id);
       logAction('Producto eliminado',_dp.name+((_dp.bc)?' · #'+_dp.bc:'')+' · '+dolr(_dp.price||0));
-      saveDB();renderProdList();renderProds();renderCart();calcNotifs();
+      if(_invSelRow===id)_invSelRow=null;
+      saveDB();renderProdList();renderProds();renderCart();calcNotifs();renderInv();
     });
   };
   if((_dp.stock||0)>0){
@@ -3358,7 +3379,6 @@ function renderProds(){
 function setInvCat(id){invCatFilter=id;renderInv();}
 function renderInv(){
   const q=(el('inv-srch').value||'').toLowerCase();
-  // Render category chips
   const chips=el('inv-cat-chips');
   if(chips){
     const cats=db.categories||[];
@@ -3372,8 +3392,6 @@ function renderInv(){
     return p.name.toLowerCase().includes(q)||(p.bc||'').toLowerCase().includes(q);
   });
   const isAdm=curUser&&curUser.role==='admin';
-  const costCol=isAdm?('<th style="text-align:right;padding:6px 4px">'+t('fldCostPrice')+'</th>'):'';
-  const priceCol=isAdm?('<th style="text-align:right;padding:6px 4px">'+t('fldPrice')+'</th>'):'';
   var cntRed=0,cntYel=0,cntGrn=0;
   list.forEach(function(p){var s=p.stock||0;var m=p.minStock||5;if(s<=0)cntRed++;else if(s<=m)cntYel++;else cntGrn++;});
   var badges='<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">'
@@ -3381,44 +3399,70 @@ function renderInv(){
     +'<span style="display:inline-flex;align-items:center;gap:5px;background:#F59E0B20;color:#F59E0B;padding:4px 11px;border-radius:20px;font-size:.78rem;font-weight:700;border:1px solid #F59E0B40">🟡 Stock bajo: '+cntYel+'</span>'
     +'<span style="display:inline-flex;align-items:center;gap:5px;background:#22C55E20;color:#22C55E;padding:4px 11px;border-radius:20px;font-size:.78rem;font-weight:700;border:1px solid #22C55E40">🟢 Ok: '+cntGrn+'</span>'
     +'</div>';
-  el('inv-list').innerHTML=badges+'<table style="width:100%;border-collapse:collapse;font-size:.83rem">'
-    +'<tr style="border-bottom:2px solid var(--b2);color:var(--tx3)">'
-    +'<th style="padding:6px 4px"><input type="checkbox" class="inv-chk" id="inv-chk-all" onchange="invToggleAll(this)" title="Seleccionar todos"></th>'
-    +'<th style="text-align:left;padding:6px 4px">'+t('product')+'</th>'
-    +'<th style="text-align:left;padding:6px 4px;font-size:.75rem">Código</th>'
-    +costCol+priceCol
-    +'<th style="text-align:right;padding:6px 4px">'+t('stock')+'</th>'
-    +'<th style="text-align:right;padding:6px 4px">'+t('invValue')+'</th><th></th></tr>'
-    +list.map(function(p){
-      var stk=p.stock||0;var min=p.minStock||5;
-      var isZero=stk<=0;var isLow=!isZero&&stk<=min;
-      var rowBg=isZero?'background:rgba(239,68,68,.08)':isLow?'background:rgba(245,158,11,.08)':'background:rgba(34,197,94,.04)';
-      var stkClr=isZero?'#EF4444':isLow?'#F59E0B':'#22C55E';
-      const costTd=isAdm?('<td style="padding:7px 4px;text-align:right;font-family:monospace;color:var(--tx2)">'+(p.cost?dolr(p.cost):'—')+'</td><td style="padding:7px 4px;text-align:right;font-family:monospace;color:var(--gn)">'+dolr(p.price)+'</td>'):'';
-      const chk=_invSel.has(p.id)?'checked':'';
-      return '<tr style="border-bottom:1px solid var(--b1);'+rowBg+'">'
-        +'<td style="padding:7px 4px"><input type="checkbox" class="inv-chk" '+chk+' onchange="invToggleSel(\''+p.id+'\')"></td>'
-        +'<td style="padding:7px 4px;font-weight:600;color:var(--tx)">'+p.name+'</td>'
-        +'<td style="padding:7px 4px;font-family:monospace;font-size:.75rem;color:var(--tx3)">'+(p.bc||'—')+'</td>'
-        +costTd
-        +'<td style="padding:7px 4px;text-align:right;font-weight:700;color:'+stkClr+'">'+stk+'</td>'
-        +'<td style="padding:7px 4px;text-align:right;font-family:monospace;color:var(--tx2)">'+dolr(p.price*stk)+'</td>'
-        +'<td style="padding:7px 4px;display:flex;gap:4px"><button class="eb" onclick="editProd(\''+p.id+'\')">✏</button><button class="eb" onclick="qkStockModal(\''+p.id+'\')">📦</button><button class="eb" onclick="openLabelModal(\''+p.id+'\')" title="Etiqueta">🏷️</button></td></tr>';
-    }).join('')+'</table>';
-  if(typeof _invView!=='undefined'&&_invView==='grid'){
+  // sync toggle button visual state + toolbar visibility
+  var _tblBtn=el('inv-view-table'),_grdBtn=el('inv-view-grid');
+  if(_tblBtn)_tblBtn.classList.toggle('on',_invView==='table');
+  if(_grdBtn)_grdBtn.classList.toggle('on',_invView==='grid');
+  var _tb=el('inv-table-toolbar');if(_tb)_tb.style.display=_invView==='table'?'flex':'none';
+  var ftEl=el('inv-table-footer');
+  // guard: clear selection if selected row no longer in list
+  if(_invSelRow&&!list.find(function(p){return p.id===_invSelRow;})){
+    _invSelRow=null;
+    ['inv-tb-edit','inv-tb-del','inv-tb-lbl'].forEach(function(bid){var b=el(bid);if(b)b.disabled=true;});
+  }
+  if(_invView==='grid'){
     el('inv-list').innerHTML='<div style="display:flex;flex-wrap:wrap;gap:8px;padding:4px 0">'
       +list.map(function(p){
         var stk=p.stock||0;var min=p.minStock||5;
         var clr=stk<=0?'#EF4444':(stk<=min?'#F59E0B':'#22C55E');
         var catName=((db.categories||[]).find(function(c){return c.id===p.cat;})||{name:'—'}).name;
         return '<div style="background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--rs);padding:10px;width:158px;cursor:pointer;flex-shrink:0" onclick="editProd(\''+p.id+'\')">'
-          +'<div style="font-weight:700;font-size:.8rem;color:var(--tx);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+p.name+'">'+p.name+'</div>'
-          +'<div style="font-size:.68rem;color:var(--tx3);margin-bottom:6px">'+catName+'</div>'
+          +'<div style="font-weight:700;font-size:.8rem;color:var(--tx);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+_htmlEsc(p.name)+'">'+_htmlEsc(p.name)+'</div>'
+          +'<div style="font-size:.68rem;color:var(--tx3);margin-bottom:6px">'+_htmlEsc(catName)+'</div>'
           +'<div style="display:flex;justify-content:space-between;align-items:center">'
           +'<span style="font-family:monospace;font-weight:800;font-size:.85rem;color:var(--gn)">'+dolr(p.price)+'</span>'
           +'<span style="font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:4px;background:'+clr+'22;color:'+clr+'">'+stk+'</span>'
           +'</div></div>';
       }).join('')+'</div>';
+    if(ftEl)ftEl.style.display='none';
+    _updateInvSelUI();return;
+  }
+  // TABLE VIEW
+  const cats=db.categories||[];
+  const costTh=isAdm?'<th style="text-align:right">Costo</th>':'';
+  const rows=list.map(function(p,i){
+    var stk=p.stock||0;var min=p.minStock||5;
+    var isZero=stk<=0;var isLow=!isZero&&stk<=min;
+    var stkClr=isZero?'#EF4444':isLow?'#F59E0B':'#22C55E';
+    var catName=((cats).find(function(c){return c.id===p.cat;})||{name:'—'}).name;
+    var active=p.active!==false;
+    var costTd=isAdm?('<td style="text-align:right;font-family:monospace;color:var(--tx2)">'+(p.cost?dolr(p.cost):'—')+'</td>'):'';
+    var selCls=_invSelRow===p.id?' class="inv-row-sel"':'';
+    return'<tr data-pid="'+p.id+'"'+selCls+' onclick="_invSelectRow(\''+p.id+'\')" ondblclick="editProd(\''+p.id+'\')">'
+      +'<td style="color:var(--tx3);font-size:.74rem">'+(i+1)+'</td>'
+      +'<td style="font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis" title="'+_htmlEsc(p.name)+'">'+_htmlEsc(p.name)+'</td>'
+      +'<td style="font-size:.76rem;color:var(--tx2)">'+_htmlEsc(catName)+'</td>'
+      +'<td style="font-family:monospace;font-size:.75rem;color:var(--tx3)">'+(p.bc||'—')+'</td>'
+      +'<td style="text-align:right;font-weight:700"><span style="display:inline-flex;align-items:center;gap:5px;justify-content:flex-end">'
+        +'<span style="width:7px;height:7px;border-radius:50%;background:'+stkClr+';flex-shrink:0;display:inline-block"></span>'+stk+'</span></td>'
+      +costTd
+      +'<td style="text-align:right;font-family:monospace;color:var(--gn)">'+dolr(p.price)+'</td>'
+      +'<td style="text-align:center">'+(active?'<span style="color:#22C55E;font-weight:700">✓</span>':'<span style="color:#EF4444;font-weight:700">✗</span>')+'</td>'
+      +'</tr>';
+  }).join('');
+  el('inv-list').innerHTML=badges
+    +'<div style="overflow-x:auto"><table class="inv-tbl"><thead><tr>'
+    +'<th style="width:32px">#</th><th>Nombre</th><th>Categoría</th><th>Cód. barras</th>'
+    +'<th style="text-align:right">Stock</th>'+costTh
+    +'<th style="text-align:right">Precio</th><th style="text-align:center">Activo</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  if(ftEl){
+    var totCost=0,totVal=0;
+    list.forEach(function(p){totCost+=(p.cost||0)*(p.stock||0);totVal+=(p.price||0)*(p.stock||0);});
+    ftEl.style.display='';
+    ftEl.innerHTML=list.length+' producto'+(list.length!==1?'s':'')
+      +(isAdm?' &nbsp;·&nbsp; Costo total: <strong>'+dolr(totCost)+'</strong>':'')
+      +' &nbsp;·&nbsp; Valor en venta: <strong>'+dolr(totVal)+'</strong>';
   }
   _updateInvSelUI();
 }
@@ -6956,13 +7000,26 @@ function _renderDbStock(){
 }
 
 // ── INVENTORY VIEW TOGGLE ─────────────────────────────────────────────────────
-var _invView='table';
+var _invView=(function(){try{return localStorage.getItem('invView')||'table';}catch(e){return'table';}}());
+var _invSelRow=null;
 function setInvView(v,btn){
   _invView=v;
+  try{localStorage.setItem('invView',v);}catch(e){}
   document.querySelectorAll('.inv-view-btn').forEach(function(b){b.classList.remove('on');});
   if(btn)btn.classList.add('on');
   renderInv();
 }
+function _invSelectRow(id){
+  _invSelRow=id;
+  document.querySelectorAll('.inv-tbl tr[data-pid]').forEach(function(tr){
+    if(tr.dataset.pid===id)tr.classList.add('inv-row-sel');
+    else tr.classList.remove('inv-row-sel');
+  });
+  ['inv-tb-edit','inv-tb-del','inv-tb-lbl'].forEach(function(bid){var b=el(bid);if(b)b.disabled=!id;});
+}
+function _invEditSel(){if(_invSelRow)editProd(_invSelRow);}
+function _invDelSel(){if(_invSelRow)delProd(_invSelRow);}
+function _invLblSel(){if(_invSelRow)openLabelModal(_invSelRow);}
 </script>
 </body>
 </html>
