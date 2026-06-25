@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog, Notification } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const os = require('os')
@@ -57,6 +57,14 @@ try {
   autoUpdater.on('update-available', (i) => {
     logUpdate('Update available: current=' + app.getVersion() + ' → latest=' + (i && i.version))
     if (mainWindow) mainWindow.webContents.send('update-status', 'downloading')
+    try {
+      if (Notification.isSupported()) {
+        new Notification({
+          title: '4K POS — Actualización disponible',
+          body: 'Versión ' + ((i && i.version) || '') + ' disponible. Descargando en segundo plano...'
+        }).show()
+      }
+    } catch(ne) { logUpdate('Notification error: ' + ne.message) }
   })
   autoUpdater.on('update-not-available', (i) => {
     logUpdate('No update: current=' + app.getVersion() + ' latest.yml=' + (i && i.version))
@@ -66,10 +74,26 @@ try {
   autoUpdater.on('update-downloaded', (i) => {
     logUpdate('Downloaded: ' + (i && i.version) + ' · will install on quit')
     if (mainWindow) mainWindow.webContents.send('update-status', 'ready')
+    const _mw = mainWindow
+    if (_mw && !_mw.isDestroyed()) {
+      dialog.showMessageBox(_mw, {
+        type: 'info',
+        title: 'Actualización lista — 4K POS',
+        message: 'Nueva versión ' + ((i && i.version) || '') + ' descargada',
+        detail: 'Se instalará al cerrar el programa, o puedes reiniciar ahora para aplicarla.',
+        buttons: ['Reiniciar ahora', 'Más tarde'],
+        defaultId: 0,
+        cancelId: 1
+      }).then(result => {
+        if (result.response === 0) {
+          try { autoUpdater.quitAndInstall() } catch(e) { app.relaunch(); app.exit(0) }
+        }
+      }).catch(() => {})
+    }
   })
   autoUpdater.on('error', (e) => { logUpdate('Error: ' + e.message); if (mainWindow) mainWindow.webContents.send('update-status', 'error') })
   ipcMain.on('check-updates', () => { logUpdate('Manual check triggered'); autoUpdater.checkForUpdates() })
-  setTimeout(() => { logUpdate('Auto check starting'); autoUpdater.checkForUpdates() }, 10000)
+  setTimeout(() => { logUpdate('Auto check starting'); try { autoUpdater.checkForUpdates() } catch(e) { logUpdate('Auto check error: ' + e.message) } }, 10000)
 } catch(e) {
   logUpdate('FAILED to load electron-updater: ' + e.message)
 }
@@ -126,9 +150,23 @@ function createWindow() {
 
   mainWindow = win
 
-  win.loadFile('index.html')
+  win.loadFile(path.join(__dirname, 'index.html'))
   if (isDev) win.webContents.openDevTools()
-  win.once('ready-to-show', () => win.show())
+
+  // Show window on first paint; fallback after 5s in case ready-to-show never fires
+  let _shown = false
+  function _showMain() { if (!_shown) { _shown = true; win.show() } }
+  win.once('ready-to-show', _showMain)
+  setTimeout(_showMain, 5000)
+
+  // Auto-retry on load failure (e.g. first-launch file system race)
+  win.webContents.on('did-fail-load', (evt, code, desc, url, isMain) => {
+    if (isMain) {
+      logUpdate('did-fail-load ' + code + ': ' + desc)
+      setTimeout(() => { if (!win.isDestroyed()) win.loadFile(path.join(__dirname, 'index.html')) }, 1500)
+    }
+  })
+
   win.setMenuBarVisibility(false)
 
   if (!isDev) win.webContents.on('devtools-opened', () => { win.webContents.closeDevTools() })
