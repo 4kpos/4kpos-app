@@ -944,7 +944,7 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
           </div>
         </div>
         <div id="inv-table-toolbar" style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;align-items:center">
-          <button class="inv-tb-btn inv-tb-new" onclick="admTab('t-prods',document.querySelector('#adm-tabs .btn'))">➕ Nuevo</button>
+          <button class="inv-tb-btn inv-tb-new" id="inv-tb-new-btn" onclick="admTab('t-prods',document.querySelector('#adm-tabs .btn'))">➕ Nuevo</button>
           <button class="inv-tb-btn" id="inv-tb-edit" disabled onclick="_invEditSel()">✏️ Editar</button>
           <button class="inv-tb-btn inv-tb-danger" id="inv-tb-del" disabled onclick="_invDelSel()">🗑️ Eliminar</button>
           <button class="inv-tb-btn" id="inv-tb-lbl" disabled onclick="_invLblSel()">🏷️ Etiqueta</button>
@@ -981,14 +981,14 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
       <div id="t-combos" style="display:none">
         <input type="hidden" id="cmb-eid">
         <div class="slbl" id="cmb-form-title">Nuevo Combo</div>
-        <div class="fg" style="margin-bottom:8px"><label class="lbl">Nombre</label><input type="text" class="fi" id="cmb-name" placeholder="Ej: Combo Familiar"></div>
-        <div class="fg" style="margin-bottom:8px"><label class="lbl">Descripción</label><input type="text" class="fi" id="cmb-desc" placeholder="Descripción opcional"></div>
-        <div class="fg" style="margin-bottom:8px"><label class="lbl">Precio especial ($)</label><input type="number" class="fi" id="cmb-price" min="0" step="0.01" placeholder="0.00" oninput="_updateCmbCostTotal()"></div>
-        <div class="slbl" style="font-size:.78rem;margin-top:4px">Productos incluidos</div>
+        <div class="fg" style="margin-bottom:8px"><label class="lbl" id="cmb-name-lbl">Nombre</label><input type="text" class="fi" id="cmb-name" placeholder="Ej: Combo Familiar"></div>
+        <div class="fg" style="margin-bottom:8px"><label class="lbl" id="cmb-desc-lbl">Descripción</label><input type="text" class="fi" id="cmb-desc" placeholder="Descripción opcional"></div>
+        <div class="fg" style="margin-bottom:8px"><label class="lbl" id="cmb-price-lbl">Precio especial ($)</label><input type="number" class="fi" id="cmb-price" min="0" step="0.01" placeholder="0.00" oninput="_updateCmbCostTotal()"></div>
+        <div class="slbl" id="cmb-items-title" style="font-size:.78rem;margin-top:4px">Productos incluidos</div>
         <div id="cmb-items-list" style="margin-bottom:8px"></div>
-        <button class="btn btn-s" style="width:100%;margin-bottom:6px;font-size:.8rem" onclick="cmbAddItem()">+ Agregar producto</button>
+        <button class="btn btn-s" id="cmb-add-item-btn" style="width:100%;margin-bottom:6px;font-size:.8rem" onclick="cmbAddItem()">+ Agregar producto</button>
         <div id="cmb-cost-total" style="font-size:.78rem;color:var(--tx3);padding:6px 8px;background:var(--s2);border-radius:6px;margin-bottom:10px;min-height:24px"></div>
-        <div class="tog" style="margin-bottom:10px"><span class="tog-label">Activo</span><label class="tog-sw"><input type="checkbox" id="cmb-active" checked><span class="slider"></span></label></div>
+        <div class="tog" style="margin-bottom:10px"><span class="tog-label" id="cmb-active-lbl">Activo</span><label class="tog-sw"><input type="checkbox" id="cmb-active" checked><span class="slider"></span></label></div>
         <div class="frow" style="margin-bottom:16px">
           <button class="btn btn-p" id="cmb-save-btn" onclick="saveCombo()" style="flex:1">💾 Guardar Combo</button>
           <button class="btn btn-s" onclick="clearCombo()">↺</button>
@@ -1005,28 +1005,28 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
           <button class="spc-type-btn" id="spc-type-bogo" onclick="setSpcType('bogo',this)">2×1</button>
           <button class="spc-type-btn" id="spc-type-qty" onclick="setSpcType('qty_price',this)">📦 x Cantidad</button>
         </div>
-        <div class="fg" style="margin-bottom:8px"><label class="lbl">Producto</label><select class="fi" id="spc-product"></select></div>
+        <div class="fg" style="margin-bottom:8px"><label class="lbl" id="spc-prod-lbl">Producto</label><select class="fi" id="spc-product"></select></div>
         <div id="spc-fields-discount">
           <div class="g2">
-            <div class="fg"><label class="lbl">Descuento (%)</label><input type="number" class="fi" id="spc-pct" min="1" max="99" placeholder="20"></div>
-            <div class="fg"><label class="lbl">Fecha inicio</label><input type="date" class="fi" id="spc-start"></div>
+            <div class="fg"><label class="lbl" id="spc-disc-lbl">Descuento (%)</label><input type="number" class="fi" id="spc-pct" min="1" max="99" placeholder="20"></div>
+            <div class="fg"><label class="lbl" id="spc-start-lbl">Fecha inicio</label><input type="date" class="fi" id="spc-start"></div>
           </div>
-          <div class="fg" style="margin-bottom:8px"><label class="lbl">Fecha fin</label><input type="date" class="fi" id="spc-end"></div>
+          <div class="fg" style="margin-bottom:8px"><label class="lbl" id="spc-end-lbl">Fecha fin</label><input type="date" class="fi" id="spc-end"></div>
         </div>
         <div id="spc-fields-bogo" style="display:none">
           <div class="g2" style="margin-bottom:8px">
-            <div class="fg"><label class="lbl">Lleva (compra)</label><input type="number" class="fi" id="spc-buy-qty" min="2" max="99" value="2" placeholder="2"></div>
-            <div class="fg"><label class="lbl">Paga (cobrar)</label><input type="number" class="fi" id="spc-pay-qty" min="1" max="99" value="1" placeholder="1"></div>
+            <div class="fg"><label class="lbl" id="spc-buyqty-lbl">Lleva (compra)</label><input type="number" class="fi" id="spc-buy-qty" min="2" max="99" value="2" placeholder="2"></div>
+            <div class="fg"><label class="lbl" id="spc-payqty-lbl">Paga (cobrar)</label><input type="number" class="fi" id="spc-pay-qty" min="1" max="99" value="1" placeholder="1"></div>
           </div>
-          <div style="font-size:.75rem;color:var(--tx3);padding:6px 8px;background:var(--s2);border-radius:var(--rs)">Ej: Lleva 2 paga 1 = 2×1 · Lleva 3 paga 2 = 3×2. Se aplica por grupos al agregar al carrito.</div>
+          <div id="spc-bogo-ex" style="font-size:.75rem;color:var(--tx3);padding:6px 8px;background:var(--s2);border-radius:var(--rs)">Ej: Lleva 2 paga 1 = 2×1 · Lleva 3 paga 2 = 3×2. Se aplica por grupos al agregar al carrito.</div>
         </div>
         <div id="spc-fields-qty" style="display:none">
           <div class="g2">
-            <div class="fg"><label class="lbl">Cantidad mínima</label><input type="number" class="fi" id="spc-minqty" min="2" placeholder="6"></div>
-            <div class="fg"><label class="lbl">Precio especial ($)</label><input type="number" class="fi" id="spc-specprice" min="0" step="0.01" placeholder="0.00"></div>
+            <div class="fg"><label class="lbl" id="spc-minqty-lbl">Cantidad mínima</label><input type="number" class="fi" id="spc-minqty" min="2" placeholder="6"></div>
+            <div class="fg"><label class="lbl" id="spc-price-lbl">Precio especial ($)</label><input type="number" class="fi" id="spc-specprice" min="0" step="0.01" placeholder="0.00"></div>
           </div>
         </div>
-        <div class="tog" style="margin-bottom:10px;margin-top:8px"><span class="tog-label">Activo</span><label class="tog-sw"><input type="checkbox" id="spc-active" checked><span class="slider"></span></label></div>
+        <div class="tog" style="margin-bottom:10px;margin-top:8px"><span class="tog-label" id="spc-active-lbl">Activo</span><label class="tog-sw"><input type="checkbox" id="spc-active" checked><span class="slider"></span></label></div>
         <div class="frow" style="margin-bottom:16px">
           <button class="btn btn-p" id="spc-save-btn" onclick="saveSpecial()" style="flex:1">💾 Guardar Especial</button>
           <button class="btn btn-s" onclick="clearSpecial()">↺</button>
@@ -1044,12 +1044,12 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
     <div class="mh"><h3>🏷️ <span id="lbl-modal-title">Imprimir Etiquetas</span></h3><button class="mx" onclick="closeOv('ov-labels')">✕</button></div>
     <div class="mb">
       <div id="lbl-single-row" style="margin-bottom:10px">
-        <label class="lbl">Producto</label>
+        <label class="lbl" id="lbl-prod-lbl">Producto</label>
         <select class="fi" id="lbl-prod-sel" onchange="renderLabelPreview()"></select>
       </div>
       <div id="lbl-multi-row" style="display:none;margin-bottom:10px;padding:8px;background:var(--s2);border-radius:var(--rs);font-size:.82rem;color:var(--tx2)"></div>
       <div style="margin-bottom:10px">
-        <label class="lbl" style="margin-bottom:5px;display:block">Formato</label>
+        <label class="lbl" id="lbl-format-lbl" style="margin-bottom:5px;display:block">Formato</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
           <button class="lbl-sz-btn on" id="lbl-sz-1x2" onclick="setLblSize('1x2',this)">📋 1×2"<br><span style="font-size:.68rem;font-weight:400;opacity:.8">25×50mm · precio</span></button>
           <button class="lbl-sz-btn" id="lbl-sz-2x2" onclick="setLblSize('2x2',this)">📋 2×2"<br><span style="font-size:.68rem;font-weight:400;opacity:.8">50×50mm · producto</span></button>
@@ -1059,7 +1059,7 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
       </div>
       <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:10px">
         <div class="fg" style="flex:0 0 90px">
-          <label class="lbl">Copias</label>
+          <label class="lbl" id="lbl-copies-lbl">Copias</label>
           <input type="text" inputmode="numeric" pattern="[0-9]*" class="fi" id="lbl-qty" value="1" onfocus="this.select()" oninput="var v=parseInt(this.value)||1;if(v>100)this.value=100;else if(v<1)this.value=1;renderLabelPreview()">
         </div>
         <div id="lbl-pages-info" style="font-size:.78rem;color:var(--ac);font-weight:600;padding-bottom:10px;flex:1"></div>
@@ -1928,6 +1928,19 @@ const T = {
     lblPreviewTitle:'Vista previa de etiqueta',lblPageTitle:'Vista previa de hoja',
     lblThermalInfo:'ℹ Una etiqueta por hoja — la página se configura automáticamente al imprimir.',
     lblDownloadBtn:'💾 Descargar PDF',lblPrintBtn:'🖨️ Imprimir',
+    // Etiquetas modal — títulos y labels sin traducir
+    lblModalTitle:'Imprimir Etiquetas',lblProdLbl:'Producto',lblFormatLbl:'Formato',lblCopiesLbl:'Copias',
+    // Combos — form labels
+    cmbNew:'Nuevo Combo',cmbEdit:'Editar Combo',
+    cmbDescLbl:'Descripción',cmbDescPh:'Descripción opcional',
+    specialPriceLbl:'Precio especial ($)',cmbItemsTitle:'Productos incluidos',
+    activeLbl:'Activo',cmbSaveBtn:'💾 Guardar Combo',
+    // Especiales — form labels
+    spcNew:'Nuevo Especial',spcEdit:'Editar Especial',
+    spcDiscLbl:'Descuento (%)',spcStartLbl:'Fecha inicio',spcEndLbl:'Fecha fin',
+    spcBogoEx:'Ej: Lleva 2 paga 1 = 2×1 · Lleva 3 paga 2 = 3×2. Se aplica por grupos al agregar al carrito.',
+    spcBuyQtyLbl:'Lleva (compra)',spcPayQtyLbl:'Paga (cobrar)',spcMinQtyLbl:'Cantidad mínima',
+    spcSaveBtn:'💾 Guardar Especial',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -2137,6 +2150,19 @@ const T = {
     lblPreviewTitle:'Label preview',lblPageTitle:'Page preview',
     lblThermalInfo:'ℹ One label per page — page is configured automatically when printing.',
     lblDownloadBtn:'💾 Download PDF',lblPrintBtn:'🖨️ Print',
+    // Labels modal — titles and unlabelled fields
+    lblModalTitle:'Print Labels',lblProdLbl:'Product',lblFormatLbl:'Format',lblCopiesLbl:'Copies',
+    // Combos — form labels
+    cmbNew:'New Combo',cmbEdit:'Edit Combo',
+    cmbDescLbl:'Description',cmbDescPh:'Optional description',
+    specialPriceLbl:'Special price ($)',cmbItemsTitle:'Included products',
+    activeLbl:'Active',cmbSaveBtn:'💾 Save Combo',
+    // Specials — form labels
+    spcNew:'New Special',spcEdit:'Edit Special',
+    spcDiscLbl:'Discount (%)',spcStartLbl:'Start date',spcEndLbl:'End date',
+    spcBogoEx:'E.g.: Buy 2 get 1 = 2×1 · Buy 3 get 2 = 3×2. Applied in groups when added to cart.',
+    spcBuyQtyLbl:'Take (buy qty)',spcPayQtyLbl:'Pay (charge)',spcMinQtyLbl:'Min. quantity',
+    spcSaveBtn:'💾 Save Special',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -2207,6 +2233,7 @@ function applyLang(){
   const _lsub=el('l-sub');if(_lsub)_lsub.textContent=t('loginTitle');
   const _lbtn=el('l-btn');if(_lbtn)_lbtn.textContent=t('loginBtn');
   const _lerr=el('lerr');if(_lerr)_lerr.textContent=t('loginErr');
+  const _lp=el('lp');if(_lp)_lp.placeholder=t('fldPassword');
   const _sotitle=el('so-title');if(_sotitle)_sotitle.textContent=t('shiftOpen');
   const _soflbl=el('so-flbl');if(_soflbl)_soflbl.textContent=t('shiftFund');
   const _soctxt=el('so-ctxt');if(_soctxt)_soctxt.textContent=t('shiftConfirm');
@@ -2511,16 +2538,45 @@ function applyLang(){
   // Inventory toolbar & view toggle
   const _invViewTbl=el('inv-view-table');if(_invViewTbl)_invViewTbl.innerHTML='<i class="ti ti-list"></i> '+t('invViewTable');
   const _invViewGrd=el('inv-view-grid');if(_invViewGrd)_invViewGrd.innerHTML='<i class="ti ti-grid-dots"></i> '+t('invViewCards');
+  const _invTbNew=el('inv-tb-new-btn');if(_invTbNew)_invTbNew.textContent='➕ '+t('invTbNew');
   const _invTbEdit=el('inv-tb-edit');if(_invTbEdit)_invTbEdit.textContent=t('invTbEdit');
   const _invTbDel=el('inv-tb-del');if(_invTbDel)_invTbDel.textContent=t('invTbDel');
   const _invTbLbl=el('inv-tb-lbl');if(_invTbLbl)_invTbLbl.textContent=t('invTbLbl');
   const _invLblBtn=el('inv-lbl-btn');if(_invLblBtn)_invLblBtn.textContent=t('invTbMultiLbl');
   // Labels modal
+  const _lblModalTitleEl=el('lbl-modal-title');if(_lblModalTitleEl)_lblModalTitleEl.textContent=t('lblModalTitle');
+  const _lblProdLblEl=el('lbl-prod-lbl');if(_lblProdLblEl)_lblProdLblEl.textContent=t('lblProdLbl');
+  const _lblFormatLblEl=el('lbl-format-lbl');if(_lblFormatLblEl)_lblFormatLblEl.textContent=t('lblFormatLbl');
+  const _lblCopiesLblEl=el('lbl-copies-lbl');if(_lblCopiesLblEl)_lblCopiesLblEl.textContent=t('lblCopiesLbl');
   const _lblPrevTitleEl=el('lbl-preview-title');if(_lblPrevTitleEl)_lblPrevTitleEl.textContent=t('lblPreviewTitle');
   const _lblPageTitleEl=el('lbl-page-title');if(_lblPageTitleEl)_lblPageTitleEl.textContent=t('lblPageTitle');
   const _lblThermalInfoEl=el('lbl-thermal-info');if(_lblThermalInfoEl)_lblThermalInfoEl.textContent=t('lblThermalInfo');
   const _lblDlBtnEl=el('lbl-dl-btn');if(_lblDlBtnEl)_lblDlBtnEl.textContent=t('lblDownloadBtn');
   const _lblPrintBtnEl=el('lbl-print-btn');if(_lblPrintBtnEl)_lblPrintBtnEl.innerHTML='🖨️ '+t('lblPrintBtn');
+  // Combos form
+  const _cmbFormTitle=el('cmb-form-title');if(_cmbFormTitle&&!el('cmb-eid').value)_cmbFormTitle.textContent=t('cmbNew');
+  const _cmbNameLbl=el('cmb-name-lbl');if(_cmbNameLbl)_cmbNameLbl.textContent=t('fldName');
+  const _cmbDescLbl=el('cmb-desc-lbl');if(_cmbDescLbl)_cmbDescLbl.textContent=t('cmbDescLbl');
+  const _cmbPriceLbl=el('cmb-price-lbl');if(_cmbPriceLbl)_cmbPriceLbl.textContent=t('specialPriceLbl');
+  const _cmbItemsTitle=el('cmb-items-title');if(_cmbItemsTitle)_cmbItemsTitle.textContent=t('cmbItemsTitle');
+  const _cmbAddItemBtn=el('cmb-add-item-btn');if(_cmbAddItemBtn)_cmbAddItemBtn.textContent=t('addProductRow');
+  const _cmbActiveLbl=el('cmb-active-lbl');if(_cmbActiveLbl)_cmbActiveLbl.textContent=t('activeLbl');
+  const _cmbSaveBtn=el('cmb-save-btn');if(_cmbSaveBtn)_cmbSaveBtn.textContent=t('cmbSaveBtn');
+  const _cmbListTitle=el('cmb-list-title');if(_cmbListTitle)_cmbListTitle.textContent=t('comboList');
+  // Specials form
+  const _spcFormTitle=el('spc-form-title');if(_spcFormTitle&&!el('spc-eid').value)_spcFormTitle.textContent=t('spcNew');
+  const _spcProdLbl=el('spc-prod-lbl');if(_spcProdLbl)_spcProdLbl.textContent=t('lblProdLbl');
+  const _spcDiscLbl=el('spc-disc-lbl');if(_spcDiscLbl)_spcDiscLbl.textContent=t('spcDiscLbl');
+  const _spcStartLbl=el('spc-start-lbl');if(_spcStartLbl)_spcStartLbl.textContent=t('spcStartLbl');
+  const _spcEndLbl=el('spc-end-lbl');if(_spcEndLbl)_spcEndLbl.textContent=t('spcEndLbl');
+  const _spcBuyQtyLbl=el('spc-buyqty-lbl');if(_spcBuyQtyLbl)_spcBuyQtyLbl.textContent=t('spcBuyQtyLbl');
+  const _spcPayQtyLbl=el('spc-payqty-lbl');if(_spcPayQtyLbl)_spcPayQtyLbl.textContent=t('spcPayQtyLbl');
+  const _spcBogoEx=el('spc-bogo-ex');if(_spcBogoEx)_spcBogoEx.textContent=t('spcBogoEx');
+  const _spcMinQtyLbl=el('spc-minqty-lbl');if(_spcMinQtyLbl)_spcMinQtyLbl.textContent=t('spcMinQtyLbl');
+  const _spcPriceLbl=el('spc-price-lbl');if(_spcPriceLbl)_spcPriceLbl.textContent=t('specialPriceLbl');
+  const _spcActiveLbl=el('spc-active-lbl');if(_spcActiveLbl)_spcActiveLbl.textContent=t('activeLbl');
+  const _spcSaveBtn=el('spc-save-btn');if(_spcSaveBtn)_spcSaveBtn.textContent=t('spcSaveBtn');
+  const _spcListTitle=el('spc-list-title');if(_spcListTitle)_spcListTitle.textContent=t('specialList');
   updateCobrar(); renderCats(); renderProds(); updatePCat();
 }
 function switchLang(){
@@ -6394,7 +6450,7 @@ function cmbRemoveItem(idx){_cmbItems.splice(idx,1);renderCmbItemsEditor();}
 function clearCombo(){
   el('cmb-eid').value='';el('cmb-name').value='';el('cmb-desc').value='';
   el('cmb-price').value='';el('cmb-active').checked=true;_cmbItems=[];
-  const ft=el('cmb-form-title');if(ft)ft.textContent='Nuevo Combo';
+  const ft=el('cmb-form-title');if(ft)ft.textContent=t('cmbNew');
   renderCmbItemsEditor();_updateCmbCostTotal();
 }
 function saveCombo(){
@@ -6423,7 +6479,7 @@ function editCombo(id){
   el('cmb-eid').value=c.id;el('cmb-name').value=c.name;
   el('cmb-desc').value=c.desc||'';el('cmb-price').value=c.price;
   el('cmb-active').checked=c.active!==false;
-  const ft=el('cmb-form-title');if(ft)ft.textContent='Editar Combo';
+  const ft=el('cmb-form-title');if(ft)ft.textContent=t('cmbEdit');
   _cmbItems=JSON.parse(JSON.stringify(c.items||[]));
   renderCmbItemsEditor();
   const n=el('cmb-name');if(n)n.scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -6479,7 +6535,7 @@ function clearSpecial(){
   if(el('spc-specprice'))el('spc-specprice').value='';
   if(el('spc-buy-qty'))el('spc-buy-qty').value='2';
   if(el('spc-pay-qty'))el('spc-pay-qty').value='1';
-  const ft=el('spc-form-title');if(ft)ft.textContent='Nuevo Especial';
+  const ft=el('spc-form-title');if(ft)ft.textContent=t('spcNew');
   populateSpcProducts();
 }
 function saveSpecial(){
@@ -6526,7 +6582,7 @@ function editSpecial(id){
   if(s.type==='discount'){el('spc-pct').value=s.pct||'';el('spc-start').value=s.startDate||'';el('spc-end').value=s.endDate||'';}
   else if(s.type==='bogo'){if(el('spc-buy-qty'))el('spc-buy-qty').value=s.buyQty||2;if(el('spc-pay-qty'))el('spc-pay-qty').value=s.payQty||1;}
   else if(s.type==='qty_price'){if(el('spc-minqty'))el('spc-minqty').value=s.minQty||'';if(el('spc-specprice'))el('spc-specprice').value=s.specialPrice||'';}
-  const ft=el('spc-form-title');if(ft)ft.textContent='Editar Especial';
+  const ft=el('spc-form-title');if(ft)ft.textContent=t('spcEdit');
 }
 function deleteSpecial(id){
   const s=(db.specials||[]).find(function(x){return x.id===id;});if(!s)return;
