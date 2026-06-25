@@ -465,72 +465,72 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
     <div id="sb-urole"></div>
   </div>
   <div class="sb-nav">
-    <div class="sb-section">Principal</div>
+    <div class="sb-section" id="sb-sec-main">Principal</div>
     <div class="sb-item" id="sbi-dash" onclick="sbNav('dash')">
       <i class="ti ti-layout-dashboard sb-icon"></i><span class="sb-lbl">Dashboard</span>
     </div>
     <div class="sb-item" id="sbi-dash-qr" onclick="openDashQR()">
-      <i class="ti ti-device-mobile sb-icon"></i><span class="sb-lbl">Dashboard Móvil</span>
+      <i class="ti ti-device-mobile sb-icon"></i><span class="sb-lbl" id="sbi-dash-qr-lbl">Dashboard Móvil</span>
     </div>
     <div class="sb-item" id="sbi-pos" onclick="sbNav('pos')">
-      <i class="ti ti-shopping-cart sb-icon"></i><span class="sb-lbl">Vender</span>
+      <i class="ti ti-shopping-cart sb-icon"></i><span class="sb-lbl" id="sbi-pos-lbl">Vender</span>
     </div>
-    <div class="sb-section">Inventario</div>
+    <div class="sb-section" id="sb-sec-inv">Inventario</div>
     <div class="sb-item" id="sbi-prods" onclick="sbNav('prods')">
-      <i class="ti ti-package sb-icon"></i><span class="sb-lbl">Productos</span>
+      <i class="ti ti-package sb-icon"></i><span class="sb-lbl" id="sbi-prods-lbl">Productos</span>
     </div>
     <div class="sb-item" id="sbi-inv" onclick="sbNav('inv')">
-      <i class="ti ti-clipboard-list sb-icon"></i><span class="sb-lbl">Stock</span>
+      <i class="ti ti-clipboard-list sb-icon"></i><span class="sb-lbl" id="sbi-inv-lbl">Stock</span>
     </div>
     <div class="sb-item" id="sbi-labels" onclick="sbNav('labels')">
-      <i class="ti ti-tag sb-icon"></i><span class="sb-lbl">Etiquetas</span>
+      <i class="ti ti-tag sb-icon"></i><span class="sb-lbl" id="sbi-labels-lbl">Etiquetas</span>
     </div>
-    <div class="sb-section">Ventas</div>
+    <div class="sb-section" id="sb-sec-sales">Ventas</div>
     <div class="sb-item" id="sbi-sales" onclick="sbNav('sales')">
-      <i class="ti ti-receipt sb-icon"></i><span class="sb-lbl">Ventas del día</span>
+      <i class="ti ti-receipt sb-icon"></i><span class="sb-lbl" id="sbi-sales-lbl">Ventas del día</span>
     </div>
     <div class="sb-item" id="sbi-returns" onclick="sbNav('returns')">
-      <i class="ti ti-arrow-back-up sb-icon"></i><span class="sb-lbl">Devoluciones</span>
+      <i class="ti ti-arrow-back-up sb-icon"></i><span class="sb-lbl" id="sbi-returns-lbl">Devoluciones</span>
     </div>
     <div class="sb-item" id="sbi-credits" onclick="sbNav('credits')">
-      <i class="ti ti-credit-card sb-icon"></i><span class="sb-lbl">Créditos</span>
+      <i class="ti ti-credit-card sb-icon"></i><span class="sb-lbl" id="sbi-credits-lbl">Créditos</span>
     </div>
-    <div class="sb-section">Catálogo</div>
+    <div class="sb-section" id="sb-sec-catalog">Catálogo</div>
     <div class="sb-item" id="sbi-combos" onclick="sbNav('combos')">
-      <i class="ti ti-package-export sb-icon"></i><span class="sb-lbl">Combos</span>
+      <i class="ti ti-package-export sb-icon"></i><span class="sb-lbl" id="sbi-combos-lbl">Combos</span>
     </div>
     <div class="sb-item" id="sbi-specials" onclick="sbNav('specials')">
-      <i class="ti ti-star sb-icon"></i><span class="sb-lbl">Especiales</span>
+      <i class="ti ti-star sb-icon"></i><span class="sb-lbl" id="sbi-specials-lbl">Especiales</span>
     </div>
-    <div class="sb-section">Más</div>
+    <div class="sb-section" id="sb-sec-more">Más</div>
     <div class="sb-item" id="sbi-conta" onclick="sbNav('conta')">
-      <i class="ti ti-book sb-icon"></i><span class="sb-lbl">Contabilidad</span>
+      <i class="ti ti-book sb-icon"></i><span class="sb-lbl" id="sbi-conta-lbl">Contabilidad</span>
     </div>
     <div class="sb-item" id="sbi-compras" onclick="sbNav('compras')">
-      <i class="ti ti-truck sb-icon"></i><span class="sb-lbl">Compras</span>
+      <i class="ti ti-truck sb-icon"></i><span class="sb-lbl" id="sbi-compras-lbl">Compras</span>
     </div>
     <div class="sb-item" id="sbi-audit" style="display:none" onclick="sbNav('audit')">
-      <i class="ti ti-shield sb-icon"></i><span class="sb-lbl">Auditoría</span>
+      <i class="ti ti-shield sb-icon"></i><span class="sb-lbl" id="sbi-audit-lbl">Auditoría</span>
     </div>
     <div class="sb-item" id="sbi-drawer" onclick="openDrawer()">
-      <i class="ti ti-device-desktop sb-icon"></i><span class="sb-lbl">Registradora</span>
+      <i class="ti ti-device-desktop sb-icon"></i><span class="sb-lbl" id="sbi-drawer-lbl">Registradora</span>
     </div>
     <div class="sb-item" id="sbi-note" onclick="openWriteNote()">
-      <i class="ti ti-note sb-icon"></i><span class="sb-lbl">Nota de turno</span>
+      <i class="ti ti-note sb-icon"></i><span class="sb-lbl" id="sbi-note-lbl">Nota de turno</span>
     </div>
     <div class="sb-item" id="sbi-update" onclick="checkUpdates()">
-      <i class="ti ti-refresh sb-icon"></i><span class="sb-lbl">Actualizaciones</span>
+      <i class="ti ti-refresh sb-icon"></i><span class="sb-lbl" id="sbi-update-lbl">Actualizaciones</span>
     </div>
     <div class="sb-item" id="sbi-cfg" onclick="sbNav('cfg')">
-      <i class="ti ti-settings sb-icon"></i><span class="sb-lbl">Configuración</span>
+      <i class="ti ti-settings sb-icon"></i><span class="sb-lbl" id="sbi-cfg-lbl">Configuración</span>
     </div>
   </div>
   <div class="sb-bottom">
-    <div class="sb-item" onclick="doQuickLock()">
-      <i class="ti ti-lock sb-icon" style="color:#f87171"></i><span class="sb-lbl" style="color:#f87171">Bloquear</span>
+    <div class="sb-item" id="sbi-lock" onclick="doQuickLock()">
+      <i class="ti ti-lock sb-icon" style="color:#f87171"></i><span class="sb-lbl" id="sbi-lock-lbl" style="color:#f87171">Bloquear</span>
     </div>
-    <div class="sb-item" onclick="openLogout()">
-      <i class="ti ti-door-exit sb-icon" style="color:#f87171"></i><span class="sb-lbl" style="color:#f87171">Cerrar turno</span>
+    <div class="sb-item" id="sbi-logout" onclick="openLogout()">
+      <i class="ti ti-door-exit sb-icon" style="color:#f87171"></i><span class="sb-lbl" id="sbi-logout-lbl" style="color:#f87171">Cerrar turno</span>
     </div>
   </div>
 </div>
@@ -1941,6 +1941,11 @@ const T = {
     spcBogoEx:'Ej: Lleva 2 paga 1 = 2×1 · Lleva 3 paga 2 = 3×2. Se aplica por grupos al agregar al carrito.',
     spcBuyQtyLbl:'Lleva (compra)',spcPayQtyLbl:'Paga (cobrar)',spcMinQtyLbl:'Cantidad mínima',
     spcSaveBtn:'💾 Guardar Especial',
+    // Sidebar
+    sbSecMain:'Principal',sbSecCatalog:'Catálogo',sbSecMore:'Más',
+    sbDashMobile:'Dashboard Móvil',sbSell:'Vender',sbLabels:'Etiquetas',
+    sbNote:'Nota de turno',sbUpdates:'Actualizaciones',sbConfig:'Configuración',
+    sbLock:'Bloquear',roleAdmin:'Administrador',roleCashierShort:'Cajero',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -2163,6 +2168,11 @@ const T = {
     spcBogoEx:'E.g.: Buy 2 get 1 = 2×1 · Buy 3 get 2 = 3×2. Applied in groups when added to cart.',
     spcBuyQtyLbl:'Take (buy qty)',spcPayQtyLbl:'Pay (charge)',spcMinQtyLbl:'Min. quantity',
     spcSaveBtn:'💾 Save Special',
+    // Sidebar
+    sbSecMain:'Main',sbSecCatalog:'Catalog',sbSecMore:'More',
+    sbDashMobile:'Mobile Dashboard',sbSell:'Sell',sbLabels:'Labels',
+    sbNote:'Shift note',sbUpdates:'Updates',sbConfig:'Settings',
+    sbLock:'Lock',roleAdmin:'Admin',roleCashierShort:'Cashier',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -2577,6 +2587,32 @@ function applyLang(){
   const _spcActiveLbl=el('spc-active-lbl');if(_spcActiveLbl)_spcActiveLbl.textContent=t('activeLbl');
   const _spcSaveBtn=el('spc-save-btn');if(_spcSaveBtn)_spcSaveBtn.textContent=t('spcSaveBtn');
   const _spcListTitle=el('spc-list-title');if(_spcListTitle)_spcListTitle.textContent=t('specialList');
+  // Sidebar sections
+  const _sbSecMain=el('sb-sec-main');if(_sbSecMain)_sbSecMain.textContent=t('sbSecMain');
+  const _sbSecInv=el('sb-sec-inv');if(_sbSecInv)_sbSecInv.textContent=t('tabInv');
+  const _sbSecSales=el('sb-sec-sales');if(_sbSecSales)_sbSecSales.textContent=t('salesLbl');
+  const _sbSecCatalog=el('sb-sec-catalog');if(_sbSecCatalog)_sbSecCatalog.textContent=t('sbSecCatalog');
+  const _sbSecMore=el('sb-sec-more');if(_sbSecMore)_sbSecMore.textContent=t('sbSecMore');
+  // Sidebar items
+  const _sbiDashQrLbl=el('sbi-dash-qr-lbl');if(_sbiDashQrLbl)_sbiDashQrLbl.textContent=t('sbDashMobile');
+  const _sbiPosLbl=el('sbi-pos-lbl');if(_sbiPosLbl)_sbiPosLbl.textContent=t('sbSell');
+  const _sbiProdsLbl=el('sbi-prods-lbl');if(_sbiProdsLbl)_sbiProdsLbl.textContent=t('tabProds');
+  const _sbiInvLbl=el('sbi-inv-lbl');if(_sbiInvLbl)_sbiInvLbl.textContent=t('stock');
+  const _sbiLabelsLbl=el('sbi-labels-lbl');if(_sbiLabelsLbl)_sbiLabelsLbl.textContent=t('sbLabels');
+  const _sbiSalesLbl=el('sbi-sales-lbl');if(_sbiSalesLbl)_sbiSalesLbl.textContent=t('sal');
+  const _sbiReturnsLbl=el('sbi-returns-lbl');if(_sbiReturnsLbl)_sbiReturnsLbl.textContent=t('ret');
+  const _sbiCreditsLbl=el('sbi-credits-lbl');if(_sbiCreditsLbl)_sbiCreditsLbl.textContent=t('tabCredits');
+  const _sbiCombosLbl=el('sbi-combos-lbl');if(_sbiCombosLbl)_sbiCombosLbl.textContent=t('tabCombos');
+  const _sbiSpecialsLbl=el('sbi-specials-lbl');if(_sbiSpecialsLbl)_sbiSpecialsLbl.textContent=t('tabSpecials');
+  const _sbiContaLbl=el('sbi-conta-lbl');if(_sbiContaLbl)_sbiContaLbl.textContent=t('conta');
+  const _sbiComprasLbl=el('sbi-compras-lbl');if(_sbiComprasLbl)_sbiComprasLbl.textContent=t('tabPurchases');
+  const _sbiAuditLbl=el('sbi-audit-lbl');if(_sbiAuditLbl)_sbiAuditLbl.textContent=t('auditMenu');
+  const _sbiDrawerLbl=el('sbi-drawer-lbl');if(_sbiDrawerLbl)_sbiDrawerLbl.textContent=t('cashDrawer');
+  const _sbiNoteLbl=el('sbi-note-lbl');if(_sbiNoteLbl)_sbiNoteLbl.textContent=t('sbNote');
+  const _sbiUpdateLbl=el('sbi-update-lbl');if(_sbiUpdateLbl)_sbiUpdateLbl.textContent=t('sbUpdates');
+  const _sbiCfgLbl=el('sbi-cfg-lbl');if(_sbiCfgLbl)_sbiCfgLbl.textContent=t('sbConfig');
+  const _sbiLockLbl=el('sbi-lock-lbl');if(_sbiLockLbl)_sbiLockLbl.textContent=t('sbLock');
+  const _sbiLogoutLbl=el('sbi-logout-lbl');if(_sbiLogoutLbl)_sbiLogoutLbl.textContent=t('logoutTitle');
   updateCobrar(); renderCats(); renderProds(); updatePCat();
 }
 function switchLang(){
@@ -7035,7 +7071,7 @@ function hideSidebar(){
 function _sbUpdateUser(){
   var nameEl=el('sb-uname'),roleEl=el('sb-urole');
   if(nameEl)nameEl.textContent=curUser?curUser.name:'—';
-  if(roleEl)roleEl.textContent=curUser?(curUser.role==='admin'?'Administrador':'Cajero'):'';
+  if(roleEl)roleEl.textContent=curUser?(curUser.role==='admin'?t('roleAdmin'):t('roleCashierShort')):'';
 }
 function _sbUpdatePerms(){
   if(!curUser)return;
