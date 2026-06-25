@@ -6164,12 +6164,12 @@ function calcNotifs(){
 }
 
 function _updateNotifBadge(){
-  const total=_notifs.length;
+  const unread=_notifs.filter(function(n){return !n.read;}).length;
   const badge=el('notif-badge');
   const btn=el('notif-btn');
   if(!badge||!btn)return;
-  if(total>0){
-    badge.textContent=total>9?'9+':String(total);
+  if(unread>0){
+    badge.textContent=unread>9?'9+':String(unread);
     badge.style.display='flex';
     btn.style.color='#ef4444';
   }else{
