@@ -6643,26 +6643,23 @@ function _buildOneLabelHTML(p,size){
   var biz=db.cfg||{};
   var bizName=biz.bizName||'4K Negocio';
 
-  // 1×2" (50×25mm horizontal): negocio · nombre · precio · barcode
+  // 1×2" (50×25mm horizontal): centrado, sin colores
   if(size==='1x2'){
-    return'<div class="lbl-itm" style="width:50mm;height:25mm;padding:1mm 1.5mm;justify-content:space-between;border:.5px solid #ccc">'
-      +'<div style="font-size:6pt;color:#000;line-height:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
-      +'<div style="font-size:9pt;font-weight:800;line-height:1.2;color:#000;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
-      +'<div style="font-size:14pt;font-weight:800;line-height:1;color:#000">'+price+'</div>'
-      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,150,14)+'<div style="font-size:5.5pt;letter-spacing:.5px;color:#000;margin-top:.3mm;line-height:1">'+_htmlEsc(bc)+'</div></div>':'')
+    return'<div class="lbl-itm" style="width:50mm;height:25mm;padding:.8mm 1.5mm;justify-content:space-evenly;align-items:center;text-align:center;border:.5px solid #ccc">'
+      +'<div style="font-size:7pt;color:#000;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
+      +'<div style="font-size:10.5pt;font-weight:800;line-height:1.1;color:#000;text-transform:uppercase;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
+      +'<div style="font-size:10pt;font-weight:800;line-height:1;color:#000">'+price+'</div>'
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,170,15)+'<div style="font-size:5.5pt;color:#000;margin-top:.2mm;line-height:1">'+_htmlEsc(bc)+'</div></div>':'')
       +'</div>';
   }
 
-  // 2×2" (50×50mm): negocio · nombre · categoría · precio · barcode
+  // 2×2" (50×50mm): centrado, sin colores
   if(size==='2x2'){
-    return'<div class="lbl-itm" style="width:50mm;height:50mm;padding:1.5mm 2mm;justify-content:space-between;border:.5px solid #ccc">'
-      +'<div>'
-      +'<div style="font-size:6pt;color:#000;line-height:1">'+_htmlEsc(bizName)+'</div>'
-      +'<div style="font-size:9pt;font-weight:800;line-height:1.2;color:#000;margin-top:.5mm">'+_htmlEsc(p.name)+'</div>'
-      +(catName?'<div style="font-size:5.5pt;color:#000;text-transform:uppercase;letter-spacing:.3px;margin-top:.3mm">'+_htmlEsc(catName)+'</div>':'')
-      +'</div>'
-      +'<div style="font-size:16pt;font-weight:800;line-height:1;color:#000">'+price+'</div>'
-      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,170,22)+'<div style="font-size:5.5pt;letter-spacing:1px;color:#000;margin-top:.5mm">'+_htmlEsc(bc)+'</div></div>':'')
+    return'<div class="lbl-itm" style="width:50mm;height:50mm;padding:1.5mm 2mm;justify-content:space-evenly;align-items:center;text-align:center;border:.5px solid #ccc">'
+      +'<div style="font-size:8pt;color:#000;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
+      +'<div style="font-size:15pt;font-weight:800;line-height:1.1;color:#000;text-transform:uppercase;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
+      +'<div style="font-size:13.5pt;font-weight:800;line-height:1;color:#000">'+price+'</div>'
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,170,35)+'<div style="font-size:7pt;color:#000;margin-top:.5mm;line-height:1">'+_htmlEsc(bc)+'</div></div>':'')
       +'</div>';
   }
 
@@ -6696,24 +6693,21 @@ function _buildPreviewLabelHTML(p,size){
 
   // 1×2": 200×100px (proporcional 50×25mm horizontal, escala 4×)
   if(size==='1x2'){
-    return'<div style="'+base+'width:200px;height:100px;padding:5px 7px;justify-content:space-between">'
-      +'<div style="font-size:8px;color:#000;line-height:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
-      +'<div style="font-size:12px;font-weight:800;line-height:1.2;color:#000;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
-      +'<div style="font-size:18px;font-weight:800;line-height:1;color:#000">'+price+'</div>'
-      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,185,14)+'<div style="font-size:7px;letter-spacing:.5px;color:#000;margin-top:1px">'+_htmlEsc(bc)+'</div></div>':'')
+    return'<div style="'+base+'width:200px;height:100px;padding:3px 4px;justify-content:space-evenly;align-items:center;text-align:center">'
+      +'<div style="font-size:9px;color:#000;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
+      +'<div style="font-size:14px;font-weight:800;line-height:1.1;color:#000;text-transform:uppercase;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
+      +'<div style="font-size:13px;font-weight:800;line-height:1;color:#000">'+price+'</div>'
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,190,20)+'<div style="font-size:8px;color:#000;margin-top:1px;line-height:1">'+_htmlEsc(bc)+'</div></div>':'')
       +'</div>';
   }
 
   // 2×2": 190×190px (proporcional 50×50mm escala 3.8×)
   if(size==='2x2'){
-    return'<div style="'+base+'width:190px;height:190px;padding:8px 10px;justify-content:space-between">'
-      +'<div>'
-      +'<div style="font-size:8px;color:#000;line-height:1">'+_htmlEsc(bizName)+'</div>'
-      +'<div style="font-size:12px;font-weight:800;line-height:1.2;color:#000;margin-top:2px">'+_htmlEsc(p.name)+'</div>'
-      +(catName?'<div style="font-size:9px;color:#000;text-transform:uppercase;letter-spacing:.3px;margin-top:1px">'+_htmlEsc(catName)+'</div>':'')
-      +'</div>'
+    return'<div style="'+base+'width:190px;height:190px;padding:5px 6px;justify-content:space-evenly;align-items:center;text-align:center">'
+      +'<div style="font-size:11px;color:#000;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
+      +'<div style="font-size:20px;font-weight:800;line-height:1.1;color:#000;text-transform:uppercase;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
       +'<div style="font-size:18px;font-weight:800;line-height:1;color:#000">'+price+'</div>'
-      +(bc?'<div style="text-align:center">'+_barcodeSvg(bc,155,20)+'<div style="font-size:7px;letter-spacing:1px;color:#000;margin-top:2px">'+_htmlEsc(bc)+'</div></div>':'')
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,178,35)+'<div style="font-size:9px;color:#000;margin-top:2px;line-height:1">'+_htmlEsc(bc)+'</div></div>':'')
       +'</div>';
   }
 
