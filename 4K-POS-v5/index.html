@@ -2566,7 +2566,7 @@ function applyLang(){
   const _cpayPartialTxt=el('cpay-partial-txt');if(_cpayPartialTxt)_cpayPartialTxt.textContent=t('cpayPartialBtn');
   const _cpayFullTxt=el('cpay-full-txt');if(_cpayFullTxt)_cpayFullTxt.textContent=t('cpayTotalBtn');
   // Contabilidad period dropdown
-  const _ctPeriod=el('ct-period');if(_ctPeriod)_ctPeriod.options[0]&&(_ctPeriod.options[0].text=t('today'));
+  const _ctPeriod=el('ct-period');if(_ctPeriod){if(_ctPeriod.options[0])_ctPeriod.options[0].text=t('today');if(_ctPeriod.options[1])_ctPeriod.options[1].text=t('thisWeek');if(_ctPeriod.options[2])_ctPeriod.options[2].text=t('thisMonth');if(_ctPeriod.options[3])_ctPeriod.options[3].text=t('vntPeriodAll');}
   // Cash close label
   const _loCashCloseLbl=el('lo-cash-close-lbl');if(_loCashCloseLbl)_loCashCloseLbl.textContent=t('cashInDrawer');
   const _loDeclaredLbl=el('lo-declared-lbl');if(_loDeclaredLbl)_loDeclaredLbl.textContent=t('declaredCash');
@@ -2691,9 +2691,6 @@ function applyLang(){
   const _grafPer7=el('graf-period-7');if(_grafPer7)_grafPer7.textContent=t('grafPeriod7');
   const _grafPer30=el('graf-period-30');if(_grafPer30)_grafPer30.textContent=t('grafPeriod30');
   const _grafPer90=el('graf-period-90');if(_grafPer90)_grafPer90.textContent=t('grafPeriod90');
-  // Conta period options (update remaining 3)
-  const _ctPeriod=el('ct-period');
-  if(_ctPeriod){if(_ctPeriod.options[1])_ctPeriod.options[1].text=t('thisWeek');if(_ctPeriod.options[2])_ctPeriod.options[2].text=t('thisMonth');if(_ctPeriod.options[3])_ctPeriod.options[3].text=t('vntPeriodAll');}
   // Reset pass modal
   const _rpNote=el('rp-note');if(_rpNote)_rpNote.textContent=t('rpNote');
   const _rpOkBtn=el('rp-ok-btn');if(_rpOkBtn)_rpOkBtn.textContent=t('resetPassOkBtn');
