@@ -1067,13 +1067,16 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
       <div id="lbl-thermal-info" style="display:none;background:var(--acg);color:var(--ac);border-radius:var(--rs);padding:7px 10px;font-size:.75rem;margin-bottom:8px">
         ℹ Una etiqueta por hoja — la página se configura automáticamente al imprimir.
       </div>
-      <div class="slbl" style="margin-bottom:6px;font-size:.78rem">Vista previa de etiqueta</div>
+      <div class="slbl" id="lbl-preview-title" style="margin-bottom:6px;font-size:.78rem">Vista previa de etiqueta</div>
       <div class="lbl-prev-wrap" id="lbl-preview" style="margin-bottom:12px"></div>
       <div id="lbl-page-section" style="margin-bottom:12px">
-        <div class="slbl" style="margin-bottom:6px;font-size:.78rem">Vista previa de hoja</div>
+        <div class="slbl" id="lbl-page-title" style="margin-bottom:6px;font-size:.78rem">Vista previa de hoja</div>
         <div id="lbl-page-preview" style="display:flex;flex-direction:column;align-items:center;overflow-x:auto"></div>
       </div>
-      <button class="btn btn-p" onclick="printLabels()" style="width:100%">🖨️ Imprimir / Guardar PDF</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-s" id="lbl-dl-btn" onclick="downloadLabelsPDF()" style="flex:1">💾 Descargar PDF</button>
+        <button class="btn btn-p" id="lbl-print-btn" onclick="printLabels()" style="flex:1">🖨️ Imprimir</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1911,6 +1914,20 @@ const T = {
     specialActiveStatus:'● Activo',specialInactiveStatus:'○ Inactivo',specialOutOfRange:'⏳ Fuera de rango',
     specialBogoInfo:'Lleva 2, paga 1. Se aplica automáticamente al agregar 2 o más unidades al carrito.',
     stockInsufficientFor:'⚠ Stock insuficiente para: ',comboSubitemsLabel:'Incluye: ',
+    // Inventario — vista tabla
+    invStkNone:'Sin stock',invStkLow:'Stock bajo',invStkOk:'Ok',
+    invColName:'Nombre',invColCat:'Categoría',invColBarcode:'Cód. barras',
+    invColStock:'Stock',invColCost:'Costo',invColPrice:'Precio',invColActive:'Activo',
+    invFooterProds:'producto',invFooterProdsP:'productos',
+    invFooterCostTotal:'Costo total',invFooterSaleValue:'Valor en venta',
+    // Inventario — toolbar y toggle
+    invTbNew:'➕ Nuevo',invTbEdit:'✏️ Editar',invTbDel:'🗑️ Eliminar',
+    invTbLbl:'🏷️ Etiqueta',invTbMultiLbl:'🏷️ Etiquetas múltiples',
+    invViewTable:'Tabla',invViewCards:'Tarjetas',
+    // Etiquetas — modal
+    lblPreviewTitle:'Vista previa de etiqueta',lblPageTitle:'Vista previa de hoja',
+    lblThermalInfo:'ℹ Una etiqueta por hoja — la página se configura automáticamente al imprimir.',
+    lblDownloadBtn:'💾 Descargar PDF',lblPrintBtn:'🖨️ Imprimir',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -2106,6 +2123,20 @@ const T = {
     specialActiveStatus:'● Active',specialInactiveStatus:'○ Inactive',specialOutOfRange:'⏳ Out of range',
     specialBogoInfo:'Buy 2, get 1 free. Applied automatically when 2+ units are added to cart.',
     stockInsufficientFor:'⚠ Insufficient stock for: ',comboSubitemsLabel:'Includes: ',
+    // Inventory — table view
+    invStkNone:'No stock',invStkLow:'Low stock',invStkOk:'Ok',
+    invColName:'Name',invColCat:'Category',invColBarcode:'Barcode',
+    invColStock:'Stock',invColCost:'Cost',invColPrice:'Price',invColActive:'Active',
+    invFooterProds:'product',invFooterProdsP:'products',
+    invFooterCostTotal:'Total cost',invFooterSaleValue:'Sale value',
+    // Inventory — toolbar & toggle
+    invTbNew:'➕ New',invTbEdit:'✏️ Edit',invTbDel:'🗑️ Delete',
+    invTbLbl:'🏷️ Label',invTbMultiLbl:'🏷️ Multiple labels',
+    invViewTable:'Table',invViewCards:'Cards',
+    // Labels — modal
+    lblPreviewTitle:'Label preview',lblPageTitle:'Page preview',
+    lblThermalInfo:'ℹ One label per page — page is configured automatically when printing.',
+    lblDownloadBtn:'💾 Download PDF',lblPrintBtn:'🖨️ Print',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -2477,6 +2508,19 @@ function applyLang(){
   const _fcpP1El=el('fcp-p1');if(_fcpP1El)_fcpP1El.placeholder=t('fcpNewPassPh');
   const _fcpP2El=el('fcp-p2');if(_fcpP2El)_fcpP2El.placeholder=t('fcpConfirmPassPh');
   const _fcpSaveBtnEl=el('fcp-save-btn');if(_fcpSaveBtnEl)_fcpSaveBtnEl.textContent=t('fcpSaveBtn');
+  // Inventory toolbar & view toggle
+  const _invViewTbl=el('inv-view-table');if(_invViewTbl)_invViewTbl.innerHTML='<i class="ti ti-list"></i> '+t('invViewTable');
+  const _invViewGrd=el('inv-view-grid');if(_invViewGrd)_invViewGrd.innerHTML='<i class="ti ti-grid-dots"></i> '+t('invViewCards');
+  const _invTbEdit=el('inv-tb-edit');if(_invTbEdit)_invTbEdit.textContent=t('invTbEdit');
+  const _invTbDel=el('inv-tb-del');if(_invTbDel)_invTbDel.textContent=t('invTbDel');
+  const _invTbLbl=el('inv-tb-lbl');if(_invTbLbl)_invTbLbl.textContent=t('invTbLbl');
+  const _invLblBtn=el('inv-lbl-btn');if(_invLblBtn)_invLblBtn.textContent=t('invTbMultiLbl');
+  // Labels modal
+  const _lblPrevTitleEl=el('lbl-preview-title');if(_lblPrevTitleEl)_lblPrevTitleEl.textContent=t('lblPreviewTitle');
+  const _lblPageTitleEl=el('lbl-page-title');if(_lblPageTitleEl)_lblPageTitleEl.textContent=t('lblPageTitle');
+  const _lblThermalInfoEl=el('lbl-thermal-info');if(_lblThermalInfoEl)_lblThermalInfoEl.textContent=t('lblThermalInfo');
+  const _lblDlBtnEl=el('lbl-dl-btn');if(_lblDlBtnEl)_lblDlBtnEl.textContent=t('lblDownloadBtn');
+  const _lblPrintBtnEl=el('lbl-print-btn');if(_lblPrintBtnEl)_lblPrintBtnEl.innerHTML='🖨️ '+t('lblPrintBtn');
   updateCobrar(); renderCats(); renderProds(); updatePCat();
 }
 function switchLang(){
@@ -3395,9 +3439,9 @@ function renderInv(){
   var cntRed=0,cntYel=0,cntGrn=0;
   list.forEach(function(p){var s=p.stock||0;var m=p.minStock||5;if(s<=0)cntRed++;else if(s<=m)cntYel++;else cntGrn++;});
   var badges='<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">'
-    +'<span style="display:inline-flex;align-items:center;gap:5px;background:#EF444420;color:#EF4444;padding:4px 11px;border-radius:20px;font-size:.78rem;font-weight:700;border:1px solid #EF444440">🔴 Sin stock: '+cntRed+'</span>'
-    +'<span style="display:inline-flex;align-items:center;gap:5px;background:#F59E0B20;color:#F59E0B;padding:4px 11px;border-radius:20px;font-size:.78rem;font-weight:700;border:1px solid #F59E0B40">🟡 Stock bajo: '+cntYel+'</span>'
-    +'<span style="display:inline-flex;align-items:center;gap:5px;background:#22C55E20;color:#22C55E;padding:4px 11px;border-radius:20px;font-size:.78rem;font-weight:700;border:1px solid #22C55E40">🟢 Ok: '+cntGrn+'</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:5px;background:#EF444420;color:#EF4444;padding:4px 11px;border-radius:20px;font-size:.78rem;font-weight:700;border:1px solid #EF444440">🔴 '+t('invStkNone')+': '+cntRed+'</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:5px;background:#F59E0B20;color:#F59E0B;padding:4px 11px;border-radius:20px;font-size:.78rem;font-weight:700;border:1px solid #F59E0B40">🟡 '+t('invStkLow')+': '+cntYel+'</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:5px;background:#22C55E20;color:#22C55E;padding:4px 11px;border-radius:20px;font-size:.78rem;font-weight:700;border:1px solid #22C55E40">🟢 '+t('invStkOk')+': '+cntGrn+'</span>'
     +'</div>';
   // sync toggle button visual state + toolbar visibility
   var _tblBtn=el('inv-view-table'),_grdBtn=el('inv-view-grid');
@@ -3429,7 +3473,7 @@ function renderInv(){
   }
   // TABLE VIEW
   const cats=db.categories||[];
-  const costTh=isAdm?'<th style="text-align:right">Costo</th>':'';
+  const costTh=isAdm?'<th style="text-align:right">'+t('invColCost')+'</th>':'';
   const rows=list.map(function(p,i){
     var stk=p.stock||0;var min=p.minStock||5;
     var isZero=stk<=0;var isLow=!isZero&&stk<=min;
@@ -3452,17 +3496,17 @@ function renderInv(){
   }).join('');
   el('inv-list').innerHTML=badges
     +'<div style="overflow-x:auto"><table class="inv-tbl"><thead><tr>'
-    +'<th style="width:32px">#</th><th>Nombre</th><th>Categoría</th><th>Cód. barras</th>'
-    +'<th style="text-align:right">Stock</th>'+costTh
-    +'<th style="text-align:right">Precio</th><th style="text-align:center">Activo</th>'
+    +'<th style="width:32px">#</th><th>'+t('invColName')+'</th><th>'+t('invColCat')+'</th><th>'+t('invColBarcode')+'</th>'
+    +'<th style="text-align:right">'+t('invColStock')+'</th>'+costTh
+    +'<th style="text-align:right">'+t('invColPrice')+'</th><th style="text-align:center">'+t('invColActive')+'</th>'
     +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
   if(ftEl){
     var totCost=0,totVal=0;
     list.forEach(function(p){totCost+=(p.cost||0)*(p.stock||0);totVal+=(p.price||0)*(p.stock||0);});
     ftEl.style.display='';
-    ftEl.innerHTML=list.length+' producto'+(list.length!==1?'s':'')
-      +(isAdm?' &nbsp;·&nbsp; Costo total: <strong>'+dolr(totCost)+'</strong>':'')
-      +' &nbsp;·&nbsp; Valor en venta: <strong>'+dolr(totVal)+'</strong>';
+    ftEl.innerHTML=list.length+' '+(list.length!==1?t('invFooterProdsP'):t('invFooterProds'))
+      +(isAdm?' &nbsp;·&nbsp; '+t('invFooterCostTotal')+': <strong>'+dolr(totCost)+'</strong>':'')
+      +' &nbsp;·&nbsp; '+t('invFooterSaleValue')+': <strong>'+dolr(totVal)+'</strong>';
   }
   _updateInvSelUI();
 }
@@ -6110,12 +6154,12 @@ function calcNotifs(){
 }
 
 function _updateNotifBadge(){
-  const unread=_notifs.filter(function(n){return !n.read;}).length;
+  const total=_notifs.length;
   const badge=el('notif-badge');
   const btn=el('notif-btn');
   if(!badge||!btn)return;
-  if(unread>0){
-    badge.textContent=unread>9?'9+':String(unread);
+  if(total>0){
+    badge.textContent=total>9?'9+':String(total);
     badge.style.display='flex';
     btn.style.color='#ef4444';
   }else{
@@ -6758,6 +6802,7 @@ function _buildPreviewLabelHTML(p,size){
   // Térmica 58mm: 200px ancho
   if(size==='t58'){
     return'<div style="'+base+'width:200px;padding:8px;align-items:center;text-align:center">'
+      +'<div style="font-size:9px;color:#555;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-bottom:4px">'+_htmlEsc(bizName)+'</div>'
       +'<div style="font-size:12px;font-weight:800;line-height:1.3;color:#111;margin-bottom:6px;word-break:break-word;width:100%">'+_htmlEsc(p.name)+'</div>'
       +'<div style="font-size:20px;font-weight:800;color:#000;line-height:1;margin-bottom:6px">'+price+'</div>'
       +(bc?'<div style="width:100%">'+_barcodeSvg(bc,170,28)+'<div style="font-size:9px;letter-spacing:1.5px;color:#666;margin-top:2px">'+_htmlEsc(bc)+'</div></div>':'')
@@ -6767,6 +6812,7 @@ function _buildPreviewLabelHTML(p,size){
 
   // Térmica 80mm: 280px ancho
   return'<div style="'+base+'width:280px;padding:10px 8px;align-items:center;text-align:center">'
+    +'<div style="font-size:10px;color:#555;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-bottom:4px">'+_htmlEsc(bizName)+'</div>'
     +'<div style="font-size:13px;font-weight:800;line-height:1.3;color:#111;margin-bottom:6px;word-break:break-word;width:100%">'+_htmlEsc(p.name)+'</div>'
     +'<div style="font-size:22px;font-weight:800;color:#000;line-height:1;margin-bottom:6px">'+price+'</div>'
     +(bc?'<div style="width:100%">'+_barcodeSvg(bc,240,30)+'<div style="font-size:10px;letter-spacing:1.5px;color:#666;margin-top:2px">'+_htmlEsc(bc)+'</div></div>':'')
@@ -6815,6 +6861,44 @@ function printLabels(){
     window.print();
     setTimeout(function(){document.body.classList.remove('lbl-pm');printArea.innerHTML='';},500);
   },80);
+}
+
+async function downloadLabelsPDF(){
+  const qty=Math.max(1,Math.min(100,parseInt((el('lbl-qty')||{}).value)||1));
+  var pids;
+  if(_lblMulti&&_lblPids.length){pids=_lblPids;}
+  else{const sel=el('lbl-prod-sel');pids=sel&&sel.value?[sel.value]:(_lblPids.length?_lblPids:[]);}
+  if(!pids.length){toast('⚠ Sin producto seleccionado');return;}
+  const labels=[];
+  pids.forEach(function(pid){
+    const p=db.products.find(function(x){return x.id===pid;});
+    if(!p)return;
+    for(var i=0;i<qty;i++)labels.push(_buildOneLabelHTML(p,_lblSize));
+  });
+  if(!labels.length){toast('⚠ Sin etiquetas');return;}
+  const printArea=el('lbl-print-area');
+  if(_lblSize==='t58'||_lblSize==='t80'){
+    var pgW=_lblSize==='t58'?'58mm':'80mm';
+    printArea.innerHTML='<style>@media print{@page{size:'+pgW+' auto;margin:0;}.lbl-itm{page-break-after:always;break-after:page;}}</style>'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-start">'+labels.join('')+'</div>';
+  }else{
+    printArea.innerHTML='<style>@media print{@page{size:8.5in 11in;margin:.25in;}}</style>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1mm">'+labels.join('')+'</div>';
+  }
+  closeOv('ov-labels');
+  document.body.classList.add('lbl-pm');
+  await new Promise(function(r){setTimeout(r,80);});
+  try{
+    const result=await ipcRenderer.invoke('save-pdf');
+    document.body.classList.remove('lbl-pm');
+    printArea.innerHTML='';
+    if(result.ok){toast('✅ PDF guardado');}
+    else if(result.error){toast('❌ '+result.error);}
+  }catch(e){
+    document.body.classList.remove('lbl-pm');
+    printArea.innerHTML='';
+    toast('❌ '+e.message);
+  }
 }
 
 // ── SIDEBAR ──────────────────────────────────────────────────────────────────

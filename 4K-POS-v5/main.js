@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const os = require('os')
@@ -212,6 +212,22 @@ ipcMain.handle('extend-license-offline', (_, { deviceCode, extensionCode }) => {
 })
 
 ipcMain.handle('restart-clean', () => { app.relaunch(); app.exit(0) })
+
+// ── IPC: guardar etiquetas como PDF ────────────
+ipcMain.handle('save-pdf', async (event) => {
+  const { filePath, canceled } = await dialog.showSaveDialog({
+    defaultPath: 'etiquetas_4kpos.pdf',
+    filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
+  })
+  if (canceled || !filePath) return { ok: false }
+  try {
+    const data = await event.sender.printToPDF({ printBackground: true, marginsType: 0 })
+    fs.writeFileSync(filePath, data)
+    return { ok: true }
+  } catch (e) {
+    return { ok: false, error: e.message }
+  }
+})
 
 // ── IPC: cerrar app ────────────────────────────
 ipcMain.handle('exit-app', () => { app.quit() })
