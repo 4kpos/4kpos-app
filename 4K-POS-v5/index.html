@@ -697,7 +697,7 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
       <div style="background:#fff;padding:10px;border-radius:12px;display:inline-block">
         <img id="dash-qr-img" src="" alt="QR" style="width:200px;height:200px;display:block">
       </div>
-      <p style="font-size:.82rem;color:var(--tx2);margin:0">Escanea con tu celular<br>para abrir el dashboard</p>
+      <p id="dash-qr-scan-txt" style="font-size:.82rem;color:var(--tx2);margin:0;text-align:center">Escanea con tu celular<br>para abrir el dashboard</p>
       <a id="dash-qr-link" href="#" target="_blank" onclick="try{require('electron').shell.openExternal(this.dataset.url);return false;}catch(e){}" style="font-size:.75rem;color:var(--ac);word-break:break-all;text-decoration:none"></a>
     </div>
   </div>
@@ -1051,10 +1051,10 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
       <div style="margin-bottom:10px">
         <label class="lbl" id="lbl-format-lbl" style="margin-bottom:5px;display:block">Formato</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-          <button class="lbl-sz-btn on" id="lbl-sz-1x2" onclick="setLblSize('1x2',this)">📋 1×2"<br><span style="font-size:.68rem;font-weight:400;opacity:.8">25×50mm · precio</span></button>
-          <button class="lbl-sz-btn" id="lbl-sz-2x2" onclick="setLblSize('2x2',this)">📋 2×2"<br><span style="font-size:.68rem;font-weight:400;opacity:.8">50×50mm · producto</span></button>
-          <button class="lbl-sz-btn" id="lbl-sz-t58" onclick="setLblSize('t58',this)">🧾 Térmica 58mm<br><span style="font-size:.68rem;font-weight:400;opacity:.8">58mm rollo</span></button>
-          <button class="lbl-sz-btn" id="lbl-sz-t80" onclick="setLblSize('t80',this)">🧾 Térmica 80mm<br><span style="font-size:.68rem;font-weight:400;opacity:.8">80mm rollo</span></button>
+          <button class="lbl-sz-btn on" id="lbl-sz-1x2" onclick="setLblSize('1x2',this)">📋 1×2"<br><span id="lbl-sz-1x2-sub" style="font-size:.68rem;font-weight:400;opacity:.8">25×50mm · precio</span></button>
+          <button class="lbl-sz-btn" id="lbl-sz-2x2" onclick="setLblSize('2x2',this)">📋 2×2"<br><span id="lbl-sz-2x2-sub" style="font-size:.68rem;font-weight:400;opacity:.8">50×50mm · producto</span></button>
+          <button class="lbl-sz-btn" id="lbl-sz-t58" onclick="setLblSize('t58',this)">🧾 <span id="lbl-sz-t58-txt">Térmica 58mm</span><br><span id="lbl-sz-t58-sub" style="font-size:.68rem;font-weight:400;opacity:.8">58mm rollo</span></button>
+          <button class="lbl-sz-btn" id="lbl-sz-t80" onclick="setLblSize('t80',this)">🧾 <span id="lbl-sz-t80-txt">Térmica 80mm</span><br><span id="lbl-sz-t80-sub" style="font-size:.68rem;font-weight:400;opacity:.8">80mm rollo</span></button>
         </div>
       </div>
       <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:10px">
@@ -2130,6 +2130,17 @@ const T = {
     auditSpecialDeactivated:'Especial desactivado',
     auditSpcTypeDiscount:'Descuento %',auditSpcTypeQtyPrice:'Por cantidad',
     userUpdatedPre:'✓ Usuario actualizado: ',userCreatedPre:'✓ Usuario: ',
+    // QR dashboard scan text
+    scanQR:'Escanea con tu celular\npara abrir el dashboard',
+    // Credits — Abonar button
+    abonar:'Abonar',
+    // Label modal — single/multi titles and dynamic text
+    lblSingleTitle:'Imprimir Etiqueta',lblMultiTitle:'Etiquetas múltiples',
+    lblSelectedProducts:'productos seleccionados para imprimir etiquetas.',
+    // Label size button descriptions
+    lblSz1x2Sub:'25×50mm · precio',lblSz2x2Sub:'50×50mm · producto',
+    lblSzT58Txt:'Térmica 58mm',lblSzT58Sub:'58mm rollo',
+    lblSzT80Txt:'Térmica 80mm',lblSzT80Sub:'80mm rollo',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -2541,6 +2552,17 @@ const T = {
     auditSpecialDeactivated:'Special deactivated',
     auditSpcTypeDiscount:'Discount %',auditSpcTypeQtyPrice:'By quantity',
     userUpdatedPre:'✓ User updated: ',userCreatedPre:'✓ User: ',
+    // QR dashboard scan text
+    scanQR:'Scan with your phone\nto open the dashboard',
+    // Credits — payment button
+    abonar:'Add payment',
+    // Label modal — single/multi titles and dynamic text
+    lblSingleTitle:'Print Label',lblMultiTitle:'Multiple Labels',
+    lblSelectedProducts:'products selected for label printing.',
+    // Label size button descriptions
+    lblSz1x2Sub:'25×50mm · price',lblSz2x2Sub:'50×50mm · product',
+    lblSzT58Txt:'Thermal 58mm',lblSzT58Sub:'58mm roll',
+    lblSzT80Txt:'Thermal 80mm',lblSzT80Sub:'80mm roll',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -3080,6 +3102,15 @@ function applyLang(){
   const _ncNameEl=el('nc-name');if(_ncNameEl)_ncNameEl.placeholder=t('custNamePh');
   const _cmbDescEl=el('cmb-desc');if(_cmbDescEl)_cmbDescEl.placeholder=t('cmbDescPh');
   const _uNameEl=el('u-name');if(_uNameEl)_uNameEl.placeholder=t('userNameExPh');
+  // QR dashboard scan text
+  const _dashQrScanTxt=el('dash-qr-scan-txt');if(_dashQrScanTxt)_dashQrScanTxt.textContent=t('scanQR');
+  // Label size button sub-descriptions
+  const _sz1x2Sub=el('lbl-sz-1x2-sub');if(_sz1x2Sub)_sz1x2Sub.textContent=t('lblSz1x2Sub');
+  const _sz2x2Sub=el('lbl-sz-2x2-sub');if(_sz2x2Sub)_sz2x2Sub.textContent=t('lblSz2x2Sub');
+  const _szT58Txt=el('lbl-sz-t58-txt');if(_szT58Txt)_szT58Txt.textContent=t('lblSzT58Txt');
+  const _szT58Sub=el('lbl-sz-t58-sub');if(_szT58Sub)_szT58Sub.textContent=t('lblSzT58Sub');
+  const _szT80Txt=el('lbl-sz-t80-txt');if(_szT80Txt)_szT80Txt.textContent=t('lblSzT80Txt');
+  const _szT80Sub=el('lbl-sz-t80-sub');if(_szT80Sub)_szT80Sub.textContent=t('lblSzT80Sub');
   updateCobrar(); renderCats(); renderProds(); updatePCat();
 }
 function switchLang(){
@@ -5063,7 +5094,7 @@ function _buildCreditCard(c,compact,fromList){
   const dateStr=new Date(c.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
   const _abonoFn=fromList?'openAbonoFromList':'openCreditPay';
   const btns='<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'
-    +'<button class="btn btn-p" style="font-size:.75rem" onclick="'+_abonoFn+'(\''+c._key+'\')">💰 Abonar</button>'
+    +'<button class="btn btn-p" style="font-size:.75rem" onclick="'+_abonoFn+'(\''+c._key+'\')">💰 '+t('abonar')+'</button>'
     +'<button class="btn btn-g" style="font-size:.75rem" onclick="payCreditFull(\''+c._key+'\')">✅ '+t('markPaid')+'</button>'
     +'</div>';
   const dueBadge=_dueBadge(c.dueDate);
@@ -7231,7 +7262,7 @@ function openLabelModal(pid){
   }
   const sr=el('lbl-single-row');if(sr)sr.style.display='';
   const mr=el('lbl-multi-row');if(mr)mr.style.display='none';
-  el('lbl-modal-title').textContent='Imprimir Etiqueta';
+  el('lbl-modal-title').textContent=t('lblSingleTitle');
   el('lbl-qty').value='1';
   _lblSize='1x2';_lblPrinter='normal';
   ['1x2','2x2','t58','t80'].forEach(function(k){var b=el('lbl-sz-'+k);if(b)b.classList.toggle('on',k==='1x2');});
@@ -7247,8 +7278,8 @@ function printSelectedLabels(){
   _lblPids=[..._invSel];
   const sr=el('lbl-single-row');if(sr)sr.style.display='none';
   const mr=el('lbl-multi-row');
-  if(mr){mr.style.display='';mr.innerHTML='<strong>'+_lblPids.length+'</strong> productos seleccionados para imprimir etiquetas.';}
-  el('lbl-modal-title').textContent='Etiquetas múltiples';
+  if(mr){mr.style.display='';mr.innerHTML='<strong>'+_lblPids.length+'</strong> '+t('lblSelectedProducts');}
+  el('lbl-modal-title').textContent=t('lblMultiTitle');
   el('lbl-qty').value='1';
   _lblSize='1x2';_lblPrinter='normal';
   ['1x2','2x2','t58','t80'].forEach(function(k){var b=el('lbl-sz-'+k);if(b)b.classList.toggle('on',k==='1x2');});
