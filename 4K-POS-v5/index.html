@@ -1971,6 +1971,142 @@ const T = {
     rpNote:'Anótala — no se mostrará otra vez. El empleado deberá cambiarla al iniciar sesión.',
     bkpModalPassPh:'Contraseña de respaldo',bkpConfirmBtn:'Confirmar',
     userFieldsRequired:'Todos los campos requeridos',userAlreadyExists:'Usuario ya existe',userNotFound:'Usuario no encontrado',
+    // Backup / restore
+    backupRestoreConfirm:'¿Restaurar backup? Se perderán los cambios no guardados.',
+    backupRestoreEncConfirm:'¿Restaurar backup cifrado? Se perderán los cambios no guardados.',
+    backupRestored:'✅ Backup restaurado',backupNotFound:'⚠ Backup no encontrado',backupInvalid:'⚠ Backup inválido',
+    backupRestoreError:'⚠ Error al restaurar',backupImportConfirm:'¿Restaurar datos desde este archivo? Se perderán cambios no guardados.',
+    dataImported:'✅ Datos importados correctamente',dataRefreshed:'🔄 Actualizado',
+    // Logo
+    logoLoaded:'✅ Logo cargado',
+    // CSV / export
+    csvExported:'📥 CSV exportado',
+    // Categories
+    catNameRequired:'⚠ Nombre requerido',
+    // Products
+    prodNamePriceRequired:'⚠ Nombre y precio requeridos',
+    delProductConfirm:'¿Eliminar producto ',
+    marginLbl:'Margen',
+    // Inventory filter
+    invCatAll:'Todos',
+    // Customers
+    custCedulaRequired:'⚠ Cédula requerida',custDuplicate:'⚠ Ya existe un cliente con esa cédula: ',
+    noCustomers:'Sin clientes.',delCustConfirm:'¿Eliminar cliente?',
+    custSaved:'✓ Cliente guardado',
+    // Open accounts
+    oaEnterNameOrTable:'⚠ Ingresa nombre o mesa',oaSaved:'📖 Cuenta guardada: ',
+    oaLoaded:'📂 Cuenta cargada: ',oaDeleted:'🗑️ Cuenta eliminada',
+    oaDeleteConfirm:'¿Eliminar esta cuenta abierta?',oaReplaceConfirm:'¿Reemplazar el carrito actual con esta cuenta?',
+    oaNoneOpen:'No hay cuentas abiertas',oaOpen:'📂 Abrir',oaDelete:'🗑️ Eliminar',
+    oaBlockMsg:'⚠ No puedes cerrar sesión con ',oaBlockMsgSuffix:' cuenta',oaBlockMsgPSuffix:'s',
+    oaBlockPending:' pendiente',oaBlockPendingP:'s',oaBlockCloseFirst:'. Cierra o cobra las cuentas primero.',
+    // Pay methods
+    payMethodsUpdated:'✅ Métodos de pago actualizados',
+    // User toasts
+    userUpdated:'✓ Usuario actualizado: ',userCreated:'✓ Usuario: ',userEditing:'✏️ Editando usuario: ',
+    userPlanLimitPrefix:'⚠ Límite de plan alcanzado (',userPlanLimitSuffix:' usuarios). Actualiza a Pro para agregar más.',
+    // Config toasts
+    codeBadOld:'⚠ Código actual incorrecto',codeUpdated:'✅ Código actualizado',
+    fundSaved:'✅ Fondo: ',time24h:'✅ Hora 24h',time12h:'✅ Hora 12h AM/PM',
+    creditCfgSaved:'✅ Configuración de crédito guardada',
+    // Facturas / invoices
+    proveedorRequired:'⚠ El nombre del proveedor es obligatorio',numFacRequired:'⚠ El número de factura es obligatorio',
+    facItemsRequired:'⚠ Agrega al menos un producto con cantidad y precio',
+    facNoValidItems:'⚠ Ningún producto válido encontrado',
+    facSavedPrefix:'✅ Factura guardada. Stock actualizado — ',facSavedSuffix:' producto(s), total ',
+    facDeleted:'🗑 Factura eliminada — stock revertido',
+    facProdQtyCostRequired:'⚠ Producto, cantidad y costo requeridos',facProdNotFound:'⚠ Producto no encontrado',
+    facSavedOld:'✅ Factura — Stock: ',facDelConfirmNoStock:'¿Eliminar factura? El stock NO se revertirá.',
+    facSelectProduct:'— Selecciona producto —',facNoInvoices:'Sin facturas.',
+    // Gastos
+    gstConceptAmtRequired:'⚠ Concepto y monto requeridos',gstSaved:'✅ Gasto registrado',gstDelConfirm:'¿Eliminar gasto?',
+    gstPeriodTotal:'Total período: ',gstRecords:' registros',gstNoneInPeriod:'Sin gastos en este período.',
+    // Returns / cancel
+    returnConfirmPrefix:'¿Devolver Orden #',returnConfirmSuffix:')?',
+    returnDelConfirmPrefix:'¿Eliminar devolución #',returnDelConfirmSuffix:'? El stock se ajustará.',
+    returnDone:'✅ Devolución procesada',returnDeleted:'↩ Devolución eliminada',
+    cancelConfirmPrefix:'¿CANCELAR Orden #',cancelConfirmSuffix:')?',
+    cancelDone:'🗑 Cancelado',cancelAdminPromptPrefix:'Anular Orden #',
+    orderLbl:'Orden #',
+    returnedBadge:'🔄 Devuelta',cancelledBadge:'❌ Cancelada',
+    deleteReturnBtn:'🗑 Eliminar devolución',returnBtn:'↩ Devolver',
+    // Sales view
+    avgTicketLbl:'Promedio',cancelledCount:'❌ Canceladas: ',returnedCount:'🔄 Devueltas: ',
+    noSalesInPeriod:'Sin ventas en este período.',
+    // Shift report / logout inline
+    shiftOpenedLbl:'Turno abierto',collectedSalesHdr:'VENTAS COBRADAS DEL DÍA',totalCollectedHdr:'TOTAL COBRADO',
+    creditGrantedShift:'Crédito otorgado en este turno',creditGrantedShiftNote:'⚠ Deuda — no incluida en lo cobrado',
+    cashReconHdr:'CUADRE DE EFECTIVO',cashFundNote:'🗃️ Fondo de caja: ',cashFundNoteNoCuadre:' (no incluido en el cuadre)',
+    openAccountPayMethod:'Cta. Abierta',
+    // printShiftReport inline
+    shiftReportTitle:'REPORTE DE TURNO',cashierLblPrint:'Cajero: ',shiftFromLbl:'Turno desde: ',
+    balanceOkTxt:'Cuadre correcto ✅',
+    collectedSalesSection:'VENTAS COBRADAS',creditsGrantedSection:'CRÉDITOS OTORGADOS (DEUDA)',
+    creditNotIncome:'No es ingreso — no incluido en efectivo',cashReconSection:'CUADRE DE EFECTIVO',
+    declaredCashPrint:'Efectivo declarado',diffPrint:'Diferencia',
+    // printReporteVentas
+    salesReportTitle:'Reporte de Ventas',salesReportSalesLbl:'Ventas: ',salesReportTotalLbl:'Total: ',
+    salesReportCollectedLbl:'Cobrado: ',salesReportCreditPendLbl:'Crédito pendiente: ',
+    dateColHdr:'Fecha',timeColHdr:'Hora',orderColHdr:'Orden',itemsColHdr:'Items',methodColHdr:'Método',
+    totalColHdr:'Total',cashierColHdr:'Cajero',statusColHdr:'Estado',generatedLbl:'Generado: ',
+    completedStatus:'Completada',creditPaidStatus:'Crédito pagado',creditPendStatus:'Crédito pendiente',
+    creditPendShort:'Crédito pend.',
+    // exportVentasCSV / exportCreditosCSV column headers
+    csvDateCol:'Fecha',csvTimeCol:'Hora',csvOrderCol:'Orden',csvItemsCol:'Items',csvMethodCol:'Método de Pago',
+    csvTotalCol:'Total',csvCashierCol:'Cajero',csvStatusCol:'Estado',csvClientCol:'Cliente',
+    csvCreditClient:'Cliente',csvCedulaCol:'Cédula/ID',csvSaleDateCol:'Fecha Venta',csvDueDateCol:'Fecha Límite',
+    csvTotalDebt:'Total',csvPaidCol:'Abonado',csvPendCol:'Pendiente',csvEstadoCol:'Estado',
+    csvPaidStatus:'Pagado',csvPendStatus:'Pendiente',
+    pmLabelEfectivo:'Efectivo',pmLabelTarjeta:'Tarjeta',pmLabelTransferencia:'Transferencia',
+    pmLabelCredito:'Crédito',pmLabelDividido:'Dividido',pmLabelOA:'Cuenta abierta',
+    periodHoy:'Hoy',periodSemana:'Esta semana',periodMes:'Este mes',periodTodo:'Todo el período',
+    // renderVentasList
+    ventasSummaryPrefix:' ventas · ',noSalesThisPeriod:'Sin ventas en este período.',
+    pendingLabel:'⏳ Pendiente',paidLabel:'✅ Pagado',partialLabel:'⏳ Abonado ',
+    // Graf tooltip / legend
+    grafIngresos:'Ingresos',grafGastos:'Gastos',grafIncomeLbl:'Ingresos: ',grafExpLbl:'Gastos: ',
+    // contaConta
+    ordersLblConta:'Órdenes',profitLbl:'Utilidad',noSalesConta:'Sin ventas.',
+    // Backup list view
+    bkpListProds:' productos · ',bkpListSales:' ventas',bkpListRestoreBtn:'Restaurar',bkpListReadErr:'Error al leer backup',
+    // Specials bogo label
+    bogoPaysLessThanBuys:'⚠ "Paga" debe ser menor que "Lleva"',
+    // Abono confirm dialog
+    abonoConfirmTitle:'¿Confirmar abono?',abonoClientLbl:'Cliente: ',abonoFullPayment:'Pago total',abonoPartialPayment:'Abono parcial',
+    abonoRemainingBalance:'Saldo restante: ',
+    // Barcode scanner
+    barcodeNotFound:'Código no encontrado: ',
+    // renderSpecialsList
+    deletedProduct:'(producto eliminado)',bogoCarries:'Lleva ',bogoPays:' paga ',qtyPriceDetail:'u. → ',
+    // Restore backup decrypt modal
+    bkpDecryptTitle:'🔐 Descifrar respaldo',bkpDecryptDesc:'Ingresa la contraseña de respaldo para restaurar.',
+    // dataRestoredFromBackup
+    dataRestoredBackup:'🔄 Datos restaurados del backup automático',
+    // Cash reconciliation inline
+    cashMatchesLbl:'Cuadre correcto',cashDiffLbl:'Diferencia',
+    fundNotePre:'Fondo: ',fundNotePost:' (no incluido)',
+    declaredLbl:'Declarado',cashMismatch:'El efectivo no cuadra — corrígelo antes de cerrar',
+    // Inventory count modal
+    invCountDesc:'Ingresa el conteo físico de cada producto:',
+    invCountColProd:'Producto',invCountColSys:'Sistema',invCountColCount:'Conteo',invCountColStatus:'Estado',
+    // Customer search / credit
+    noSearchResults:'Sin resultados',noRegisteredCustomers:'Sin clientes registrados',
+    // Purchases / expenses
+    delFacConfirm:'¿Eliminar factura? El stock NO se revertirá.',
+    delGstConfirm:'¿Eliminar gasto?',
+    gstConceptAmtRequired:'⚠ Concepto y monto requeridos',
+    gstSavedToast:'✅ Gasto registrado',
+    // Connectivity
+    connectedTitle:'Conectado',noConnectionTitle:'Sin conexión',
+    // Admin code prompt prefixes
+    delUserPromptPre:'Eliminar usuario ',delProdPromptPre:'Eliminar ',
+    invAdjPromptPre:'Ajuste de inventario (',markCreditPaidPromptPre:'Marcar crédito pagado: ',
+    delOaPromptPre:'Eliminar cuenta: ',
+    // Dashboard table columns
+    dbColProd:'Producto',dbColQty:'Cant.',
+    // Placeholder hints
+    vntSrchPh:'🔍 # orden o cliente...',catNamePh:'Ej: Cosméticos',
+    custNamePh:'Juan Pérez',userNameExPh:'María',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -2223,6 +2359,142 @@ const T = {
     rpNote:'Write it down — it will not be shown again. The employee must change it on next login.',
     bkpModalPassPh:'Backup password',bkpConfirmBtn:'Confirm',
     userFieldsRequired:'All fields required',userAlreadyExists:'Username already taken',userNotFound:'User not found',
+    // Backup / restore
+    backupRestoreConfirm:'Restore backup? Unsaved changes will be lost.',
+    backupRestoreEncConfirm:'Restore encrypted backup? Unsaved changes will be lost.',
+    backupRestored:'✅ Backup restored',backupNotFound:'⚠ Backup not found',backupInvalid:'⚠ Invalid backup',
+    backupRestoreError:'⚠ Error restoring backup',backupImportConfirm:'Restore data from this file? Unsaved changes will be lost.',
+    dataImported:'✅ Data imported successfully',dataRefreshed:'🔄 Refreshed',
+    // Logo
+    logoLoaded:'✅ Logo loaded',
+    // CSV / export
+    csvExported:'📥 CSV exported',
+    // Categories
+    catNameRequired:'⚠ Name required',
+    // Products
+    prodNamePriceRequired:'⚠ Name and price required',
+    delProductConfirm:'Delete product ',
+    marginLbl:'Margin',
+    // Inventory filter
+    invCatAll:'All',
+    // Customers
+    custCedulaRequired:'⚠ ID required',custDuplicate:'⚠ A customer with this ID already exists: ',
+    noCustomers:'No customers.',delCustConfirm:'Delete customer?',
+    custSaved:'✓ Customer saved',
+    // Open accounts
+    oaEnterNameOrTable:'⚠ Enter name or table',oaSaved:'📖 Account saved: ',
+    oaLoaded:'📂 Account loaded: ',oaDeleted:'🗑️ Account deleted',
+    oaDeleteConfirm:'Delete this open account?',oaReplaceConfirm:'Replace current cart with this account?',
+    oaNoneOpen:'No open accounts',oaOpen:'📂 Open',oaDelete:'🗑️ Delete',
+    oaBlockMsg:'⚠ Cannot close session with ',oaBlockMsgSuffix:' open account',oaBlockMsgPSuffix:'s',
+    oaBlockPending:' pending',oaBlockPendingP:'',oaBlockCloseFirst:'. Close or charge accounts first.',
+    // Pay methods
+    payMethodsUpdated:'✅ Payment methods updated',
+    // User toasts
+    userUpdated:'✓ User updated: ',userCreated:'✓ User: ',userEditing:'✏️ Editing user: ',
+    userPlanLimitPrefix:'⚠ Plan limit reached (',userPlanLimitSuffix:' users). Upgrade to Pro to add more.',
+    // Config toasts
+    codeBadOld:'⚠ Current code is incorrect',codeUpdated:'✅ Code updated',
+    fundSaved:'✅ Fund: ',time24h:'✅ 24h time',time12h:'✅ 12h AM/PM time',
+    creditCfgSaved:'✅ Credit config saved',
+    // Facturas / invoices
+    proveedorRequired:'⚠ Supplier name is required',numFacRequired:'⚠ Invoice number is required',
+    facItemsRequired:'⚠ Add at least one product with quantity and price',
+    facNoValidItems:'⚠ No valid products found',
+    facSavedPrefix:'✅ Invoice saved. Stock updated — ',facSavedSuffix:' product(s), total ',
+    facDeleted:'🗑 Invoice deleted — stock reverted',
+    facProdQtyCostRequired:'⚠ Product, quantity and cost required',facProdNotFound:'⚠ Product not found',
+    facSavedOld:'✅ Invoice — Stock: ',facDelConfirmNoStock:'Delete invoice? Stock will NOT be reverted.',
+    facSelectProduct:'— Select product —',facNoInvoices:'No invoices.',
+    // Gastos
+    gstConceptAmtRequired:'⚠ Concept and amount required',gstSaved:'✅ Expense registered',gstDelConfirm:'Delete expense?',
+    gstPeriodTotal:'Period total: ',gstRecords:' records',gstNoneInPeriod:'No expenses in this period.',
+    // Returns / cancel
+    returnConfirmPrefix:'Return Order #',returnConfirmSuffix:')?',
+    returnDelConfirmPrefix:'Delete return #',returnDelConfirmSuffix:'? Stock will be adjusted.',
+    returnDone:'✅ Return processed',returnDeleted:'↩ Return removed',
+    cancelConfirmPrefix:'CANCEL Order #',cancelConfirmSuffix:')?',
+    cancelDone:'🗑 Cancelled',cancelAdminPromptPrefix:'Void Order #',
+    orderLbl:'Order #',
+    returnedBadge:'🔄 Returned',cancelledBadge:'❌ Cancelled',
+    deleteReturnBtn:'🗑 Delete return',returnBtn:'↩ Return',
+    // Sales view
+    avgTicketLbl:'Average',cancelledCount:'❌ Cancelled: ',returnedCount:'🔄 Returned: ',
+    noSalesInPeriod:'No sales in this period.',
+    // Shift report / logout inline
+    shiftOpenedLbl:'Shift opened',collectedSalesHdr:'COLLECTED SALES OF THE DAY',totalCollectedHdr:'TOTAL COLLECTED',
+    creditGrantedShift:'Credit granted this shift',creditGrantedShiftNote:'⚠ Debt — not counted in collected cash',
+    cashReconHdr:'CASH RECONCILIATION',cashFundNote:'🗃️ Cash fund: ',cashFundNoteNoCuadre:' (not included in reconciliation)',
+    openAccountPayMethod:'Open Acct.',
+    // printShiftReport inline
+    shiftReportTitle:'SHIFT REPORT',cashierLblPrint:'Cashier: ',shiftFromLbl:'Shift from: ',
+    balanceOkTxt:'Balance correct ✅',
+    collectedSalesSection:'COLLECTED SALES',creditsGrantedSection:'CREDITS GRANTED (DEBT)',
+    creditNotIncome:'Not income — excluded from cash',cashReconSection:'CASH RECONCILIATION',
+    declaredCashPrint:'Declared cash',diffPrint:'Difference',
+    // printReporteVentas
+    salesReportTitle:'Sales Report',salesReportSalesLbl:'Sales: ',salesReportTotalLbl:'Total: ',
+    salesReportCollectedLbl:'Collected: ',salesReportCreditPendLbl:'Pending credit: ',
+    dateColHdr:'Date',timeColHdr:'Time',orderColHdr:'Order',itemsColHdr:'Items',methodColHdr:'Method',
+    totalColHdr:'Total',cashierColHdr:'Cashier',statusColHdr:'Status',generatedLbl:'Generated: ',
+    completedStatus:'Completed',creditPaidStatus:'Credit paid',creditPendStatus:'Credit pending',
+    creditPendShort:'Credit pend.',
+    // exportVentasCSV / exportCreditosCSV column headers
+    csvDateCol:'Date',csvTimeCol:'Time',csvOrderCol:'Order',csvItemsCol:'Items',csvMethodCol:'Payment Method',
+    csvTotalCol:'Total',csvCashierCol:'Cashier',csvStatusCol:'Status',csvClientCol:'Customer',
+    csvCreditClient:'Customer',csvCedulaCol:'ID/Cedula',csvSaleDateCol:'Sale Date',csvDueDateCol:'Due Date',
+    csvTotalDebt:'Total',csvPaidCol:'Paid',csvPendCol:'Pending',csvEstadoCol:'Status',
+    csvPaidStatus:'Paid',csvPendStatus:'Pending',
+    pmLabelEfectivo:'Cash',pmLabelTarjeta:'Card',pmLabelTransferencia:'Transfer',
+    pmLabelCredito:'Credit',pmLabelDividido:'Mixed',pmLabelOA:'Open account',
+    periodHoy:'Today',periodSemana:'This week',periodMes:'This month',periodTodo:'Entire period',
+    // renderVentasList
+    ventasSummaryPrefix:' sales · ',noSalesThisPeriod:'No sales in this period.',
+    pendingLabel:'⏳ Pending',paidLabel:'✅ Paid',partialLabel:'⏳ Paid ',
+    // Graf tooltip / legend
+    grafIngresos:'Income',grafGastos:'Expenses',grafIncomeLbl:'Income: ',grafExpLbl:'Expenses: ',
+    // contaConta
+    ordersLblConta:'Orders',profitLbl:'Profit',noSalesConta:'No sales.',
+    // Backup list view
+    bkpListProds:' products · ',bkpListSales:' sales',bkpListRestoreBtn:'Restore',bkpListReadErr:'Error reading backup',
+    // Specials bogo label
+    bogoPaysLessThanBuys:'⚠ "Pay" must be less than "Take"',
+    // Abono confirm dialog
+    abonoConfirmTitle:'Confirm payment?',abonoClientLbl:'Customer: ',abonoFullPayment:'Full payment',abonoPartialPayment:'Partial payment',
+    abonoRemainingBalance:'Remaining balance: ',
+    // Barcode scanner
+    barcodeNotFound:'Code not found: ',
+    // renderSpecialsList
+    deletedProduct:'(product deleted)',bogoCarries:'Take ',bogoPays:' pay ',qtyPriceDetail:'u. → ',
+    // Restore backup decrypt modal
+    bkpDecryptTitle:'🔐 Decrypt backup',bkpDecryptDesc:'Enter the backup password to restore.',
+    // dataRestoredFromBackup
+    dataRestoredBackup:'🔄 Data restored from auto-backup',
+    // Cash reconciliation inline
+    cashMatchesLbl:'Cash matches',cashDiffLbl:'Difference',
+    fundNotePre:'Fund: ',fundNotePost:' (not in reconciliation)',
+    declaredLbl:'Declared',cashMismatch:'Cash does not match — correct before closing',
+    // Inventory count modal
+    invCountDesc:'Enter the physical count for each product:',
+    invCountColProd:'Product',invCountColSys:'System',invCountColCount:'Count',invCountColStatus:'Status',
+    // Customer search / credit
+    noSearchResults:'No results',noRegisteredCustomers:'No registered customers',
+    // Purchases / expenses
+    delFacConfirm:'Delete invoice? Stock will NOT be reverted.',
+    delGstConfirm:'Delete expense?',
+    gstConceptAmtRequired:'⚠ Concept and amount required',
+    gstSavedToast:'✅ Expense recorded',
+    // Connectivity
+    connectedTitle:'Connected',noConnectionTitle:'No connection',
+    // Admin code prompt prefixes
+    delUserPromptPre:'Delete user ',delProdPromptPre:'Delete ',
+    invAdjPromptPre:'Stock adjustment (',markCreditPaidPromptPre:'Mark credit paid: ',
+    delOaPromptPre:'Delete account: ',
+    // Dashboard table columns
+    dbColProd:'Product',dbColQty:'Qty.',
+    // Placeholder hints
+    vntSrchPh:'🔍 # order or customer...',catNamePh:'E.g.: Cosmetics',
+    custNamePh:'John Doe',userNameExPh:'Mary',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -2731,6 +3003,14 @@ function applyLang(){
   const _sbiCfgLbl=el('sbi-cfg-lbl');if(_sbiCfgLbl)_sbiCfgLbl.textContent=t('sbConfig');
   const _sbiLockLbl=el('sbi-lock-lbl');if(_sbiLockLbl)_sbiLockLbl.textContent=t('sbLock');
   const _sbiLogoutLbl=el('sbi-logout-lbl');if(_sbiLogoutLbl)_sbiLogoutLbl.textContent=t('logoutTitle');
+  // Remaining placeholders
+  const _vntSrchEl=el('vnt-srch');if(_vntSrchEl)_vntSrchEl.placeholder=t('vntSrchPh');
+  const _credSearchEl=el('cred-search');if(_credSearchEl)_credSearchEl.placeholder=t('creditSrch');
+  const _catNameEl=el('cat-name');if(_catNameEl)_catNameEl.placeholder=t('catNamePh');
+  const _custNameEl=el('cust-name');if(_custNameEl)_custNameEl.placeholder=t('custNamePh');
+  const _ncNameEl=el('nc-name');if(_ncNameEl)_ncNameEl.placeholder=t('custNamePh');
+  const _cmbDescEl=el('cmb-desc');if(_cmbDescEl)_cmbDescEl.placeholder=t('cmbDescPh');
+  const _uNameEl=el('u-name');if(_uNameEl)_uNameEl.placeholder=t('userNameExPh');
   updateCobrar(); renderCats(); renderProds(); updatePCat();
 }
 function switchLang(){
@@ -2751,7 +3031,7 @@ setInterval(updateClock,1000); updateClock();
 // WIFI INDICATOR
 function setConnDot(ok){
   const ico=el('wifi-icon');if(ico)ico.setAttribute('stroke',ok?'#22c55e':'#ef4444');
-  const d=el('wifi-dot');if(d)d.title=ok?(lang==='en'?'Connected':'Conectado'):(lang==='en'?'No connection':'Sin conexión');
+  const d=el('wifi-dot');if(d)d.title=ok?t('connectedTitle'):t('noConnectionTitle');
 }
 function checkConn(){setConnDot(navigator.onLine);}
 window.addEventListener('online',()=>{setConnDot(true);updateLicBadge();});
@@ -3105,7 +3385,7 @@ function logAction(accion,detalle,antes,despues){
 function delUser(id){
   var u=db.users.find(function(x){return x.id===id;});
   if(!u)return;
-  requireAdminCode('Eliminar usuario '+u.name+' ('+u.role+')',function(){
+  requireAdminCode(t('delUserPromptPre')+u.name+' ('+u.role+')',function(){
     confirm2(t('deleteUserConfirm')+u.name+'?',function(){
       logAction('Usuario eliminado',u.name+' ('+u.role+')');
       db.users=db.users.filter(function(x){return x.id!==id;});
@@ -3253,7 +3533,7 @@ function startApp(){
   if(!window._cdSyncInt){window._cdSyncInt=setInterval(syncCreditDirect,30000);setTimeout(syncCreditDirect,3000);}
   if(!window._shiftHbInt){window._shiftHbInt=setInterval(function(){if(db.cfg&&db.cfg.shiftOpen&&curUser){syncShiftStatusDirect({active:true,currentUser:curUser.name,shiftOpenedAt:db.cfg.shiftOpenAt||new Date().toISOString(),lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg.pendingShiftNote||null});}},5*60*1000);}
   setEl('ord-lbl','#'+db.orderNum);
-  if(_restoredFromBackup){toast('🔄 Datos restaurados del backup automático');_restoredFromBackup=false;}
+  if(_restoredFromBackup){toast(t('dataRestoredBackup'));_restoredFromBackup=false;}
   const bts=localStorage.getItem('4kpos_backup_ts');
   const lbl=el('last-backup-lbl');if(lbl&&bts)lbl.textContent=new Date(bts).toLocaleString(lang);
   _startInactivityTimer();
@@ -3319,21 +3599,21 @@ function calcCashDiff(){
   const isAdmin=curUser&&curUser.role==='admin';
   const color=diff===0?'var(--gn)':diff<0?'var(--rd)':'var(--am)';
   const diffTxt=diff===0
-    ?'✅ '+(lang==='en'?'Cash matches':'Cuadre correcto')
-    :(diff<0?'⬇ ':('+⬆ '))+(lang==='en'?'Difference':'Diferencia')+': '+dolr(Math.abs(diff));
+    ?'✅ '+t('cashMatchesLbl')
+    :(diff<0?'⬇ ':'+⬆ ')+t('cashDiffLbl')+': '+dolr(Math.abs(diff));
   box.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+t('cashFromSales')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(cashSales)+'</span></div>'
     +(creditCash?'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+t('cashCreditPay')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(creditCash)+'</span></div>':'')
-    +(db.fundAmount>0?'<div style="font-size:.73rem;color:var(--tx3);margin-bottom:3px">🗃️ '+(lang==='en'?'Fund: '+dolr(db.fundAmount)+' (not in reconciliation)':'Fondo: '+dolr(db.fundAmount)+' (no incluido)')+'</div>':'')
+    +(db.fundAmount>0?'<div style="font-size:.73rem;color:var(--tx3);margin-bottom:3px">🗃️ '+t('fundNotePre')+dolr(db.fundAmount)+t('fundNotePost')+'</div>':'')
     +'<div style="display:flex;justify-content:space-between;margin-bottom:3px;padding-top:4px;border-top:1px solid var(--b1)"><span style="color:var(--tx3)">'+t('expectedCashLbl')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(expected)+'</span></div>'
-    +'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+(lang==='en'?'Declared':'Declarado')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(declared)+'</span></div>'
-    +'<div style="display:flex;justify-content:space-between;padding-top:5px;border-top:1px solid var(--b1)"><span style="color:var(--tx3)">'+(lang==='en'?'Difference':'Diferencia')+'</span><span style="font-weight:700;color:'+color+'">'+diffTxt+'</span></div>';
+    +'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--tx3)">'+t('declaredLbl')+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr(declared)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;padding-top:5px;border-top:1px solid var(--b1)"><span style="color:var(--tx3)">'+t('cashDiffLbl')+'</span><span style="font-weight:700;color:'+color+'">'+diffTxt+'</span></div>';
   if(diff===0){
     if(confirmBtn)confirmBtn.disabled=false;
     if(forceBtn)forceBtn.style.display='none';
   }else{
     if(confirmBtn)confirmBtn.disabled=true;
     if(forceBtn)forceBtn.style.display=isAdmin?'block':'none';
-    if(!isAdmin){box.innerHTML+='<div style="margin-top:5px;font-size:.78rem;color:var(--rd)">⛔ '+(lang==='en'?'Cash does not match — correct before closing':'El efectivo no cuadra — corrígelo antes de cerrar')+'</div>';}
+    if(!isAdmin){box.innerHTML+='<div style="margin-top:5px;font-size:.78rem;color:var(--rd)">⛔ '+t('cashMismatch')+'</div>';}
   }
 }
 function doLogout(){
@@ -3494,12 +3774,12 @@ function imgLoad(input,prevId,dataId){
   reader.readAsDataURL(file);
 }
 function imgClear(prevId,dataId,fileId){el(prevId).innerHTML='📷';el(dataId).value='';if(el(fileId))el(fileId).value='';}
-function saveLogo(){const d=el('logo-data').value;if(d){db.cfg.logo=d;saveDB();el('logo-prev').innerHTML='<img src="'+d+'" style="width:100%;height:100%;object-fit:contain">';toast('✅ Logo cargado');}}
+function saveLogo(){const d=el('logo-data').value;if(d){db.cfg.logo=d;saveDB();el('logo-prev').innerHTML='<img src="'+d+'" style="width:100%;height:100%;object-fit:contain">';toast(t('logoLoaded'));}}
 function clearLogo(){db.cfg.logo='';el('logo-prev').innerHTML='<img src="'+LOGO+'" style="width:100%;height:100%;object-fit:contain">';el('logo-data').value='';el('logo-file').value='';saveDB();}
 
 // CATEGORIES
 function saveCat(){
-  const name=el('cat-name').value.trim();if(!name){toast('⚠ Nombre requerido');return;}
+  const name=el('cat-name').value.trim();if(!name){toast(t('catNameRequired'));return;}
   const eid=el('cat-eid').value,cat={id:eid||Date.now().toString(),name,img:el('cat-data').value||''};
   if(eid){const i=db.categories.findIndex(x=>x.id===eid);if(i>=0)db.categories[i]=cat;el('cat-eid').value='';}
   else db.categories.push(cat);
@@ -3551,7 +3831,7 @@ function calcMargin(){
 }
 function saveProd(){
   const name=el('p-name').value.trim(),price=getNum('p-price');
-  if(!name||!price){toast('⚠ Nombre y precio requeridos');return;}
+  if(!name||!price){toast(t('prodNamePriceRequired'));return;}
   const eid=el('p-eid').value,imgData=el('p-data').value;
   const prod={id:eid||Date.now().toString(),name,cat:el('p-cat').value,price,cost:getNum('p-cost')||undefined,stock:getNum('p-stock'),minStock:getNum('p-minstock')||5,bc:el('p-bc').value.trim(),img:imgData};
   if(eid){const i=db.products.findIndex(x=>x.id===eid);if(i>=0){if(db.products[i].price!==price)logAction('Precio editado',prod.name,dolr(db.products[i].price),dolr(price));if(!imgData)prod.img=db.products[i].img;db.products[i]=prod;}el('p-eid').value='';}
@@ -3570,7 +3850,7 @@ function editProd(id){
 function delProd(id){
   const _dp=db.products.find(x=>x.id===id);if(!_dp)return;
   const _doDelProd=function(){
-    confirm2('¿Eliminar producto '+_dp.name+'?',function(){
+    confirm2(t('delProductConfirm')+_dp.name+'?',function(){
       db.products=db.products.filter(x=>x.id!==id);cart=cart.filter(x=>x.id!==id);
       logAction('Producto eliminado',_dp.name+((_dp.bc)?' · #'+_dp.bc:'')+' · '+dolr(_dp.price||0));
       if(_invSelRow===id)_invSelRow=null;
@@ -3578,7 +3858,7 @@ function delProd(id){
     });
   };
   if((_dp.stock||0)>0){
-    requireAdminCode('Eliminar '+_dp.name+' (Stock: '+(_dp.stock||0)+')',_doDelProd);
+    requireAdminCode(t('delProdPromptPre')+_dp.name+' ('+t('stock')+': '+(_dp.stock||0)+')',_doDelProd);
   }else{_doDelProd();}
 }
 function clearProd(){['p-eid','p-name','p-price','p-cost','p-stock','p-minstock','p-bc'].forEach(id=>el(id).value='');el('p-cat').value='';const mr=el('p-margin-row');if(mr)mr.style.display='none';imgClear('p-prev','p-data','p-file');}
@@ -3587,7 +3867,7 @@ function renderProdList(){
   if(!db.products.length){e2.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('noProducts')+'</div>';return;}
   e2.innerHTML=db.products.map(p=>{
     const th=p.img?('<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;border-radius:7px">'):p.name[0];
-    const marginTxt=(curUser&&curUser.role==='admin'&&p.cost)?(' · Margen: '+((p.price-p.cost)/p.cost*100).toFixed(1)+'%'):'';
+    const marginTxt=(curUser&&curUser.role==='admin'&&p.cost)?(' · '+t('marginLbl')+': '+((p.price-p.cost)/p.cost*100).toFixed(1)+'%'):'';
     return '<div class="pli"><div class="pli-thumb">'+th+'</div><div class="pli-info"><div class="pli-name">'+p.name+'</div><div class="pli-meta">'+dolr(p.price)+' · Stock: '+(p.stock||0)+(p.bc?' · #'+p.bc:'')+marginTxt+'</div></div><div class="pli-price">'+dolr(p.price)+'</div><div style="display:flex;gap:4px"><button class="eb" onclick="editProd(\''+p.id+'\')">✏</button><button class="xb" onclick="delProd(\''+p.id+'\')">✕</button></div></div>';
   }).join('');
 }
@@ -3636,7 +3916,7 @@ function renderInv(){
   const chips=el('inv-cat-chips');
   if(chips){
     const cats=db.categories||[];
-    let ch='<button class="chip'+(invCatFilter===''?' on':'')+'" onclick="setInvCat(\'\')">Todos</button>';
+    let ch='<button class="chip'+(invCatFilter===''?' on':'')+'" onclick="setInvCat(\'\')">'+t('invCatAll')+'</button>';
     cats.forEach(c=>{ch+='<button class="chip'+(invCatFilter===c.id?' on':'')+'" onclick="setInvCat(\''+c.id+'\')">'+c.name+'</button>';});
     chips.innerHTML=ch;
   }
@@ -3777,18 +4057,18 @@ function setIcCat(id){
 function openInvCount(){
   _invCountData={};icCatFilter='';
   const body=el('inv-count-body');
-  if(!db.products.length){body.innerHTML='<p style="color:var(--tx3)">Sin productos</p>';openOv('ov-inv-count');return;}
+  if(!db.products.length){body.innerHTML='<p style="color:var(--tx3)">'+t('noProducts')+'</p>';openOv('ov-inv-count');return;}
   const chips=el('ic-cat-chips');
   if(chips){
     const cats=db.categories||[];
-    let ch='<button class="chip on" onclick="setIcCat(\'\')">Todos</button>';
+    let ch='<button class="chip on" onclick="setIcCat(\'\')">'+t('invCatAll')+'</button>';
     cats.forEach(c=>{ch+='<button class="chip" onclick="setIcCat(\''+c.id+'\')">'+c.name+'</button>';});
     chips.innerHTML=ch;
   }
   if(el('ic-srch'))el('ic-srch').value='';
-  body.innerHTML='<div style="font-size:.78rem;color:var(--tx3);margin-bottom:10px">Ingresa el conteo físico de cada producto:</div>'
+  body.innerHTML='<div style="font-size:.78rem;color:var(--tx3);margin-bottom:10px">'+t('invCountDesc')+'</div>'
     +'<table style="width:100%;border-collapse:collapse;font-size:.83rem">'
-    +'<tr style="border-bottom:2px solid var(--b2);color:var(--tx3)"><th style="text-align:left;padding:6px 4px">Producto</th><th style="text-align:right;padding:6px 4px">Sistema</th><th style="text-align:right;padding:6px 4px">Conteo</th><th style="text-align:right;padding:6px 4px">Estado</th></tr>'
+    +'<tr style="border-bottom:2px solid var(--b2);color:var(--tx3)"><th style="text-align:left;padding:6px 4px">'+t('invCountColProd')+'</th><th style="text-align:right;padding:6px 4px">'+t('invCountColSys')+'</th><th style="text-align:right;padding:6px 4px">'+t('invCountColCount')+'</th><th style="text-align:right;padding:6px 4px">'+t('invCountColStatus')+'</th></tr>'
     +db.products.map(p=>'<tr style="border-bottom:1px solid var(--b1)" data-name="'+p.name.replace(/"/g,'&quot;')+'" data-bc="'+(p.bc||'')+'" data-cat="'+(p.cat||'')+'">'
       +'<td style="padding:7px 4px;font-weight:600;color:var(--tx)">'+p.name+'</td>'
       +'<td style="padding:7px 4px;text-align:right;color:var(--tx2)" id="ics-sys-'+p.id+'">'+(p.stock||0)+'</td>'
@@ -3846,7 +4126,7 @@ function showInvCountResult(){
 function applyInvCount(){
   const counted=_readInvCountInputs();
   if(!Object.keys(counted).length){toast('⚠ '+t('noDataToAdjust'));return;}
-  requireAdminCode('Ajuste de inventario ('+Object.keys(counted).length+' productos)',function(){
+  requireAdminCode(t('invAdjPromptPre')+Object.keys(counted).length+' '+t('products')+')',function(){
     confirm2(t('adjustStockConfirm'),function(){
       db.products.forEach(p=>{if(counted[p.id]!==undefined)p.stock=counted[p.id];});
       saveDB();renderInv();renderProds();
@@ -3864,7 +4144,7 @@ function exportCSV(){
   const blob=new Blob([csv],{type:'text/csv'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download='inventario_4kpos.csv';a.click();
-  toast('📥 CSV exportado');
+  toast(t('csvExported'));
 }
 
 // CUSTOMERS
@@ -3872,10 +4152,10 @@ function saveCust(){
   const name=el('cust-name').value.trim();
   if(!name){toast('⚠ '+t('fldUserName')+' requerido');return;}
   const cedula=el('cust-cedula').value.trim();
-  if(!cedula){toast('⚠ Cédula requerida');return;}
+  if(!cedula){toast(t('custCedulaRequired'));return;}
   const eid=el('cust-eid').value;
   const dup=db.customers.find(c=>c.cedula===cedula&&c.id!==eid);
-  if(dup){toast('⚠ Ya existe un cliente con esa cédula: '+dup.name);return;}
+  if(dup){toast(t('custDuplicate')+dup.name);return;}
   const phone=el('cust-phone').value.trim();
   const email=el('cust-email').value.trim();
   const notes=el('cust-notes').value.trim();
@@ -3895,10 +4175,10 @@ function editCust(id){
   el('cust-email').value=c.email||'';el('cust-notes').value=c.notes||'';
 }
 function clearCust(){['cust-eid','cust-name','cust-cedula','cust-phone','cust-email','cust-notes'].forEach(id=>el(id)&&(el(id).value=''));}
-function delCust(id){confirm2('¿Eliminar cliente?',()=>{db.customers=db.customers.filter(c=>c.id!==id);saveDB();renderCustList();});}
+function delCust(id){confirm2(t('delCustConfirm'),()=>{db.customers=db.customers.filter(c=>c.id!==id);saveDB();renderCustList();});}
 function renderCustList(){
   const e2=el('cust-list');
-  if(!db.customers.length){e2.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">Sin clientes.</div>';return;}
+  if(!db.customers.length){e2.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('noCustomers')+'</div>';return;}
   e2.innerHTML=db.customers.map(c=>'<div class="pli"><div class="pli-thumb" style="background:var(--acg);color:var(--ac)">'+c.name[0]+'</div>'
     +'<div class="pli-info"><div class="pli-name">'+c.name+'</div>'
     +'<div class="pli-meta">'+(c.cedula?'🪪 '+c.cedula:'')+(c.phone?' · 📞 '+c.phone:'')+'</div></div>'
@@ -4024,7 +4304,7 @@ function savePayMethods(){
   db.payMethods.credit = el('cfg-credit')?el('cfg-credit').checked:false;
   saveDB();
   applyPayMethods();
-  toast('✅ Métodos de pago actualizados');
+  toast(t('payMethodsUpdated'));
 }
  function setPay(m,e2){
   payMethod=m;
@@ -4253,9 +4533,9 @@ function _submitBkpPass(){
       if(el('bkp-modal-pass'))el('bkp-modal-pass').value='';
       closeOv('ov-bkp-pass');
       _updateBkpPassUI();
-      confirm2('¿Restaurar backup? Se perderán los cambios no guardados.',function(){
+      confirm2(t('backupRestoreConfirm'),function(){
         Object.assign(db,data2);saveDB();showCategories();renderCart();
-        toast('✅ Backup restaurado');
+        toast(t('backupRestored'));
       });
     }
   }catch(e){
@@ -4263,7 +4543,7 @@ function _submitBkpPass(){
   }
 }
 function _doImportData(data){
-  confirm2('¿Restaurar datos desde este archivo? Se perderán cambios no guardados.',function(){
+  confirm2(t('backupImportConfirm'),function(){
     if(data.products)db.products=data.products;
     if(data.categories)db.categories=data.categories;
     if(data.sales)db.sales=data.sales;
@@ -4274,7 +4554,7 @@ function _doImportData(data){
     if(data.customers)db.customers=data.customers;
     if(data.payMethods)db.payMethods=Object.assign(db.payMethods,data.payMethods);
     saveDB();showCategories();renderCart();
-    toast('✅ Datos importados correctamente');
+    toast(t('dataImported'));
   });
 }
 function saveBackupPass(){
@@ -4502,37 +4782,37 @@ function toggleBackupList(){
     const cnt=(saved.db&&saved.db.products||[]).length;
     list.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">'
       +'<div><div style="font-size:.78rem;color:var(--tx);font-weight:600">'+lbl+'</div>'
-      +'<div style="font-size:.7rem;color:var(--tx3)">'+cnt+' productos · '+(saved.db.sales||[]).length+' ventas</div></div>'
-      +'<button class="btn btn-s" style="font-size:.72rem;padding:3px 8px" onclick="restoreBackup()">Restaurar</button></div>';
-  }catch(e){list.innerHTML='<div style="font-size:.75rem;color:var(--rd)">Error al leer backup</div>';}
+      +'<div style="font-size:.7rem;color:var(--tx3)">'+cnt+t('bkpListProds')+(saved.db.sales||[]).length+t('bkpListSales')+'</div></div>'
+      +'<button class="btn btn-s" style="font-size:.72rem;padding:3px 8px" onclick="restoreBackup()">'+t('bkpListRestoreBtn')+'</button></div>';
+  }catch(e){list.innerHTML='<div style="font-size:.75rem;color:var(--rd)">'+t('bkpListReadErr')+'</div>';}
 }
 function restoreBackup(){
   try{
-    const raw=localStorage.getItem('4kpos_backup');if(!raw){toast('⚠ Backup no encontrado');return;}
-    const saved=JSON.parse(raw);if(!saved){toast('⚠ Backup inválido');return;}
+    const raw=localStorage.getItem('4kpos_backup');if(!raw){toast(t('backupNotFound'));return;}
+    const saved=JSON.parse(raw);if(!saved){toast(t('backupInvalid'));return;}
     if(saved.encrypted){
       if(_bkpKey&&_hasBackupCfg()){
         try{
           const plain=_decryptBkpObjWithKey(saved,_bkpKey);
           const parsed=JSON.parse(plain);const data2=parsed.db||parsed;
-          confirm2('¿Restaurar backup cifrado? Se perderán los cambios no guardados.',function(){
-            Object.assign(db,data2);saveDB();showCategories();renderCart();toast('✅ Backup restaurado');
+          confirm2(t('backupRestoreEncConfirm'),function(){
+            Object.assign(db,data2);saveDB();showCategories();renderCart();toast(t('backupRestored'));
           });return;
         }catch(e){}
       }
-      _openBkpPassModal('🔐 Descifrar respaldo','Ingresa la contraseña de respaldo para restaurar.',{mode:'restore-auto',data:saved});
+      _openBkpPassModal(t('bkpDecryptTitle'),t('bkpDecryptDesc'),{mode:'restore-auto',data:saved});
       return;
     }
-    if(!saved.db){toast('⚠ Backup inválido');return;}
-    confirm2('¿Restaurar backup? Se perderán los cambios no guardados.',function(){
+    if(!saved.db){toast(t('backupInvalid'));return;}
+    confirm2(t('backupRestoreConfirm'),function(){
       Object.assign(db,saved.db);saveDB();showCategories();renderCart();
-      toast('✅ Backup restaurado');
+      toast(t('backupRestored'));
     });
-  }catch(e){toast('⚠ Error al restaurar');}
+  }catch(e){toast(t('backupRestoreError'));}
 }
 function refreshPOS(){
   renderCats();renderProds();renderCart();updateOACounter();
-  toast('🔄 Actualizado');
+  toast(t('dataRefreshed'));
 }
 function updateOACounter(){
   const list=_loadOAs();
@@ -4595,7 +4875,7 @@ function renderCreditCustList(q){
   const f=(q||'').toLowerCase().trim();
   const filtered=!f?db.customers:db.customers.filter(c=>(c.name||'').toLowerCase().includes(f)||(c.cedula||'').toLowerCase().includes(f));
   if(!filtered.length){
-    list.innerHTML='<div style="padding:12px;text-align:center;color:var(--tx3);font-size:.82rem">'+(db.customers.length?'Sin resultados':'Sin clientes registrados')+'</div>';
+    list.innerHTML='<div style="padding:12px;text-align:center;color:var(--tx3);font-size:.82rem">'+(db.customers.length?t('noSearchResults'):t('noRegisteredCustomers'))+'</div>';
     return;
   }
   list.innerHTML=filtered.map(c=>'<div onclick="selectCreditCust(\''+c.id+'\')" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:8px;transition:background .15s" onmouseover="this.style.background=\'var(--s3)\'" onmouseout="this.style.background=\'\'">'
@@ -4897,11 +5177,11 @@ function requestAbonoConfirm(full){
   _cpayFull=full;
   const mi=_cpayMethod==='card'?'💳':_cpayMethod==='split'?'⚡':'💵';
   const resto=Math.max(0,owed-actual);
-  const msg='<div style="font-size:1.05rem;font-weight:700;margin-bottom:10px">¿Confirmar abono?</div>'
-    +'<div style="margin-bottom:4px">Cliente: <b>'+(c.client||'—')+'</b>'+(c.cedula?' <span style="color:var(--tx3);font-size:.82rem">CI '+c.cedula+'</span>':'')+'</div>'
+  const msg='<div style="font-size:1.05rem;font-weight:700;margin-bottom:10px">'+t('abonoConfirmTitle')+'</div>'
+    +'<div style="margin-bottom:4px">'+t('abonoClientLbl')+'<b>'+(c.client||'—')+'</b>'+(c.cedula?' <span style="color:var(--tx3);font-size:.82rem">CI '+c.cedula+'</span>':'')+'</div>'
     +'<div style="font-size:1.5rem;font-weight:800;color:var(--am);margin:8px 0">'+dolr(actual)+'</div>'
-    +'<div style="color:var(--tx3);font-size:.83rem">'+mi+' '+(full||actual>=owed?'Pago total':'Abono parcial')
-    +(resto>0?' \xb7 Saldo restante: <span style="color:var(--am)">'+dolr(resto)+'</span>':'')+'</div>';
+    +'<div style="color:var(--tx3);font-size:.83rem">'+mi+' '+(full||actual>=owed?t('abonoFullPayment'):t('abonoPartialPayment'))
+    +(resto>0?' \xb7 '+t('abonoRemainingBalance')+'<span style="color:var(--am)">'+dolr(resto)+'</span>':'')+'</div>';
   const msgEl=el('cpay-confirm-msg');if(msgEl)msgEl.innerHTML=msg;
   const fs=el('cpay-form-section');if(fs)fs.style.display='none';
   const cs=el('cpay-confirm-section');if(cs)cs.style.display='block';
@@ -4980,7 +5260,7 @@ function payCreditFull(key){
   if(!_pfc)return;
   const _owed=_pfc.total-_pfc.paid;
   confirm2(t('payCreditFullPre')+_pfc.client+' ('+dolr(_owed)+')?',function(){
-    requireAdminCode('Marcar crédito pagado: '+_pfc.client+' '+dolr(_owed),function(){
+    requireAdminCode(t('markCreditPaidPromptPre')+_pfc.client+' '+dolr(_owed),function(){
       _cpayKey=key;doCreditPayment(true);
     });
   });
@@ -4996,7 +5276,7 @@ function openSaveOA(){
 function doSaveOA(){
   const name=el('oa-name').value.trim();
   const table=el('oa-table').value.trim();
-  if(!name&&!table){toast('⚠ Ingresa nombre o mesa');return;}
+  if(!name&&!table){toast(t('oaEnterNameOrTable'));return;}
   const ref=(name&&table)?name+' — '+table:(name||table);
   const total=cart.reduce((s,c)=>s+c.price*c.qty,0);
   const list=_loadOAs();
@@ -5004,7 +5284,7 @@ function doSaveOA(){
   _saveOAs(list);
   closeOv('ov-save-oa');
   cart=[];cashIn='';renderCart();renderProds();
-  toast('📖 Cuenta guardada: '+ref);
+  toast(t('oaSaved')+ref);
 }
 
 function openOAManager(){
@@ -5015,7 +5295,7 @@ function openOAManager(){
 function renderOAList(){
   const list=_loadOAs();
   const box=el('oa-list');
-  if(!list.length){box.innerHTML='<p style="color:var(--tx3);text-align:center;padding:16px">No hay cuentas abiertas</p>';return;}
+  if(!list.length){box.innerHTML='<p style="color:var(--tx3);text-align:center;padding:16px">'+t('oaNoneOpen')+'</p>';return;}
   box.innerHTML=list.map(oa=>{
     const d=new Date(oa.date);
     const time=fmtTime(oa.date);
@@ -5026,8 +5306,8 @@ function renderOAList(){
       +'<div style="font-family:monospace;font-weight:700;color:var(--ac)">'+dolr(oa.total)+'</div></div>'
       +'<div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px">'+time+' · '+items+'</div>'
       +'<div style="display:flex;gap:6px">'
-      +'<button class="btn btn-p" style="flex:1;font-size:.78rem" onclick="loadOA(\''+oa.id+'\')">📂 Abrir</button>'
-      +'<button class="btn btn-s" style="font-size:.78rem" onclick="deleteOA(\''+oa.id+'\')">🗑️ Eliminar</button>'
+      +'<button class="btn btn-p" style="flex:1;font-size:.78rem" onclick="loadOA(\''+oa.id+'\')">'+t('oaOpen')+'</button>'
+      +'<button class="btn btn-s" style="font-size:.78rem" onclick="deleteOA(\''+oa.id+'\')">'+t('oaDelete')+'</button>'
       +'</div></div>';
   }).join('');
 }
@@ -5037,7 +5317,7 @@ function loadOA(id){
   const oa=list.find(x=>x.id===id);
   if(!oa)return;
   if(cart.length){
-    confirm2('¿Reemplazar el carrito actual con esta cuenta?',function(){_doLoadOA(oa);});
+    confirm2(t('oaReplaceConfirm'),function(){_doLoadOA(oa);});
   }else{_doLoadOA(oa);}
 }
 
@@ -5048,21 +5328,21 @@ function _doLoadOA(oa){
   const list=_loadOAs().filter(x=>x.id!==oa.id);
   _saveOAs(list);
   closeOv('ov-oa-mgr');
-  toast('📂 Cuenta cargada: '+oa.ref);
+  toast(t('oaLoaded')+oa.ref);
 }
 
 function deleteOA(id){
   const _oa=_loadOAs().find(x=>x.id===id);if(!_oa)return;
   const _doDelOA=function(){
-    confirm2('¿Eliminar esta cuenta abierta?',function(){
+    confirm2(t('oaDeleteConfirm'),function(){
       const list=_loadOAs().filter(x=>x.id!==id);
       _saveOAs(list);renderOAList();updateOACounter();
       if(!list.length)closeOv('ov-oa-mgr');
-      toast('🗑️ Cuenta eliminada');
+      toast(t('oaDeleted'));
     });
   };
   if((_oa.items||[]).length>0){
-    requireAdminCode('Eliminar cuenta: '+(_oa.ref||_oa.name||id)+' ('+(_oa.items||[]).length+' items, '+dolr(_oa.total||0)+')',_doDelOA);
+    requireAdminCode(t('delOaPromptPre')+(_oa.ref||_oa.name||id)+' ('+(_oa.items||[]).length+' items, '+dolr(_oa.total||0)+')',_doDelOA);
   }else{_doDelOA();}
 }
   function showRcpt(sale){
@@ -5141,7 +5421,7 @@ function renderActions(mode){
       const stxt=s.status==='returned'?'🔄':s.status==='cancelled'?'❌':'';
       const timeStr=fmtTime(s.date);
       const btn='<button style="width:100%;padding:7px;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;background:'+(active?'var(--rdb)':'var(--s3)')+';border:1.5px solid '+(active?'rgba(248,113,113,.3)':'var(--b1)')+';color:'+(active?'var(--rd)':'var(--tx3)')+'" '+(active?'onclick="doCancel(\''+s.id+'\')"':'disabled')+'>✕ '+(active?t('cancelSale')+' '+dolr(s.total):t('alreadyCancelled'))+'</button>';
-      return '<div class="srow'+(s.status==='cancelled'?' cancelled':'')+'"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-weight:700;font-size:.83rem;color:var(--ac)">Orden #'+(s.rnum||s.id)+' '+stxt+'</span><span style="font-size:.72rem;color:var(--tx3)">'+timeStr+' '+pico(s.payMethod)+'</span></div><div style="font-size:.77rem;color:var(--tx2);margin-bottom:6px">'+s.items.map(i=>i.name+' ×'+i.qty).join(', ')+(s.cashier?' · '+s.cashier:'')+'</div>'+btn+'</div>';
+      return '<div class="srow'+(s.status==='cancelled'?' cancelled':'')+'"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-weight:700;font-size:.83rem;color:var(--ac)">'+t('orderLbl')+(s.rnum||s.id)+' '+stxt+'</span><span style="font-size:.72rem;color:var(--tx3)">'+timeStr+' '+pico(s.payMethod)+'</span></div><div style="font-size:.77rem;color:var(--tx2);margin-bottom:6px">'+s.items.map(i=>i.name+' ×'+i.qty).join(', ')+(s.cashier?' · '+s.cashier:'')+'</div>'+btn+'</div>';
     }).join('');
     return;
   }
@@ -5154,20 +5434,20 @@ function renderActions(mode){
     const returned=s.status==='returned';
     const timeStr=fmtTime(s.date);
     const badge=returned
-      ?'<span style="font-size:.68rem;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);border-radius:4px;padding:1px 5px;color:var(--am)">🔄 Devuelta</span>'
-      :s.status==='cancelled'?'<span style="font-size:.68rem;background:var(--rdb);border:1px solid rgba(248,113,113,.2);border-radius:4px;padding:1px 5px;color:var(--rd)">❌ Cancelada</span>':'';
+      ?'<span style="font-size:.68rem;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);border-radius:4px;padding:1px 5px;color:var(--am)">'+t('returnedBadge')+'</span>'
+      :s.status==='cancelled'?'<span style="font-size:.68rem;background:var(--rdb);border:1px solid rgba(248,113,113,.2);border-radius:4px;padding:1px 5px;color:var(--rd)">'+t('cancelledBadge')+'</span>':'';
     const delBtn=returned
       ?'<button style="background:var(--rdb);border:1.5px solid rgba(248,113,113,.25);border-radius:6px;padding:3px 7px;font-size:.72rem;color:var(--rd);cursor:pointer;line-height:1" onclick="delReturn(\''+s.id+'\');event.stopPropagation()">🗑</button>'
       :'';
     const itemRows=s.items.map(i=>'<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--b1);font-size:.78rem"><span>'+i.name+' ×'+i.qty+'</span><span style="font-family:monospace;color:var(--tx2)">'+dolr((i.price||0)*i.qty)+'</span></div>').join('');
     const actionBtn=active
-      ?'<button style="width:100%;padding:8px;border-radius:8px;font-weight:700;font-size:.83rem;cursor:pointer;background:rgba(239,68,68,.12);border:1.5px solid rgba(239,68,68,.4);color:#ef4444;margin-top:8px" onclick="doReturn(\''+s.id+'\');event.stopPropagation()">↩ Devolver '+dolr(s.total)+'</button>'
-      :returned?'<button style="width:100%;padding:7px;border-radius:8px;font-weight:700;font-size:.78rem;cursor:pointer;background:var(--rdb);border:1.5px solid rgba(248,113,113,.3);color:var(--rd);margin-top:8px" onclick="delReturn(\''+s.id+'\');event.stopPropagation()">🗑 Eliminar devolución</button>':'';
+      ?'<button style="width:100%;padding:8px;border-radius:8px;font-weight:700;font-size:.83rem;cursor:pointer;background:rgba(239,68,68,.12);border:1.5px solid rgba(239,68,68,.4);color:#ef4444;margin-top:8px" onclick="doReturn(\''+s.id+'\');event.stopPropagation()">'+t('returnBtn')+' '+dolr(s.total)+'</button>'
+      :returned?'<button style="width:100%;padding:7px;border-radius:8px;font-weight:700;font-size:.78rem;cursor:pointer;background:var(--rdb);border:1.5px solid rgba(248,113,113,.3);color:var(--rd);margin-top:8px" onclick="delReturn(\''+s.id+'\');event.stopPropagation()">'+t('deleteReturnBtn')+'</button>':'';
     const detail='<div id="'+uid+'" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--b1)">'+itemRows+'<div style="display:flex;justify-content:space-between;font-size:.78rem;margin-top:6px;color:var(--tx3)"><span>'+pico(s.payMethod)+' '+(s.payLabel||s.payMethod)+'</span>'+(s.cashier?'<span>👤 '+s.cashier+'</span>':'')+'</div>'+actionBtn+'</div>';
     const nameColor=active?'var(--ac)':returned?'var(--am)':'var(--rd)';
     return '<div class="srow" style="cursor:pointer" onclick="toggleRetDetail(\''+uid+'\',this)">'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
-      +'<div style="flex:1"><span style="font-weight:700;font-size:.83rem;color:'+nameColor+'">Orden #'+(s.rnum||s.id)+'</span> '+badge+'</div>'
+      +'<div style="flex:1"><span style="font-weight:700;font-size:.83rem;color:'+nameColor+'">'+t('orderLbl')+(s.rnum||s.id)+'</span> '+badge+'</div>'
       +'<div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><span style="font-size:.72rem;color:var(--tx3)">'+timeStr+' '+pico(s.payMethod)+'</span>'+delBtn+'</div>'
       +'</div>'
       +'<div style="font-size:.77rem;color:var(--tx2);margin:4px 0">'+s.items.map(i=>i.name+' ×'+i.qty).join(', ')+(s.cashier?' · '+s.cashier:'')+'</div>'
@@ -5188,31 +5468,31 @@ function toggleRetDetail(uid,card){
 }
 function doReturn(id){
   const sale=db.sales.find(s=>s.id==id);if(!sale||sale.status!=='active')return;
-  confirm2('¿Devolver Orden #'+(sale.rnum||id)+' ('+dolr(sale.total)+')?',()=>{
+  confirm2(t('returnConfirmPrefix')+(sale.rnum||id)+' ('+dolr(sale.total)+t('returnConfirmSuffix'),()=>{
     sale.status='returned';sale.returnDate=new Date().toISOString();
     sale.items.forEach(item=>{const p=db.products.find(x=>x.id===item.id);if(p)p.stock+=item.qty;});
     if(!db.returns)db.returns=[];
     db.returns.push({id:Date.now().toString(),originalSaleId:sale.id,rnum:sale.rnum,items:sale.items.map(i=>Object.assign({},i)),total:sale.total,user:curUser?curUser.name:'',date:sale.returnDate,payMethod:sale.payMethod,payLabel:sale.payLabel});
-    saveDB();renderActions('returns');renderProds();toast('✅ Devolución procesada');
+    saveDB();renderActions('returns');renderProds();toast(t('returnDone'));
   });
 }
 function delReturn(id){
   const sale=db.sales.find(s=>s.id==id);if(!sale||sale.status!=='returned')return;
-  confirm2('¿Eliminar devolución #'+(sale.rnum||id)+'? El stock se ajustará.',()=>{
+  confirm2(t('returnDelConfirmPrefix')+(sale.rnum||id)+t('returnDelConfirmSuffix'),()=>{
     sale.status='active';delete sale.returnDate;
     sale.items.forEach(item=>{const p=db.products.find(x=>x.id===item.id);if(p)p.stock=Math.max(0,(p.stock||0)-item.qty);});
     if(db.returns)db.returns=db.returns.filter(r=>r.originalSaleId!=id);
-    saveDB();renderActions('returns');renderProds();toast('↩ Devolución eliminada');
+    saveDB();renderActions('returns');renderProds();toast(t('returnDeleted'));
   });
 }
 function doCancel(id){
   const sale=db.sales.find(s=>s.id==id);if(!sale||sale.status!=='active')return;
-  requireAdminCode('Anular Orden #'+(sale.rnum||id)+' '+dolr(sale.total),function(){
-    confirm2('¿CANCELAR Orden #'+(sale.rnum||id)+' ('+dolr(sale.total)+')?',()=>{
+  requireAdminCode(t('cancelAdminPromptPrefix')+(sale.rnum||id)+' '+dolr(sale.total),function(){
+    confirm2(t('cancelConfirmPrefix')+(sale.rnum||id)+' ('+dolr(sale.total)+t('cancelConfirmSuffix'),()=>{
       sale.status='cancelled';sale.cancelDate=new Date().toISOString();
       sale.items.forEach(item=>{const p=db.products.find(x=>x.id===item.id);if(p)p.stock+=item.qty;});
       logAction('Venta anulada','#'+(sale.rnum||sale.id)+' · '+dolr(sale.total));
-      saveDB();renderActions('cancel');renderProds();toast('🗑 Cancelado');
+      saveDB();renderActions('cancel');renderProds();toast(t('cancelDone'));
     });
   });
 }
@@ -5235,16 +5515,16 @@ function renderSales(){
     const timeStr=fmtTime(s.date);
     const stxt=s.status!=='active'?(' <span style="font-size:.7rem;color:var(--tx3)">('+s.status+')</span>'):'';
     const xmark=s.status==='cancelled'?'❌ ':s.status==='returned'?'🔄 ':isCreditPend?'🏷️ ':'';
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--b1);font-size:.82rem"><div><div style="font-weight:600">'+xmark+'Orden #'+(s.rnum||s.id)+stxt+'</div><div style="font-size:.72rem;color:var(--tx3)">'+timeStr+' '+pico(s.payMethod)+(s.cashier?' · '+s.cashier:'')+'</div></div><div style="font-family:Courier New,monospace;font-weight:700;color:'+color+';'+deco+'">'+dolr(s.total)+'</div></div>';
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--b1);font-size:.82rem"><div><div style="font-weight:600">'+xmark+t('orderLbl')+(s.rnum||s.id)+stxt+'</div><div style="font-size:.72rem;color:var(--tx3)">'+timeStr+' '+pico(s.payMethod)+(s.cashier?' · '+s.cashier:'')+'</div></div><div style="font-family:Courier New,monospace;font-weight:700;color:'+color+';'+deco+'">'+dolr(s.total)+'</div></div>';
   }).join('');
   const statsHtml='<div class="sg">'
     +'<div class="sc gn"><div class="sclbl">'+t('incomeCollected')+'</div><div class="scval">'+dolr(inc)+'</div></div>'
     +'<div class="sc ac"><div class="sclbl">'+t('ordersLbl')+'</div><div class="scval">'+active.length+'</div></div>'
     +(creditAmt>0
       ?'<div class="sc am"><div class="sclbl">🏷️ '+t('creditDebtCard')+'</div><div class="scval">'+dolr(creditAmt)+'</div></div>'
-      :'<div class="sc am"><div class="sclbl">Promedio</div><div class="scval">'+(cobradas.length?dolr(inc/cobradas.length):'$0.00')+'</div></div>'
+      :'<div class="sc am"><div class="sclbl">'+t('avgTicketLbl')+'</div><div class="scval">'+(cobradas.length?dolr(inc/cobradas.length):'$0.00')+'</div></div>'
     )+'</div>';
-  el('sales-body').innerHTML=statsHtml+(can||ret?'<div style="display:flex;gap:7px;margin-bottom:9px">'+(can?'<span style="background:var(--rdb);border:1.5px solid rgba(248,113,113,.2);border-radius:8px;padding:4px 9px;font-size:.75rem;color:var(--rd)">❌ Canceladas: '+can+'</span>':'')+(ret?'<span style="background:var(--amb);border:1.5px solid rgba(251,191,36,.2);border-radius:8px;padding:4px 9px;font-size:.75rem;color:var(--am)">🔄 Devueltas: '+ret+'</span>':'')+'</div>':'')+rows;
+  el('sales-body').innerHTML=statsHtml+(can||ret?'<div style="display:flex;gap:7px;margin-bottom:9px">'+(can?'<span style="background:var(--rdb);border:1.5px solid rgba(248,113,113,.2);border-radius:8px;padding:4px 9px;font-size:.75rem;color:var(--rd)">'+t('cancelledCount')+can+'</span>':'')+(ret?'<span style="background:var(--amb);border:1.5px solid rgba(251,191,36,.2);border-radius:8px;padding:4px 9px;font-size:.75rem;color:var(--am)">'+t('returnedCount')+ret+'</span>':'')+'</div>':'')+rows;
 }
 
 // LOGOUT
@@ -5253,7 +5533,7 @@ function openLogout(){
   if(oas.length>0){
     const plural=oas.length>1;
     const msg=el('oa-block-msg');
-    if(msg)msg.innerHTML='<div style="background:var(--rdb);border:1.5px solid var(--rd);border-radius:var(--rs);padding:10px;color:var(--rd);font-size:.85rem">⚠ No puedes cerrar sesión con <strong>'+oas.length+'</strong> cuenta'+(plural?'s':'')+' abierta'+(plural?'s':'')+' pendiente'+(plural?'s':'')+'. Cierra o cobra las cuentas primero.</div>';
+    if(msg)msg.innerHTML='<div style="background:var(--rdb);border:1.5px solid var(--rd);border-radius:var(--rs);padding:10px;color:var(--rd);font-size:.85rem">'+t('oaBlockMsg')+'<strong>'+oas.length+'</strong>'+t('oaBlockMsgSuffix')+(plural?t('oaBlockMsgPSuffix'):'')+' '+t('openAccounts').toLowerCase()+(plural?'':'')+t('oaBlockPending')+(plural?t('oaBlockPendingP'):'')+t('oaBlockCloseFirst')+'</div>';
     const bl=el('oa-block-list');
     if(bl)bl.innerHTML=oas.map(oa=>'<div style="padding:8px 12px;border-bottom:1px solid var(--b1);display:flex;justify-content:space-between;align-items:center"><span style="font-weight:600;font-size:.87rem">📖 '+oa.name+'</span><span style="color:var(--am);font-family:monospace;font-size:.83rem">'+dolr(oa.total||0)+'</span></div>').join('');
     openOv('ov-oa-block');
@@ -5278,32 +5558,32 @@ function openLogout(){
   let report='<div style="background:var(--s2);border-radius:var(--rs);padding:11px;font-size:.8rem">';
   const _sOpenAt=db.cfg&&db.cfg.shiftOpenAt?new Date(db.cfg.shiftOpenAt):null;
   report+='<div style="font-weight:700;margin-bottom:3px;color:var(--tx)">'+t('shiftReport')+(curUser?' — '+curUser.name:'')+'</div>';
-  if(_sOpenAt)report+='<div style="font-size:.72rem;color:var(--tx3);margin-bottom:6px">⏱ '+(lang==='en'?'Shift opened':'Turno abierto')+': '+_sOpenAt.toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'})+'</div>';
+  if(_sOpenAt)report+='<div style="font-size:.72rem;color:var(--tx3);margin-bottom:6px">⏱ '+t('shiftOpenedLbl')+': '+_sOpenAt.toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'})+'</div>';
   // ── Bloque 1: Ventas cobradas ──────────────────────────
-  report+=secHdr(lang==='en'?'COLLECTED SALES':'VENTAS COBRADAS DEL DÍA');
+  report+=secHdr(t('collectedSalesHdr'));
   if(byPay2.cash)report+=rRow('💵',t('payMethodCash'),byPay2.cash,byCnt2.cash,'var(--gn)');
   if(byPay2.card)report+=rRow('💳',t('payMethodCard'),byPay2.card,byCnt2.card,'var(--bl)');
   if(byPay2.transf)report+=rRow('📲',t('payMethodTransf'),byPay2.transf,byCnt2.transf,'var(--ac)');
   if(byPay2.split)report+=rRow('⚡',t('payMethodSplit'),byPay2.split,byCnt2.split,'var(--bl)');
-  if(byPay2.openAccount)report+=rRow('📖','Cta. Abierta',byPay2.openAccount,byCnt2.openAccount,'var(--ac)');
+  if(byPay2.openAccount)report+=rRow('📖',t('openAccountPayMethod'),byPay2.openAccount,byCnt2.openAccount,'var(--ac)');
   if(credCash.count>0){
     report+=rRow('🏷️',t('cashCreditPay'),credCash.cashPart,0,'var(--gn)');
     if(credCash.cardPart)report+=rRow('💳',t('cardCreditPay'),credCash.cardPart,0,'var(--bl)');
   }
-  if(ret.length)report+=rRow('🔄',lang==='en'?'Returns':'Devoluciones',-retTotal,ret.length,'var(--am)');
-  if(can.length)report+=rRow('❌',lang==='en'?'Cancellations':'Cancelaciones',can.reduce((s,x)=>s+x.total,0),can.length,'var(--rd)');
-  report+='<div style="display:flex;justify-content:space-between;font-weight:700;background:var(--gnb);border-radius:5px;padding:5px 8px;margin-top:5px"><span style="color:var(--gn)">✅ '+(lang==='en'?'TOTAL COLLECTED':'TOTAL COBRADO')+'</span><span style="font-family:monospace;color:var(--gn)">'+dolr(totalCobrado)+'</span></div>';
+  if(ret.length)report+=rRow('🔄',t('returns'),-retTotal,ret.length,'var(--am)');
+  if(can.length)report+=rRow('❌',t('cancelSale'),can.reduce((s,x)=>s+x.total,0),can.length,'var(--rd)');
+  report+='<div style="display:flex;justify-content:space-between;font-weight:700;background:var(--gnb);border-radius:5px;padding:5px 8px;margin-top:5px"><span style="color:var(--gn)">✅ '+t('totalCollectedHdr')+'</span><span style="font-family:monospace;color:var(--gn)">'+dolr(totalCobrado)+'</span></div>';
   if(byPay2.credit){
     report+='<div style="display:flex;justify-content:space-between;margin-top:6px;padding:5px 8px;background:rgba(245,158,11,.08);border-radius:5px;border:1px solid rgba(245,158,11,.2)">'
-      +'<span style="color:var(--am)">🏷️ '+(lang==='en'?'Credit granted this shift':'Crédito otorgado en este turno')+' <span style="font-size:.72rem;opacity:.75">('+byCnt2.credit+')</span></span>'
+      +'<span style="color:var(--am)">🏷️ '+t('creditGrantedShift')+' <span style="font-size:.72rem;opacity:.75">('+byCnt2.credit+')</span></span>'
       +'<span style="font-family:monospace;color:var(--am)">'+dolr(byPay2.credit)+'</span></div>'
-      +'<div style="font-size:.7rem;color:var(--tx3);padding:2px 6px;margin-bottom:2px">'+(lang==='en'?'⚠ Debt — not counted in collected cash':'⚠ Deuda — no incluida en lo cobrado')+'</div>';
+      +'<div style="font-size:.7rem;color:var(--tx3);padding:2px 6px;margin-bottom:2px">'+t('creditGrantedShiftNote')+'</div>';
   }
   // ── Bloque 2: Cuadre de efectivo ──────────────────────
-  report+=secHdr(lang==='en'?'CASH RECONCILIATION':'CUADRE DE EFECTIVO');
+  report+=secHdr(t('cashReconHdr'));
   report+=rRow('💵',t('cashFromSales'),cashSales,0,'var(--tx2)');
   if(credCash.cashPart)report+=rRow('🏷️',t('cashCreditPay'),credCash.cashPart,0,'var(--tx2)');
-  if(db.fundAmount>0)report+='<div style="font-size:.73rem;color:var(--tx3);margin:2px 0 4px">'+(lang==='en'?'🗃️ Cash fund: '+dolr(db.fundAmount)+' (not included in reconciliation)':'🗃️ Fondo de caja: '+dolr(db.fundAmount)+' (no incluido en el cuadre)')+'</div>';
+  if(db.fundAmount>0)report+='<div style="font-size:.73rem;color:var(--tx3);margin:2px 0 4px">'+t('cashFundNote')+dolr(db.fundAmount)+t('cashFundNoteNoCuadre')+'</div>';
   report+='<div style="display:flex;justify-content:space-between;font-weight:700;margin-top:4px"><span style="color:var(--tx)">💵 '+t('expectedCashLbl')+'</span><span style="font-family:monospace;color:var(--gn)">'+dolr(expectedCash)+'</span></div>';
   report+='</div>';
   el('lo-report').innerHTML=report;
@@ -5332,7 +5612,7 @@ function printShiftReport(){
   const declared=parseFloat((el('lo-declared-cash')||{}).value)||0;
   const expected=cashSales+(credCashPrint.cashPart||0)+db.fundAmount;
   const diff=Math.round((declared-expected)*100)/100;
-  const diffTxt=declared>0?(diff===0?'Cuadre correcto ✅':(diff>0?'+':'')+dolr(diff)):'—';
+  const diffTxt=declared>0?(diff===0?t('balanceOkTxt'):(diff>0?'+':'')+dolr(diff)):'—';
   const now=new Date();
   function pr(icon,lbl,val,cnt){return (val||cnt)?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>'+icon+' '+lbl+(cnt?' ('+cnt+')':'')+'</span><span>'+dolr(val)+'</span></div>':'';}
   const rows=allToday.slice().reverse().map(s=>{
@@ -5342,38 +5622,38 @@ function printShiftReport(){
   }).join('');
   el('parea').innerHTML='<div style="text-align:center;padding:6px;font-family:monospace">'
     +logoH+'<b>'+(c.bizName||'4K Negocio')+'</b><br>'
-    +'<small>REPORTE DE TURNO</small><br>'
+    +'<small>'+t('shiftReportTitle')+'</small><br>'
     +'<small>'+now.toLocaleDateString()+' '+now.toLocaleTimeString()+'</small>'
-    +(curUser?'<br><small>Cajero: '+curUser.name+'</small>':'')
-    +(db.cfg&&db.cfg.shiftOpenAt?'<br><small>Turno desde: '+new Date(db.cfg.shiftOpenAt).toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'})+'</small>':'')
+    +(curUser?'<br><small>'+t('cashierLblPrint')+curUser.name+'</small>':'')
+    +(db.cfg&&db.cfg.shiftOpenAt?'<br><small>'+t('shiftFromLbl')+new Date(db.cfg.shiftOpenAt).toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'})+'</small>':'')
     +'<hr style="border:1px dashed #000;margin:4px 0">'
     +rows
     +'<hr style="border:1px dashed #000;margin:4px 0">'
-    +'<div style="font-size:11px;font-weight:bold;margin-bottom:3px">'+(lang==='en'?'COLLECTED SALES':'VENTAS COBRADAS')+'</div>'
+    +'<div style="font-size:11px;font-weight:bold;margin-bottom:3px">'+t('collectedSalesSection')+'</div>'
     +pr('💵',t('payMethodCash'),byPay.cash,byCnt.cash)
     +pr('💳',t('payMethodCard'),byPay.card,byCnt.card)
     +pr('📲',t('payMethodTransf'),byPay.transf,byCnt.transf)
     +pr('⚡',t('payMethodSplit'),byPay.split,byCnt.split)
-    +pr('📖','Cta. Abierta',byPay.openAccount,byCnt.openAccount)
+    +pr('📖',t('openAccountPayMethod'),byPay.openAccount,byCnt.openAccount)
     +pr('🏷️',t('cashCreditPay'),credCashPrint.cashPart,0)
     +(credCashPrint.cardPart?pr('💳',t('cardCreditPay'),credCashPrint.cardPart,0):'')
-    +(ret.length?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>🔄 '+(lang==='en'?'Returns':'Devoluciones')+' ('+ret.length+')</span><span>-'+dolr(retTotal)+'</span></div>':'')
-    +(can.length?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>❌ '+(lang==='en'?'Cancellations':'Cancelaciones')+': '+can.length+'</span><span>-'+dolr(can.reduce((s,x)=>s+x.total,0))+'</span></div>':'')
+    +(ret.length?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>🔄 '+t('returns')+' ('+ret.length+')</span><span>-'+dolr(retTotal)+'</span></div>':'')
+    +(can.length?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>❌ '+t('cancelSale')+': '+can.length+'</span><span>-'+dolr(can.reduce((s,x)=>s+x.total,0))+'</span></div>':'')
     +'<hr style="border:1px dashed #000;margin:4px 0">'
-    +'<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:bold"><span>'+(lang==='en'?'TOTAL COLLECTED':'TOTAL COBRADO')+'</span><span>'+dolr(totalCobradoPrint)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:bold"><span>'+t('totalCollectedHdr')+'</span><span>'+dolr(totalCobradoPrint)+'</span></div>'
     +(byPay.credit?'<hr style="border:1px dashed #000;margin:4px 0">'
-      +'<div style="font-size:11px;font-weight:bold;margin-bottom:3px">'+(lang==='en'?'CREDITS GRANTED (DEBT)':'CRÉDITOS OTORGADOS (DEUDA)')+'</div>'
-      +pr('🏷️',lang==='en'?'New credit (debt)':'Crédito nuevo (deuda)',byPay.credit,byCnt.credit)
-      +'<div style="font-size:10px">('+(lang==='en'?'Not income — excluded from cash':'No es ingreso — no incluido en efectivo')+')</div>'
+      +'<div style="font-size:11px;font-weight:bold;margin-bottom:3px">'+t('creditsGrantedSection')+'</div>'
+      +pr('🏷️',t('creditDebtCard'),byPay.credit,byCnt.credit)
+      +'<div style="font-size:10px">('+t('creditNotIncome')+')</div>'
       :'')
     +'<hr style="border:1px dashed #000;margin:4px 0">'
-    +'<div style="font-size:11px;font-weight:bold;margin-bottom:3px">'+(lang==='en'?'CASH RECONCILIATION':'CUADRE DE EFECTIVO')+'</div>'
+    +'<div style="font-size:11px;font-weight:bold;margin-bottom:3px">'+t('cashReconSection')+'</div>'
     +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>💵 '+t('cashFromSales')+'</span><span>'+dolr(cashSales)+'</span></div>'
     +(credCashPrint.cashPart?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>🏷️ '+t('cashCreditPay')+'</span><span>'+dolr(credCashPrint.cashPart)+'</span></div>':'')
     +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>🗃️ '+t('fundBoxLbl')+'</span><span>'+dolr(db.fundAmount)+'</span></div>'
     +'<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:bold;padding:3px 0"><span>'+t('expectedCashLbl').toUpperCase()+'</span><span>'+dolr(expected)+'</span></div>'
-    +(declared?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>'+(lang==='en'?'Declared cash':'Efectivo declarado')+'</span><span>'+dolr(declared)+'</span></div>':'')
-    +(declared?'<div style="display:flex;justify-content:space-between;font-size:11px;font-weight:bold;padding:2px 0"><span>'+(lang==='en'?'Difference':'Diferencia')+'</span><span>'+diffTxt+'</span></div>':'')
+    +(declared?'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>'+t('declaredCashPrint')+'</span><span>'+dolr(declared)+'</span></div>':'')
+    +(declared?'<div style="display:flex;justify-content:space-between;font-size:11px;font-weight:bold;padding:2px 0"><span>'+t('diffPrint')+'</span><span>'+diffTxt+'</span></div>':'')
     +'</div>';
   window.print();
 }
@@ -5636,7 +5916,7 @@ function renderConta(){
   const utilidad=ingresos-costoFac-totalGastos;
   el('ct-stats').innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px">'
     +sCard('gn','💰 '+t('incomeCollected'),dolr(ingresos))+sCard('rd','💸 '+t('purchasesLbl'),dolr(costoFac))+sCard('am','⚡ '+t('tabExpenses'),dolr(totalGastos))
-    +sCard('ac','📊 '+(lang==='en'?'Orders':'Órdenes'),sales.length.toString())+sCard(utilidad>=0?'gn':'rd','✨ '+(lang==='en'?'Profit':'Utilidad'),dolr(utilidad))+'</div>';
+    +sCard('ac','📊 '+t('ordersLblConta'),sales.length.toString())+sCard(utilidad>=0?'gn':'rd','✨ '+t('profitLbl'),dolr(utilidad))+'</div>';
   const prodMap={};
   sales.forEach(s=>s.items.forEach(i=>{if(!prodMap[i.name])prodMap[i.name]={qty:0,total:0};prodMap[i.name].qty+=i.qty;prodMap[i.name].total+=i.price*i.qty;}));
   const sorted=Object.entries(prodMap).sort((a,b)=>b[1].total-a[1].total);
@@ -5644,7 +5924,7 @@ function renderConta(){
   el('ct-breakdown').innerHTML=sorted.length?sorted.map(e=>{
     const pct=Math.round(e[1].total/maxT*100);
     return '<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:3px"><span style="color:var(--tx2)">'+e[0]+'</span><span style="font-family:monospace;color:var(--gn)">'+dolr(e[1].total)+' ('+e[1].qty+' u)</span></div><div style="height:7px;background:var(--b2);border-radius:4px"><div style="height:100%;width:'+pct+'%;background:var(--ac);border-radius:4px;transition:width .4s"></div></div></div>';
-  }).join(''):'<div style="color:var(--tx3);font-size:.82rem">'+(lang==='en'?'No sales.':'Sin ventas.')+'</div>';
+  }).join(''):'<div style="color:var(--tx3);font-size:.82rem">'+t('noSalesConta')+'</div>';
   renderFacList();renderGstList();
 }
 function sCard(color,lbl,val){return '<div style="background:var(--'+color+'b,var(--s2));border:1.5px solid var(--'+color+',var(--b1));border-radius:8px;padding:10px;text-align:center"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.8px;color:var(--'+color+');margin-bottom:3px">'+lbl+'</div><div style="font-family:monospace;font-size:1rem;font-weight:700;color:var(--'+color+')">'+val+'</div></div>';}
@@ -5800,21 +6080,21 @@ function saveFactura(){
   saveDB();renderFacList();renderProds();clearFactura();toast('✅ Factura — Stock: '+prod.name+' → '+prod.stock);
 }
 function clearFactura(){['fac-qty','fac-cost','fac-prov','fac-num','fac-notes'].forEach(id=>el(id).value='');el('fac-prod').value='';}
-function delFactura(id){confirm2('¿Eliminar factura? El stock NO se revertirá.',()=>{db.facturas=db.facturas.filter(f=>f.id!==id);saveDB();renderFacList();});}
-function loadFacProds(){el('fac-prod').innerHTML='<option value="">— Selecciona producto —</option>'+db.products.map(p=>'<option value="'+p.id+'">'+p.name+' (Stock: '+(p.stock||0)+')</option>').join('');}
+function delFactura(id){confirm2(t('delFacConfirm'),()=>{db.facturas=db.facturas.filter(f=>f.id!==id);saveDB();renderFacList();});}
+function loadFacProds(){el('fac-prod').innerHTML='<option value="">'+t('facSelectProduct')+'</option>'+db.products.map(p=>'<option value="'+p.id+'">'+p.name+' ('+t('stock')+': '+(p.stock||0)+')</option>').join('');}
 function renderFacList(){
   const list=el('fac-list');
-  if(!db.facturas.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+(lang==='en'?'No invoices.':'Sin facturas.')+'</div>';return;}
+  if(!db.facturas.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('facNoInvoices')+'</div>';return;}
   list.innerHTML=db.facturas.slice().reverse().map(f=>'<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1.5px solid var(--b1)"><div style="flex:1"><div style="font-weight:600;font-size:.83rem;color:var(--tx)">'+f.prodName+' — <span style="color:var(--gn)">+'+f.qty+' u</span></div><div style="font-size:.72rem;color:var(--tx3)">'+new Date(f.date).toLocaleDateString()+(f.proveedor?' · '+f.proveedor:'')+(f.numFac?' · #'+f.numFac:'')+'</div></div><div style="font-family:monospace;color:var(--am);font-size:.85rem;font-weight:700">'+dolr(f.cost)+'</div><button class="xb" onclick="delFactura(\''+f.id+'\')">✕</button></div>').join('');
 }
 function saveGasto(){
   const concepto=el('gst-concepto').value.trim(),monto=parseFloat(el('gst-monto').value)||0;
-  if(!concepto||!monto){toast('⚠ Concepto y monto requeridos');return;}
+  if(!concepto||!monto){toast(t('gstConceptAmtRequired'));return;}
   db.gastos_conta.push({id:Date.now().toString(),date:new Date().toISOString(),concepto,monto,cat:el('gst-cat').value,notes:el('gst-notes').value.trim()});
-  saveDB();renderGstList();clearGasto();toast('✅ Gasto registrado');
+  saveDB();renderGstList();clearGasto();toast(t('gstSavedToast'));
 }
 function clearGasto(){['gst-concepto','gst-monto','gst-notes'].forEach(id=>el(id).value='');el('gst-cat').value='operativo';}
-function delGasto(id){confirm2('¿Eliminar gasto?',()=>{db.gastos_conta=db.gastos_conta.filter(g=>g.id!==id);saveDB();renderGstList();});}
+function delGasto(id){confirm2(t('delGstConfirm'),()=>{db.gastos_conta=db.gastos_conta.filter(g=>g.id!==id);saveDB();renderGstList();});}
 function renderGstList(){
   const list=el('gst-list');
   const period=(el('ct-period')||{value:'todo'}).value;
@@ -5822,8 +6102,8 @@ function renderGstList(){
   const all=(db.gastos_conta||[]).filter(function(g){const d=new Date(g.date);return d>=range.start&&d<=range.end;});
   const totalGst=all.reduce(function(s,g){return s+g.monto;},0);
   const hdr=el('gst-period-total');
-  if(hdr)hdr.textContent='Total período: '+dolr(totalGst)+' ('+all.length+' registros)';
-  if(!all.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+(lang==='en'?'No expenses in this period.':'Sin gastos en este período.')+'</div>';return;}
+  if(hdr)hdr.textContent=t('gstPeriodTotal')+dolr(totalGst)+' ('+all.length+t('gstRecords')+')';
+  if(!all.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('gstNoneInPeriod')+'</div>';return;}
   const cc={operativo:'var(--bl)',inventario:'var(--ac)',servicios:'var(--am)',nomina:'var(--gn)',marketing:'var(--rd)',otro:'var(--tx3)'};
   list.innerHTML=all.slice().reverse().map(function(g){return '<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1.5px solid var(--b1)"><div style="flex:1"><div style="font-weight:600;font-size:.83rem;color:var(--tx)">'+g.concepto+'</div><div style="font-size:.72rem;color:var(--tx3)">'+new Date(g.date).toLocaleDateString()+' · <span style="color:'+(cc[g.cat]||'var(--tx3)')+'">'+g.cat+'</span>'+(g.notes?' · '+g.notes:'')+'</div></div><div style="font-family:monospace;color:var(--rd);font-size:.85rem;font-weight:700">'+dolr(g.monto)+'</div><button class="xb" onclick="delGasto(\''+g.id+'\')">✕</button></div>';}).join('');
 }
@@ -5987,9 +6267,9 @@ function renderVentasList(){
   const total=sales.reduce(function(s,x){return s+x.total;},0);
   const creditInList=sales.filter(function(s){return s.payMethod==='credit'&&s.creditStatus!=='paid';}).reduce(function(s,x){return s+x.total;},0);
   const lbl=el('vnt-summary');
-  if(lbl)lbl.textContent=sales.length+' ventas · '+t('incomeCollected')+': '+dolr(total-creditInList)+(creditInList>0?' · 🏷️ '+t('creditDebtCard')+': '+dolr(creditInList):'');
+  if(lbl)lbl.textContent=sales.length+t('ventasSummaryPrefix')+t('incomeCollected')+': '+dolr(total-creditInList)+(creditInList>0?' · 🏷️ '+t('creditDebtCard')+': '+dolr(creditInList):'');
   const list=el('vnt-list');if(!list)return;
-  if(!sales.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:12px 0;text-align:center">Sin ventas en este período.</div>';return;}
+  if(!sales.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:12px 0;text-align:center">'+t('noSalesInPeriod')+'</div>';return;}
   list.innerHTML=sales.map(function(s){
     const dt=new Date(s.date);
     const dStr=dt.toLocaleDateString(undefined,{month:'short',day:'numeric'});
@@ -6503,7 +6783,7 @@ document.addEventListener('keydown', function(e) {
       if(prod){
         addToCart(prod.id);
       } else {
-        toast('⚠ '+(lang==='en'?'Code not found: ':'Código no encontrado: ')+code);
+        toast('⚠ '+t('barcodeNotFound')+code);
       }
       return;
     }
@@ -7300,14 +7580,14 @@ function _renderDbTop5(){
     });
   });
   var top5=Object.values(counts).sort(function(a,b){return b.qty-a.qty;}).slice(0,5);
-  if(!top5.length){el5.innerHTML='<p style="font-size:.75rem;color:var(--tx3);text-align:center;padding:12px">Sin ventas hoy</p>';return;}
-  el5.innerHTML='<table class="db-top5"><tr><th>#</th><th>Producto</th><th style="text-align:right">Cant.</th><th style="text-align:right">Total</th></tr>'
+  if(!top5.length){el5.innerHTML='<p style="font-size:.75rem;color:var(--tx3);text-align:center;padding:12px">'+t('noSalesToday')+'</p>';return;}
+  el5.innerHTML='<table class="db-top5"><tr><th>#</th><th>'+t('dbColProd')+'</th><th style="text-align:right">'+t('dbColQty')+'</th><th style="text-align:right">'+t('totalColHdr')+'</th></tr>'
     +top5.map(function(p,i){return '<tr><td style="color:var(--tx3)">'+(i+1)+'</td><td style="font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.name+'</td><td style="text-align:right;font-weight:700">'+p.qty+'</td><td style="text-align:right;font-family:monospace;color:var(--gn)">'+dolr(p.revenue)+'</td></tr>';}).join('')+'</table>';
 }
 function _renderDbStock(){
   var stkEl=el('db-stock');if(!stkEl)return;
   var prods=db.products||[];
-  if(!prods.length){stkEl.innerHTML='<p style="font-size:.75rem;color:var(--tx3)">Sin productos</p>';return;}
+  if(!prods.length){stkEl.innerHTML='<p style="font-size:.75rem;color:var(--tx3)">'+t('noProducts')+'</p>';return;}
   var sorted=prods.slice().sort(function(a,b){return (a.stock||0)-(b.stock||0);}).slice(0,12);
   stkEl.innerHTML=sorted.map(function(p){
     var stk=p.stock||0;var min=p.minStock||5;
