@@ -680,7 +680,7 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
   <div class="hmi sal" id="hm-sal" onclick="closeHMenu();reqPin('sales')">📊 <span id="hm-sal-txt">Ventas del día</span></div>
   <div class="hmi conta" id="hm-conta" onclick="closeHMenu();reqPin('conta')">📒 <span id="hm-conta-txt">Contabilidad</span></div>
   <div class="hmi" style="color:var(--tx3)" onclick="closeHMenu();openDrawer()">🗃️ <span id="hm-drawer-txt">Abrir Registradora</span></div>
-  <div class="hmi" style="color:#3b82f6" onclick="closeHMenu();openDashQR()">📱 <span>Dashboard Móvil</span></div>
+  <div class="hmi" style="color:#3b82f6" onclick="closeHMenu();openDashQR()">📱 <span id="hm-dash-qr-span">Dashboard Móvil</span></div>
   <div class="hmi" style="color:#10b981" id="hm-update" onclick="closeHMenu();checkUpdates()">⬆️ <span id="hm-update-txt">Buscar actualizaciones</span></div>
   <div class="hmi" style="color:#8b5cf6;display:none" id="hm-audit" onclick="closeHMenu();openAudit()">📋 <span id="hm-audit-txt">Auditoría</span></div>
   <div class="hmi" style="color:#f59e0b" id="hm-abonos" onclick="closeHMenu();openAbonosList()">💰 <span id="hm-abonos-txt">Abonos de crédito</span></div>
@@ -808,15 +808,15 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
       </div>
       <!-- CONFIG -->
       <div id="t-cfg" style="display:none">
-        <div class="slbl">Código Admin</div>
+        <div class="slbl" id="cfg-admin-code-title">Código Admin</div>
         <div class="g2">
-          <div class="fg"><label class="lbl">Código actual</label><input type="password" class="fi" id="cc-old" placeholder="••••"></div>
-          <div class="fg"><label class="lbl">Nuevo código</label><input type="password" class="fi" id="cc-new" placeholder="••••"></div>
+          <div class="fg"><label class="lbl" id="cfg-cur-code-lbl">Código actual</label><input type="password" class="fi" id="cc-old" placeholder="••••"></div>
+          <div class="fg"><label class="lbl" id="cfg-new-code-lbl">Nuevo código</label><input type="password" class="fi" id="cc-new" placeholder="••••"></div>
         </div>
-        <div class="frow"><button class="btn btn-p" onclick="changeCode()">🔑 Cambiar</button></div>
+        <div class="frow"><button class="btn btn-p" id="cfg-change-code-btn" onclick="changeCode()">🔑 Cambiar</button></div>
         <div class="sep-line"></div>
-        <div class="slbl">Fondo de Caja</div>
-        <div class="fg"><label class="lbl">Monto ($)</label><input type="number" class="fi" id="cfg-fund" placeholder="50.00" step="0.01"></div>
+        <div class="slbl" id="cfg-fund-title">Fondo de Caja</div>
+        <div class="fg"><label class="lbl" id="cfg-fund-amt-lbl">Monto ($)</label><input type="number" class="fi" id="cfg-fund" placeholder="50.00" step="0.01"></div>
         <div class="frow"><button class="btn btn-p" id="fund-save-btn" onclick="saveFund()">💾 Guardar</button></div>
         <div class="sep-line"></div>
         <div class="slbl" id="cfg-pay-methods-lbl">Métodos de Pago</div>
@@ -846,8 +846,8 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
           <button id="cfg-time-12h" class="btn btn-p" onclick="setTimeFormat('12h')">🕐 12h (AM/PM)</button>
           <button id="cfg-time-24h" class="btn btn-s" onclick="setTimeFormat('24h')">🕐 24h</button>
         </div>
-        <div class="slbl">Recibo</div>
-        <div class="fg"><label class="lbl">Logo</label>
+        <div class="slbl" id="cfg-receipt-title">Recibo</div>
+        <div class="fg"><label class="lbl" id="cfg-logo-lbl">Logo</label>
           <div class="img-upload-row">
             <input type="file" accept="image/*" id="logo-file" style="display:none" onchange="imgLoad(this,'logo-prev','logo-data');saveLogo()">
             <button class="btn btn-s" onclick="el('logo-file').click()">📁 Subir</button>
@@ -863,10 +863,10 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
         <div class="fg"><label class="lbl" id="cfg-thanks-lbl">Mensaje gracias</label><input type="text" class="fi" id="cfg-thanks"></div>
         <div class="fg"><label class="lbl" id="cfg-phone-lbl">Teléfono</label><input type="text" class="fi" id="cfg-phone"></div>
         <div class="g2">
-          <div class="fg"><label class="lbl">Red social 1</label><input type="text" class="fi" id="cfg-s1"></div>
-          <div class="fg"><label class="lbl">Red social 2</label><input type="text" class="fi" id="cfg-s2"></div>
+          <div class="fg"><label class="lbl" id="cfg-s1-lbl">Red social 1</label><input type="text" class="fi" id="cfg-s1"></div>
+          <div class="fg"><label class="lbl" id="cfg-s2-lbl">Red social 2</label><input type="text" class="fi" id="cfg-s2"></div>
         </div>
-        <div class="fg"><label class="lbl">URL QR</label><input type="text" class="fi" id="cfg-qr"></div>
+        <div class="fg"><label class="lbl" id="cfg-qr-lbl">URL QR</label><input type="text" class="fi" id="cfg-qr"></div>
         <div class="frow"><button class="btn btn-p" id="cfg-save-btn" onclick="saveCfg()">💾 Guardar Config</button></div>
         <div id="cfg-msg" style="font-size:.8rem;color:var(--gn);margin-top:7px;display:none">✅ Guardado</div>
         <div class="sep-line"></div>
@@ -885,7 +885,7 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
         <div class="sep-line"></div>
         <div class="slbl" id="cfg-backup-lbl">Backup automático</div>
         <div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px" id="cfg-backup-info">Automático cada 5 min · silencioso</div>
-        <div style="font-size:.72rem;color:var(--tx3);margin-bottom:8px">Último respaldo: <span id="last-backup-lbl" style="color:var(--gn)">—</span></div>
+        <div style="font-size:.72rem;color:var(--tx3);margin-bottom:8px"><span id="cfg-last-backup-pre">Último respaldo</span>: <span id="last-backup-lbl" style="color:var(--gn)">—</span></div>
         <div class="sep-line"></div>
         <div class="slbl" id="cfg-bkp-pass-title">Contraseña de Respaldo</div>
         <div id="bkp-no-pass-warn" style="font-size:.73rem;padding:8px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);border-radius:6px;color:#f59e0b;margin-bottom:8px">⚠️ Tus backups no están cifrados — configura una contraseña para proteger las exportaciones.</div>
@@ -961,8 +961,8 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
           <div class="fg"><label class="lbl" id="lbl-cust-name">Nombre completo</label><input type="text" class="fi" id="cust-name" placeholder="Juan Pérez"></div>
           <div class="fg"><label class="lbl" id="lbl-cust-cedula">Cédula / ID <span style="color:var(--rd)">*</span></label><input type="text" class="fi" id="cust-cedula" placeholder="0-000-000"></div>
           <div class="fg"><label class="lbl" id="lbl-cust-phone">Teléfono</label><input type="text" class="fi" id="cust-phone"></div>
-          <div class="fg"><label class="lbl">Email</label><input type="text" class="fi" id="cust-email"></div>
-          <div class="fg"><label class="lbl">Notas</label><input type="text" class="fi" id="cust-notes"></div>
+          <div class="fg"><label class="lbl" id="lbl-cust-email">Email</label><input type="text" class="fi" id="cust-email"></div>
+          <div class="fg"><label class="lbl" id="lbl-cust-notes">Notas</label><input type="text" class="fi" id="cust-notes"></div>
         </div>
         <input type="hidden" id="cust-eid">
         <div class="frow"><button class="btn btn-p" id="cust-save-btn" onclick="saveCust()">💾 Guardar</button><button class="btn btn-s" onclick="clearCust()">↺</button></div>
@@ -1222,7 +1222,7 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
         </div>
         <div id="ct-stats"></div>
         <div class="sep-line"></div>
-        <div style="font-size:.82rem;font-weight:700;color:var(--tx);margin-bottom:8px">Desglose por producto</div>
+        <div id="ct-breakdown-title" style="font-size:.82rem;font-weight:700;color:var(--tx);margin-bottom:8px">Desglose por producto</div>
         <div id="ct-breakdown"></div>
       </div>
       <div id="ct-fac" style="display:none">
@@ -2107,6 +2107,29 @@ const T = {
     // Placeholder hints
     vntSrchPh:'🔍 # orden o cliente...',catNamePh:'Ej: Cosméticos',
     custNamePh:'Juan Pérez',userNameExPh:'María',
+    // Config labels missing translations
+    cfgTimeLbl:'Formato de hora',
+    social1Lbl:'Red social 1',social2Lbl:'Red social 2',
+    lastBackupLbl:'Último respaldo',emailLbl:'Email',notesLbl:'Notas',
+    // Audit log action names
+    auditLoginFail:'Login fallido',auditPassReset:'Contraseña reseteada',
+    auditUserDel:'Usuario eliminado',auditShiftClose:'Cierre de turno',
+    auditAdminExempt:'Acción admin (exento)',auditAdminCfgExempt:'Config admin-exempt',
+    auditAdminCode:'Código admin verificado',auditPriceEdit:'Precio editado',
+    auditProdDel:'Producto eliminado',auditTaxUpdate:'Impuesto actualizado',
+    auditBkpPassChange:'Contraseña respaldo cambiada',auditBkpPassSet:'Contraseña respaldo configurada',
+    auditBkpPassDel:'Contraseña respaldo eliminada',auditInactivityLock:'Cierre por inactividad',
+    auditSessionLock:'Sesión bloqueada',auditDiscountApplied:'Descuento aplicado',
+    auditAbonoReg:'Abono registrado',auditSaleVoided:'Venta anulada',
+    auditUserEdit:'Usuario editado',auditUserCreate:'Usuario creado',
+    auditComboEdit:'Combo editado',auditComboCreate:'Combo creado',
+    auditComboDel:'Combo eliminado',auditComboActivated:'Combo activado',
+    auditComboDeactivated:'Combo desactivado',
+    auditSpecialEdit:'Especial editado',auditSpecialCreate:'Especial creado',
+    auditSpecialDel:'Especial eliminado',auditSpecialActivated:'Especial activado',
+    auditSpecialDeactivated:'Especial desactivado',
+    auditSpcTypeDiscount:'Descuento %',auditSpcTypeQtyPrice:'Por cantidad',
+    userUpdatedPre:'✓ Usuario actualizado: ',userCreatedPre:'✓ Usuario: ',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -2495,6 +2518,29 @@ const T = {
     // Placeholder hints
     vntSrchPh:'🔍 # order or customer...',catNamePh:'E.g.: Cosmetics',
     custNamePh:'John Doe',userNameExPh:'Mary',
+    // Config labels missing translations
+    cfgTimeLbl:'Time format',
+    social1Lbl:'Social media 1',social2Lbl:'Social media 2',
+    lastBackupLbl:'Last backup',emailLbl:'Email',notesLbl:'Notes',
+    // Audit log action names
+    auditLoginFail:'Login failed',auditPassReset:'Password reset',
+    auditUserDel:'User deleted',auditShiftClose:'Shift closed',
+    auditAdminExempt:'Admin action (exempt)',auditAdminCfgExempt:'Admin-exempt config',
+    auditAdminCode:'Admin code verified',auditPriceEdit:'Price edited',
+    auditProdDel:'Product deleted',auditTaxUpdate:'Tax updated',
+    auditBkpPassChange:'Backup password changed',auditBkpPassSet:'Backup password set',
+    auditBkpPassDel:'Backup password removed',auditInactivityLock:'Locked by inactivity',
+    auditSessionLock:'Session locked',auditDiscountApplied:'Discount applied',
+    auditAbonoReg:'Payment recorded',auditSaleVoided:'Sale voided',
+    auditUserEdit:'User edited',auditUserCreate:'User created',
+    auditComboEdit:'Combo edited',auditComboCreate:'Combo created',
+    auditComboDel:'Combo deleted',auditComboActivated:'Combo activated',
+    auditComboDeactivated:'Combo deactivated',
+    auditSpecialEdit:'Special edited',auditSpecialCreate:'Special created',
+    auditSpecialDel:'Special deleted',auditSpecialActivated:'Special activated',
+    auditSpecialDeactivated:'Special deactivated',
+    auditSpcTypeDiscount:'Discount %',auditSpcTypeQtyPrice:'By quantity',
+    userUpdatedPre:'✓ User updated: ',userCreatedPre:'✓ User: ',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -3003,6 +3049,29 @@ function applyLang(){
   const _sbiCfgLbl=el('sbi-cfg-lbl');if(_sbiCfgLbl)_sbiCfgLbl.textContent=t('sbConfig');
   const _sbiLockLbl=el('sbi-lock-lbl');if(_sbiLockLbl)_sbiLockLbl.textContent=t('sbLock');
   const _sbiLogoutLbl=el('sbi-logout-lbl');if(_sbiLogoutLbl)_sbiLogoutLbl.textContent=t('logoutTitle');
+  // Config labels (previously unhandled)
+  const _cfgAdminCodeTitle=el('cfg-admin-code-title');if(_cfgAdminCodeTitle)_cfgAdminCodeTitle.textContent=t('cfgAdminCode');
+  const _cfgCurCodeLbl=el('cfg-cur-code-lbl');if(_cfgCurCodeLbl)_cfgCurCodeLbl.textContent=t('cfgCurCode');
+  const _cfgNewCodeLbl=el('cfg-new-code-lbl');if(_cfgNewCodeLbl)_cfgNewCodeLbl.textContent=t('cfgNewCode');
+  const _cfgChangeCodeBtn=el('cfg-change-code-btn');if(_cfgChangeCodeBtn)_cfgChangeCodeBtn.textContent=t('cfgChangeBtn');
+  const _cfgFundTitle=el('cfg-fund-title');if(_cfgFundTitle)_cfgFundTitle.textContent=t('cfgFundLbl');
+  const _cfgFundAmtLbl=el('cfg-fund-amt-lbl');if(_cfgFundAmtLbl)_cfgFundAmtLbl.textContent=t('cfgAmountLbl');
+  const _cfgCreditDueLbl=el('cfg-credit-due-lbl');if(_cfgCreditDueLbl)_cfgCreditDueLbl.textContent=t('defaultDueDays');
+  const _cfgAllowCashierDueLbl=el('cfg-allow-cashier-due-lbl');if(_cfgAllowCashierDueLbl)_cfgAllowCashierDueLbl.textContent=t('allowCashierDue');
+  const _cfgTimeLbl=el('cfg-time-lbl');if(_cfgTimeLbl)_cfgTimeLbl.textContent=t('cfgTimeLbl');
+  const _cfgReceiptTitle=el('cfg-receipt-title');if(_cfgReceiptTitle)_cfgReceiptTitle.textContent=t('receiptLbl');
+  const _cfgLogoLbl=el('cfg-logo-lbl');if(_cfgLogoLbl)_cfgLogoLbl.textContent=t('logoLbl');
+  const _cfgS1Lbl=el('cfg-s1-lbl');if(_cfgS1Lbl)_cfgS1Lbl.textContent=t('social1Lbl');
+  const _cfgS2Lbl=el('cfg-s2-lbl');if(_cfgS2Lbl)_cfgS2Lbl.textContent=t('social2Lbl');
+  const _cfgQrLbl=el('cfg-qr-lbl');if(_cfgQrLbl)_cfgQrLbl.textContent=t('qrLbl');
+  const _cfgLastBkpPre=el('cfg-last-backup-pre');if(_cfgLastBkpPre)_cfgLastBkpPre.textContent=t('lastBackupLbl');
+  // Customer form labels
+  const _lblCustEmail=el('lbl-cust-email');if(_lblCustEmail)_lblCustEmail.textContent=t('emailLbl');
+  const _lblCustNotes=el('lbl-cust-notes');if(_lblCustNotes)_lblCustNotes.textContent=t('notesLbl');
+  // Hamburger dashboard span
+  const _hmDashQrSpan=el('hm-dash-qr-span');if(_hmDashQrSpan)_hmDashQrSpan.textContent=t('sbDashMobile');
+  // Contabilidad breakdown title
+  const _ctBreakdownTitle=el('ct-breakdown-title');if(_ctBreakdownTitle)_ctBreakdownTitle.textContent=t('salesBreakdown');
   // Remaining placeholders
   const _vntSrchEl=el('vnt-srch');if(_vntSrchEl)_vntSrchEl.placeholder=t('vntSrchPh');
   const _credSearchEl=el('cred-search');if(_credSearchEl)_credSearchEl.placeholder=t('creditSrch');
@@ -3218,7 +3287,7 @@ async function saveDB(){
   // Check lock before validating password
   if(candidate&&candidate.lockedUntil&&new Date(candidate.lockedUntil)>new Date()){
     const minsLeft=Math.max(1,Math.ceil((new Date(candidate.lockedUntil)-Date.now())/60000));
-    logAction('Login fallido','Cuenta bloqueada · '+u+' · '+minsLeft+' min restantes');
+    logAction(t('auditLoginFail'),'Cuenta bloqueada · '+u+' · '+minsLeft+' min restantes');
     el('lerr').textContent=t('accountLockedPrefix')+minsLeft+t('accountLockedSuffix');
     el('lerr').style.display='block';
     el('lp').value='';
@@ -3258,18 +3327,18 @@ async function saveDB(){
       if(candidate.failedAttempts>=5){
         candidate.lockedUntil=new Date(Date.now()+5*60*1000).toISOString();
         candidate.failedAttempts=0;
-        logAction('Login fallido','BLOQUEADO tras 5 intentos · '+u);
+        logAction(t('auditLoginFail'),'BLOQUEADO tras 5 intentos · '+u);
         el('lerr').textContent=t('tooManyAttempts');
         setTimeout(()=>{el('lerr').style.display='none';el('lerr').textContent=t('loginErr');},4000);
       }else{
-        logAction('Login fallido','Contraseña incorrecta · '+u+' ('+candidate.failedAttempts+'/5)');
+        logAction(t('auditLoginFail'),'Contraseña incorrecta · '+u+' ('+candidate.failedAttempts+'/5)');
         el('lerr').textContent=t('wrongPassPrefix')+candidate.failedAttempts+t('wrongPassSuffix');
         setTimeout(()=>{el('lerr').style.display='none';el('lerr').textContent=t('loginErr');},2500);
       }
       saveDB();
     }else{
-      logAction('Login fallido','Usuario no existe: '+u);
-      el('lerr').textContent='Usuario o contraseña incorrectos';
+      logAction(t('auditLoginFail'),'Usuario no existe: '+u);
+      el('lerr').textContent=t('loginErr');
       setTimeout(()=>el('lerr').style.display='none',2500);
     }
     el('lerr').style.display='block';
@@ -3343,7 +3412,7 @@ function resetUserPass(id){
     for(var i=0;i<6;i++)tmp+=chars[Math.floor(Math.random()*chars.length)];
     u.pass=bcrypt?bcrypt.hashSync(tmp,10):tmp;
     u.tempPassword=true;
-    logAction('Contraseña reseteada',u.name+' ('+u.user+')');
+    logAction(t('auditPassReset'),u.name+' ('+u.user+')');
     saveDB();
     el('rp-uname').textContent=u.name;
     el('rp-code').textContent=tmp;
@@ -3387,7 +3456,7 @@ function delUser(id){
   if(!u)return;
   requireAdminCode(t('delUserPromptPre')+u.name+' ('+u.role+')',function(){
     confirm2(t('deleteUserConfirm')+u.name+'?',function(){
-      logAction('Usuario eliminado',u.name+' ('+u.role+')');
+      logAction(t('auditUserDel'),u.name+' ('+u.role+')');
       db.users=db.users.filter(function(x){return x.id!==id;});
       saveDB();renderUserList();renderLoginUsers();
     });
@@ -3640,7 +3709,7 @@ function doLogout(){
   const _decl2=parseFloat((el('lo-declared-cash')||{}).value)||0;
   const _expCash2=(_bpS.cash||0)+(_aboS.cashPart||0);
   const _diff2=Math.round((_decl2-_expCash2)*100)/100;
-  logAction('Cierre de turno',_shiftActive.length+' ventas · Efectivo: '+dolr(_bpS.cash||0)+(_diff2!==0?' · Descuadre: '+(_diff2<0?'-':'+')+'$'+Math.abs(_diff2).toFixed(2):''));
+  logAction(t('auditShiftClose'),_shiftActive.length+' ventas · Efectivo: '+dolr(_bpS.cash||0)+(_diff2!==0?' · Descuadre: '+(_diff2<0?'-':'+')+'$'+Math.abs(_diff2).toFixed(2):''));
   const _noteVal=(el('lo-shift-note')||{}).value||'';
   if(!db.cfg)db.cfg={};
   db.cfg.pendingShiftNote=_noteVal.trim()||null;
@@ -3669,7 +3738,7 @@ var _adminConfirmLabel='';
 
 function requireAdminCode(accionTexto,callback){
   if(curUser&&curUser.role==='admin'&&(db.settings&&db.settings.adminExemptFromConfirm)!==false){
-    logAction('Acción autorizada (admin exento)',accionTexto);
+    logAction(t('auditAdminExempt'),accionTexto);
     callback();return;
   }
   _adminConfirmCb=callback;_adminConfirmLabel=accionTexto;
@@ -3692,7 +3761,7 @@ function saveAdminExemptCfg(){
   if(!db.settings)db.settings={};
   db.settings.adminExemptFromConfirm=(el('cfg-admin-exempt')||{}).checked!==false;
   saveDB();
-  logAction('Configuración admin-exempt actualizada','adminExemptFromConfirm:'+db.settings.adminExemptFromConfirm);
+  logAction(t('auditAdminCfgExempt'),'adminExemptFromConfirm:'+db.settings.adminExemptFromConfirm);
   toast(t('configSaved'));
 }
 
@@ -3748,7 +3817,7 @@ function verifyPin(){
       _adminConfirmCb=null;_adminConfirmLabel='';
       const pt=el('pin-title');if(pt)pt.textContent=t('pinTitle');
       const pc=el('pin-action-ctx');if(pc){pc.textContent='';pc.style.display='none';}
-      logAction('Autorizado con código admin',_lbl);
+      logAction(t('auditAdminCode'),_lbl);
       _cb();
     }else{runTarget(pinTarget);}
   }else{el('pin-err').style.display='block';pinVal='';updatePinDisp();setTimeout(()=>el('pin-err').style.display='none',1500);}
@@ -3834,7 +3903,7 @@ function saveProd(){
   if(!name||!price){toast(t('prodNamePriceRequired'));return;}
   const eid=el('p-eid').value,imgData=el('p-data').value;
   const prod={id:eid||Date.now().toString(),name,cat:el('p-cat').value,price,cost:getNum('p-cost')||undefined,stock:getNum('p-stock'),minStock:getNum('p-minstock')||5,bc:el('p-bc').value.trim(),img:imgData};
-  if(eid){const i=db.products.findIndex(x=>x.id===eid);if(i>=0){if(db.products[i].price!==price)logAction('Precio editado',prod.name,dolr(db.products[i].price),dolr(price));if(!imgData)prod.img=db.products[i].img;db.products[i]=prod;}el('p-eid').value='';}
+  if(eid){const i=db.products.findIndex(x=>x.id===eid);if(i>=0){if(db.products[i].price!==price)logAction(t('auditPriceEdit'),prod.name,dolr(db.products[i].price),dolr(price));if(!imgData)prod.img=db.products[i].img;db.products[i]=prod;}el('p-eid').value='';}
   else db.products.push(prod);
   saveDB();renderProdList();renderProds();clearProd();calcNotifs();toast('✓ '+name);
 }
@@ -3852,7 +3921,7 @@ function delProd(id){
   const _doDelProd=function(){
     confirm2(t('delProductConfirm')+_dp.name+'?',function(){
       db.products=db.products.filter(x=>x.id!==id);cart=cart.filter(x=>x.id!==id);
-      logAction('Producto eliminado',_dp.name+((_dp.bc)?' · #'+_dp.bc:'')+' · '+dolr(_dp.price||0));
+      logAction(t('auditProdDel'),_dp.name+((_dp.bc)?' · #'+_dp.bc:'')+' · '+dolr(_dp.price||0));
       if(_invSelRow===id)_invSelRow=null;
       saveDB();renderProdList();renderProds();renderCart();calcNotifs();renderInv();
     });
@@ -4399,7 +4468,7 @@ function saveTaxCfg(){
   db.cfg.taxRate=Math.max(0,parseFloat((el('cfg-tax-rate')||{}).value)||0);
   db.cfg.taxIncluded=(el('cfg-tax-included')||{}).checked===true;
   saveDB();
-  logAction('Impuesto actualizado',db.cfg.taxName+' '+db.cfg.taxRate+'% (activo:'+db.cfg.taxEnabled+')');
+  logAction(t('auditTaxUpdate'),db.cfg.taxName+' '+db.cfg.taxRate+'% (activo:'+db.cfg.taxEnabled+')');
   toast(t('taxSaved'));
 }
 function npPress(k){
@@ -4575,7 +4644,7 @@ function saveBackupPass(){
     _bkpKey=_deriveBackupKey(p1,salt);
     if(el('cfg-bkp-pass1'))el('cfg-bkp-pass1').value='';
     if(el('cfg-bkp-pass2'))el('cfg-bkp-pass2').value='';
-    logAction('Contraseña de respaldo '+(hadPass?'cambiada':'configurada'));
+    logAction(hadPass?t('auditBkpPassChange'):t('auditBkpPassSet'));
     saveDB();
     _updateBkpPassUI();
     toast(t('backupPassSaved'));
@@ -4587,7 +4656,7 @@ function removeBackupPass(){
     db.settings.backupPassHash=null;
     db.settings.backupKeySalt=null;
     _bkpKey=null;
-    logAction('Contraseña de respaldo eliminada');
+    logAction(t('auditBkpPassDel'));
     saveDB();
     _updateBkpPassUI();
     toast(t('backupPassRemoved'));
@@ -4658,7 +4727,7 @@ function _onInactivityTimeout(){
     _oaList.push({id:Date.now().toString(),ref:_ref,name:_userName,table:'',date:new Date().toISOString(),items:JSON.parse(JSON.stringify(cart)),total:_tot,cashier:_userName});
     _saveOAs(_oaList);
   }
-  logAction('Cierre por inactividad',_userName+' · '+((db.settings&&db.settings.inactivityMinutes)||10)+' min sin actividad');
+  logAction(t('auditInactivityLock'),_userName+' · '+((db.settings&&db.settings.inactivityMinutes)||10)+' min sin actividad');
   syncShiftStatusDirect({active:true,currentUser:_userName,lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg&&db.cfg.pendingShiftNote||null});
   _sessionLogout();
   toast(t('sessionLockedInactivity')+(cart&&cart.length?' '+t('cartSaved'):''));
@@ -4694,7 +4763,7 @@ function doQuickLock(){
     _oaList.push({id:Date.now().toString(),ref:_ref,name:_uName,table:'',date:new Date().toISOString(),items:JSON.parse(JSON.stringify(cart)),total:_tot,cashier:_uName});
     _saveOAs(_oaList);
   }
-  logAction('Sesión bloqueada manualmente',_uName);
+  logAction(t('auditSessionLock'),_uName);
   syncShiftStatusDirect({active:true,currentUser:_uName,lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg&&db.cfg.pendingShiftNote||null});
   _sessionLogout();
   toast(t('sessionLocked')+(_hadCart?' '+t('cartSaved'):''));
@@ -4845,7 +4914,7 @@ function discSetType(t2,btn){
 function applyDiscount(){
   const v=parseFloat(el('disc-val').value)||0;
   discount={type:discount.type,value:v,active:v>0};
-  if(v>0){const _ct=cart.reduce((s,c)=>s+c.price*c.qty,0);logAction('Descuento aplicado',(discount.type==='fix'?dolr(v):v+'%')+' · carrito '+dolr(_ct));}
+  if(v>0){const _ct=cart.reduce((s,c)=>s+c.price*c.qty,0);logAction(t('auditDiscountApplied'),(discount.type==='fix'?dolr(v):v+'%')+' · carrito '+dolr(_ct));}
   renderCart();updateCobrar();closeOv('ov-discount');
   toast(v>0?'✓ '+t('discount')+' '+t('apply'):'✕ '+t('removeDiscount'));
 }
@@ -5245,7 +5314,7 @@ function doCreditPayment(full){
     cr.payments.push(payRec);
   }
   saveDB();
-  logAction('Abono registrado','Cliente: '+c.client+' · Monto: '+dolr(actual)+(actual<owed?' (parcial)':' (pago total)')+' · Usuario: '+(curUser?curUser.name:'—'));
+  logAction(t('auditAbonoReg'),'Cliente: '+c.client+' · Monto: '+dolr(actual)+(actual<owed?' (parcial)':' (pago total)')+' · Usuario: '+(curUser?curUser.name:'—'));
   closeOv('ov-credit-pay');
   renderCreditsPanel();
   renderAdmCredits();
@@ -5491,7 +5560,7 @@ function doCancel(id){
     confirm2(t('cancelConfirmPrefix')+(sale.rnum||id)+' ('+dolr(sale.total)+t('cancelConfirmSuffix'),()=>{
       sale.status='cancelled';sale.cancelDate=new Date().toISOString();
       sale.items.forEach(item=>{const p=db.products.find(x=>x.id===item.id);if(p)p.stock+=item.qty;});
-      logAction('Venta anulada','#'+(sale.rnum||sale.id)+' · '+dolr(sale.total));
+      logAction(t('auditSaleVoided'),'#'+(sale.rnum||sale.id)+' · '+dolr(sale.total));
       saveDB();renderActions('cancel');renderProds();toast(t('cancelDone'));
     });
   });
@@ -5700,12 +5769,12 @@ function saveUser(){
     u.role=role;
     u.perms=perms;
 
-    logAction('Usuario editado',name+' ('+role+')');
+    logAction(t('auditUserEdit'),name+' ('+role+')');
     saveDB();
     renderUserList();
     renderLoginUsers();
     clearUser();
-    toast('✓ Usuario actualizado: '+name);
+    toast(t('userUpdatedPre')+name);
   }else{
     ipcRenderer.invoke('get-license-info').then(function(info){
       const planLimit=(info&&['pro','lifetime'].includes((info.plan||'').toLowerCase()))?10:3;
@@ -5726,12 +5795,12 @@ function saveUser(){
         perms
       });
 
-      logAction('Usuario creado',name+' ('+role+')');
+      logAction(t('auditUserCreate'),name+' ('+role+')');
       saveDB();
       renderUserList();
       renderLoginUsers();
       clearUser();
-      toast('✓ Usuario: '+name);
+      toast(t('userCreatedPre')+name);
     }).catch(function(){
       db.users.push({
         id:Date.now().toString(),
@@ -5742,12 +5811,12 @@ function saveUser(){
         perms
       });
 
-      logAction('Usuario creado',name+' ('+role+')');
+      logAction(t('auditUserCreate'),name+' ('+role+')');
       saveDB();
       renderUserList();
       renderLoginUsers();
       clearUser();
-      toast('✓ Usuario: '+name);
+      toast(t('userCreatedPre')+name);
     });
 
     return;
@@ -5798,7 +5867,7 @@ function renderUserList(){
 }
 
 // CONFIG
-function changeCode(){const old=el('cc-old').value,nw=el('cc-new').value;if(old!==db.adminCode){toast('⚠ Código actual incorrecto');return;}if(nw.length<4){toast('⚠ Mínimo 4 caracteres');return;}db.adminCode=nw;saveDB();el('cc-old').value='';el('cc-new').value='';toast('✅ Código actualizado');}
+function changeCode(){const old=el('cc-old').value,nw=el('cc-new').value;if(old!==db.adminCode){toast(t('codeBadOld'));return;}if(nw.length<4){toast('⚠ '+t('min4chars'));return;}db.adminCode=nw;saveDB();el('cc-old').value='';el('cc-new').value='';toast(t('codeUpdated'));}
 function saveFund(){db.fundAmount=getNum('cfg-fund');saveDB();toast('✅ Fondo: '+dolr(db.fundAmount));}
 function setTimeFormat(fmt){
   if(!db.cfg)db.cfg={};
@@ -6880,10 +6949,10 @@ function saveCombo(){
   if(eid){
     const i=db.combos.findIndex(function(x){return x.id===eid;});
     if(i>=0)db.combos[i]=combo;
-    logAction('Combo editado',name+' \xb7 '+dolr(price));
+    logAction(t('auditComboEdit'),name+' \xb7 '+dolr(price));
   }else{
     db.combos.push(combo);
-    logAction('Combo creado',name+' \xb7 '+dolr(price));
+    logAction(t('auditComboCreate'),name+' \xb7 '+dolr(price));
   }
   saveDB();clearCombo();renderComboList();renderCategories();
   toast(t('comboSaved'));
@@ -6902,7 +6971,7 @@ function deleteCombo(id){
   const c=(db.combos||[]).find(function(x){return x.id===id;});if(!c)return;
   confirm2(t('comboDelConfirm')+c.name+'?',function(){
     db.combos=db.combos.filter(function(x){return x.id!==id;});
-    logAction('Combo eliminado',c.name);
+    logAction(t('auditComboDel'),c.name);
     saveDB();renderComboList();renderCategories();
     toast(t('comboDeleted'));
   });
@@ -6910,7 +6979,7 @@ function deleteCombo(id){
 function toggleCombo(id){
   const c=(db.combos||[]).find(function(x){return x.id===id;});if(!c)return;
   c.active=!c.active;
-  logAction(c.active?'Combo activado':'Combo desactivado',c.name);
+  logAction(c.active?t('auditComboActivated'):t('auditComboDeactivated'),c.name);
   saveDB();renderComboList();renderCategories();
 }
 function renderComboList(){
@@ -6975,13 +7044,13 @@ function saveSpecial(){
     spc.minQty=mq;spc.specialPrice=sp;
   }
   const _bogoLabel=_spcType==='bogo'?(spc.buyQty+'\xd7'+spc.payQty):'2\xd71';
-  const typeLabel={discount:'Descuento %',bogo:_bogoLabel,qty_price:'Por cantidad'}[_spcType]||_spcType;
+  const typeLabel={discount:t('auditSpcTypeDiscount'),bogo:_bogoLabel,qty_price:t('auditSpcTypeQtyPrice')}[_spcType]||_spcType;
   if(eid){
     const i=db.specials.findIndex(function(x){return x.id===eid;});if(i>=0)db.specials[i]=spc;
-    logAction('Especial editado',typeLabel+' \xb7 '+(prod?prod.name:pid));
+    logAction(t('auditSpecialEdit'),typeLabel+' \xb7 '+(prod?prod.name:pid));
   }else{
     db.specials.push(spc);
-    logAction('Especial creado',typeLabel+' \xb7 '+(prod?prod.name:pid));
+    logAction(t('auditSpecialCreate'),typeLabel+' \xb7 '+(prod?prod.name:pid));
   }
   saveDB();clearSpecial();renderSpecialList();renderProds();
   toast(t('specialSaved'));
@@ -7003,7 +7072,7 @@ function deleteSpecial(id){
   const prod=db.products.find(function(x){return x.id===s.productId;});
   confirm2(t('specialDelConfirm'),function(){
     db.specials=db.specials.filter(function(x){return x.id!==id;});
-    logAction('Especial eliminado',(prod?prod.name:s.productId));
+    logAction(t('auditSpecialDel'),(prod?prod.name:s.productId));
     saveDB();renderSpecialList();renderProds();toast(t('specialDeleted'));
   });
 }
@@ -7011,7 +7080,7 @@ function toggleSpecial(id){
   const s=(db.specials||[]).find(function(x){return x.id===id;});if(!s)return;
   const prod=db.products.find(function(x){return x.id===s.productId;});
   s.active=!s.active;
-  logAction(s.active?'Especial activado':'Especial desactivado',(prod?prod.name:s.productId));
+  logAction(s.active?t('auditSpecialActivated'):t('auditSpecialDeactivated'),(prod?prod.name:s.productId));
   saveDB();renderSpecialList();renderProds();
 }
 function renderSpecialList(){
