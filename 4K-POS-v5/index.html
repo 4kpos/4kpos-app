@@ -982,6 +982,16 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
         <input type="hidden" id="cmb-eid">
         <div class="slbl" id="cmb-form-title">Nuevo Combo</div>
         <div class="fg" style="margin-bottom:8px"><label class="lbl" id="cmb-name-lbl">Nombre</label><input type="text" class="fi" id="cmb-name" placeholder="Ej: Combo Familiar"></div>
+        <div class="fg" style="margin-bottom:8px">
+          <label class="lbl" id="cmb-img-lbl">Imagen (opcional)</label>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <label class="btn btn-s" style="cursor:pointer;font-size:.8rem;margin:0;padding:6px 10px">📷
+              <input type="file" id="cmb-img-input" accept="image/*" style="display:none" onchange="onCmbImgSelect(this)">
+            </label>
+            <img id="cmb-img-preview" src="" alt="" style="display:none;width:80px;height:80px;border-radius:8px;object-fit:cover;border:1px solid var(--b1)">
+            <button class="btn btn-s" id="cmb-img-clear-btn" title="Quitar imagen" style="display:none;padding:4px 8px" onclick="clearCmbImg()">✕</button>
+          </div>
+        </div>
         <div class="fg" style="margin-bottom:8px"><label class="lbl" id="cmb-desc-lbl">Descripción</label><input type="text" class="fi" id="cmb-desc" placeholder="Descripción opcional"></div>
         <div class="fg" style="margin-bottom:8px"><label class="lbl" id="cmb-price-lbl">Precio especial ($)</label><input type="number" class="fi" id="cmb-price" min="0" step="0.01" placeholder="0.00" oninput="_updateCmbCostTotal()"></div>
         <div class="slbl" id="cmb-items-title" style="font-size:.78rem;margin-top:4px">Productos incluidos</div>
@@ -2130,6 +2140,10 @@ const T = {
     auditSpecialDeactivated:'Especial desactivado',
     auditSpcTypeDiscount:'Descuento %',auditSpcTypeQtyPrice:'Por cantidad',
     userUpdatedPre:'✓ Usuario actualizado: ',userCreatedPre:'✓ Usuario: ',
+    // Sidebar inventory label
+    stockMenu:'Stock / Inventario',
+    // Combo image
+    comboImg:'Imagen (opcional)',comboImgRemove:'Quitar imagen',
     // QR dashboard scan text
     scanQR:'Escanea con tu celular\npara abrir el dashboard',
     // Credits — Abonar button
@@ -2552,6 +2566,10 @@ const T = {
     auditSpecialDeactivated:'Special deactivated',
     auditSpcTypeDiscount:'Discount %',auditSpcTypeQtyPrice:'By quantity',
     userUpdatedPre:'✓ User updated: ',userCreatedPre:'✓ User: ',
+    // Sidebar inventory label
+    stockMenu:'Stock',
+    // Combo image
+    comboImg:'Image (optional)',comboImgRemove:'Remove image',
     // QR dashboard scan text
     scanQR:'Scan with your phone\nto open the dashboard',
     // Credits — payment button
@@ -2954,6 +2972,8 @@ function applyLang(){
   const _lblDlBtnEl=el('lbl-dl-btn');if(_lblDlBtnEl)_lblDlBtnEl.textContent=t('lblDownloadBtn');
   const _lblPrintBtnEl=el('lbl-print-btn');if(_lblPrintBtnEl)_lblPrintBtnEl.innerHTML='🖨️ '+t('lblPrintBtn');
   // Combos form
+  const _cmbImgLbl=el('cmb-img-lbl');if(_cmbImgLbl)_cmbImgLbl.textContent=t('comboImg');
+  const _cmbImgClearBtn=el('cmb-img-clear-btn');if(_cmbImgClearBtn)_cmbImgClearBtn.title=t('comboImgRemove');
   const _cmbFormTitle=el('cmb-form-title');if(_cmbFormTitle&&!el('cmb-eid').value)_cmbFormTitle.textContent=t('cmbNew');
   const _cmbNameLbl=el('cmb-name-lbl');if(_cmbNameLbl)_cmbNameLbl.textContent=t('fldName');
   const _cmbDescLbl=el('cmb-desc-lbl');if(_cmbDescLbl)_cmbDescLbl.textContent=t('cmbDescLbl');
@@ -3055,7 +3075,7 @@ function applyLang(){
   const _sbiDashQrLbl=el('sbi-dash-qr-lbl');if(_sbiDashQrLbl)_sbiDashQrLbl.textContent=t('sbDashMobile');
   const _sbiPosLbl=el('sbi-pos-lbl');if(_sbiPosLbl)_sbiPosLbl.textContent=t('sbSell');
   const _sbiProdsLbl=el('sbi-prods-lbl');if(_sbiProdsLbl)_sbiProdsLbl.textContent=t('tabProds');
-  const _sbiInvLbl=el('sbi-inv-lbl');if(_sbiInvLbl)_sbiInvLbl.textContent=t('stock');
+  const _sbiInvLbl=el('sbi-inv-lbl');if(_sbiInvLbl)_sbiInvLbl.textContent=t('stockMenu');
   const _sbiLabelsLbl=el('sbi-labels-lbl');if(_sbiLabelsLbl)_sbiLabelsLbl.textContent=t('sbLabels');
   const _sbiSalesLbl=el('sbi-sales-lbl');if(_sbiSalesLbl)_sbiSalesLbl.textContent=t('sal');
   const _sbiReturnsLbl=el('sbi-returns-lbl');if(_sbiReturnsLbl)_sbiReturnsLbl.textContent=t('ret');
@@ -6939,6 +6959,20 @@ function addComboToCart(comboId){
 
 // =================== COMBOS — ADMIN ===================
 var _cmbItems=[];
+var _cmbImg='';
+function onCmbImgSelect(input){
+  var file=input.files&&input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){_cmbImg=e.target.result;_setCmbImgPreview(_cmbImg);};
+  reader.readAsDataURL(file);
+  input.value='';
+}
+function clearCmbImg(){_cmbImg='';_setCmbImgPreview('');}
+function _setCmbImgPreview(src){
+  var prev=el('cmb-img-preview');var clr=el('cmb-img-clear-btn');
+  if(prev){prev.src=src||'';prev.style.display=src?'block':'none';}
+  if(clr)clr.style.display=src?'':'none';
+}
 function renderCmbItemsEditor(){
   const list=el('cmb-items-list');if(!list)return;
   if(!_cmbItems.length){list.innerHTML='<div style="color:var(--tx3);font-size:.8rem;padding:6px 0">'+t('comboNoItems')+'</div>';_updateCmbCostTotal();return;}
@@ -6964,6 +6998,7 @@ function cmbRemoveItem(idx){_cmbItems.splice(idx,1);renderCmbItemsEditor();}
 function clearCombo(){
   el('cmb-eid').value='';el('cmb-name').value='';el('cmb-desc').value='';
   el('cmb-price').value='';el('cmb-active').checked=true;_cmbItems=[];
+  clearCmbImg();
   const ft=el('cmb-form-title');if(ft)ft.textContent=t('cmbNew');
   renderCmbItemsEditor();_updateCmbCostTotal();
 }
@@ -6975,8 +7010,7 @@ function saveCombo(){
   if(!_cmbItems.length){toast(t('comboNoItemsErr'));return;}
   if(!db.combos)db.combos=[];
   const eid=el('cmb-eid').value;
-  const prevImg=eid?((db.combos.find(function(x){return x.id===eid;})||{}).img||''):'';
-  const combo={id:eid||Date.now().toString(),name:name,desc:(el('cmb-desc').value||'').trim(),price:price,items:JSON.parse(JSON.stringify(_cmbItems)),active:el('cmb-active').checked,img:prevImg};
+  const combo={id:eid||Date.now().toString(),name:name,desc:(el('cmb-desc').value||'').trim(),price:price,items:JSON.parse(JSON.stringify(_cmbItems)),active:el('cmb-active').checked,img:_cmbImg};
   if(eid){
     const i=db.combos.findIndex(function(x){return x.id===eid;});
     if(i>=0)db.combos[i]=combo;
@@ -6995,6 +7029,7 @@ function editCombo(id){
   el('cmb-active').checked=c.active!==false;
   const ft=el('cmb-form-title');if(ft)ft.textContent=t('cmbEdit');
   _cmbItems=JSON.parse(JSON.stringify(c.items||[]));
+  _setCmbImgPreview(c.img||'');
   renderCmbItemsEditor();
   const n=el('cmb-name');if(n)n.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
@@ -7019,7 +7054,8 @@ function renderComboList(){
   if(!combos.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:12px 0">'+t('comboNone')+'</div>';return;}
   list.innerHTML=combos.map(function(c){
     const itemNames=(c.items||[]).map(function(ci){const p=db.products.find(function(x){return x.id===ci.productId;});return (p?p.name:'?')+(ci.qty>1?' \xd7'+ci.qty:'');}).join(', ');
-    return '<div class="pli"><div class="pli-info"><div class="pli-name">🍱 '+c.name+'</div><div class="pli-meta">'+dolr(c.price)+' \xb7 '+itemNames+'</div></div>'+
+    const thumbH=c.img?('<img src="'+c.img+'" alt="" style="width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;margin-right:6px">'):'<span style="font-size:1.3rem;margin-right:4px">🍱</span>';
+    return '<div class="pli" style="align-items:center"><div style="display:flex;align-items:center;flex:1;min-width:0">'+thumbH+'<div class="pli-info" style="min-width:0"><div class="pli-name">'+c.name+'</div><div class="pli-meta">'+dolr(c.price)+' \xb7 '+itemNames+'</div></div></div>'+
       '<div style="display:flex;align-items:center;gap:4px"><span style="font-size:.72rem;color:'+(c.active?'var(--gn)':'var(--tx3)')+';font-weight:700">'+(c.active?t('specialActiveStatus'):t('specialInactiveStatus'))+'</span>'+
       '<button class="eb" onclick="toggleCombo(\''+c.id+'\')">⏯</button>'+
       '<button class="eb" onclick="editCombo(\''+c.id+'\')">✏</button>'+
