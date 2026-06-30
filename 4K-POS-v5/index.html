@@ -730,6 +730,7 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
         <button class="btn btn-s" onclick="admTab('t-cust',this)">👥 <span id="tab-cust-txt">Clientes</span></button>
         <button class="btn btn-s" onclick="admTab('t-combos',this)">🍱 <span id="tab-combos-txt">Combos</span></button>
         <button class="btn btn-s" onclick="admTab('t-specials',this)">⭐ <span id="tab-specials-txt">Especiales</span></button>
+        <button class="btn btn-s" onclick="admTab('t-nomina',this)">👷 <span id="tab-nomina-txt">Nómina</span></button>
       </div>
       <!-- PRODUCTS -->
       <div id="t-prods">
@@ -1044,6 +1045,32 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
         <div class="slbl" id="spc-list-title">Especiales registrados</div>
         <div id="spc-list"></div>
       </div>
+      <!-- NÓMINA -->
+      <div id="t-nomina" style="display:none">
+        <input type="hidden" id="emp-eid">
+        <div class="slbl" id="nomina-form-title">Nuevo Empleado</div>
+        <div class="g2">
+          <div class="fg"><label class="lbl" id="emp-name-lbl">Nombre</label><input type="text" class="fi" id="emp-name" placeholder="Juan Pérez"></div>
+          <div class="fg"><label class="lbl" id="emp-paytype-lbl">Tipo de pago</label>
+            <select class="fi" id="emp-paytype">
+              <option value="weekly" id="emp-pt-weekly">Semanal</option>
+              <option value="biweekly" id="emp-pt-biweekly">Quincenal</option>
+              <option value="monthly" id="emp-pt-monthly">Mensual</option>
+            </select>
+          </div>
+          <div class="fg" id="emp-amount-row"><label class="lbl" id="emp-amount-lbl">Monto por período ($)</label><input type="number" class="fi" id="emp-amount" placeholder="0.00" step="0.01" min="0"></div>
+          <div class="fg" style="display:flex;align-items:center">
+            <div class="tog" style="margin-top:22px"><span class="tog-label" id="emp-clock-lbl">Usar Clock In/Out</span><label class="tog-sw"><input type="checkbox" id="emp-use-clock" onchange="toggleEmpClock()"><span class="slider"></span></label></div>
+          </div>
+        </div>
+        <div class="fg" id="emp-hourly-row" style="display:none;max-width:240px"><label class="lbl" id="emp-hourly-lbl">Tarifa por hora ($)</label><input type="number" class="fi" id="emp-hourly" placeholder="0.00" step="0.01" min="0"></div>
+        <div class="frow">
+          <button class="btn btn-p" id="emp-save-btn" onclick="saveEmployee()">💾 Guardar</button>
+          <button class="btn btn-s" onclick="clearEmployee()">↺</button>
+        </div>
+        <div class="slbl" id="emp-list-title">Empleados registrados</div>
+        <div id="emp-list"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1220,6 +1247,7 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
         <button id="ct-btn-cred" class="btn btn-s" onclick="contaTab('ct-cred',this)">💳 <span id="ct-tab-cred-txt">Créditos</span></button>
         <button id="ct-btn-gst" class="btn btn-s btn-red-soft" data-extra-class="btn-red-soft" onclick="contaTab('ct-gst',this)">💸 <span id="ct-tab-gst-txt">Gastos</span></button>
         <button id="ct-btn-graf" class="btn btn-s" onclick="contaTab('ct-graf',this)">📈 <span id="ct-tab-graf-txt">Gráfica</span></button>
+        <button id="ct-btn-monthly" class="btn btn-s" onclick="contaTab('ct-monthly',this)">📅 <span id="ct-tab-monthly-txt">Resumen Mensual</span></button>
       </div>
       <div id="ct-res">
         <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -1330,6 +1358,29 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
         <div id="graf-legend" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
       </div>
 
+      <!-- RESUMEN MENSUAL -->
+      <div id="ct-monthly" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+          <select class="fi" id="monthly-month" style="width:150px" onchange="renderMonthlyResumen()">
+            <option value="0" id="mth-0">Enero</option>
+            <option value="1" id="mth-1">Febrero</option>
+            <option value="2" id="mth-2">Marzo</option>
+            <option value="3" id="mth-3">Abril</option>
+            <option value="4" id="mth-4">Mayo</option>
+            <option value="5" id="mth-5">Junio</option>
+            <option value="6" id="mth-6">Julio</option>
+            <option value="7" id="mth-7">Agosto</option>
+            <option value="8" id="mth-8">Septiembre</option>
+            <option value="9" id="mth-9">Octubre</option>
+            <option value="10" id="mth-10">Noviembre</option>
+            <option value="11" id="mth-11">Diciembre</option>
+          </select>
+          <select class="fi" id="monthly-year" style="width:90px" onchange="renderMonthlyResumen()"></select>
+        </div>
+        <div id="monthly-stats"></div>
+        <div class="sep-line" id="monthly-nomina-sep" style="display:none"></div>
+        <div id="monthly-nomina-detail"></div>
+      </div>
       <!-- CRÉDITOS -->
       <div id="ct-cred" style="display:none">
         <div style="background:var(--amb);border:1.5px solid var(--am);border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
@@ -2181,6 +2232,25 @@ const T = {
     lblSz1x2Sub:'25×50mm · precio',lblSz2x2Sub:'50×50mm · producto',
     lblSzT58Txt:'Térmica 58mm',lblSzT58Sub:'58mm rollo',
     lblSzT80Txt:'Térmica 80mm',lblSzT80Sub:'80mm rollo',
+    // Nómina de empleados
+    tabNomina:'Nómina',nominaFormTitle:'Nuevo Empleado',empNameLbl:'Nombre',empPayTypeLbl:'Tipo de pago',
+    empAmountLbl:'Monto por período ($)',empClockLbl:'Usar Clock In/Out',empHourlyLbl:'Tarifa por hora ($)',
+    empListTitle:'Empleados registrados',empSaveBtn:'💾 Guardar',
+    empPayWeekly:'Semanal',empPayBiweekly:'Quincenal',empPayMonthly:'Mensual',
+    empClockIn:'✅ Entrar',empClockOut:'🔴 Salir',empEditing:'✏️ Editando: ',
+    empSaved:'✓ Empleado guardado',empDelConfirm:'¿Eliminar empleado?',empDeleted:'🗑 Empleado eliminado',
+    empNameRequired:'⚠ Nombre requerido',empAmountRequired:'⚠ Monto o tarifa requerida',
+    empNextPayment:'Próximo pago est.',empHoursWorked:'Horas este mes',empCurrentlyIn:'● Trabajando',
+    empNoEmployees:'Sin empleados registrados.',
+    empClockedIn:'Entrada registrada ✓',empClockedOut:'Salida registrada ✓',empNotClockedIn:'No está trabajando.',
+    empHistoryTitle:'Historial de horas',empNoHistory:'Sin registros.',
+    // Contabilidad - Resumen Mensual
+    tabMonthly:'Resumen Mensual',monthlyTotalExpenses:'Total gastos',monthlyTotalPurchases:'Total compras (facturas)',
+    monthlyTotalNomina:'Total nómina',monthlyOperationalCost:'Costo operacional total',
+    monthlyIncome:'Ingresos del mes',monthlyNetProfit:'Utilidad neta',
+    monthlyNominaDetail:'Detalle de nómina',monthlyNoEmployees:'Sin empleados.',
+    monthlyExpand:'▼ Ver detalle nómina',monthlyCollapse:'▲ Ocultar detalle',
+    monthlyMonths:'Enero,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -2609,6 +2679,25 @@ const T = {
     lblSz1x2Sub:'25×50mm · price',lblSz2x2Sub:'50×50mm · product',
     lblSzT58Txt:'Thermal 58mm',lblSzT58Sub:'58mm roll',
     lblSzT80Txt:'Thermal 80mm',lblSzT80Sub:'80mm roll',
+    // Payroll / Nómina
+    tabNomina:'Payroll',nominaFormTitle:'New Employee',empNameLbl:'Name',empPayTypeLbl:'Pay type',
+    empAmountLbl:'Amount per period ($)',empClockLbl:'Use Clock In/Out',empHourlyLbl:'Hourly rate ($)',
+    empListTitle:'Registered employees',empSaveBtn:'💾 Save',
+    empPayWeekly:'Weekly',empPayBiweekly:'Bi-weekly',empPayMonthly:'Monthly',
+    empClockIn:'✅ Clock In',empClockOut:'🔴 Clock Out',empEditing:'✏️ Editing: ',
+    empSaved:'✓ Employee saved',empDelConfirm:'Delete employee?',empDeleted:'🗑 Employee deleted',
+    empNameRequired:'⚠ Name required',empAmountRequired:'⚠ Amount or rate required',
+    empNextPayment:'Next est. payment',empHoursWorked:'Hours this month',empCurrentlyIn:'● Working',
+    empNoEmployees:'No employees registered.',
+    empClockedIn:'Clock-in recorded ✓',empClockedOut:'Clock-out recorded ✓',empNotClockedIn:'Not working.',
+    empHistoryTitle:'Hours history',empNoHistory:'No records.',
+    // Accounting - Monthly Summary
+    tabMonthly:'Monthly Summary',monthlyTotalExpenses:'Total expenses',monthlyTotalPurchases:'Total purchases (invoices)',
+    monthlyTotalNomina:'Total payroll',monthlyOperationalCost:'Total operational cost',
+    monthlyIncome:'Monthly income',monthlyNetProfit:'Net profit',
+    monthlyNominaDetail:'Payroll detail',monthlyNoEmployees:'No employees.',
+    monthlyExpand:'▼ Show payroll detail',monthlyCollapse:'▲ Hide detail',
+    monthlyMonths:'January,February,March,April,May,June,July,August,September,October,November,December',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -2621,7 +2710,7 @@ let db={products:[],categories:[],sales:[],returns:[],orderNum:1,adminCode:'1234
   fundAmount:0,customers:[],credits:[],payMethods:{cash:true,card:true,transf:true,openAccounts:true,credit:false},
   drawerPort:'COM3',drawerAuto:true,
   cfg:{bizName:'4K Negocio',bizSub:'',thanks:'¡Gracias por tu compra! 💕',phone:'',s1:'',s2:'',qr:'',logo:'',timeFormat:'12h',taxEnabled:false,taxName:'Impuesto',taxRate:0,taxIncluded:false},
-  facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true,shifts:[],auditLog:[],combos:[],specials:[],
+  facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true,shifts:[],auditLog:[],combos:[],specials:[],employees:[],
   settings:{inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null,adminExemptFromConfirm:true,lowStockThreshold:5}};
 let cart=[],payMethod='cash',cashIn='',discount={type:'pct',value:0,active:false};
 let currentView='categories',currentCategory=null;
@@ -3159,6 +3248,23 @@ function applyLang(){
   const _szT58Sub=el('lbl-sz-t58-sub');if(_szT58Sub)_szT58Sub.textContent=t('lblSzT58Sub');
   const _szT80Txt=el('lbl-sz-t80-txt');if(_szT80Txt)_szT80Txt.textContent=t('lblSzT80Txt');
   const _szT80Sub=el('lbl-sz-t80-sub');if(_szT80Sub)_szT80Sub.textContent=t('lblSzT80Sub');
+  // Nómina tab
+  const _tabNomina=el('tab-nomina-txt');if(_tabNomina)_tabNomina.textContent=t('tabNomina');
+  const _nominaFormTitle=el('nomina-form-title');if(_nominaFormTitle)_nominaFormTitle.textContent=t('nominaFormTitle');
+  const _empNameLbl=el('emp-name-lbl');if(_empNameLbl)_empNameLbl.textContent=t('empNameLbl');
+  const _empPayTypeLbl=el('emp-paytype-lbl');if(_empPayTypeLbl)_empPayTypeLbl.textContent=t('empPayTypeLbl');
+  const _empAmountLbl=el('emp-amount-lbl');if(_empAmountLbl)_empAmountLbl.textContent=t('empAmountLbl');
+  const _empClockLbl=el('emp-clock-lbl');if(_empClockLbl)_empClockLbl.textContent=t('empClockLbl');
+  const _empHourlyLbl=el('emp-hourly-lbl');if(_empHourlyLbl)_empHourlyLbl.textContent=t('empHourlyLbl');
+  const _empListTitle=el('emp-list-title');if(_empListTitle)_empListTitle.textContent=t('empListTitle');
+  const _empSaveBtn=el('emp-save-btn');if(_empSaveBtn)_empSaveBtn.textContent=t('empSaveBtn');
+  const _empPtW=el('emp-pt-weekly');if(_empPtW)_empPtW.textContent=t('empPayWeekly');
+  const _empPtB=el('emp-pt-biweekly');if(_empPtB)_empPtB.textContent=t('empPayBiweekly');
+  const _empPtM=el('emp-pt-monthly');if(_empPtM)_empPtM.textContent=t('empPayMonthly');
+  // Resumen Mensual tab
+  const _ctMonthly=el('ct-tab-monthly-txt');if(_ctMonthly)_ctMonthly.textContent=t('tabMonthly');
+  // Month names in selector
+  (function(){const ms=t('monthlyMonths').split(',');ms.forEach(function(name,i){const o=el('mth-'+i);if(o)o.textContent=name;});})();
   updateCobrar(); renderCats(); renderProds(); updatePCat();
 }
 function switchLang(){
@@ -3297,6 +3403,7 @@ async function loadDB(){
       if(d.settings)db.settings=Object.assign({inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null,adminExemptFromConfirm:true},d.settings);
       if(d.combos)db.combos=d.combos;
       if(d.specials)db.specials=d.specials;
+      if(d.employees)db.employees=d.employees;
     }
  }catch(e){console.error(e);}
 
@@ -5990,7 +6097,7 @@ function loadAdminModal(){
   _updateBkpPassUI();
 }
 function admTab(tab,e2){
-  ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits','t-combos','t-specials'].forEach(t=>{const el2=el(t);if(el2)el2.style.display='none';});
+  ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits','t-combos','t-specials','t-nomina'].forEach(t=>{const el2=el(t);if(el2)el2.style.display='none';});
   el(tab).style.display='block';
   document.querySelectorAll('#adm-tabs .btn').forEach(b=>b.className='btn btn-s');
   if(e2)e2.className='btn btn-p';
@@ -5998,6 +6105,7 @@ function admTab(tab,e2){
   if(tab==='t-credits')renderAdmCredits();
   if(tab==='t-combos')initCombosTab();
   if(tab==='t-specials')initSpecialsTab();
+  if(tab==='t-nomina')renderEmployeeList();
 }
 
 // CONTABILIDAD
@@ -6006,7 +6114,7 @@ function loadContaPerms(){
   const isAdm=curUser&&curUser.role==='admin';
   const hasFullAccess=isAdm||!!pm.contaFull;
   // Hide restricted tabs for non-full users
-  ['ct-btn-res','ct-btn-fac','ct-btn-comp','ct-btn-gst','ct-btn-graf'].forEach(function(id){
+  ['ct-btn-res','ct-btn-fac','ct-btn-comp','ct-btn-gst','ct-btn-graf','ct-btn-monthly'].forEach(function(id){
     const b=el(id);if(b)b.style.display=hasFullAccess?'':'none';
   });
   const compBlock=el('comp-block'),compContent=el('comp-content');
@@ -6606,7 +6714,7 @@ function renderContaCredits(){
   }).join('');
 }
 function contaTab(tab,e2){
-  ['ct-res','ct-fac','ct-comp','ct-gst','ct-graf','ct-cred'].forEach(function(t){const p=el(t);if(p)p.style.display='none';});
+  ['ct-res','ct-fac','ct-comp','ct-gst','ct-graf','ct-cred','ct-monthly'].forEach(function(t){const p=el(t);if(p)p.style.display='none';});
   el(tab).style.display='block';
   document.querySelectorAll('#conta-tabs .btn').forEach(function(b){b.className='btn btn-s '+(b.dataset.extraClass||'').trim();});
   if(e2)e2.className='btn btn-p '+(e2.dataset.extraClass||'').trim();
@@ -6614,6 +6722,216 @@ function contaTab(tab,e2){
   if(tab==='ct-comp'){compLoadProds();renderCompList();}
   if(tab==='ct-cred'){renderContaCredits();}
   if(tab==='ct-graf')setTimeout(renderGraf,50);
+  if(tab==='ct-monthly')renderMonthlyResumen();
+}
+
+// ── NÓMINA DE EMPLEADOS ──────────────────────────────────────────────────────
+function toggleEmpClock(){
+  const useClock=el('emp-use-clock').checked;
+  const hourlyRow=el('emp-hourly-row');
+  const amountRow=el('emp-amount-row');
+  if(hourlyRow)hourlyRow.style.display=useClock?'block':'none';
+  if(amountRow)amountRow.style.display=useClock?'none':'block';
+}
+function clearEmployee(){
+  el('emp-eid').value='';
+  el('emp-name').value='';
+  el('emp-paytype').value='weekly';
+  el('emp-amount').value='';
+  el('emp-use-clock').checked=false;
+  el('emp-hourly').value='';
+  toggleEmpClock();
+  const formTitle=el('nomina-form-title');if(formTitle)formTitle.textContent=t('nominaFormTitle');
+}
+function saveEmployee(){
+  const eid=el('emp-eid').value;
+  const name=(el('emp-name').value||'').trim();
+  if(!name){toast(t('empNameRequired'));return;}
+  const payType=el('emp-paytype').value;
+  const useClock=el('emp-use-clock').checked;
+  const amount=parseFloat(el('emp-amount').value)||0;
+  const hourlyRate=parseFloat(el('emp-hourly').value)||0;
+  if(!useClock&&amount<=0){toast(t('empAmountRequired'));return;}
+  if(useClock&&hourlyRate<=0){toast(t('empAmountRequired'));return;}
+  if(!db.employees)db.employees=[];
+  if(eid){
+    const i=db.employees.findIndex(function(e){return e.id===eid;});
+    if(i>=0){
+      db.employees[i].name=name;db.employees[i].payType=payType;
+      db.employees[i].amount=amount;db.employees[i].useClockInOut=useClock;db.employees[i].hourlyRate=hourlyRate;
+    }
+  }else{
+    db.employees.push({id:'emp_'+Date.now(),name:name,payType:payType,amount:amount,useClockInOut:useClock,hourlyRate:hourlyRate,clockEvents:[]});
+  }
+  saveDB();clearEmployee();renderEmployeeList();toast(t('empSaved'));
+}
+function editEmployee(id){
+  if(!db.employees)return;
+  const emp=db.employees.find(function(e){return e.id===id;});if(!emp)return;
+  el('emp-eid').value=emp.id;
+  el('emp-name').value=emp.name;
+  el('emp-paytype').value=emp.payType||'weekly';
+  el('emp-amount').value=emp.amount||'';
+  el('emp-use-clock').checked=!!emp.useClockInOut;
+  el('emp-hourly').value=emp.hourlyRate||'';
+  toggleEmpClock();
+  const formTitle=el('nomina-form-title');if(formTitle)formTitle.textContent=t('empEditing')+emp.name;
+}
+function deleteEmployee(id){
+  confirm2(t('empDelConfirm'),function(){
+    db.employees=(db.employees||[]).filter(function(e){return e.id!==id;});
+    saveDB();renderEmployeeList();toast(t('empDeleted'));
+  });
+}
+function clockIn(id){
+  if(!db.employees)return;
+  const emp=db.employees.find(function(e){return e.id===id;});if(!emp)return;
+  if(!emp.clockEvents)emp.clockEvents=[];
+  const active=emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
+  if(active){toast(t('empCurrentlyIn'));return;}
+  emp.clockEvents.push({id:'ce_'+Date.now(),in:new Date().toISOString(),out:null});
+  saveDB();renderEmployeeList();toast(t('empClockedIn'));
+}
+function clockOut(id){
+  if(!db.employees)return;
+  const emp=db.employees.find(function(e){return e.id===id;});if(!emp)return;
+  if(!emp.clockEvents)emp.clockEvents=[];
+  const active=emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
+  if(!active){toast(t('empNotClockedIn'));return;}
+  active.out=new Date().toISOString();
+  saveDB();renderEmployeeList();toast(t('empClockedOut'));
+}
+function _empHoursInMonth(emp,year,month){
+  if(!emp.clockEvents||!emp.clockEvents.length)return 0;
+  return emp.clockEvents.reduce(function(total,ev){
+    if(!ev.in||!ev.out)return total;
+    const inDate=new Date(ev.in);
+    if(inDate.getFullYear()===year&&inDate.getMonth()===month){
+      const hrs=(new Date(ev.out)-inDate)/3600000;
+      return total+(hrs>0?hrs:0);
+    }
+    return total;
+  },0);
+}
+function _empMonthlyPay(emp,year,month){
+  if(!emp.useClockInOut){
+    const periodsPerMonth={weekly:4.33,biweekly:2,monthly:1};
+    return (emp.amount||0)*(periodsPerMonth[emp.payType]||1);
+  }
+  const hrs=_empHoursInMonth(emp,year,month);
+  return hrs*(emp.hourlyRate||0);
+}
+function renderEmployeeList(){
+  if(!db.employees)db.employees=[];
+  const now=new Date();
+  const container=el('emp-list');if(!container)return;
+  if(!db.employees.length){container.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('empNoEmployees')+'</div>';return;}
+  const payTypeLabel={weekly:t('empPayWeekly'),biweekly:t('empPayBiweekly'),monthly:t('empPayMonthly')};
+  container.innerHTML=db.employees.map(function(emp){
+    const isIn=!!(emp.clockEvents&&emp.clockEvents.find(function(ev){return ev.in&&!ev.out;}));
+    const hrs=emp.useClockInOut?_empHoursInMonth(emp,now.getFullYear(),now.getMonth()):0;
+    const nextPay=emp.useClockInOut?(hrs*(emp.hourlyRate||0)):emp.amount||0;
+    const clockBtn=emp.useClockInOut
+      ?('<button class="btn '+(isIn?'btn-d':'btn-p')+' btn-s" style="font-size:.76rem;padding:4px 12px" onclick="'+(isIn?'clockOut':'clockIn')+'(\''+emp.id+'\')">'+(isIn?t('empClockOut'):t('empClockIn'))+'</button>')
+      :'';
+    const statusBadge=emp.useClockInOut&&isIn?('<span style="font-size:.72rem;color:var(--gn);font-weight:700;margin-left:6px">'+t('empCurrentlyIn')+'</span>'):'';
+    const hoursInfo=emp.useClockInOut?('<div style="font-size:.76rem;color:var(--tx3);margin-top:2px">'+t('empHoursWorked')+': <b style="color:var(--am)">'+hrs.toFixed(1)+'h</b></div>'):'';
+    const payLabel=emp.useClockInOut?(''+dolr(nextPay)):(''+dolr(nextPay)+' / '+payTypeLabel[emp.payType||'monthly']);
+    return '<div style="background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--rs);padding:10px 13px;margin-bottom:7px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">'
+      +'<div><span style="font-weight:700;color:var(--tx)">'+escHtml(emp.name)+'</span>'+statusBadge+'</div>'
+      +'<div style="display:flex;gap:5px;align-items:center">'
+      +clockBtn
+      +'<button class="btn btn-s" style="font-size:.72rem;padding:3px 9px" onclick="editEmployee(\''+emp.id+'\')">✏️</button>'
+      +'<button class="btn btn-s" style="font-size:.72rem;padding:3px 9px;border-color:var(--rd);color:var(--rd)" onclick="deleteEmployee(\''+emp.id+'\')">🗑️</button>'
+      +'</div></div>'
+      +'<div style="font-size:.76rem;color:var(--tx3);margin-top:4px">'+payTypeLabel[emp.payType||'monthly']+(emp.useClockInOut?' · '+dolr(emp.hourlyRate||0)+'/h':'')+' · '+t('empNextPayment')+': <b style="color:var(--gn)">'+payLabel+'</b></div>'
+      +hoursInfo
+      +'</div>';
+  }).join('');
+}
+
+// ── RESUMEN MENSUAL ──────────────────────────────────────────────────────────
+function _initMonthlySelectors(){
+  const yearSel=el('monthly-year');if(!yearSel)return;
+  if(yearSel.options.length>0)return;
+  const curYear=new Date().getFullYear();
+  for(let y=curYear;y>=curYear-5;y--){
+    const o=document.createElement('option');o.value=y;o.textContent=y;yearSel.appendChild(o);
+  }
+  const monthSel=el('monthly-month');
+  if(monthSel)monthSel.value=new Date().getMonth();
+  yearSel.value=curYear;
+}
+function renderMonthlyResumen(){
+  _initMonthlySelectors();
+  const monthSel=el('monthly-month');const yearSel=el('monthly-year');
+  if(!monthSel||!yearSel)return;
+  const month=parseInt(monthSel.value);const year=parseInt(yearSel.value);
+  const monthStart=new Date(year,month,1);const monthEnd=new Date(year,month+1,0,23,59,59,999);
+  // Sales income
+  const sales=(db.sales||[]).filter(function(s){
+    const d=new Date(s.date);return s.status==='active'&&d>=monthStart&&d<=monthEnd;
+  });
+  const cobradas=sales.filter(function(s){return s.payMethod!=='credit'||s.creditStatus==='paid';});
+  const abonosMes=(db.sales||[]).filter(function(s){return s.payMethod==='credit'&&s.creditStatus!=='paid';}).reduce(function(sum,s){
+    return sum+(s.creditPayments||[]).filter(function(p){var d=new Date(p.date);return d>=monthStart&&d<=monthEnd;}).reduce(function(s2,p){return s2+(p.amount||0);},0);
+  },0);
+  const ingresos=cobradas.reduce(function(s,x){return s+x.total;},0)+abonosMes;
+  // Expenses
+  const gastos=(db.gastos_conta||[]).filter(function(g){const d=new Date(g.date);return d>=monthStart&&d<=monthEnd;});
+  const totalGastos=gastos.reduce(function(s,x){return s+x.monto;},0);
+  // Purchases (facturas)
+  const facturas=(db.facturas||[]).filter(function(f){const d=new Date(f.date);return d>=monthStart&&d<=monthEnd;});
+  const totalFacturas=facturas.reduce(function(s,f){return s+(f.total||f.cost||0);},0);
+  // Payroll
+  const emps=db.employees||[];
+  const totalNomina=emps.reduce(function(s,emp){return s+_empMonthlyPay(emp,year,month);},0);
+  // Totals
+  const costoOp=totalGastos+totalFacturas+totalNomina;
+  const utilidad=ingresos-costoOp;
+  const statsEl=el('monthly-stats');
+  if(statsEl){
+    statsEl.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px">'
+      +sCard('gn','💰 '+t('monthlyIncome'),dolr(ingresos))
+      +sCard('am','⚡ '+t('monthlyTotalExpenses'),dolr(totalGastos))
+      +sCard('bl','📦 '+t('monthlyTotalPurchases'),dolr(totalFacturas))
+      +sCard('rd','👷 '+t('monthlyTotalNomina'),dolr(totalNomina))
+      +sCard('tx3','🔧 '+t('monthlyOperationalCost'),dolr(costoOp))
+      +sCard(utilidad>=0?'gn':'rd','✨ '+t('monthlyNetProfit'),dolr(utilidad))
+      +'</div>';
+  }
+  const sepEl=el('monthly-nomina-sep');
+  const detailEl=el('monthly-nomina-detail');
+  if(sepEl)sepEl.style.display=emps.length?'block':'none';
+  if(detailEl){
+    if(!emps.length){
+      detailEl.innerHTML='<div style="color:var(--tx3);font-size:.82rem">'+t('monthlyNoEmployees')+'</div>';
+    }else{
+      const payTypeLabel={weekly:t('empPayWeekly'),biweekly:t('empPayBiweekly'),monthly:t('empPayMonthly')};
+      detailEl.innerHTML='<div style="font-size:.82rem;font-weight:700;color:var(--tx);margin-bottom:8px">'+t('monthlyNominaDetail')+'</div>'
+        +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.8rem">'
+        +'<thead><tr style="color:var(--tx3);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px">'
+        +'<th style="text-align:left;padding:4px 6px">'+t('empNameLbl')+'</th>'
+        +'<th style="text-align:center;padding:4px 6px">'+t('empPayTypeLbl')+'</th>'
+        +'<th style="text-align:right;padding:4px 6px">'+t('empHoursWorked')+'</th>'
+        +'<th style="text-align:right;padding:4px 6px">'+t('empNextPayment')+'</th>'
+        +'</tr></thead><tbody>'
+        +emps.map(function(emp){
+          const pay=_empMonthlyPay(emp,year,month);
+          const hrs=emp.useClockInOut?_empHoursInMonth(emp,year,month).toFixed(1):'—';
+          return '<tr style="border-top:1px solid var(--b1)">'
+            +'<td style="padding:5px 6px;color:var(--tx)">'+escHtml(emp.name)+'</td>'
+            +'<td style="padding:5px 6px;text-align:center;color:var(--tx3)">'+payTypeLabel[emp.payType||'monthly']+'</td>'
+            +'<td style="padding:5px 6px;text-align:right;color:var(--am)">'+hrs+'</td>'
+            +'<td style="padding:5px 6px;text-align:right;font-family:monospace;color:var(--gn);font-weight:700">'+dolr(pay)+'</td>'
+            +'</tr>';
+        }).join('')
+        +'<tr style="border-top:2px solid var(--b2)"><td colspan="3" style="padding:5px 6px;font-weight:700;color:var(--tx)">Total</td>'
+        +'<td style="padding:5px 6px;text-align:right;font-family:monospace;font-weight:700;color:var(--rd)">'+dolr(totalNomina)+'</td></tr>'
+        +'</tbody></table></div>';
+    }
+  }
 }
 
 // CALC
