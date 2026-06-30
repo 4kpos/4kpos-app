@@ -685,6 +685,7 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
   <div class="hmi" style="color:#8b5cf6;display:none" id="hm-audit" onclick="closeHMenu();openAudit()">📋 <span id="hm-audit-txt">Auditoría</span></div>
   <div class="hmi" style="color:#f59e0b" id="hm-abonos" onclick="closeHMenu();openAbonosList()">💰 <span id="hm-abonos-txt">Abonos de crédito</span></div>
   <div class="hmi" style="color:#fbbf24" id="hm-note" onclick="closeHMenu();openWriteNote()">📋 <span id="hm-note-txt">Nota para el próximo turno</span></div>
+  <div class="hmi" style="color:#10b981;display:none" id="hm-clock" onclick="closeHMenu();openClockQuick()">⏱ <span id="hm-clock-txt">Clock In/Out</span></div>
   <div class="hmi" style="color:#f87171" onclick="doQuickLock()">🔒 <span id="hm-lock-txt">Bloquear sesión</span></div>
   <div id="hm-ver" style="padding:8px 16px;font-size:.68rem;color:var(--tx3);text-align:center;border-top:1px solid var(--b1);cursor:default;user-select:none"></div>
 </div>
@@ -932,6 +933,12 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
           <div style="font-size:.7rem;color:var(--tx3);margin-top:6px" id="cfg-tax-included-info">Si está activado: el precio del producto ya incluye el impuesto y se desglosa en el ticket. Si está desactivado: el impuesto se suma al precio.</div>
         </div>
         <div class="frow"><button class="btn btn-p" id="cfg-tax-save-btn" onclick="saveTaxCfg()">💾 Guardar impuesto</button></div>
+        <div class="sep-line"></div>
+        <div class="slbl" id="cfg-clock-section-lbl">Control de Asistencia</div>
+        <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:8px">
+          <div class="tog"><span class="tog-label" id="cfg-clock-quick-lbl">⏱ Mostrar botón Clock In/Out en menú</span><label class="tog-sw"><input type="checkbox" id="cfg-clock-quick" onchange="saveClockQuickCfg()"><span class="slider"></span></label></div>
+          <div id="cfg-clock-quick-info" style="font-size:.7rem;color:var(--tx3);margin-top:6px">Cuando está activo, aparece la opción "⏱ Clock In/Out" en el menú del POS para registrar entradas y salidas de empleados rápidamente.</div>
+        </div>
       </div>
       <!-- INVENTORY -->
       <div id="t-inv" style="display:none">
@@ -1405,6 +1412,16 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
         </div>
         <div id="cred-tab-list"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- CLOCK QUICK MODAL -->
+<div class="ov" id="ov-clock-quick">
+  <div class="modal mnarrow">
+    <div class="mh"><h3>⏱ <span id="cq-title-txt">Clock In/Out</span></h3><button class="mx" onclick="closeOv('ov-clock-quick')">✕</button></div>
+    <div class="mb">
+      <div id="cq-list"></div>
     </div>
   </div>
 </div>
@@ -2251,6 +2268,11 @@ const T = {
     monthlyNominaDetail:'Detalle de nómina',monthlyNoEmployees:'Sin empleados.',
     monthlyExpand:'▼ Ver detalle nómina',monthlyCollapse:'▲ Ocultar detalle',
     monthlyMonths:'Enero,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre',
+    // Clock Quick (menú slider)
+    cfgClockSectionLbl:'Control de Asistencia',cfgClockQuickLbl:'⏱ Mostrar botón Clock In/Out en menú',
+    cfgClockQuickInfo:'Cuando está activo, aparece la opción "⏱ Clock In/Out" en el menú del POS para registrar entradas y salidas de empleados rápidamente.',
+    hmClockTxt:'Clock In/Out',clockQuickTitle:'Clock In/Out',clockQuickSaved:'✅ Opción guardada',
+    clockQuickNoEmployees:'Sin empleados con Clock In/Out activado.',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -2698,6 +2720,11 @@ const T = {
     monthlyNominaDetail:'Payroll detail',monthlyNoEmployees:'No employees.',
     monthlyExpand:'▼ Show payroll detail',monthlyCollapse:'▲ Hide detail',
     monthlyMonths:'January,February,March,April,May,June,July,August,September,October,November,December',
+    // Clock Quick (slider menu)
+    cfgClockSectionLbl:'Attendance Control',cfgClockQuickLbl:'⏱ Show Clock In/Out button in menu',
+    cfgClockQuickInfo:'When active, the "⏱ Clock In/Out" option appears in the POS menu to quickly log employee entries and exits.',
+    hmClockTxt:'Clock In/Out',clockQuickTitle:'Clock In/Out',clockQuickSaved:'✅ Option saved',
+    clockQuickNoEmployees:'No employees with Clock In/Out enabled.',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -2711,7 +2738,7 @@ let db={products:[],categories:[],sales:[],returns:[],orderNum:1,adminCode:'1234
   drawerPort:'COM3',drawerAuto:true,
   cfg:{bizName:'4K Negocio',bizSub:'',thanks:'¡Gracias por tu compra! 💕',phone:'',s1:'',s2:'',qr:'',logo:'',timeFormat:'12h',taxEnabled:false,taxName:'Impuesto',taxRate:0,taxIncluded:false},
   facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true,shifts:[],auditLog:[],combos:[],specials:[],employees:[],
-  settings:{inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null,adminExemptFromConfirm:true,lowStockThreshold:5}};
+  settings:{inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null,adminExemptFromConfirm:true,lowStockThreshold:5,clockQuickEnabled:false}};
 let cart=[],payMethod='cash',cashIn='',discount={type:'pct',value:0,active:false};
 let currentView='categories',currentCategory=null;
 let editingAccountId=null;
@@ -3263,6 +3290,12 @@ function applyLang(){
   const _empPtM=el('emp-pt-monthly');if(_empPtM)_empPtM.textContent=t('empPayMonthly');
   // Resumen Mensual tab
   const _ctMonthly=el('ct-tab-monthly-txt');if(_ctMonthly)_ctMonthly.textContent=t('tabMonthly');
+  // Clock Quick
+  const _hmClockTxt=el('hm-clock-txt');if(_hmClockTxt)_hmClockTxt.textContent=t('hmClockTxt');
+  const _cqTitleTxt=el('cq-title-txt');if(_cqTitleTxt)_cqTitleTxt.textContent=t('clockQuickTitle');
+  const _cfgClockSecLbl=el('cfg-clock-section-lbl');if(_cfgClockSecLbl)_cfgClockSecLbl.textContent=t('cfgClockSectionLbl');
+  const _cfgClockLbl=el('cfg-clock-quick-lbl');if(_cfgClockLbl)_cfgClockLbl.textContent=t('cfgClockQuickLbl');
+  const _cfgClockInfo=el('cfg-clock-quick-info');if(_cfgClockInfo)_cfgClockInfo.textContent=t('cfgClockQuickInfo');
   // Month names in selector
   (function(){const ms=t('monthlyMonths').split(',');ms.forEach(function(name,i){const o=el('mth-'+i);if(o)o.textContent=name;});})();
   updateCobrar(); renderCats(); renderProds(); updatePCat();
@@ -3788,6 +3821,7 @@ function startApp(){
   if(!window._cdSyncInt){window._cdSyncInt=setInterval(syncCreditDirect,30000);setTimeout(syncCreditDirect,3000);}
   if(!window._shiftHbInt){window._shiftHbInt=setInterval(function(){if(db.cfg&&db.cfg.shiftOpen&&curUser){syncShiftStatusDirect({active:true,currentUser:curUser.name,shiftOpenedAt:db.cfg.shiftOpenAt||new Date().toISOString(),lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg.pendingShiftNote||null});}},5*60*1000);}
   setEl('ord-lbl','#'+db.orderNum);
+  updateClockQuickBtn();
   if(_restoredFromBackup){toast(t('dataRestoredBackup'));_restoredFromBackup=false;}
   const bts=localStorage.getItem('4kpos_backup_ts');
   const lbl=el('last-backup-lbl');if(lbl&&bts)lbl.textContent=new Date(bts).toLocaleString(lang);
@@ -4881,6 +4915,58 @@ function saveLowStockCfg(){
   db.settings.lowStockThreshold=Math.max(0,parseInt((el('cfg-low-stock-threshold')||{}).value)||5);
   saveDB();calcNotifs();
   toast(t('lowStockThresholdSaved'));
+}
+function saveClockQuickCfg(){
+  if(!db.settings)db.settings={};
+  db.settings.clockQuickEnabled=(el('cfg-clock-quick')||{}).checked===true;
+  saveDB();
+  updateClockQuickBtn();
+  toast(t('clockQuickSaved'));
+}
+function updateClockQuickBtn(){
+  const enabled=db.settings&&db.settings.clockQuickEnabled;
+  const hasClock=(db.employees||[]).some(function(e){return e.useClockInOut;});
+  const btn=el('hm-clock');
+  if(btn)btn.style.display=(enabled&&hasClock)?'block':'none';
+}
+function openClockQuick(){
+  renderClockQuickList();
+  openOv('ov-clock-quick');
+}
+function renderClockQuickList(){
+  const container=el('cq-list');if(!container)return;
+  const emps=(db.employees||[]).filter(function(e){return e.useClockInOut;});
+  if(!emps.length){
+    container.innerHTML='<div style="color:var(--tx3);font-size:.85rem;text-align:center;padding:16px">'+t('clockQuickNoEmployees')+'</div>';
+    return;
+  }
+  container.innerHTML=emps.map(function(emp){
+    const activeEv=emp.clockEvents&&emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
+    const isIn=!!activeEv;
+    const entryTime=isIn?fmtTime(activeEv.in):'';
+    const statusLine=isIn
+      ?('<div style="font-size:.72rem;color:var(--gn);margin-top:2px">● '+t('empCurrentlyIn')+' · '+t('empClockIn').replace('✅ ','')+ ': '+entryTime+'</div>')
+      :'';
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--b1)">'
+      +'<div><div style="font-weight:600;color:var(--tx)">'+escHtml(emp.name)+'</div>'+statusLine+'</div>'
+      +'<button class="btn '+(isIn?'btn-d':'btn-p')+'" style="font-size:.82rem;padding:7px 18px;min-width:90px" onclick="cqClock(\''+emp.id+'\')">'
+      +(isIn?t('empClockOut'):t('empClockIn'))+'</button>'
+      +'</div>';
+  }).join('');
+}
+function cqClock(id){
+  const emp=(db.employees||[]).find(function(e){return e.id===id;});if(!emp)return;
+  const activeEv=emp.clockEvents&&emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
+  if(activeEv){
+    activeEv.out=new Date().toISOString();
+    saveDB();toast(t('empClockedOut'));
+  }else{
+    if(!emp.clockEvents)emp.clockEvents=[];
+    emp.clockEvents.push({id:'ce_'+Date.now(),in:new Date().toISOString(),out:null});
+    saveDB();toast(t('empClockedIn'));
+  }
+  renderClockQuickList();
+  renderEmployeeList();
 }
 function _isModalCritical(){
   const ck=el('ov-checkout');if(ck&&ck.classList.contains('open'))return true;
@@ -6094,6 +6180,7 @@ function loadAdminModal(){
   if(el('cfg-tax-name'))el('cfg-tax-name').value=(db.cfg&&db.cfg.taxName)||'Impuesto';
   if(el('cfg-tax-rate'))el('cfg-tax-rate').value=(db.cfg&&db.cfg.taxRate)||0;
   if(el('cfg-tax-included'))el('cfg-tax-included').checked=(db.cfg&&db.cfg.taxIncluded)===true;
+  if(el('cfg-clock-quick'))el('cfg-clock-quick').checked=(db.settings&&db.settings.clockQuickEnabled)===true;
   _updateBkpPassUI();
 }
 function admTab(tab,e2){
@@ -6763,7 +6850,7 @@ function saveEmployee(){
   }else{
     db.employees.push({id:'emp_'+Date.now(),name:name,payType:payType,amount:amount,useClockInOut:useClock,hourlyRate:hourlyRate,clockEvents:[]});
   }
-  saveDB();clearEmployee();renderEmployeeList();toast(t('empSaved'));
+  saveDB();clearEmployee();renderEmployeeList();updateClockQuickBtn();toast(t('empSaved'));
 }
 function editEmployee(id){
   if(!db.employees)return;
@@ -6780,7 +6867,7 @@ function editEmployee(id){
 function deleteEmployee(id){
   confirm2(t('empDelConfirm'),function(){
     db.employees=(db.employees||[]).filter(function(e){return e.id!==id;});
-    saveDB();renderEmployeeList();toast(t('empDeleted'));
+    saveDB();renderEmployeeList();updateClockQuickBtn();toast(t('empDeleted'));
   });
 }
 function clockIn(id){
