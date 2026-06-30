@@ -465,64 +465,14 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
     <div id="sb-urole"></div>
   </div>
   <div class="sb-nav">
-    <div class="sb-section" id="sb-sec-main">Principal</div>
-    <div class="sb-item" id="sbi-dash" onclick="sbNav('dash')">
-      <i class="ti ti-layout-dashboard sb-icon"></i><span class="sb-lbl">Dashboard</span>
-    </div>
-    <div class="sb-item" id="sbi-dash-qr" onclick="openDashQR()">
-      <i class="ti ti-device-mobile sb-icon"></i><span class="sb-lbl" id="sbi-dash-qr-lbl">Dashboard Móvil</span>
-    </div>
     <div class="sb-item" id="sbi-pos" onclick="sbNav('pos')">
       <i class="ti ti-shopping-cart sb-icon"></i><span class="sb-lbl" id="sbi-pos-lbl">Vender</span>
     </div>
-    <div class="sb-section" id="sb-sec-inv">Inventario</div>
-    <div class="sb-item" id="sbi-prods" onclick="sbNav('prods')">
-      <i class="ti ti-package sb-icon"></i><span class="sb-lbl" id="sbi-prods-lbl">Productos</span>
+    <div class="sb-item" id="sbi-menu" onclick="reqPin('admin')">
+      <i class="ti ti-menu-2 sb-icon"></i><span class="sb-lbl" id="sbi-menu-lbl">Menú</span>
     </div>
-    <div class="sb-item" id="sbi-inv" onclick="sbNav('inv')">
-      <i class="ti ti-clipboard-list sb-icon"></i><span class="sb-lbl" id="sbi-inv-lbl">Stock</span>
-    </div>
-    <div class="sb-item" id="sbi-labels" onclick="sbNav('labels')">
-      <i class="ti ti-tag sb-icon"></i><span class="sb-lbl" id="sbi-labels-lbl">Etiquetas</span>
-    </div>
-    <div class="sb-section" id="sb-sec-sales">Ventas</div>
-    <div class="sb-item" id="sbi-sales" onclick="sbNav('sales')">
-      <i class="ti ti-receipt sb-icon"></i><span class="sb-lbl" id="sbi-sales-lbl">Ventas del día</span>
-    </div>
-    <div class="sb-item" id="sbi-returns" onclick="sbNav('returns')">
-      <i class="ti ti-arrow-back-up sb-icon"></i><span class="sb-lbl" id="sbi-returns-lbl">Devoluciones</span>
-    </div>
-    <div class="sb-item" id="sbi-credits" onclick="sbNav('credits')">
-      <i class="ti ti-credit-card sb-icon"></i><span class="sb-lbl" id="sbi-credits-lbl">Créditos</span>
-    </div>
-    <div class="sb-section" id="sb-sec-catalog">Catálogo</div>
-    <div class="sb-item" id="sbi-combos" onclick="sbNav('combos')">
-      <i class="ti ti-package-export sb-icon"></i><span class="sb-lbl" id="sbi-combos-lbl">Combos</span>
-    </div>
-    <div class="sb-item" id="sbi-specials" onclick="sbNav('specials')">
-      <i class="ti ti-star sb-icon"></i><span class="sb-lbl" id="sbi-specials-lbl">Especiales</span>
-    </div>
-    <div class="sb-section" id="sb-sec-more">Más</div>
-    <div class="sb-item" id="sbi-conta" onclick="sbNav('conta')">
-      <i class="ti ti-book sb-icon"></i><span class="sb-lbl" id="sbi-conta-lbl">Contabilidad</span>
-    </div>
-    <div class="sb-item" id="sbi-compras" onclick="sbNav('compras')">
-      <i class="ti ti-truck sb-icon"></i><span class="sb-lbl" id="sbi-compras-lbl">Compras</span>
-    </div>
-    <div class="sb-item" id="sbi-audit" style="display:none" onclick="sbNav('audit')">
-      <i class="ti ti-shield sb-icon"></i><span class="sb-lbl" id="sbi-audit-lbl">Auditoría</span>
-    </div>
-    <div class="sb-item" id="sbi-drawer" onclick="openDrawer()">
-      <i class="ti ti-device-desktop sb-icon"></i><span class="sb-lbl" id="sbi-drawer-lbl">Registradora</span>
-    </div>
-    <div class="sb-item" id="sbi-note" onclick="openWriteNote()">
-      <i class="ti ti-note sb-icon"></i><span class="sb-lbl" id="sbi-note-lbl">Nota de turno</span>
-    </div>
-    <div class="sb-item" id="sbi-update" onclick="checkUpdates()">
-      <i class="ti ti-refresh sb-icon"></i><span class="sb-lbl" id="sbi-update-lbl">Actualizaciones</span>
-    </div>
-    <div class="sb-item" id="sbi-cfg" onclick="sbNav('cfg')">
-      <i class="ti ti-settings sb-icon"></i><span class="sb-lbl" id="sbi-cfg-lbl">Configuración</span>
+    <div class="sb-item" id="sbi-clock" style="display:none" onclick="openClockQuick()">
+      <i class="ti ti-clock sb-icon" style="color:#10b981"></i><span class="sb-lbl" style="color:#10b981" id="sbi-clock-lbl">Clock</span>
     </div>
   </div>
   <div class="sb-bottom">
@@ -2284,6 +2234,7 @@ const T = {
     clockQuickNoEmployees:'Sin empleados con Clock In/Out activado.',
     // Menú unificado
     uniModalTitle:'Menú',uniTabAdm:'Administración',uniTabConta:'Contabilidad',uniTabAjustes:'Ajustes',uniTabClock:'Clock',
+    sbiMenu:'Menú',sbiClock:'Clock',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -2738,6 +2689,7 @@ const T = {
     clockQuickNoEmployees:'No employees with Clock In/Out enabled.',
     // Unified menu
     uniModalTitle:'Menu',uniTabAdm:'Administration',uniTabConta:'Accounting',uniTabAjustes:'Settings',uniTabClock:'Clock',
+    sbiMenu:'Menu',sbiClock:'Clock',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -3309,6 +3261,9 @@ function applyLang(){
   const _cfgClockSecLbl=el('cfg-clock-section-lbl');if(_cfgClockSecLbl)_cfgClockSecLbl.textContent=t('cfgClockSectionLbl');
   const _cfgClockLbl=el('cfg-clock-quick-lbl');if(_cfgClockLbl)_cfgClockLbl.textContent=t('cfgClockQuickLbl');
   const _cfgClockInfo=el('cfg-clock-quick-info');if(_cfgClockInfo)_cfgClockInfo.textContent=t('cfgClockQuickInfo');
+  // Sidebar simplificado
+  const _sbiMenuLbl=el('sbi-menu-lbl');if(_sbiMenuLbl)_sbiMenuLbl.textContent=t('sbiMenu');
+  const _sbiClockLbl=el('sbi-clock-lbl');if(_sbiClockLbl)_sbiClockLbl.textContent=t('sbiClock');
   // Unified menu
   const _uniTitle=el('uni-modal-title');if(_uniTitle)_uniTitle.textContent=t('uniModalTitle');
   const _uniAdm=el('uni-lbl-adm');if(_uniAdm)_uniAdm.textContent=t('uniTabAdm');
@@ -4974,8 +4929,10 @@ function saveClockQuickCfg(){
 function updateClockQuickBtn(){
   const enabled=db.settings&&db.settings.clockQuickEnabled;
   const hasClock=(db.employees||[]).some(function(e){return e.useClockInOut;});
-  const btn=el('hm-clock');
-  if(btn)btn.style.display=(enabled&&hasClock)?'block':'none';
+  const show=(enabled&&hasClock)?'block':'none';
+  const hmClock=el('hm-clock');if(hmClock)hmClock.style.display=show;
+  const sbiClock=el('sbi-clock');if(sbiClock)sbiClock.style.display=show;
+  const cb=el('uni-clock-btn');if(cb)cb.style.display=(enabled&&hasClock)?'':'none';
 }
 function openClockQuick(){
   renderClockQuickList();
@@ -7132,6 +7089,7 @@ el('login-screen').style.display='flex';
 loadDB().then(()=>{
   applyLang();
   initUnifiedModal();
+  updateClockQuickBtn();
   // renderLoginUsers();
   el('lang-screen').style.display='none';
   el('splash').style.display='none';
