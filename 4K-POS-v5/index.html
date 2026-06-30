@@ -3417,40 +3417,70 @@ async function loadDB(){
   if(!db.products.length&&!db.sales.length){_restoredFromBackup=restoreFromBackup();}
 
   try{const li=await ipcRenderer.invoke('get-license-info');if(li&&li.key)db._lic=li.key;}catch(e){}
+
+  // ── RESTORE COMPLETO desde Supabase en PC nueva (sin datos locales) ────────
+  if(db._lic&&!db.products.length&&!db.users.some(function(u){return u.role==='admin';})){
+    try{
+      const _r=await fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'load',license_key:db._lic})});
+      const _j=await _r.json();
+      if(_j.success&&_j.data){
+        const _d=_j.data;
+        if(_d.products&&_d.products.length)db.products=_d.products;
+        if(_d.categories&&_d.categories.length)db.categories=_d.categories;
+        if(_d.users&&_d.users.length)db.users=_d.users;
+        if(_d.cfg)db.cfg=Object.assign(db.cfg,_d.cfg);
+        if(_d.settings)db.settings=Object.assign(db.settings||{},_d.settings);
+        if(_d.sales&&_d.sales.length){db.sales=_d.sales;db.sales.forEach(function(s){const n=_normPayLabel(s);if(n!==s.payLabel)s.payLabel=n;});}
+        if(_d.returns&&_d.returns.length)db.returns=_d.returns;
+        if(_d.credits&&_d.credits.length)db.credits=_d.credits;
+        if(_d.customers&&_d.customers.length)db.customers=_d.customers;
+        if(_d.combos&&_d.combos.length)db.combos=_d.combos;
+        if(_d.specials&&_d.specials.length)db.specials=_d.specials;
+        if(_d.employees&&_d.employees.length)db.employees=_d.employees;
+        if(_d.orderNum)db.orderNum=_d.orderNum;
+        if(_d.fundAmount!==undefined)db.fundAmount=_d.fundAmount;
+        if(_d.payMethods)db.payMethods=Object.assign(db.payMethods||{},_d.payMethods);
+        if(_d.adminCode)db.adminCode=_d.adminCode;
+        try{await ipcRenderer.invoke('save-data',db);}catch(e2){}
+        console.log('[4KPOS] Restore desde Supabase: '+db.products.length+' productos, '+db.users.length+' usuarios');
+      }
+    }catch(e){console.warn('[4KPOS] Error en restore Supabase:',e);}
+  }
+  // ── Fin restore ───────────────────────────────────────────────────────────
+
   ipcRenderer.invoke('get-device-code').then(function(code){
     if(code)_shiftStatusId='shift_status_'+code;
     if(db._lic)syncShiftStatusDirect({active:false,updatedAt:new Date().toISOString()});
   }).catch(function(){});
   if(db._lic){(async function(){
-    // 1. Pull: sync minStock and categories from Supabase back to local
+    // Push: enviar datos actuales a Supabase para mantener sincronizado
     try{
-      const rms=await fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=load',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({license_key:db._lic})});
-      const jms=await rms.json();
-      if(jms.success&&jms.data){
-        if(jms.data.products){
-          jms.data.products.forEach(function(sp){
-            const lp=db.products.find(function(p){return p.id===sp.id;});
-            if(lp&&sp.minStock!==undefined&&sp.minStock!==lp.minStock){lp.minStock=sp.minStock;}
-          });
-        }
-      }
-    }catch(e){}
-    // 2. Push: send current data (products + categories + sales) so dashboard always has fresh category names
-    // This ensures categories reach Supabase even if the previous save predates the categories field
-    try{
-      const slim={
-        sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,payLabel:_normPayLabel(s),cashier:s.cashier||'',creditClient:s.creditClient||null,creditStatus:s.creditStatus||null,creditPaid:s.creditPaid||null,creditDueDate:s.creditDueDate||null,creditPayments:(s.creditPayments&&s.creditPayments.length)?s.creditPayments:undefined,items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),
-        products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat,minStock:p.minStock||5};}),
-        categories:(db.categories||[]).map(function(c){return {id:c.id,name:c.name,image:c.img||null};}),
-        returns:(db.returns||[]).map(function(r){return {id:r.id,originalSaleId:r.originalSaleId,rnum:r.rnum,total:r.total,user:r.user,date:r.date,payMethod:r.payMethod};}),
-        credits:(db.credits||[]).map(function(cr){return {id:cr.id,saleId:cr.saleId,client:cr.client,cedula:cr.cedula||'',total:cr.total,paid:cr.paid,date:cr.date,payments:cr.payments||[],items:(cr.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),
-        cfg:{bizName:(db.cfg||{}).bizName||''},
-        creditSummary:(function(){var _p=(db.sales||[]).filter(function(s){return s.payMethod==='credit'&&s.creditStatus!=='paid'&&(s.total-(s.creditPaid||0))>0;});return {totalPending:_p.reduce(function(s,x){return s+((x.total||0)-(x.creditPaid||0));},0),count:_p.length};}())
-      };
-      fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({license_key:db._lic,data:slim})}).catch(function(){});
+      const slim=_buildSlim();
+      fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'save',license_key:db._lic,data:slim})}).catch(function(){});
       syncCategories();
     }catch(e){}
   })();}
+}
+function _buildSlim(){
+  return {
+    products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat,minStock:p.minStock||5,cost:p.cost||0,barcode:p.barcode||''};}),
+    categories:(db.categories||[]).map(function(c){return {id:c.id,name:c.name,img:c.img||null};}),
+    sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,payLabel:_normPayLabel(s),cashier:s.cashier||'',creditClient:s.creditClient||null,creditStatus:s.creditStatus||null,creditPaid:s.creditPaid||null,creditDueDate:s.creditDueDate||null,creditPayments:(s.creditPayments&&s.creditPayments.length)?s.creditPayments:undefined,items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),
+    returns:(db.returns||[]).map(function(r){return {id:r.id,originalSaleId:r.originalSaleId,rnum:r.rnum,total:r.total,user:r.user,date:r.date,payMethod:r.payMethod};}),
+    credits:(db.credits||[]).map(function(cr){return {id:cr.id,saleId:cr.saleId,client:cr.client,cedula:cr.cedula||'',total:cr.total,paid:cr.paid,date:cr.date,payments:cr.payments||[],items:(cr.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),
+    customers:db.customers||[],
+    combos:db.combos||[],
+    specials:db.specials||[],
+    employees:(db.employees||[]).map(function(e){return {id:e.id,name:e.name,payType:e.payType,amount:e.amount||0,useClockInOut:!!e.useClockInOut,hourlyRate:e.hourlyRate||0,clockHistory:e.clockHistory||[]};}),
+    users:(db.users||[]).map(function(u){return {id:u.id,name:u.name,role:u.role,pass:u.pass||'',perms:u.perms||{}};}),
+    cfg:db.cfg||{},
+    settings:db.settings||{},
+    orderNum:db.orderNum||1,
+    fundAmount:db.fundAmount||0,
+    payMethods:db.payMethods||{},
+    adminCode:db.adminCode||'',
+    creditSummary:(function(){var _p=(db.sales||[]).filter(function(s){return s.payMethod==='credit'&&s.creditStatus!=='paid'&&(s.total-(s.creditPaid||0))>0;});return {totalPending:_p.reduce(function(s,x){return s+((x.total||0)-(x.creditPaid||0));},0),count:_p.length};}())
+  };
 }
 function _normPayLabel(s){
   const abbr={Ef:'Efectivo',Tj:'Tarjeta',Efe:'Efectivo',Tar:'Tarjeta',Trf:'Transferencia',Div:'Dividido',Cred:'Crédito','Cta.':'Cuenta Abierta',OA:'Cuenta Abierta',Sp:'Dividido'};
@@ -3466,8 +3496,7 @@ async function saveDB(){
   try{
     const licKey=db._lic||'';
     if(licKey){
-      const slim={sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,payLabel:_normPayLabel(s),cashier:s.cashier||'',creditStatus:s.creditStatus||null,creditPaid:s.creditPaid||null,items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat,minStock:p.minStock||5};}),categories:(db.categories||[]).map(function(c){return {id:c.id,name:c.name,image:c.img||null};}),cfg:{bizName:(db.cfg||{}).bizName||''},creditSummary:(function(){var _p=(db.sales||[]).filter(function(s){return s.payMethod==='credit'&&s.creditStatus!=='paid'&&(s.total-(s.creditPaid||0))>0;});return {totalPending:_p.reduce(function(s,x){return s+((x.total||0)-(x.creditPaid||0));},0),count:_p.length};}())};
-      fetch('https://izalnhluwtyotuxwkqrh.supabase.co/functions/v1/posapi?action=save',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({license_key:licKey,data:slim})}).catch(function(){});
+      fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'save',license_key:licKey,data:_buildSlim()})}).catch(function(){});
     }
   }catch(e){}
 }

@@ -1,5 +1,5 @@
 // 4K POS — posapi Edge Function
-// Acciones: activate_license | verify_license | request_license_by_email
+// Acciones: activate_license | verify_license | request_license_by_email | save | load
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -25,18 +25,22 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  let body: Record<string, string>;
+  let body: Record<string, unknown>;
   try {
     body = await req.json();
   } catch {
     return json({ error: "Invalid JSON" }, 400);
   }
 
-  const { action } = body;
+  // Lee action del body primero, luego del query param (compatibilidad hacia atrás)
+  const url = new URL(req.url);
+  const action = (body.action as string) || url.searchParams.get("action") || "";
+  const license_key = ((body.license_key as string) || "").trim().toUpperCase();
 
   // ── Activar licencia ──────────────────────────────────────────────────────
   if (action === "activate_license") {
-    const { license_key, hardware_id, hostname } = body;
+    const hardware_id = body.hardware_id as string;
+    const hostname = body.hostname as string;
     if (!license_key || !hardware_id) {
       return json({ error: "Faltan campos requeridos" }, 400);
     }
@@ -44,7 +48,7 @@ serve(async (req) => {
     const { data: lic, error } = await supabase
       .from("licenses")
       .select("*")
-      .eq("license_id", license_key.trim().toUpperCase())
+      .eq("license_id", license_key)
       .eq("status", "active")
       .single();
 
@@ -74,7 +78,7 @@ serve(async (req) => {
 
   // ── Verificar licencia ────────────────────────────────────────────────────
   if (action === "verify_license") {
-    const { license_key, hardware_id } = body;
+    const hardware_id = body.hardware_id as string;
     if (!license_key || !hardware_id) {
       return json({ error: "Faltan campos requeridos" }, 400);
     }
@@ -82,7 +86,7 @@ serve(async (req) => {
     const { data: lic, error } = await supabase
       .from("licenses")
       .select("plan, status, expires_at, hardware_id")
-      .eq("license_id", license_key.trim().toUpperCase())
+      .eq("license_id", license_key)
       .single();
 
     if (error || !lic) return json({ error: "license_invalid" }, 403);
@@ -97,21 +101,21 @@ serve(async (req) => {
     await supabase
       .from("licenses")
       .update({ last_verified: new Date().toISOString() })
-      .eq("license_id", license_key.trim().toUpperCase());
+      .eq("license_id", license_key);
 
     return json({ ok: true, plan: lic.plan, expires_at: lic.expires_at });
   }
 
   // ── Solicitar licencia por email ──────────────────────────────────────────
   if (action === "request_license_by_email") {
-    const { email, plan } = body;
+    const email = body.email as string;
+    const plan = body.plan as string;
     if (!email || !email.includes("@")) {
       return json({ error: "Email inválido" }, 400);
     }
 
     const emailLower = email.toLowerCase().trim();
 
-    // Buscar licencia activa con este email
     const { data: active } = await supabase
       .from("licenses")
       .select("license_id, plan")
@@ -123,7 +127,6 @@ serve(async (req) => {
       return json({ found: true, license_id: active.license_id, plan: active.plan });
     }
 
-    // Verificar si ya hay una solicitud pendiente
     const { data: existing } = await supabase
       .from("licenses")
       .select("license_id")
@@ -140,7 +143,6 @@ serve(async (req) => {
       });
     }
 
-    // Enviar emails via Resend
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     const ADMIN_EMAIL = Deno.env.get("ADMIN_EMAIL") || "kelvin-2101@hotmail.com";
 
@@ -191,34 +193,69 @@ serve(async (req) => {
       await Promise.allSettled([
         fetch("https://api.resend.com/emails", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${RESEND_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: "onboarding@resend.dev",
-            to: emailLower,
-            subject: "Tu solicitud de 4K POS fue recibida",
-            html: clientHtml,
-          }),
+          headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ from: "onboarding@resend.dev", to: emailLower, subject: "Tu solicitud de 4K POS fue recibida", html: clientHtml }),
         }),
         fetch("https://api.resend.com/emails", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${RESEND_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: "onboarding@resend.dev",
-            to: ADMIN_EMAIL,
-            subject: "Nueva solicitud de licencia 4K POS",
-            html: adminHtml,
-          }),
+          headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ from: "onboarding@resend.dev", to: ADMIN_EMAIL, subject: "Nueva solicitud de licencia 4K POS", html: adminHtml }),
         }),
       ]);
     }
 
     return json({ found: false, pending: true });
+  }
+
+  // ── Guardar datos POS ─────────────────────────────────────────────────────
+  if (action === "save") {
+    if (!license_key) return json({ error: "license_key required" }, 400);
+
+    // Verificar que la licencia existe y está activa
+    const { data: lic } = await supabase
+      .from("licenses")
+      .select("license_id")
+      .eq("license_id", license_key)
+      .eq("status", "active")
+      .single();
+
+    if (!lic) return json({ error: "license_invalid" }, 403);
+
+    const { error: upsertErr } = await supabase
+      .from("pos_data")
+      .upsert(
+        { license_key, data: body.data, updated_at: new Date().toISOString() },
+        { onConflict: "license_key" }
+      );
+
+    if (upsertErr) return json({ error: upsertErr.message }, 500);
+    return json({ success: true });
+  }
+
+  // ── Cargar datos POS ──────────────────────────────────────────────────────
+  if (action === "load") {
+    if (!license_key) return json({ error: "license_key required" }, 400);
+
+    const { data: lic } = await supabase
+      .from("licenses")
+      .select("license_id")
+      .eq("license_id", license_key)
+      .eq("status", "active")
+      .single();
+
+    if (!lic) return json({ error: "license_invalid" }, 403);
+
+    const { data: posRow } = await supabase
+      .from("pos_data")
+      .select("data, updated_at")
+      .eq("license_key", license_key)
+      .single();
+
+    return json({
+      success: true,
+      data: posRow?.data ?? null,
+      updated_at: posRow?.updated_at ?? null,
+    });
   }
 
   return json({ error: "Acción desconocida" }, 400);
