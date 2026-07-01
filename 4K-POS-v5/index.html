@@ -358,7 +358,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 .db-toggle{display:flex;background:var(--s2);border-radius:var(--rs);border:1.5px solid var(--b1);padding:2px;gap:2px;}
 .db-toggle button{padding:3px 12px;font-size:.72rem;border:none;border-radius:calc(var(--rs) - 2px);background:transparent;color:var(--tx3);cursor:pointer;transition:all .18s;font-weight:600;}
 .db-toggle button.on{background:var(--ac);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);}
-.db-chart{display:block;width:100%;}
+.db-chart{display:block;width:100%;max-height:200px;overflow:hidden;}
 .db-bar-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:2px;}
 .db-bar-val{font-size:.58rem;color:var(--ac);font-weight:700;min-height:13px;line-height:13px;text-align:center;white-space:nowrap;}
 .db-bar{background:var(--ac);border-radius:3px 3px 0 0;width:100%;min-height:4px;transition:height .3s;flex:1;}
@@ -601,13 +601,9 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div id="db-pay-chart"></div>
     </div>
   </div>
-  <div class="db-row">
+  <div style="margin-top:12px">
     <div class="db-card">
-      <div class="db-card-hd"><h4>💳 Créditos pendientes</h4></div>
-      <div id="db-credits-list"></div>
-    </div>
-    <div class="db-card">
-      <div class="db-card-hd"><h4>🧾 Ventas recientes</h4></div>
+      <div class="db-card-hd"><h4>🧾 Ventas recientes hoy</h4></div>
       <div id="db-recent-sales"></div>
     </div>
   </div>
@@ -924,7 +920,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <div style="font-size:.78rem;color:var(--tx2)" id="lic-info-devices">—</div>
         </div>
         <div class="frow">
-          <button class="btn btn-p" onclick="try{require('electron').shell.openExternal('https://get4ksolutions.com');}catch(e){window.open('https://get4ksolutions.com','_blank');}">🔄 Renovar plan</button>
+          <button class="btn btn-p" onclick="_openRenewalWA()">💬 Renovar / Soporte</button>
         </div>
       </div>
       <!-- INVENTORY -->
@@ -1058,6 +1054,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
           </div>
         </div>
         <div class="fg" id="emp-hourly-row" style="display:none;max-width:240px"><label class="lbl" id="emp-hourly-lbl">Tarifa por hora ($)</label><input type="number" class="fi" id="emp-hourly" placeholder="0.00" step="0.01" min="0"></div>
+        <div class="fg" style="max-width:180px"><label class="lbl">PIN Clock In/Out (4 dígitos)</label><input type="number" class="fi" id="emp-pin" placeholder="Ej: 1234" maxlength="4" min="0" max="9999" style="letter-spacing:4px"></div>
         <div class="frow">
           <button class="btn btn-p" id="emp-save-btn" onclick="saveEmployee()">💾 Guardar</button>
           <button class="btn btn-s" onclick="clearEmployee()">↺</button>
@@ -1471,9 +1468,58 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <!-- CLOCK QUICK MODAL -->
 <div class="ov" id="ov-clock-quick">
   <div class="modal mnarrow">
-    <div class="mh"><h3>⏱ <span id="cq-title-txt">Clock In/Out</span></h3><button class="mx" onclick="closeOv('ov-clock-quick')">✕</button></div>
+    <div class="mh" style="flex-wrap:wrap;gap:6px">
+      <h3>⏱ Clock In/Out</h3>
+      <div style="display:flex;gap:5px;align-items:center;margin-left:auto">
+        <button class="btn btn-p" id="cq-tab-btn-asist" style="font-size:.76rem;padding:4px 10px" onclick="cqShowTab('asist',this)">Asistencia</button>
+        <button class="btn btn-s" id="cq-tab-btn-hist" style="font-size:.76rem;padding:4px 10px" onclick="cqShowTab('hist',this)">Historial</button>
+        <button class="mx" onclick="closeOv('ov-clock-quick')">✕</button>
+      </div>
+    </div>
     <div class="mb">
-      <div id="cq-list"></div>
+      <!-- Admin override (admin only) -->
+      <div id="cq-admin-section" style="display:none;background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);padding:10px;margin-bottom:10px">
+        <div style="font-size:.68rem;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">🔧 Ajuste manual (admin)</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+          <select class="fi" id="cq-admin-emp" style="flex:1;min-width:120px;font-size:.82rem"><option value="">— Empleado —</option></select>
+          <select class="fi" id="cq-admin-type" style="flex:0;min-width:90px;font-size:.82rem">
+            <option value="in">✅ Entrada</option>
+            <option value="out">🚪 Salida</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:6px">
+          <input type="datetime-local" class="fi" id="cq-admin-time" style="flex:1;font-size:.82rem">
+          <button class="btn btn-p" style="font-size:.8rem;padding:7px 14px" onclick="cqAdminRecord()">✓</button>
+        </div>
+      </div>
+      <!-- Asistencia tab -->
+      <div id="cq-panel-asist">
+        <div id="cq-list"></div>
+      </div>
+      <!-- Historial tab -->
+      <div id="cq-panel-hist" style="display:none">
+        <div id="cq-hist-list"></div>
+      </div>
+      <!-- PIN panel (overlay) -->
+      <div id="cq-pin-panel" style="display:none;text-align:center;padding:12px 0">
+        <div style="font-size:.9rem;font-weight:700;margin-bottom:4px" id="cq-pin-emp-name"></div>
+        <div style="font-size:.74rem;color:var(--tx3);margin-bottom:12px">Ingresa tu PIN de 4 dígitos</div>
+        <div style="font-family:monospace;font-size:1.8rem;letter-spacing:10px;height:44px;display:flex;align-items:center;justify-content:center" id="cq-pin-dots">○○○○</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:210px;margin:14px auto 0">
+          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('1')">1</button>
+          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('2')">2</button>
+          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('3')">3</button>
+          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('4')">4</button>
+          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('5')">5</button>
+          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('6')">6</button>
+          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('7')">7</button>
+          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('8')">8</button>
+          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('9')">9</button>
+          <button class="btn btn-s" style="font-size:.85rem;padding:10px" onclick="cqPinKey('0')">0</button>
+          <button class="btn btn-s" style="font-size:.85rem;padding:10px;grid-column:span 2" onclick="cqPinBack()">⌫</button>
+        </div>
+        <button class="btn btn-s" style="margin-top:14px;width:100%;max-width:210px" onclick="cqCancelPin()">Cancelar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3589,18 +3635,29 @@ function _planLabel(plan){
   if(p.startsWith('basic'))return 'Básico';
   return plan||'—';
 }
+function _openRenewalWA(){
+  var key=(db.license&&db.license.key)||db._licKeyLocal||'';
+  function _doOpen(k){
+    var msg='Hola, quiero renovar mi licencia 4K POS. Mi clave es: '+(k||'(sin clave)');
+    var url='https://wa.me/18099416543?text='+encodeURIComponent(msg);
+    try{require('electron').shell.openExternal(url);}catch(e){window.open(url,'_blank');}
+  }
+  if(key){_doOpen(key);return;}
+  ipcRenderer.invoke('get-license-info').then(function(li){_doOpen(li&&li.key||'');}).catch(function(){_doOpen('');});
+}
 function refreshLicenseInfo(){
-  ipcRenderer.invoke('get-license-info').then(function(li){
-    var lic=db.license;
-    var plan=(lic&&lic.plan)||(li&&li.plan)||'';
-    var planEl=el('lic-info-plan');if(planEl)planEl.textContent=_planLabel(plan);
-    var active=lic?lic.active:true;
-    var isOffline=!lic&&li&&li.last_verified;
+  /* Use available in-memory data first (instant), then update with IPC */
+  function _fillLicUI(lic,li){
+    var plan=(lic&&lic.plan)||(li&&li.plan)||(db&&db._localPlan)||'';
+    var planEl=el('lic-info-plan');if(planEl)planEl.textContent=_planLabel(plan)||'—';
+    /* Status: lic.active is a boolean from Supabase. Offline mode sets active:true */
+    var active=(lic&&(lic.active===true||lic.active===undefined||(lic.status&&lic.status!=='inactive')))||(!lic&&true);
+    var isOfflineMode=!!(lic&&lic._offline);
     var statusEl=el('lic-info-status');var badgeEl=el('lic-info-badge');
     if(!active){
       if(statusEl)statusEl.textContent='Licencia inactiva';
       if(badgeEl){badgeEl.textContent='Inactiva';badgeEl.style.cssText='font-size:.7rem;padding:3px 9px;border-radius:20px;font-weight:700;background:var(--rdb);color:var(--rd);border:1px solid var(--rd);flex-shrink:0;margin-left:8px';}
-    }else if(isOffline){
+    }else if(isOfflineMode){
       if(statusEl)statusEl.textContent='Modo offline';
       if(badgeEl){badgeEl.textContent='Offline';badgeEl.style.cssText='font-size:.7rem;padding:3px 9px;border-radius:20px;font-weight:700;background:var(--amb);color:var(--am);border:1px solid var(--am);flex-shrink:0;margin-left:8px';}
     }else{
@@ -3608,7 +3665,6 @@ function refreshLicenseInfo(){
       if(badgeEl){badgeEl.textContent='Activa';badgeEl.style.cssText='font-size:.7rem;padding:3px 9px;border-radius:20px;font-weight:700;background:var(--gnb);color:var(--gn);border:1px solid var(--gn);flex-shrink:0;margin-left:8px';}
     }
     var expires=(lic&&lic.expires_at)||(li&&li.expires_at);
-    /* Auto-calcular expires_at desde activated_at si no hay fecha */
     if(!expires){
       var activatedAt=(li&&li.activated_at)||(lic&&lic.activated_at);
       if(activatedAt&&plan){
@@ -3622,18 +3678,26 @@ function refreshLicenseInfo(){
     if(expiryEl){
       if(expires){
         var d=new Date(expires);var days=Math.ceil((d-Date.now())/864e5);
-        expiryEl.textContent='Vence el '+d.toLocaleDateString(lang||'es',{day:'numeric',month:'short',year:'numeric'})+' · '+(days>0?days+' días restantes':'Vencida hace '+Math.abs(days)+' días');
+        expiryEl.textContent='Vence: '+d.toLocaleDateString(lang||'es',{day:'numeric',month:'short',year:'numeric'})+' · '+(days>0?days+' días restantes':'Vencida hace '+Math.abs(days)+' días');
       }else if(plan.toLowerCase()==='lifetime'){expiryEl.textContent='Sin vencimiento — Licencia permanente';}
-      else{expiryEl.textContent='Sin fecha de vencimiento registrada';}
+      else{expiryEl.textContent='Sin fecha registrada';}
     }
     var devEl=el('lic-info-devices');
     if(devEl){
       var isPro2=_isPlanPro();var maxDev=isPro2?3:1;
-      /* Tomar dispositivos del objeto lic (Supabase) si disponible, sino db.devices */
-      var devs=Array.isArray(lic&&lic.devices)?lic.devices:(Array.isArray(db.devices)?db.devices:[]);
-      devEl.textContent=devs.length+' de '+maxDev+' PC'+(maxDev>1?'s':'')+' registrada'+(devs.length!==1?'s':'')+' · plan '+(isPro2?'Pro':'Básico');
+      var devs=Array.isArray(lic&&lic.devices)?lic.devices:(Array.isArray(db&&db.devices)?db.devices:[]);
+      devEl.textContent=devs.length+' de '+maxDev+' PC'+(maxDev>1?'s':'')+' · plan '+(isPro2?'Pro':'Básico');
     }
-  }).catch(function(){});
+    /* Store local key for WhatsApp */
+    if(li&&li.key)db._licKeyLocal=li.key;
+    if(lic&&lic.key)db._licKeyLocal=lic.key;
+  }
+  /* Fill immediately from db.license if available */
+  if(db&&db.license)_fillLicUI(db.license,null);
+  /* Then update with fresh IPC data */
+  ipcRenderer.invoke('get-license-info').then(function(li){
+    _fillLicUI(db&&db.license,li);
+  }).catch(function(){if(db&&db.license)_fillLicUI(db.license,null);});
 }
 // DATA
 async function loadDB(){
@@ -5246,34 +5310,115 @@ function toggleHamMenu(e){
   m.style.display=visible?'none':'block';
 }
 function closeHamMenu(){var m=el('ham-menu');if(m)m.style.display='none';}
+/* ── CLOCK IN/OUT ─────────────────────────────────────────────────────── */
+var _cqPinEmpId=null,_cqPinBuf='';
 function openClockQuick(){
+  cqShowTab('asist',el('cq-tab-btn-asist'));
   renderClockQuickList();
+  _cqInitAdminSection();
   openOv('ov-clock-quick');
 }
+function cqShowTab(tab,btn){
+  el('cq-panel-asist').style.display=tab==='asist'?'':'none';
+  el('cq-panel-hist').style.display=tab==='hist'?'':'none';
+  el('cq-pin-panel').style.display='none';
+  var btns=[el('cq-tab-btn-asist'),el('cq-tab-btn-hist')];
+  btns.forEach(function(b){if(b)b.className='btn btn-s';});
+  if(btn)btn.className='btn btn-p';
+  if(tab==='hist')_renderCqHist();
+}
+function _cqInitAdminSection(){
+  var isAdm=curUser&&curUser.role==='admin';
+  var sec=el('cq-admin-section');if(!sec)return;
+  if(!isAdm){sec.style.display='none';return;}
+  sec.style.display='';
+  var sel=el('cq-admin-emp');if(!sel)return;
+  var emps=db.employees||[];
+  sel.innerHTML='<option value="">— Empleado —</option>'
+    +emps.map(function(e){return '<option value="'+e.id+'">'+escHtml(e.name)+'</option>';}).join('');
+  var now=new Date();
+  var localISO=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  var timeEl=el('cq-admin-time');if(timeEl)timeEl.value=localISO;
+}
+function cqAdminRecord(){
+  var empId=(el('cq-admin-emp')||{}).value;
+  var type=(el('cq-admin-type')||{}).value;
+  var timeStr=(el('cq-admin-time')||{}).value;
+  if(!empId||!timeStr){toast('Selecciona empleado y hora');return;}
+  var emp=(db.employees||[]).find(function(e){return e.id===empId;});if(!emp)return;
+  if(!emp.clockEvents)emp.clockEvents=[];
+  var ts=new Date(timeStr).toISOString();
+  if(type==='in'){
+    emp.clockEvents.push({id:'ce_'+Date.now(),in:ts,out:null,manual:true});
+    saveDB();toast('Entrada manual: '+emp.name);
+  }else{
+    var active=emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
+    if(!active){toast('Sin entrada activa para '+emp.name);return;}
+    active.out=ts;active.manualOut=true;
+    saveDB();toast('Salida manual: '+emp.name);
+  }
+  renderClockQuickList();_renderCqHist();renderEmployeeList();
+}
 function renderClockQuickList(){
-  const container=el('cq-list');if(!container)return;
-  const emps=(db.employees||[]).filter(function(e){return e.useClockInOut;});
+  var container=el('cq-list');if(!container)return;
+  var emps=(db.employees||[]).filter(function(e){return e.useClockInOut;});
   if(!emps.length){
     container.innerHTML='<div style="color:var(--tx3);font-size:.85rem;text-align:center;padding:16px">'+t('clockQuickNoEmployees')+'</div>';
     return;
   }
   container.innerHTML=emps.map(function(emp){
-    const activeEv=emp.clockEvents&&emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
-    const isIn=!!activeEv;
-    const entryTime=isIn?fmtTime(activeEv.in):'';
-    const statusLine=isIn
-      ?('<div style="font-size:.72rem;color:var(--gn);margin-top:2px">● '+t('empCurrentlyIn')+' · '+t('empClockIn').replace('✅ ','')+ ': '+entryTime+'</div>')
-      :'';
+    var activeEv=emp.clockEvents&&emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
+    var isIn=!!activeEv;
+    var entryTime=isIn?fmtTime(activeEv.in):'';
+    var statusLine=isIn?('<div style="font-size:.72rem;color:var(--gn);margin-top:2px">● En trabajo desde '+entryTime+'</div>'):'';
+    var hasPin=!!(emp.pin&&emp.pin.length>=4);
+    var lockBadge=hasPin?'<span style="font-size:.6rem;color:var(--tx3);margin-left:5px">🔒</span>':'';
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--b1)">'
-      +'<div><div style="font-weight:600;color:var(--tx)">'+escHtml(emp.name)+'</div>'+statusLine+'</div>'
-      +'<button class="btn '+(isIn?'btn-d':'btn-p')+'" style="font-size:.82rem;padding:7px 18px;min-width:90px" onclick="cqClock(\''+emp.id+'\')">'
-      +(isIn?t('empClockOut'):t('empClockIn'))+'</button>'
+      +'<div><div style="font-weight:600;color:var(--tx)">'+escHtml(emp.name)+lockBadge+'</div>'+statusLine+'</div>'
+      +'<button class="btn '+(isIn?'btn-d':'btn-p')+'" style="font-size:.82rem;padding:7px 18px;min-width:90px" onclick="cqClockWithPin(\''+emp.id+'\')">'
+      +(isIn?'🚪 Salida':'✅ Entrada')+'</button>'
       +'</div>';
   }).join('');
 }
+function cqClockWithPin(id){
+  var emp=(db.employees||[]).find(function(e){return e.id===id;});if(!emp)return;
+  if(!emp.pin||emp.pin.length<4){cqClock(id);return;}
+  _cqPinEmpId=id;_cqPinBuf='';
+  el('cq-panel-asist').style.display='none';
+  var nm=el('cq-pin-emp-name');if(nm)nm.textContent=emp.name;
+  _cqUpdatePinDots();
+  el('cq-pin-panel').style.display='';
+}
+function cqPinKey(d){
+  if(_cqPinBuf.length>=4)return;
+  _cqPinBuf+=d;_cqUpdatePinDots();
+  if(_cqPinBuf.length===4)setTimeout(_cqVerifyPin,200);
+}
+function cqPinBack(){_cqPinBuf=_cqPinBuf.slice(0,-1);_cqUpdatePinDots();}
+function _cqUpdatePinDots(){
+  var d=el('cq-pin-dots');if(!d)return;
+  var filled=Array(_cqPinBuf.length+1).join('●');
+  var empty=Array(4-_cqPinBuf.length+1).join('○');
+  d.textContent=filled+empty;
+}
+function _cqVerifyPin(){
+  var emp=(db.employees||[]).find(function(e){return e.id===_cqPinEmpId;});
+  if(!emp){cqCancelPin();return;}
+  if(emp.pin!==_cqPinBuf){
+    toast('PIN incorrecto');_cqPinBuf='';_cqUpdatePinDots();return;
+  }
+  var _id=_cqPinEmpId;
+  cqCancelPin();
+  cqClock(_id);
+}
+function cqCancelPin(){
+  _cqPinEmpId=null;_cqPinBuf='';
+  el('cq-pin-panel').style.display='none';
+  el('cq-panel-asist').style.display='';
+}
 function cqClock(id){
-  const emp=(db.employees||[]).find(function(e){return e.id===id;});if(!emp)return;
-  const activeEv=emp.clockEvents&&emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
+  var emp=(db.employees||[]).find(function(e){return e.id===id;});if(!emp)return;
+  var activeEv=emp.clockEvents&&emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
   if(activeEv){
     activeEv.out=new Date().toISOString();
     saveDB();toast(t('empClockedOut'));
@@ -5284,6 +5429,37 @@ function cqClock(id){
   }
   renderClockQuickList();
   renderEmployeeList();
+}
+function _renderCqHist(){
+  var container=el('cq-hist-list');if(!container)return;
+  var today=new Date().toDateString();
+  var rows=[];
+  (db.employees||[]).forEach(function(emp){
+    (emp.clockEvents||[]).forEach(function(ev){
+      if(ev.in&&new Date(ev.in).toDateString()===today){
+        var hrs=ev.out?((new Date(ev.out)-new Date(ev.in))/3600000):null;
+        rows.push({name:emp.name,in:ev.in,out:ev.out||null,hrs:hrs,manual:!!(ev.manual||ev.manualOut)});
+      }
+    });
+  });
+  if(!rows.length){container.innerHTML='<p style="font-size:.78rem;color:var(--tx3);text-align:center;padding:20px">Sin registros hoy</p>';return;}
+  rows.sort(function(a,b){return new Date(a.in)-new Date(b.in);});
+  var total=rows.reduce(function(s,r){return s+(r.hrs||0);},0);
+  container.innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.75rem">'
+    +'<tr style="color:var(--tx3)"><th style="text-align:left;padding:5px 4px">Empleado</th>'
+    +'<th style="padding:5px 4px;text-align:center">Entrada</th>'
+    +'<th style="padding:5px 4px;text-align:center">Salida</th>'
+    +'<th style="padding:5px 4px;text-align:center">Horas</th></tr>'
+    +rows.map(function(r){
+      return '<tr style="border-top:1px solid var(--b1)">'
+        +'<td style="padding:6px 4px;font-weight:600">'+escHtml(r.name)+(r.manual?' <span style="font-size:.6rem;color:var(--tx3)">(manual)</span>':'')+'</td>'
+        +'<td style="padding:6px 4px;text-align:center;color:#22c55e;font-family:monospace">'+fmtTime(r.in)+'</td>'
+        +'<td style="padding:6px 4px;text-align:center;font-family:monospace;color:'+(r.out?'#ef4444':'var(--tx3)')+'">'+( r.out?fmtTime(r.out):'—')+'</td>'
+        +'<td style="padding:6px 4px;text-align:center;font-weight:700;color:var(--tx)">'+(r.hrs!=null?(r.hrs>=1?r.hrs.toFixed(1)+'h':(Math.round(r.hrs*60)+'m')):'⏳')+'</td>'
+        +'</tr>';
+    }).join('')
+    +'</table></div>'
+    +(total>0?'<div style="text-align:right;font-size:.76rem;font-weight:700;color:var(--tx3);margin-top:6px">Total: '+total.toFixed(1)+'h</div>':'');
 }
 function _isModalCritical(){
   const ck=el('ov-checkout');if(ck&&ck.classList.contains('open'))return true;
@@ -7144,6 +7320,7 @@ function clearEmployee(){
   el('emp-amount').value='';
   el('emp-use-clock').checked=false;
   el('emp-hourly').value='';
+  if(el('emp-pin'))el('emp-pin').value='';
   toggleEmpClock();
   const formTitle=el('nomina-form-title');if(formTitle)formTitle.textContent=t('nominaFormTitle');
 }
@@ -7155,6 +7332,8 @@ function saveEmployee(){
   const useClock=el('emp-use-clock').checked;
   const amount=parseFloat(el('emp-amount').value)||0;
   const hourlyRate=parseFloat(el('emp-hourly').value)||0;
+  const pinRaw=(el('emp-pin')&&el('emp-pin').value)||'';
+  const pin=pinRaw?String(parseInt(pinRaw,10)).padStart(4,'0'):'';
   if(!useClock&&amount<=0){toast(t('empAmountRequired'));return;}
   if(useClock&&hourlyRate<=0){toast(t('empAmountRequired'));return;}
   if(!db.employees)db.employees=[];
@@ -7162,12 +7341,16 @@ function saveEmployee(){
     const i=db.employees.findIndex(function(e){return e.id===eid;});
     if(i>=0){
       db.employees[i].name=name;db.employees[i].payType=payType;
-      db.employees[i].amount=amount;db.employees[i].useClockInOut=useClock;db.employees[i].hourlyRate=hourlyRate;
+      db.employees[i].amount=amount;db.employees[i].useClockInOut=useClock;
+      db.employees[i].hourlyRate=hourlyRate;if(pin)db.employees[i].pin=pin;
     }
   }else{
-    db.employees.push({id:'emp_'+Date.now(),name:name,payType:payType,amount:amount,useClockInOut:useClock,hourlyRate:hourlyRate,clockEvents:[]});
+    db.employees.push({id:'emp_'+Date.now(),name:name,payType:payType,amount:amount,useClockInOut:useClock,hourlyRate:hourlyRate,clockEvents:[],pin:pin||''});
   }
-  saveDB();clearEmployee();renderEmployeeList();updateClockQuickBtn();toast(t('empSaved'));
+  saveDB();clearEmployee();renderEmployeeList();updateClockQuickBtn();
+  /* Refresh clock modal if open */
+  if(el('ov-clock-quick')&&el('ov-clock-quick').classList.contains('open'))renderClockQuickList();
+  toast(t('empSaved'));
 }
 function editEmployee(id){
   if(!db.employees)return;
@@ -7178,6 +7361,7 @@ function editEmployee(id){
   el('emp-amount').value=emp.amount||'';
   el('emp-use-clock').checked=!!emp.useClockInOut;
   el('emp-hourly').value=emp.hourlyRate||'';
+  if(el('emp-pin'))el('emp-pin').value=emp.pin||'';
   toggleEmpClock();
   const formTitle=el('nomina-form-title');if(formTitle)formTitle.textContent=t('empEditing')+emp.name;
 }
@@ -8423,7 +8607,6 @@ function refreshDashboard(){
   _renderDbTop5();
   _renderDbStock();
   _renderDbPayMethods();
-  _renderDbCredits();
   _renderDbRecentSales();
 }
 function _shortNum(n){
@@ -8456,7 +8639,7 @@ function _renderDbChart(){
   var cW=VW-pL-pR,cH=VH-pT-pB;
   var n=cols.length;
   var slotW=cW/n;
-  var barW=Math.min(20,Math.round(slotW*0.38));
+  var barW=Math.min(slotW-2,Math.max(28,Math.round(slotW*0.72)));
   var maxVal=Math.max.apply(null,cols.map(function(c){return c.val;}))||1;
   /* Y-axis grid */
   var grid='';
