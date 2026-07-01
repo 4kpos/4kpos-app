@@ -201,10 +201,11 @@ body.light .chgbox{color:#15803d!important;border-color:#15803d!important;backgr
 .usr-lbl{font-size:.72rem;color:#fff!important;}
 .hamburger-btn{background:var(--s2);border:1.5px solid var(--b1);color:var(--tx2);padding:8px 13px;border-radius:var(--rs);cursor:pointer;font-size:1.1rem;transition:all .2s;}
 .hamburger-btn:hover{border-color:var(--ac);color:var(--ac);}
-#ham-menu{position:absolute;top:44px;left:0;z-index:2000;background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);padding:5px;min-width:210px;box-shadow:0 8px 28px rgba(0,0,0,.45);display:none;}
-.ham-item{width:100%;display:flex;align-items:center;gap:10px;padding:10px 13px;border:none;background:transparent;color:var(--tx);cursor:pointer;border-radius:var(--rs);font-size:.88rem;font-weight:600;text-align:left;transition:background .12s;}
+#ham-menu{position:absolute;top:44px;left:0;z-index:2000;background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);padding:5px;min-width:220px;box-shadow:0 8px 28px rgba(0,0,0,.45);display:none;}
+.ham-item{width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;border:none;background:transparent;color:var(--tx);cursor:pointer;border-radius:var(--rs);font-size:.86rem;font-weight:600;text-align:left;transition:background .12s;}
 .ham-item:hover{background:var(--s2);}
 .ham-sep{height:1px;background:var(--b1);margin:4px 0;}
+.ham-sec{font-size:.65rem;font-weight:700;color:var(--tx3);letter-spacing:.7px;text-transform:uppercase;padding:7px 12px 3px;}
 .pp-hd{padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;}
 .pp-item{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--rs);padding:9px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s;}
 .pp-item:hover{border-color:var(--ac);}
@@ -437,11 +438,16 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div style="position:relative;margin:0 6px;flex-shrink:0">
     <button class="hamburger-btn" id="ham-btn" onclick="toggleHamMenu(event)">☰</button>
     <div id="ham-menu">
+      <div class="ham-sec" id="ham-sec-principal">PRINCIPAL</div>
+      <button class="ham-item" onclick="closeHamMenu();sbNav('dash')">📊 <span id="ham-lbl-dash">Dashboard</span></button>
+      <button class="ham-item" id="ham-dash-mobile-btn" onclick="closeHamMenu();_hamOpenDashMobile()">📱 <span id="ham-lbl-dash-mobile">Dashboard Móvil</span></button>
+      <div class="ham-sep"></div>
+      <div class="ham-sec" id="ham-sec-gestion">GESTIÓN</div>
       <button class="ham-item" onclick="closeHamMenu();_sbNextUniSection='uni-adm';reqPin('admin')">🏪 <span id="ham-lbl-adm">Administración</span></button>
       <button class="ham-item" onclick="closeHamMenu();reqPin('conta')">📒 <span id="ham-lbl-conta">Contabilidad</span></button>
       <button class="ham-item" onclick="closeHamMenu();_sbNextUniSection='uni-ajustes';reqPin('admin')">⚙️ <span id="ham-lbl-ajustes">Ajustes</span></button>
-      <div class="ham-sep"></div>
       <div id="ham-clock-item" style="display:none">
+        <div class="ham-sep"></div>
         <button class="ham-item" style="color:#10b981" onclick="closeHamMenu();openClockQuick()">⏱ <span id="ham-lbl-clock">Clock In/Out</span></button>
       </div>
     </div>
@@ -567,9 +573,15 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div class="db-top5" id="db-top5"></div>
     </div>
   </div>
-  <div class="db-card">
-    <div class="db-card-hd"><h4 id="db-h4-stock">Semáforo de stock</h4></div>
-    <div class="stk-list" id="db-stock"></div>
+  <div class="db-row">
+    <div class="db-card">
+      <div class="db-card-hd"><h4 id="db-h4-stock">Semáforo de stock</h4></div>
+      <div class="stk-list" id="db-stock"></div>
+    </div>
+    <div class="db-card">
+      <div class="db-card-hd"><h4>Métodos de pago hoy</h4></div>
+      <div id="db-pay-chart"></div>
+    </div>
   </div>
 </div>
 
@@ -607,12 +619,17 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <div class="ov" id="ov-dash-qr">
   <div class="modal" style="max-width:300px;text-align:center">
     <div class="mh"><h3>📱 Dashboard móvil</h3><button class="mx" onclick="closeOv('ov-dash-qr')">✕</button></div>
-    <div class="mb" style="display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:8px">
+    <div class="mb" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:8px">
       <div style="background:#fff;padding:10px;border-radius:12px;display:inline-block">
         <img id="dash-qr-img" src="" alt="QR" style="width:200px;height:200px;display:block">
       </div>
       <p id="dash-qr-scan-txt" style="font-size:.82rem;color:var(--tx2);margin:0;text-align:center">Escanea con tu celular<br>para abrir el dashboard</p>
       <a id="dash-qr-link" href="#" target="_blank" onclick="try{require('electron').shell.openExternal(this.dataset.url);return false;}catch(e){}" style="font-size:.75rem;color:var(--ac);word-break:break-all;text-decoration:none"></a>
+      <div id="dash-qr-upgrade" style="display:none;width:100%;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:var(--rs);padding:12px;font-size:.8rem;color:#92400e;text-align:left">
+        <div style="font-weight:700;margin-bottom:4px">⚡ Función exclusiva Plan Pro</div>
+        <div style="margin-bottom:8px">El dashboard móvil requiere plan Pro para ver datos reales.</div>
+        <button class="btn btn-p" style="width:100%;font-size:.8rem" onclick="try{require('electron').shell.openExternal('https://get4ksolutions.com');}catch(e){window.open('https://get4ksolutions.com','_blank');}">Upgrade a Pro →</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1031,16 +1048,20 @@ select.fi option{background:var(--s2);color:var(--tx);}
       </div>
       <!-- DASHBOARD MÓVIL -->
       <div id="t-dash-mobile" style="display:none">
-        <div style="text-align:center;padding:16px 10px">
-          <div style="font-size:.95rem;font-weight:700;margin-bottom:6px" id="tab-dash-h">Dashboard Móvil</div>
-          <div style="font-size:.78rem;color:var(--tx3);margin-bottom:14px" id="tab-dash-desc">Escanea el código QR con tu celular</div>
-          <div id="t-dash-mobile-qr" style="display:none">
-            <div style="background:#fff;padding:8px;border-radius:10px;display:inline-block;margin-bottom:10px">
+        <div style="text-align:center;padding:14px 10px">
+          <div style="font-size:.95rem;font-weight:700;margin-bottom:4px" id="tab-dash-h">Dashboard Móvil</div>
+          <div style="font-size:.78rem;color:var(--tx3);margin-bottom:12px" id="tab-dash-desc">Escanea el código QR con tu celular</div>
+          <div id="t-dash-mobile-qr">
+            <div style="background:#fff;padding:8px;border-radius:10px;display:inline-block;margin-bottom:8px">
               <img id="tab-dash-qr-img" src="" alt="QR" style="width:170px;height:170px;display:block">
             </div>
-            <div style="font-size:.7rem;color:var(--tx3)">4kpos.github.io/4kpos-dashboard</div>
+            <div style="font-size:.7rem;color:var(--tx3);margin-bottom:10px">4kpos.github.io/4kpos-dashboard</div>
           </div>
-          <div id="tab-dash-pro-msg" style="display:none;margin-top:10px;padding:14px;background:var(--s2);border-radius:var(--rs);font-size:.82rem;color:var(--tx3)">⚠ <span id="tab-dash-pro-txt">Disponible solo en plan Pro</span></div>
+          <div id="tab-dash-pro-msg" style="display:none;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:var(--rs);padding:12px;font-size:.8rem;color:#92400e;text-align:left">
+            <div style="font-weight:700;margin-bottom:4px">⚡ Requiere Plan Pro</div>
+            <div style="margin-bottom:8px" id="tab-dash-pro-txt">El dashboard móvil no está disponible en el plan Básico.</div>
+            <button class="btn btn-p" style="width:100%;font-size:.8rem" onclick="try{require('electron').shell.openExternal('https://get4ksolutions.com');}catch(e){window.open('https://get4ksolutions.com','_blank');}">Upgrade a Pro →</button>
+          </div>
         </div>
       </div>
       <!-- ETIQUETAS -->
@@ -2857,10 +2878,10 @@ function startLicenseWatcher(){
   },24*60*60*1000);
 }
 function openDashQR(){
-  if(!checkPlan('mobile_dashboard')){toast('⚠ '+t('dashboardProOnly'));return;}
   const url='https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html';
   const qr=el('dash-qr-img');if(qr)qr.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(url);
   const lnk=el('dash-qr-link');if(lnk){lnk.dataset.url=url;lnk.textContent=url;}
+  const upg=el('dash-qr-upgrade');if(upg)upg.style.display=_isPlanPro()?'none':'block';
   openOv('ov-dash-qr');
 }
 function confirm2(msg,cb){confCb=cb;el('conf-msg').textContent=msg;el('confov').classList.add('open');}
@@ -3511,26 +3532,23 @@ function updateDashBtn(){
   _applyMobileDashPlan(null);
 }
 function _applyMobileDashPlan(info){
-  const plan=((db.license&&db.license.plan)||db._localPlan||(info&&info.plan)||'').toLowerCase();
-  const isAdm=curUser&&curUser.role==='admin';
-  const isPro=isAdm||plan.startsWith('pro')||plan==='lifetime';
-  const msg=el('tab-dash-pro-msg');
-  if(msg)msg.style.display=isPro?'none':'block';
-  const qrSection=el('t-dash-mobile-qr');
-  if(qrSection)qrSection.style.display=isPro?'block':'none';
+  var isPro=_isPlanPro();
+  var msg=el('tab-dash-pro-msg');if(msg)msg.style.display=isPro?'none':'block';
   const sbiQr=el('sbi-dash-qr');
-  if(sbiQr){sbiQr.style.opacity=isPro?'1':'0.45';sbiQr.style.pointerEvents=isPro?'':'none';}
+  if(sbiQr){sbiQr.style.opacity='1';sbiQr.style.pointerEvents='';}
 }
 function updateTabDashMobile(){
   _applyMobileDashPlan(null);
-  var isPro=checkPlan('mobile_dashboard');
-  var qrSection=el('t-dash-mobile-qr');
-  if(qrSection)qrSection.style.display=isPro?'block':'none';
-  if(isPro){
-    var url='https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html';
-    var qrImg=el('tab-dash-qr-img');
-    if(qrImg&&!qrImg.src.includes('qrserver'))qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=170x170&data='+encodeURIComponent(url);
-  }
+  var url='https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html';
+  var qrImg=el('tab-dash-qr-img');
+  if(qrImg&&!qrImg.src.includes('qrserver'))qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=170x170&data='+encodeURIComponent(url);
+}
+function _hamOpenDashMobile(){
+  var url='https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html';
+  var qrImg=el('tab-dash-qr-img');
+  if(qrImg&&!qrImg.src.includes('qrserver'))qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=170x170&data='+encodeURIComponent(url);
+  _sbNextAdmTab='t-dash-mobile';
+  reqPin('admin');
 }
 function _planLabel(plan){
   var p=(plan||'').toLowerCase();
@@ -8356,6 +8374,7 @@ function refreshDashboard(){
   _renderDbChart();
   _renderDbTop5();
   _renderDbStock();
+  _renderDbPayMethods();
 }
 function _shortNum(n){
   if(n>=1000000)return '$'+(n/1000000).toFixed(1)+'M';
@@ -8427,8 +8446,56 @@ function _renderDbTop5(){
   });
   var top5=Object.values(counts).sort(function(a,b){return b.qty-a.qty;}).slice(0,5);
   if(!top5.length){el5.innerHTML='<p style="font-size:.75rem;color:var(--tx3);text-align:center;padding:12px">'+t('noSalesToday')+'</p>';return;}
-  el5.innerHTML='<table class="db-top5"><tr><th>#</th><th>'+t('dbColProd')+'</th><th style="text-align:right">'+t('dbColQty')+'</th><th style="text-align:right">'+t('totalColHdr')+'</th></tr>'
-    +top5.map(function(p,i){return '<tr><td style="color:var(--tx3)">'+(i+1)+'</td><td style="font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.name+'</td><td style="text-align:right;font-weight:700">'+p.qty+'</td><td style="text-align:right;font-family:monospace;color:var(--gn)">'+dolr(p.revenue)+'</td></tr>';}).join('')+'</table>';
+  var p0=top5[0];
+  var card1='<div style="background:linear-gradient(135deg,#1e3a8a11,#1e3a8a22);border:1.5px solid #1e3a8a44;border-radius:var(--r);padding:12px;margin-bottom:8px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">'
+    +'<div style="min-width:0"><div style="font-size:.82rem;font-weight:700;color:#3b82f6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(p0.name)+'</div>'
+    +'<div style="font-size:.68rem;color:var(--tx3);margin-top:1px">'+p0.qty+' '+(p0.qty===1?'unidad':'unidades')+'</div></div>'
+    +'<span style="background:#1e3a8a;color:#fff;font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0">★ más vendido</span>'
+    +'</div>'
+    +'<div style="font-size:1.25rem;font-weight:800;color:#3b82f6;margin-top:8px">'+dolr(p0.revenue)+'</div>'
+    +'</div>';
+  var rest=top5.slice(1);
+  var grid=rest.length?('<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'
+    +rest.map(function(p){
+      return '<div style="background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--rs);padding:9px">'
+        +'<div style="font-size:.74rem;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px">'+escHtml(p.name)+'</div>'
+        +'<div style="font-size:.88rem;font-weight:800;color:#3b82f6">'+dolr(p.revenue)+'</div>'
+        +'<div style="font-size:.67rem;color:var(--tx3)">'+p.qty+' uds</div>'
+        +'</div>';
+    }).join('')+'</div>'):'';
+  el5.innerHTML=card1+grid;
+}
+function _renderDbPayMethods(){
+  var payEl=el('db-pay-chart');if(!payEl)return;
+  var today=new Date().toDateString();
+  var sales=(db.sales||[]).filter(function(s){
+    return s.status!=='cancelled'&&s.status!=='returned'&&new Date(s.date).toDateString()===today;
+  });
+  if(!sales.length){payEl.innerHTML='<p style="font-size:.75rem;color:var(--tx3);padding:6px 0">Sin ventas hoy</p>';return;}
+  var methods={};
+  sales.forEach(function(s){
+    var m=_normPayLabel(s)||s.payMethod||'Otro';
+    if(!methods[m])methods[m]={total:0,count:0};
+    methods[m].total+=(s.total||0);methods[m].count++;
+  });
+  var entries=Object.keys(methods).map(function(k){return [k,methods[k]];}).sort(function(a,b){return b[1].total-a[1].total;});
+  var maxT=entries[0][1].total||1;
+  var colors={Efectivo:'#22C55E',Tarjeta:'#3B82F6',Transferencia:'#8B5CF6',Dividido:'#F59E0B',Crédito:'#EF4444','Cuenta Abierta':'#F97316'};
+  payEl.innerHTML=entries.map(function(e){
+    var m=e[0],d=e[1];
+    var pct=Math.round((d.total/maxT)*100);
+    var clr=colors[m]||'#6B7280';
+    return '<div style="margin-bottom:9px">'
+      +'<div style="display:flex;justify-content:space-between;font-size:.76rem;margin-bottom:3px">'
+      +'<span style="font-weight:600;color:var(--tx)">'+escHtml(m)+'</span>'
+      +'<span style="font-family:monospace;font-weight:700;color:'+clr+'">'+dolr(d.total)+'</span>'
+      +'</div>'
+      +'<div style="background:var(--s2);border-radius:3px;height:7px;overflow:hidden">'
+      +'<div style="background:'+clr+';height:100%;border-radius:3px;width:'+pct+'%"></div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
 }
 function _renderDbStock(){
   var stkEl=el('db-stock');if(!stkEl)return;
