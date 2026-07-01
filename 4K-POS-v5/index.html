@@ -358,7 +358,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 .db-toggle{display:flex;background:var(--s2);border-radius:var(--rs);border:1.5px solid var(--b1);padding:2px;gap:2px;}
 .db-toggle button{padding:3px 12px;font-size:.72rem;border:none;border-radius:calc(var(--rs) - 2px);background:transparent;color:var(--tx3);cursor:pointer;transition:all .18s;font-weight:600;}
 .db-toggle button.on{background:var(--ac);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);}
-.db-chart{display:block;width:100%;max-height:200px;overflow:hidden;}
+.db-chart{display:block;width:100%;height:140px;overflow:hidden;}
 .db-bar-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:2px;}
 .db-bar-val{font-size:.58rem;color:var(--ac);font-weight:700;min-height:13px;line-height:13px;text-align:center;white-space:nowrap;}
 .db-bar{background:var(--ac);border-radius:3px 3px 0 0;width:100%;min-height:4px;transition:height .3s;flex:1;}
@@ -1481,16 +1481,21 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div id="cq-admin-section" style="display:none;background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);padding:10px;margin-bottom:10px">
         <div style="font-size:.68rem;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">🔧 Ajuste manual (admin)</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
-          <select class="fi" id="cq-admin-emp" style="flex:1;min-width:120px;font-size:.82rem"><option value="">— Empleado —</option></select>
-          <select class="fi" id="cq-admin-type" style="flex:0;min-width:90px;font-size:.82rem">
+          <select class="fi" id="cq-admin-emp" style="flex:1;min-width:110px;font-size:.82rem"><option value="">— Empleado —</option></select>
+          <select class="fi" id="cq-admin-type" style="flex:0;min-width:100px;font-size:.82rem" onchange="_cqToggleCompleta(this.value)">
             <option value="in">✅ Entrada</option>
             <option value="out">🚪 Salida</option>
+            <option value="both">📋 Completa</option>
           </select>
         </div>
-        <div style="display:flex;gap:6px">
-          <input type="datetime-local" class="fi" id="cq-admin-time" style="flex:1;font-size:.82rem">
-          <button class="btn btn-p" style="font-size:.8rem;padding:7px 14px" onclick="cqAdminRecord()">✓</button>
+        <div style="display:flex;gap:6px;margin-bottom:4px">
+          <input type="datetime-local" class="fi" id="cq-admin-time" style="flex:1;font-size:.8rem">
         </div>
+        <div id="cq-admin-time2-row" style="display:none;margin-bottom:4px">
+          <label style="font-size:.7rem;color:var(--tx3);margin-bottom:2px;display:block">Hora salida</label>
+          <input type="datetime-local" class="fi" id="cq-admin-time2" style="width:100%;font-size:.8rem">
+        </div>
+        <button class="btn btn-p" style="font-size:.8rem;width:100%;margin-top:4px" onclick="cqAdminRecord()">✓ Registrar</button>
       </div>
       <!-- Asistencia tab -->
       <div id="cq-panel-asist">
@@ -2880,7 +2885,7 @@ async function loadLicenseFromSupabase(){
     db._localPlan=localLic.plan||'';
     var res;
     try{
-      res=await fetch(SUPA_URL+'/rest/v1/licenses?key=eq.'+encodeURIComponent(localLic.key)+'&select=plan,active,devices,expires_at,business_name,email',
+      res=await fetch(SUPA_URL+'/rest/v1/licenses?key=eq.'+encodeURIComponent(localLic.key)+'&select=key,plan,active,devices,expires_at,business_name,email,created_at',
         {headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Accept':'application/json'}});
     }catch(netErr){return _handleOfflineLicense(localLic);}
     if(!res.ok){return _handleOfflineLicense(localLic);}
@@ -2888,6 +2893,9 @@ async function loadLicenseFromSupabase(){
     if(!rows||!rows.length){_showLicError('Licencia no encontrada. Verifica tu clave de activación.','Licencia inválida');return;}
     var lic=rows[0];
     db.license=lic;db._localPlan=lic.plan||'';
+    /* Ensure key is stored (may not be in select response if column is hidden) */
+    if(!db.license.key)db.license.key=localLic.key;
+    db._licKeyLocal=localLic.key;
     if(!lic.active){_showLicError('Tu licencia está inactiva. Contacta a soporte para reactivarla.','Licencia inactiva');return;}
     if(lic.expires_at&&new Date(lic.expires_at)<new Date()){
       _showLicError('Licencia vencida el '+new Date(lic.expires_at).toLocaleDateString(lang||'es')+'. Renueva tu plan para continuar.','Licencia vencida');return;
@@ -2913,6 +2921,7 @@ async function loadLicenseFromSupabase(){
       }
     }
     _applyPlanUI();
+    setTimeout(function(){if(typeof refreshLicenseInfo==='function')refreshLicenseInfo();},200);
   }catch(e){
     console.warn('[Lic]',e);
     _handleOfflineLicense(await ipcRenderer.invoke('get-license-info').catch(function(){return null;}));
@@ -2922,10 +2931,12 @@ function _handleOfflineLicense(localLic){
   if(!localLic){_showLicError('Sin licencia local. Conecta a internet y reinicia.','Sin licencia');return;}
   var days=localLic.last_verified?(Date.now()-new Date(localLic.last_verified).getTime())/(864e5):999;
   if(days<15){
-    db.license={plan:localLic.plan||'',active:true,devices:[],expires_at:localLic.expires_at||null};
-    db._localPlan=localLic.plan||'';
+    db.license={plan:localLic.plan||'',active:true,devices:[],expires_at:localLic.expires_at||null,
+      activated_at:localLic.activated_at||null,key:localLic.key||''};
+    db._localPlan=localLic.plan||'';db._licKeyLocal=localLic.key||'';
     _applyPlanUI();
     setTimeout(function(){toast('⚠ Modo offline — '+Math.floor(days)+' días sin verificar');},1500);
+    setTimeout(function(){if(typeof refreshLicenseInfo==='function')refreshLicenseInfo();},300);
   }else{
     _showLicError('Sin conexión por más de 15 días. Conecta a internet e intenta de nuevo.','Verificación requerida');
   }
@@ -3666,7 +3677,7 @@ function refreshLicenseInfo(){
     }
     var expires=(lic&&lic.expires_at)||(li&&li.expires_at);
     if(!expires){
-      var activatedAt=(li&&li.activated_at)||(lic&&lic.activated_at);
+      var activatedAt=(lic&&(lic.activated_at||lic.created_at))||(li&&(li.activated_at||li.created_at));
       if(activatedAt&&plan){
         var p=plan.toLowerCase();var ms=0;
         if(p.includes('annual')||p.includes('anual'))ms=365*864e5;
@@ -5333,12 +5344,19 @@ function _cqInitAdminSection(){
   if(!isAdm){sec.style.display='none';return;}
   sec.style.display='';
   var sel=el('cq-admin-emp');if(!sel)return;
-  var emps=db.employees||[];
   sel.innerHTML='<option value="">— Empleado —</option>'
-    +emps.map(function(e){return '<option value="'+e.id+'">'+escHtml(e.name)+'</option>';}).join('');
+    +(db.employees||[]).map(function(e){return '<option value="'+e.id+'">'+escHtml(e.name)+'</option>';}).join('');
   var now=new Date();
   var localISO=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,16);
-  var timeEl=el('cq-admin-time');if(timeEl)timeEl.value=localISO;
+  var t1=el('cq-admin-time');if(t1)t1.value=localISO;
+  var t2=el('cq-admin-time2');if(t2)t2.value=localISO;
+  /* Reset type */
+  var typeEl=el('cq-admin-type');if(typeEl)typeEl.value='in';
+  _cqToggleCompleta('in');
+}
+function _cqToggleCompleta(type){
+  var row=el('cq-admin-time2-row');
+  if(row)row.style.display=(type==='both')?'':'none';
 }
 function cqAdminRecord(){
   var empId=(el('cq-admin-emp')||{}).value;
@@ -5348,7 +5366,14 @@ function cqAdminRecord(){
   var emp=(db.employees||[]).find(function(e){return e.id===empId;});if(!emp)return;
   if(!emp.clockEvents)emp.clockEvents=[];
   var ts=new Date(timeStr).toISOString();
-  if(type==='in'){
+  if(type==='both'){
+    var timeStr2=(el('cq-admin-time2')||{}).value;
+    if(!timeStr2){toast('Ingresa hora de salida');return;}
+    var ts2=new Date(timeStr2).toISOString();
+    if(new Date(ts2)<=new Date(ts)){toast('La salida debe ser después de la entrada');return;}
+    emp.clockEvents.push({id:'ce_'+Date.now(),in:ts,out:ts2,manual:true});
+    saveDB();toast('Registro completo: '+emp.name);
+  }else if(type==='in'){
     emp.clockEvents.push({id:'ce_'+Date.now(),in:ts,out:null,manual:true});
     saveDB();toast('Entrada manual: '+emp.name);
   }else{
@@ -5438,28 +5463,63 @@ function _renderCqHist(){
     (emp.clockEvents||[]).forEach(function(ev){
       if(ev.in&&new Date(ev.in).toDateString()===today){
         var hrs=ev.out?((new Date(ev.out)-new Date(ev.in))/3600000):null;
-        rows.push({name:emp.name,in:ev.in,out:ev.out||null,hrs:hrs,manual:!!(ev.manual||ev.manualOut)});
+        rows.push({empId:emp.id,evId:ev.id,name:emp.name,in:ev.in,out:ev.out||null,hrs:hrs,manual:!!(ev.manual||ev.manualOut)});
       }
     });
   });
+  var isAdm=curUser&&curUser.role==='admin';
   if(!rows.length){container.innerHTML='<p style="font-size:.78rem;color:var(--tx3);text-align:center;padding:20px">Sin registros hoy</p>';return;}
   rows.sort(function(a,b){return new Date(a.in)-new Date(b.in);});
   var total=rows.reduce(function(s,r){return s+(r.hrs||0);},0);
+  var editTip=isAdm?' title="Click para editar (admin)" style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,.3)"':'';
+  var editFn=function(r,field){return isAdm?'onclick="cqEditClockTime(\''+r.empId+'\',\''+r.evId+'\',\''+field+'\')"':'';};
   container.innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.75rem">'
     +'<tr style="color:var(--tx3)"><th style="text-align:left;padding:5px 4px">Empleado</th>'
     +'<th style="padding:5px 4px;text-align:center">Entrada</th>'
     +'<th style="padding:5px 4px;text-align:center">Salida</th>'
     +'<th style="padding:5px 4px;text-align:center">Horas</th></tr>'
     +rows.map(function(r){
+      var inCell='<span id="cqt-'+r.evId+'-in" '+editTip+' '+editFn(r,'in')+'>'+fmtTime(r.in)+'</span>';
+      var outCell=r.out?('<span id="cqt-'+r.evId+'-out" '+editTip+' '+editFn(r,'out')+'>'+fmtTime(r.out)+'</span>'):'<span style="color:var(--tx3)">—</span>';
       return '<tr style="border-top:1px solid var(--b1)">'
-        +'<td style="padding:6px 4px;font-weight:600">'+escHtml(r.name)+(r.manual?' <span style="font-size:.6rem;color:var(--tx3)">(manual)</span>':'')+'</td>'
-        +'<td style="padding:6px 4px;text-align:center;color:#22c55e;font-family:monospace">'+fmtTime(r.in)+'</td>'
-        +'<td style="padding:6px 4px;text-align:center;font-family:monospace;color:'+(r.out?'#ef4444':'var(--tx3)')+'">'+( r.out?fmtTime(r.out):'—')+'</td>'
+        +'<td style="padding:6px 4px;font-weight:600">'+escHtml(r.name)+(r.manual?' <span style="font-size:.6rem;color:var(--tx3)">(M)</span>':'')+'</td>'
+        +'<td style="padding:6px 4px;text-align:center;color:#22c55e;font-family:monospace">'+inCell+'</td>'
+        +'<td style="padding:6px 4px;text-align:center;font-family:monospace;color:'+(r.out?'#ef4444':'var(--tx3)')+'">'+outCell+'</td>'
         +'<td style="padding:6px 4px;text-align:center;font-weight:700;color:var(--tx)">'+(r.hrs!=null?(r.hrs>=1?r.hrs.toFixed(1)+'h':(Math.round(r.hrs*60)+'m')):'⏳')+'</td>'
         +'</tr>';
     }).join('')
     +'</table></div>'
-    +(total>0?'<div style="text-align:right;font-size:.76rem;font-weight:700;color:var(--tx3);margin-top:6px">Total: '+total.toFixed(1)+'h</div>':'');
+    +(isAdm?'<p style="font-size:.67rem;color:var(--tx3);margin-top:5px;text-align:center">Admin: click en la hora para editar</p>':'')
+    +(total>0?'<div style="text-align:right;font-size:.76rem;font-weight:700;color:var(--tx3);margin-top:4px">Total: '+total.toFixed(1)+'h</div>':'');
+}
+function cqEditClockTime(empId,evId,field){
+  if(!curUser||curUser.role!=='admin'){toast('Solo el admin puede editar');return;}
+  var emp=(db.employees||[]).find(function(e){return e.id===empId;});if(!emp)return;
+  var ev=(emp.clockEvents||[]).find(function(e){return e.id===evId;});if(!ev)return;
+  var current=field==='in'?ev.in:ev.out;
+  var spanId='cqt-'+evId+'-'+field;
+  var span=el(spanId);if(!span)return;
+  var currentTime=current?new Date(current).toTimeString().slice(0,5):'';
+  /* Replace span with inline time input */
+  var inp=document.createElement('input');
+  inp.type='time';inp.value=currentTime;
+  inp.style.cssText='font-size:.76rem;font-family:monospace;border:1px solid #3b82f6;background:var(--s1);color:var(--tx);border-radius:4px;padding:1px 4px;width:72px;outline:none;';
+  span.replaceWith(inp);inp.focus();inp.select();
+  function _save(){
+    var val=inp.value;
+    if(!val){_renderCqHist();return;}
+    var base=new Date(current||new Date());
+    var parts=val.split(':');
+    base.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
+    if(field==='in')ev.in=base.toISOString();
+    else{ev.out=base.toISOString();ev.manualOut=true;}
+    saveDB();renderEmployeeList();_renderCqHist();toast('Hora actualizada');
+  }
+  inp.addEventListener('blur',_save);
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){inp.blur();}
+    if(e.key==='Escape'){_renderCqHist();}
+  });
 }
 function _isModalCritical(){
   const ck=el('ov-checkout');if(ck&&ck.classList.contains('open'))return true;
@@ -6551,15 +6611,13 @@ function saveUser(){
         return;
       }
 
-      db.users.push({
-        id:Date.now().toString(),
-        name,
-        user,
-        pass:bcrypt?bcrypt.hashSync(pass,10):pass,
-        role,
-        perms
-      });
-
+      var _newUid=Date.now().toString();
+      db.users.push({id:_newUid,name,user,pass:bcrypt?bcrypt.hashSync(pass,10):pass,role,perms});
+      /* Auto-add to Nómina if not already there */
+      if(!db.employees)db.employees=[];
+      if(!db.employees.find(function(e){return e._userId===_newUid||e.name===name;})){
+        db.employees.push({id:'emp_'+_newUid,_userId:_newUid,name:name,payType:'monthly',amount:0,useClockInOut:false,hourlyRate:0,clockEvents:[],pin:''});
+      }
       logAction(t('auditUserCreate'),name+' ('+role+')');
       saveDB();
       renderUserList();
@@ -6567,15 +6625,12 @@ function saveUser(){
       clearUser();
       toast(t('userCreatedPre')+name);
     }).catch(function(){
-      db.users.push({
-        id:Date.now().toString(),
-        name,
-        user,
-        pass:bcrypt?bcrypt.hashSync(pass,10):pass,
-        role,
-        perms
-      });
-
+      var _newUid2=Date.now().toString();
+      db.users.push({id:_newUid2,name,user,pass:bcrypt?bcrypt.hashSync(pass,10):pass,role,perms});
+      if(!db.employees)db.employees=[];
+      if(!db.employees.find(function(e){return e._userId===_newUid2||e.name===name;})){
+        db.employees.push({id:'emp_'+_newUid2,_userId:_newUid2,name:name,payType:'monthly',amount:0,useClockInOut:false,hourlyRate:0,clockEvents:[],pin:''});
+      }
       logAction(t('auditUserCreate'),name+' ('+role+')');
       saveDB();
       renderUserList();
@@ -8616,6 +8671,8 @@ function _shortNum(n){
 }
 function _renderDbChart(){
   var chartEl=el('db-chart');if(!chartEl)return;
+  var W=chartEl.offsetWidth||chartEl.clientWidth||400;
+  if(!W||W<10){requestAnimationFrame(function(){_renderDbChart();});return;}
   var sales=db.sales||[];
   var now=new Date();
   var cols=[];
@@ -8635,33 +8692,60 @@ function _renderDbChart(){
       cols.push({lbl:'S'+(4-w),val:tot2,today:w===0});
     }
   }
-  var VW=400,VH=90,pL=36,pR=6,pT=10,pB=16;
-  var cW=VW-pL-pR,cH=VH-pT-pB;
+  /* Canvas */
+  var canvas=chartEl.querySelector('canvas');
+  if(!canvas){chartEl.innerHTML='';canvas=document.createElement('canvas');chartEl.appendChild(canvas);}
+  var H=140,dpr=window.devicePixelRatio||1;
+  canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
+  canvas.style.width=W+'px';canvas.style.height=H+'px';canvas.style.display='block';
+  var ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.scale(dpr,dpr);
+  var pL=38,pR=6,pT=18,pB=22;
+  var cW=W-pL-pR,cH=H-pT-pB;
   var n=cols.length;
   var slotW=cW/n;
-  var barW=Math.min(slotW-2,Math.max(28,Math.round(slotW*0.72)));
+  var barW=Math.min(slotW-4,Math.max(28,Math.round(slotW*0.6)));
   var maxVal=Math.max.apply(null,cols.map(function(c){return c.val;}))||1;
-  /* Y-axis grid */
-  var grid='';
-  for(var g=0;g<=4;g++){
-    var gy=pT+g*(cH/4);
-    var gv=maxVal*(1-g/4);
-    grid+='<line x1="'+pL+'" y1="'+gy.toFixed(1)+'" x2="'+(VW-pR)+'" y2="'+gy.toFixed(1)+'" stroke="var(--b1)" stroke-width="'+(g===4?'1':'0.5')+'" stroke-dasharray="'+(g===4?'0':'4,3')+'"/>';
-    if(g<4&&gv>=0.5)grid+='<text x="'+(pL-3)+'" y="'+(gy+3.5).toFixed(1)+'" text-anchor="end" font-size="8" fill="var(--tx3)">'+_shortNum(gv)+'</text>';
-  }
+  /* Grid (3 lines: 25%, 50%, 100%) */
+  [0.25,0.5,1].forEach(function(lvl){
+    var gy=pT+cH*(1-lvl);
+    ctx.strokeStyle='rgba(255,255,255,'+(lvl===1?'.12':'.06')+')';
+    ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pL,gy);ctx.lineTo(W-pR,gy);ctx.stroke();
+    if(lvl!==0.25){
+      ctx.fillStyle='rgba(255,255,255,.3)';
+      ctx.font='9px system-ui,sans-serif';
+      ctx.textAlign='right';
+      ctx.fillText(_shortNum(maxVal*lvl),pL-3,gy+3.5);
+    }
+  });
   /* Bars */
-  var bars=cols.map(function(c,i){
-    var bh=c.val>0?Math.max(3,Math.round((c.val/maxVal)*cH)):2;
-    var bx=(pL+i*slotW+slotW/2-barW/2).toFixed(1);
-    var by=(pT+cH-bh).toFixed(1);
-    var cx=(pL+(i+0.5)*slotW).toFixed(1);
-    var fill=c.today?'var(--ac)':'#1e3a8a';
-    var valStr=c.val>0?_shortNum(c.val):'';
-    return '<rect x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+bh+'" rx="3" fill="'+fill+'"/>'
-      +(valStr?'<text x="'+cx+'" y="'+(parseFloat(by)-3)+'" text-anchor="middle" font-size="8" fill="'+fill+'" font-weight="700">'+valStr+'</text>':'')
-      +'<text x="'+cx+'" y="'+(VH-3)+'" text-anchor="middle" font-size="9" fill="var(--tx3)">'+c.lbl+'</text>';
-  }).join('');
-  chartEl.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+VW+' '+VH+'" width="100%" height="'+VH+'" style="display:block;overflow:visible">'+grid+bars+'</svg>';
+  cols.forEach(function(c,i){
+    var bh=c.val>0?Math.max(4,Math.round((c.val/maxVal)*cH)):2;
+    var bx=pL+i*slotW+(slotW-barW)/2;
+    var by=pT+cH-bh;
+    var cx=pL+(i+0.5)*slotW;
+    /* Bar fill */
+    ctx.fillStyle=c.today?'#3b82f6':'#1e3a8a';
+    var r=Math.min(3,barW/4,bh/2);
+    ctx.beginPath();
+    if(ctx.roundRect){ctx.roundRect(bx,by,barW,bh,r);}
+    else{ctx.rect(bx,by,barW,bh);}
+    ctx.fill();
+    /* Value above bar */
+    if(c.val>0&&bh>4){
+      ctx.fillStyle=c.today?'#93c5fd':'rgba(255,255,255,.7)';
+      ctx.font='bold 9px system-ui,sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText(_shortNum(c.val),cx,by-3);
+    }
+    /* Day label */
+    ctx.fillStyle=c.today?'rgba(255,255,255,.85)':'rgba(255,255,255,.45)';
+    ctx.font=(c.today?'bold ':'')+'10px system-ui,sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText(c.lbl,cx,H-5);
+  });
 }
 function _renderDbTop5(){
   var el5=el('db-top5');if(!el5)return;
