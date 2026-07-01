@@ -350,20 +350,25 @@ select.fi option{background:var(--s2);color:var(--tx);}
 .db-card{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);padding:14px 16px;}
 .db-card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .db-card-hd h4{font-size:.85rem;font-weight:700;color:var(--tx2);}
-.db-toggle{display:flex;gap:4px;}
-.db-toggle button{padding:3px 10px;font-size:.72rem;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx3);cursor:pointer;transition:all .15s;}
-.db-toggle button.on{background:var(--acg);border-color:var(--ac);color:var(--ac);}
-.db-chart{display:flex;gap:4px;align-items:flex-end;height:110px;padding-top:4px;}
-.db-bar-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:3px;height:100%;}
-.db-bar{background:var(--ac);border-radius:3px 3px 0 0;width:100%;min-height:4px;transition:height .3s;}
+.db-toggle{display:flex;background:var(--s2);border-radius:var(--rs);border:1.5px solid var(--b1);padding:2px;gap:2px;}
+.db-toggle button{padding:3px 12px;font-size:.72rem;border:none;border-radius:calc(var(--rs) - 2px);background:transparent;color:var(--tx3);cursor:pointer;transition:all .18s;font-weight:600;}
+.db-toggle button.on{background:var(--ac);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);}
+.db-chart{display:flex;gap:4px;align-items:stretch;height:130px;padding-top:2px;}
+.db-bar-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:2px;}
+.db-bar-val{font-size:.58rem;color:var(--ac);font-weight:700;min-height:13px;line-height:13px;text-align:center;white-space:nowrap;}
+.db-bar{background:var(--ac);border-radius:3px 3px 0 0;width:100%;min-height:4px;transition:height .3s;flex:1;}
 .db-bar-lbl{font-size:.65rem;color:var(--tx3);white-space:nowrap;}
 .db-top5{font-size:.82rem;}
 .db-top5 table{width:100%;border-collapse:collapse;}
 .db-top5 th{font-size:.7rem;color:var(--tx3);font-weight:600;padding:4px 4px;border-bottom:1px solid var(--b1);text-align:left;}
 .db-top5 td{padding:5px 4px;border-bottom:1px solid var(--b1);color:var(--tx2);}
-.stk-list{display:flex;flex-direction:column;gap:7px;max-height:200px;overflow-y:auto;}
-.stk-item{display:flex;align-items:center;gap:8px;font-size:.8rem;}
-.stk-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.stk-list{overflow-y:auto;max-height:210px;}
+.stk-list table{width:100%;border-collapse:collapse;}
+.stk-list th{font-size:.68rem;color:var(--tx3);font-weight:600;padding:3px 6px;border-bottom:1px solid var(--b1);text-align:left;}
+.stk-list th:last-child{text-align:right;}
+.stk-list td{padding:5px 6px;border-bottom:1px solid var(--b1);font-size:.8rem;color:var(--tx2);}
+.stk-list td:last-child{text-align:right;font-family:monospace;font-weight:700;}
+.stk-dot{display:inline-block;width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-right:5px;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -443,6 +448,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 
     
      <button class="tbtn" id="oa-counter-btn" onclick="openOAManager()" title="Cuentas abiertas" style="position:relative;display:none;background:var(--ac);border-color:var(--ac);color:#fff;font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;padding:8px 14px;gap:4px;width:auto;height:auto;min-width:80px"><span id="oa-counter-txt">Cuentas</span><span id="oa-badge" style="display:none;position:absolute;top:-7px;right:-7px;background:#f44;color:#fff;border-radius:50%;font-size:.6rem;font-weight:800;min-width:18px;height:18px;align-items:center;justify-content:center;padding:0 3px;line-height:1;box-shadow:0 0 0 2px var(--bg)">0</span></button>
+     <button class="tbtn" id="hm-clock" onclick="openClockQuick()" title="Clock In/Out" style="display:none;color:#10b981;font-size:1rem">⏱</button>
      <button class="tbtn" onclick="refreshPOS()" title="Actualizar datos">🔄</button>
     <button class="tbtn" id="lang-toggle-btn" onclick="switchLang()" title="Cambiar idioma / Switch language">🌐</button>
     <button class="tbtn" onclick="toggleCalc()">🧮</button>
@@ -503,7 +509,10 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <div id="dashboard-screen">
   <div class="db-hd">
     <h2>📊 Dashboard</h2>
-    <span id="db-date"></span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span id="db-date" style="font-size:.78rem;color:var(--tx3)"></span>
+      <button class="btn btn-s" onclick="sbNav('pos')" style="padding:5px 13px;font-size:.78rem">← Vender</button>
+    </div>
   </div>
   <div class="db-kpis">
     <div class="db-kpi">
@@ -2745,8 +2754,7 @@ function _isPlanPro(){
   return plan.startsWith('pro')||plan==='lifetime';
 }
 function checkPlan(feature){
-  var pro=(curUser&&curUser.role==='admin')||_isPlanPro();
-  if(feature==='mobile_dashboard'||feature==='multi_device'||feature==='advanced_reports')return pro;
+  if(feature==='mobile_dashboard'||feature==='multi_device'||feature==='advanced_reports')return _isPlanPro();
   return true;
 }
 function _showLicError(msg,title){
@@ -2790,6 +2798,7 @@ async function loadLicenseFromSupabase(){
             {method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
             body:JSON.stringify({devices:newDevs})});
           db.devices=newDevs;
+          if(db.license)db.license.devices=newDevs;
         }catch(regErr){console.warn('[Lic] register:',regErr);}
       }
     }
@@ -3534,18 +3543,30 @@ function refreshLicenseInfo(){
       if(badgeEl){badgeEl.textContent='Activa';badgeEl.style.cssText='font-size:.7rem;padding:3px 9px;border-radius:20px;font-weight:700;background:var(--gnb);color:var(--gn);border:1px solid var(--gn);flex-shrink:0;margin-left:8px';}
     }
     var expires=(lic&&lic.expires_at)||(li&&li.expires_at);
+    /* Auto-calcular expires_at desde activated_at si no hay fecha */
+    if(!expires){
+      var activatedAt=(li&&li.activated_at)||(lic&&lic.activated_at);
+      if(activatedAt&&plan){
+        var p=plan.toLowerCase();var ms=0;
+        if(p.includes('annual')||p.includes('anual'))ms=365*864e5;
+        else if(p.includes('monthly')||p.includes('mensual'))ms=30*864e5;
+        if(ms)expires=new Date(new Date(activatedAt).getTime()+ms).toISOString();
+      }
+    }
     var expiryEl=el('lic-info-expiry');
     if(expiryEl){
       if(expires){
         var d=new Date(expires);var days=Math.ceil((d-Date.now())/864e5);
         expiryEl.textContent='Vence el '+d.toLocaleDateString(lang||'es',{day:'numeric',month:'short',year:'numeric'})+' · '+(days>0?days+' días restantes':'Vencida hace '+Math.abs(days)+' días');
-      }else{expiryEl.textContent='Sin fecha de vencimiento';}
+      }else if(plan.toLowerCase()==='lifetime'){expiryEl.textContent='Sin vencimiento — Licencia permanente';}
+      else{expiryEl.textContent='Sin fecha de vencimiento registrada';}
     }
     var devEl=el('lic-info-devices');
     if(devEl){
-      var isPro=_isPlanPro();var maxDev=isPro?3:1;
-      var devs=Array.isArray(lic&&lic.devices)?lic.devices:(db.devices||[]);
-      devEl.textContent=devs.length+' de '+maxDev+' PC'+(maxDev>1?'s':'')+' registradas (plan '+(isPro?'Pro':'Básico')+')';
+      var isPro2=_isPlanPro();var maxDev=isPro2?3:1;
+      /* Tomar dispositivos del objeto lic (Supabase) si disponible, sino db.devices */
+      var devs=Array.isArray(lic&&lic.devices)?lic.devices:(Array.isArray(db.devices)?db.devices:[]);
+      devEl.textContent=devs.length+' de '+maxDev+' PC'+(maxDev>1?'s':'')+' registrada'+(devs.length!==1?'s':'')+' · plan '+(isPro2?'Pro':'Básico');
     }
   }).catch(function(){});
 }
@@ -8335,7 +8356,8 @@ function _renderDbChart(){
   var maxVal=Math.max.apply(null,cols.map(function(c){return c.val;}))||1;
   chartEl.innerHTML=cols.map(function(c){
     var pct=Math.max(4,Math.round(c.val/maxVal*100));
-    return '<div class="db-bar-col"><div class="db-bar" style="height:'+pct+'%"></div><div class="db-bar-lbl">'+c.lbl+'</div></div>';
+    var valTxt=c.val>0?dolr(c.val):'';
+    return '<div class="db-bar-col"><div class="db-bar-val" style="font-size:.6rem;color:var(--ac);font-weight:700;min-height:14px;line-height:14px">'+valTxt+'</div><div class="db-bar" style="height:'+pct+'%;flex:1"></div><div class="db-bar-lbl">'+c.lbl+'</div></div>';
   }).join('');
 }
 function _renderDbTop5(){
@@ -8360,13 +8382,15 @@ function _renderDbTop5(){
 function _renderDbStock(){
   var stkEl=el('db-stock');if(!stkEl)return;
   var prods=db.products||[];
-  if(!prods.length){stkEl.innerHTML='<p style="font-size:.75rem;color:var(--tx3)">'+t('noProducts')+'</p>';return;}
-  var sorted=prods.slice().sort(function(a,b){return (a.stock||0)-(b.stock||0);}).slice(0,12);
-  stkEl.innerHTML=sorted.map(function(p){
+  if(!prods.length){stkEl.innerHTML='<p style="font-size:.75rem;color:var(--tx3);padding:8px">'+t('noProducts')+'</p>';return;}
+  var sorted=prods.slice().sort(function(a,b){return (a.stock||0)-(b.stock||0);}).slice(0,14);
+  var rows=sorted.map(function(p){
     var stk=p.stock||0;var min=p.minStock||5;
     var clr=stk<=0?'#EF4444':(stk<=min?'#F59E0B':'#22C55E');
-    return '<div class="stk-row"><span class="stk-dot" style="background:'+clr+'"></span><span class="stk-name">'+p.name+'</span><span class="stk-qty" style="color:'+clr+'">'+stk+'</span></div>';
+    var name=p.name.length>28?p.name.substring(0,26)+'…':p.name;
+    return '<tr><td><span class="stk-dot" style="background:'+clr+'"></span>'+name+'</td><td style="color:'+clr+'">'+stk+'</td></tr>';
   }).join('');
+  stkEl.innerHTML='<table><thead><tr><th>Producto</th><th style="text-align:right">Stock</th></tr></thead><tbody>'+rows+'</tbody></table>';
 }
 
 // ── INVENTORY VIEW TOGGLE ─────────────────────────────────────────────────────
