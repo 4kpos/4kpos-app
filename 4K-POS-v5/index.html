@@ -334,6 +334,36 @@ select.fi option{background:var(--s2);color:var(--tx);}
 .inv-tbl tbody tr:nth-child(even) td{background:rgba(255,255,255,.025);}
 .inv-tbl tbody tr[data-pid]:hover td{background:rgba(99,102,241,.08);cursor:pointer;}
 .inv-tbl tbody tr[data-pid].inv-row-sel td{background:rgba(99,102,241,.16)!important;border-bottom-color:rgba(99,102,241,.28);}
+/* ── DASHBOARD PC ──────────────────────────────────────────── */
+#dashboard-screen{flex:1;overflow-y:auto;padding:18px 20px;flex-direction:column;gap:14px;background:var(--bg);}
+.db-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.db-hd h2{font-size:1.1rem;font-weight:800;}
+.db-hd span{font-size:.78rem;color:var(--tx3);}
+.db-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+@media(max-width:900px){.db-kpis{grid-template-columns:repeat(2,1fr);}}
+.db-kpi{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:4px;}
+.kpi-ico{font-size:1.4rem;}
+.kpi-lbl{font-size:.7rem;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
+.kpi-val{font-size:1.3rem;font-weight:800;color:var(--tx);}
+.db-row{display:grid;grid-template-columns:2fr 1fr;gap:12px;}
+@media(max-width:900px){.db-row{grid-template-columns:1fr;}}
+.db-card{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);padding:14px 16px;}
+.db-card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.db-card-hd h4{font-size:.85rem;font-weight:700;color:var(--tx2);}
+.db-toggle{display:flex;gap:4px;}
+.db-toggle button{padding:3px 10px;font-size:.72rem;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx3);cursor:pointer;transition:all .15s;}
+.db-toggle button.on{background:var(--acg);border-color:var(--ac);color:var(--ac);}
+.db-chart{display:flex;gap:4px;align-items:flex-end;height:110px;padding-top:4px;}
+.db-bar-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:3px;height:100%;}
+.db-bar{background:var(--ac);border-radius:3px 3px 0 0;width:100%;min-height:4px;transition:height .3s;}
+.db-bar-lbl{font-size:.65rem;color:var(--tx3);white-space:nowrap;}
+.db-top5{font-size:.82rem;}
+.db-top5 table{width:100%;border-collapse:collapse;}
+.db-top5 th{font-size:.7rem;color:var(--tx3);font-weight:600;padding:4px 4px;border-bottom:1px solid var(--b1);text-align:left;}
+.db-top5 td{padding:5px 4px;border-bottom:1px solid var(--b1);color:var(--tx2);}
+.stk-list{display:flex;flex-direction:column;gap:7px;max-height:200px;overflow-y:auto;}
+.stk-item{display:flex;align-items:center;gap:8px;font-size:.8rem;}
+.stk-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -598,7 +628,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <button class="btn btn-s" onclick="admTab('t-combos',this)">🍱 <span id="tab-combos-txt">Combos</span></button>
         <button class="btn btn-s" onclick="admTab('t-specials',this)">⭐ <span id="tab-specials-txt">Especiales</span></button>
         <button class="btn btn-s" onclick="admTab('t-nomina',this)">👷 <span id="tab-nomina-txt">Nómina</span></button>
-        <button class="btn btn-s" onclick="admTab('t-dashboard',this)">📊 <span id="tab-dashboard-txt">Dashboard</span></button>
+        <button class="btn btn-s" onclick="closeOv('ov-unified');setTimeout(function(){sbNav('dash');},80)">📊 <span id="tab-dashboard-txt">Dashboard</span></button>
         <button class="btn btn-s" id="tab-dash-mobile-btn" onclick="admTab('t-dash-mobile',this);updateTabDashMobile()">📱 <span id="tab-dash-mobile-txt">Dashboard Móvil</span></button>
         <button class="btn btn-s" onclick="admTab('t-labels',this)">🏷️ <span id="tab-labels-txt">Etiquetas</span></button>
         <button class="btn btn-s" onclick="admTab('t-audit',this)">📋 <span id="tab-audit-txt">Auditoría</span></button>
@@ -811,6 +841,22 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <div class="tog"><span class="tog-label" id="cfg-clock-quick-lbl">⏱ Mostrar botón Clock In/Out en menú</span><label class="tog-sw"><input type="checkbox" id="cfg-clock-quick" onchange="saveClockQuickCfg()"><span class="slider"></span></label></div>
           <div id="cfg-clock-quick-info" style="font-size:.7rem;color:var(--tx3);margin-top:6px">Cuando está activo, aparece la opción "⏱ Clock In/Out" en el menú del POS para registrar entradas y salidas de empleados rápidamente.</div>
         </div>
+        <div class="sep-line"></div>
+        <div class="slbl">Mi Licencia</div>
+        <div id="lic-info-box" style="background:var(--s2);border-radius:var(--rs);padding:14px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+            <div>
+              <div style="font-weight:700;font-size:.9rem" id="lic-info-plan">—</div>
+              <div style="font-size:.72rem;color:var(--tx3);margin-top:3px" id="lic-info-status">—</div>
+            </div>
+            <span id="lic-info-badge" style="font-size:.7rem;padding:3px 9px;border-radius:20px;font-weight:700;background:var(--gnb);color:var(--gn);border:1px solid var(--gn);flex-shrink:0;margin-left:8px">—</span>
+          </div>
+          <div style="font-size:.78rem;color:var(--tx2);margin-bottom:4px" id="lic-info-expiry">—</div>
+          <div style="font-size:.78rem;color:var(--tx2)" id="lic-info-devices">—</div>
+        </div>
+        <div class="frow">
+          <button class="btn btn-p" onclick="try{require('electron').shell.openExternal('https://get4ksolutions.com');}catch(e){window.open('https://get4ksolutions.com','_blank');}">🔄 Renovar plan</button>
+        </div>
       </div>
       <!-- INVENTORY -->
       <div id="t-inv" style="display:none">
@@ -961,12 +1007,16 @@ select.fi option{background:var(--s2);color:var(--tx);}
       </div>
       <!-- DASHBOARD MÓVIL -->
       <div id="t-dash-mobile" style="display:none">
-        <div style="text-align:center;padding:30px 16px">
-          <div style="font-size:2.5rem;margin-bottom:10px">📱</div>
-          <div style="font-size:.95rem;font-weight:700;margin-bottom:8px" id="tab-dash-h">Dashboard Móvil</div>
-          <div style="font-size:.82rem;color:var(--tx3);margin-bottom:18px" id="tab-dash-desc">Accede al dashboard en tu celular</div>
-          <button class="btn btn-p" id="tab-dash-btn" onclick="closeOv('ov-unified');setTimeout(openDashQR,80)">📱 Abrir Dashboard</button>
-          <div id="tab-dash-pro-msg" style="display:none;margin-top:14px;padding:12px;background:var(--s2);border-radius:var(--rs);font-size:.82rem;color:var(--tx3)">⚠ <span id="tab-dash-pro-txt">Disponible solo en plan Pro</span></div>
+        <div style="text-align:center;padding:16px 10px">
+          <div style="font-size:.95rem;font-weight:700;margin-bottom:6px" id="tab-dash-h">Dashboard Móvil</div>
+          <div style="font-size:.78rem;color:var(--tx3);margin-bottom:14px" id="tab-dash-desc">Escanea el código QR con tu celular</div>
+          <div id="t-dash-mobile-qr" style="display:none">
+            <div style="background:#fff;padding:8px;border-radius:10px;display:inline-block;margin-bottom:10px">
+              <img id="tab-dash-qr-img" src="" alt="QR" style="width:170px;height:170px;display:block">
+            </div>
+            <div style="font-size:.7rem;color:var(--tx3)">4kpos.github.io/4kpos-dashboard</div>
+          </div>
+          <div id="tab-dash-pro-msg" style="display:none;margin-top:10px;padding:14px;background:var(--s2);border-radius:var(--rs);font-size:.82rem;color:var(--tx3)">⚠ <span id="tab-dash-pro-txt">Disponible solo en plan Pro</span></div>
         </div>
       </div>
       <!-- ETIQUETAS -->
@@ -3436,13 +3486,69 @@ function _applyMobileDashPlan(info){
   const plan=((db.license&&db.license.plan)||db._localPlan||(info&&info.plan)||'').toLowerCase();
   const isAdm=curUser&&curUser.role==='admin';
   const isPro=isAdm||plan.startsWith('pro')||plan==='lifetime';
-  const btn=el('tab-dash-btn');const msg=el('tab-dash-pro-msg');
-  if(btn)btn.style.display=isPro?'':'none';
+  const msg=el('tab-dash-pro-msg');
   if(msg)msg.style.display=isPro?'none':'block';
+  const qrSection=el('t-dash-mobile-qr');
+  if(qrSection)qrSection.style.display=isPro?'block':'none';
   const sbiQr=el('sbi-dash-qr');
   if(sbiQr){sbiQr.style.opacity=isPro?'1':'0.45';sbiQr.style.pointerEvents=isPro?'':'none';}
 }
-function updateTabDashMobile(){_applyMobileDashPlan(null);}
+function updateTabDashMobile(){
+  _applyMobileDashPlan(null);
+  var isPro=checkPlan('mobile_dashboard');
+  var qrSection=el('t-dash-mobile-qr');
+  if(qrSection)qrSection.style.display=isPro?'block':'none';
+  if(isPro){
+    var url='https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html';
+    var qrImg=el('tab-dash-qr-img');
+    if(qrImg&&!qrImg.src.includes('qrserver'))qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=170x170&data='+encodeURIComponent(url);
+  }
+}
+function _planLabel(plan){
+  var p=(plan||'').toLowerCase();
+  if(p==='pro_monthly')return 'Pro Mensual';
+  if(p==='pro_annual'||p==='pro_yearly')return 'Pro Anual';
+  if(p==='basic_monthly')return 'Básico Mensual';
+  if(p==='basic_annual'||p==='basic_yearly')return 'Básico Anual';
+  if(p==='lifetime')return 'Licencia Permanente';
+  if(p.startsWith('pro'))return 'Pro';
+  if(p.startsWith('basic'))return 'Básico';
+  return plan||'—';
+}
+function refreshLicenseInfo(){
+  ipcRenderer.invoke('get-license-info').then(function(li){
+    var lic=db.license;
+    var plan=(lic&&lic.plan)||(li&&li.plan)||'';
+    var planEl=el('lic-info-plan');if(planEl)planEl.textContent=_planLabel(plan);
+    var active=lic?lic.active:true;
+    var isOffline=!lic&&li&&li.last_verified;
+    var statusEl=el('lic-info-status');var badgeEl=el('lic-info-badge');
+    if(!active){
+      if(statusEl)statusEl.textContent='Licencia inactiva';
+      if(badgeEl){badgeEl.textContent='Inactiva';badgeEl.style.cssText='font-size:.7rem;padding:3px 9px;border-radius:20px;font-weight:700;background:var(--rdb);color:var(--rd);border:1px solid var(--rd);flex-shrink:0;margin-left:8px';}
+    }else if(isOffline){
+      if(statusEl)statusEl.textContent='Modo offline';
+      if(badgeEl){badgeEl.textContent='Offline';badgeEl.style.cssText='font-size:.7rem;padding:3px 9px;border-radius:20px;font-weight:700;background:var(--amb);color:var(--am);border:1px solid var(--am);flex-shrink:0;margin-left:8px';}
+    }else{
+      if(statusEl)statusEl.textContent='Activa';
+      if(badgeEl){badgeEl.textContent='Activa';badgeEl.style.cssText='font-size:.7rem;padding:3px 9px;border-radius:20px;font-weight:700;background:var(--gnb);color:var(--gn);border:1px solid var(--gn);flex-shrink:0;margin-left:8px';}
+    }
+    var expires=(lic&&lic.expires_at)||(li&&li.expires_at);
+    var expiryEl=el('lic-info-expiry');
+    if(expiryEl){
+      if(expires){
+        var d=new Date(expires);var days=Math.ceil((d-Date.now())/864e5);
+        expiryEl.textContent='Vence el '+d.toLocaleDateString(lang||'es',{day:'numeric',month:'short',year:'numeric'})+' · '+(days>0?days+' días restantes':'Vencida hace '+Math.abs(days)+' días');
+      }else{expiryEl.textContent='Sin fecha de vencimiento';}
+    }
+    var devEl=el('lic-info-devices');
+    if(devEl){
+      var isPro=_isPlanPro();var maxDev=isPro?3:1;
+      var devs=Array.isArray(lic&&lic.devices)?lic.devices:(db.devices||[]);
+      devEl.textContent=devs.length+' de '+maxDev+' PC'+(maxDev>1?'s':'')+' registradas (plan '+(isPro?'Pro':'Básico')+')';
+    }
+  }).catch(function(){});
+}
 // DATA
 async function loadDB(){
   try{
@@ -4069,8 +4175,9 @@ function uniTab(section,btn){
     el('uni-adm').style.display='';
     el('uni-conta').style.display='none';
     el('adm-tabs').style.display='none';
-    ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits','t-combos','t-specials','t-nomina','t-dashboard','t-labels','t-audit','t-shiftnote','t-updates'].forEach(function(t){var e=el(t);if(e)e.style.display='none';});
+    ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits','t-combos','t-specials','t-nomina','t-dashboard','t-dash-mobile','t-labels','t-audit','t-shiftnote','t-updates'].forEach(function(t){var e=el(t);if(e)e.style.display='none';});
     var cfg=el('t-cfg');if(cfg)cfg.style.display='';
+    if(typeof refreshLicenseInfo==='function')refreshLicenseInfo();
   }else{
     el('uni-adm').style.display=(section==='uni-adm')?'':'none';
     el('uni-conta').style.display=(section==='uni-conta')?'':'none';
