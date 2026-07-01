@@ -1505,25 +1505,16 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div id="cq-panel-hist" style="display:none">
         <div id="cq-hist-list"></div>
       </div>
-      <!-- PIN panel (overlay) -->
+      <!-- Verify identity panel -->
       <div id="cq-pin-panel" style="display:none;text-align:center;padding:12px 0">
         <div style="font-size:.9rem;font-weight:700;margin-bottom:4px" id="cq-pin-emp-name"></div>
-        <div style="font-size:.74rem;color:var(--tx3);margin-bottom:12px">Ingresa tu PIN de 4 dígitos</div>
-        <div style="font-family:monospace;font-size:1.8rem;letter-spacing:10px;height:44px;display:flex;align-items:center;justify-content:center" id="cq-pin-dots">○○○○</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:210px;margin:14px auto 0">
-          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('1')">1</button>
-          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('2')">2</button>
-          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('3')">3</button>
-          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('4')">4</button>
-          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('5')">5</button>
-          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('6')">6</button>
-          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('7')">7</button>
-          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('8')">8</button>
-          <button class="btn btn-s" style="font-size:1.1rem;padding:10px" onclick="cqPinKey('9')">9</button>
-          <button class="btn btn-s" style="font-size:.85rem;padding:10px" onclick="cqPinKey('0')">0</button>
-          <button class="btn btn-s" style="font-size:.85rem;padding:10px;grid-column:span 2" onclick="cqPinBack()">⌫</button>
+        <div style="font-size:.74rem;color:var(--tx3);margin-bottom:14px" id="cq-pin-action">Ingresa tu contraseña para registrar Entrada</div>
+        <div style="max-width:240px;margin:0 auto">
+          <input type="password" class="fi" id="cq-pass-input" placeholder="Contraseña" autocomplete="off" style="text-align:center;letter-spacing:2px;margin-bottom:10px" onkeydown="if(event.key==='Enter')cqVerifyPass()">
+          <div id="cq-pass-error" style="display:none;font-size:.75rem;color:#ef4444;margin-bottom:8px"></div>
+          <button class="btn btn-p" style="width:100%;margin-bottom:8px" onclick="cqVerifyPass()">✓ Confirmar</button>
+          <button class="btn btn-s" style="width:100%" onclick="cqCancelPin()">Cancelar</button>
         </div>
-        <button class="btn btn-s" style="margin-top:14px;width:100%;max-width:210px" onclick="cqCancelPin()">Cancelar</button>
       </div>
     </div>
   </div>
@@ -2948,7 +2939,7 @@ function startLicenseWatcher(){
     try{
       var localLic=await ipcRenderer.invoke('get-license-info');
       if(!localLic||!localLic.key)return;
-      var res=await fetch(SUPA_URL+'/rest/v1/licenses?key=eq.'+encodeURIComponent(localLic.key)+'&select=plan,active,expires_at',
+      var res=await fetch(SUPA_URL+'/rest/v1/licenses?key=eq.'+encodeURIComponent(localLic.key)+'&select=plan,active,expires_at,created_at',
         {headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Accept':'application/json'}});
       if(!res.ok)return;
       var rows=await res.json();if(!rows||!rows.length)return;
@@ -2957,10 +2948,14 @@ function startLicenseWatcher(){
         toast('⚠ Licencia no válida. El sistema se bloqueará en 15 minutos.');
         setTimeout(function(){_showLicError('Licencia expirada o desactivada. Guarda tu trabajo y contacta a soporte.','Licencia no válida');},15*60*1000);
       }else{
-        db.license=Object.assign(db.license||{},lic);db._localPlan=lic.plan||'';_applyPlanUI();
+        var prevPlan=db._localPlan||'';
+        db.license=Object.assign(db.license||{},lic);db._localPlan=lic.plan||'';
+        _applyPlanUI();
+        if(typeof refreshLicenseInfo==='function')refreshLicenseInfo();
+        if(prevPlan&&lic.plan&&prevPlan!==lic.plan)toast('✅ Plan actualizado: '+_planLabel(lic.plan));
       }
     }catch(e){}
-  },24*60*60*1000);
+  },10*60*1000);
 }
 function openDashQR(){
   const url='https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html';
@@ -5322,7 +5317,7 @@ function toggleHamMenu(e){
 }
 function closeHamMenu(){var m=el('ham-menu');if(m)m.style.display='none';}
 /* ── CLOCK IN/OUT ─────────────────────────────────────────────────────── */
-var _cqPinEmpId=null,_cqPinBuf='';
+var _cqPinEmpId=null;
 function openClockQuick(){
   cqShowTab('asist',el('cq-tab-btn-asist'));
   renderClockQuickList();
@@ -5407,37 +5402,46 @@ function renderClockQuickList(){
 }
 function cqClockWithPin(id){
   var emp=(db.employees||[]).find(function(e){return e.id===id;});if(!emp)return;
-  if(!emp.pin||emp.pin.length<4){cqClock(id);return;}
-  _cqPinEmpId=id;_cqPinBuf='';
+  _cqPinEmpId=id;
   el('cq-panel-asist').style.display='none';
   var nm=el('cq-pin-emp-name');if(nm)nm.textContent=emp.name;
-  _cqUpdatePinDots();
+  var activeEv=emp.clockEvents&&emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
+  var act=el('cq-pin-action');
+  if(act)act.textContent='Ingresa tu contraseña para registrar '+(activeEv?'Salida':'Entrada');
+  var passErr=el('cq-pass-error');if(passErr)passErr.style.display='none';
+  var passInp=el('cq-pass-input');if(passInp){passInp.value='';setTimeout(function(){passInp.focus();},80);}
   el('cq-pin-panel').style.display='';
 }
-function cqPinKey(d){
-  if(_cqPinBuf.length>=4)return;
-  _cqPinBuf+=d;_cqUpdatePinDots();
-  if(_cqPinBuf.length===4)setTimeout(_cqVerifyPin,200);
-}
-function cqPinBack(){_cqPinBuf=_cqPinBuf.slice(0,-1);_cqUpdatePinDots();}
-function _cqUpdatePinDots(){
-  var d=el('cq-pin-dots');if(!d)return;
-  var filled=Array(_cqPinBuf.length+1).join('●');
-  var empty=Array(4-_cqPinBuf.length+1).join('○');
-  d.textContent=filled+empty;
-}
-function _cqVerifyPin(){
+function cqVerifyPass(){
   var emp=(db.employees||[]).find(function(e){return e.id===_cqPinEmpId;});
   if(!emp){cqCancelPin();return;}
-  if(emp.pin!==_cqPinBuf){
-    toast('PIN incorrecto');_cqPinBuf='';_cqUpdatePinDots();return;
-  }
+  var passInp=el('cq-pass-input');
+  var input=(passInp&&passInp.value)||'';
+  if(!input){_cqPassErr('Ingresa tu contraseña');return;}
+  var matched=null;
+  (db.users||[]).forEach(function(u){
+    if(matched)return;
+    var h=u.pass||'';
+    var ok=false;
+    if(typeof bcrypt!=='undefined'&&h&&h.startsWith('$2')){
+      try{ok=bcrypt.compareSync(input,h);}catch(e){}
+    }else{ok=(input===h);}
+    if(ok)matched=u;
+  });
+  if(!matched){_cqPassErr('Contraseña incorrecta');return;}
+  var isAdmin=matched.role==='admin';
+  var isOwn=(matched.name===emp.name)||(emp._userId&&matched.id===emp._userId);
+  if(!isAdmin&&!isOwn){_cqPassErr('No tienes permiso para registrar a '+emp.name);return;}
   var _id=_cqPinEmpId;
   cqCancelPin();
   cqClock(_id);
 }
+function _cqPassErr(msg){
+  var e=el('cq-pass-error');if(e){e.textContent=msg;e.style.display='';}
+  var i=el('cq-pass-input');if(i){i.value='';i.focus();}
+}
 function cqCancelPin(){
-  _cqPinEmpId=null;_cqPinBuf='';
+  _cqPinEmpId=null;
   el('cq-pin-panel').style.display='none';
   el('cq-panel-asist').style.display='';
 }
