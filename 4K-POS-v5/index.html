@@ -3683,10 +3683,10 @@ function applyUserPerms(){
   if(!curUser)return;
   const pm=curUser.perms||{adm:true,ret:true,can:true,sal:true,conta:true,fac:true,gst:true};
   const isAdm=curUser.role==='admin';
-  el('hm-adm').style.display=(isAdm||pm.adm)?'flex':'none';
-  el('hm-ret').style.display=(isAdm||pm.ret)?'flex':'none';
-  el('hm-sal').style.display=(isAdm||pm.sal)?'flex':'none';
-  el('hm-conta').style.display=(isAdm||pm.conta)?'flex':'none';
+  const _hmAdm=el('hm-adm');if(_hmAdm)_hmAdm.style.display=(isAdm||pm.adm)?'flex':'none';
+  const _hmRet=el('hm-ret');if(_hmRet)_hmRet.style.display=(isAdm||pm.ret)?'flex':'none';
+  const _hmSal=el('hm-sal');if(_hmSal)_hmSal.style.display=(isAdm||pm.sal)?'flex':'none';
+  const _hmConta=el('hm-conta');if(_hmConta)_hmConta.style.display=(isAdm||pm.conta)?'flex':'none';
   const _hmAudit=el('hm-audit');if(_hmAudit)_hmAudit.style.display=isAdm?'flex':'none';
 }
 function syncShiftStatus(status){
