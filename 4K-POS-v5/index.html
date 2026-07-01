@@ -524,6 +524,18 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <span id="usr-lbl" style="display:none">—</span>
 </div>
 
+<!-- LICENSE ERROR -->
+<div class="ov" id="ov-lic-error" style="z-index:9999">
+  <div class="modal" style="max-width:380px;text-align:center">
+    <div class="mh"><h3>⚠ <span id="lic-err-title">Error de licencia</span></h3></div>
+    <div class="mb" style="padding:20px 16px">
+      <div style="font-size:2rem;margin-bottom:12px">🔒</div>
+      <div style="font-size:.82rem;color:var(--tx3);margin-bottom:18px" id="lic-err-msg">Contacta a soporte.</div>
+      <button class="btn btn-p" style="width:100%" onclick="try{ipcRenderer.invoke('exit-app');}catch(e){window.close();}">Cerrar programa</button>
+    </div>
+  </div>
+</div>
+
 <!-- DEVICE LIMIT ERROR -->
 <div class="ov" id="ov-device-limit" style="z-index:9999">
   <div class="modal" style="max-width:360px;text-align:center">
@@ -2655,7 +2667,7 @@ function t(k){ return (T[lang]&&T[lang][k]) || T.es[k] || k; }
 
 // STATE
 let dark=true;
-let db={products:[],categories:[],sales:[],returns:[],orderNum:1,adminCode:'1234',devices:[],
+let db={products:[],categories:[],sales:[],returns:[],orderNum:1,adminCode:'1234',devices:[],license:null,_localPlan:'',
   users:[{id:'1',name:'Admin',user:'admin',pass:'1234',role:'admin',perms:{adm:true,ret:true,can:true,sal:true,conta:true,fac:true,gst:true}}],
   fundAmount:0,customers:[],credits:[],payMethods:{cash:true,card:true,transf:true,openAccounts:true,credit:false},
   drawerPort:'COM3',drawerAuto:true,
@@ -2678,17 +2690,104 @@ function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function toast(m){const e=el('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2300);}
 function openOv(id){el(id).classList.add('open');}
 function closeOv(id){el(id).classList.remove('open');}
+function _isPlanPro(){
+  var plan=((db.license&&db.license.plan)||db._localPlan||'').toLowerCase();
+  return plan.startsWith('pro')||plan==='lifetime';
+}
+function checkPlan(feature){
+  var pro=(curUser&&curUser.role==='admin')||_isPlanPro();
+  if(feature==='mobile_dashboard'||feature==='multi_device'||feature==='advanced_reports')return pro;
+  return true;
+}
+function _showLicError(msg,title){
+  var t2=el('lic-err-title');var m=el('lic-err-msg');
+  if(t2)t2.textContent=title||'Error de licencia';
+  if(m)m.textContent=msg||'Contacta a soporte.';
+  openOv('ov-lic-error');
+}
+async function loadLicenseFromSupabase(){
+  try{
+    var localLic=await ipcRenderer.invoke('get-license-info');
+    if(!localLic||!localLic.key){_showLicError('No hay licencia activa en este equipo.','Sin licencia');return;}
+    db._localPlan=localLic.plan||'';
+    var res;
+    try{
+      res=await fetch(SUPA_URL+'/rest/v1/licenses?key=eq.'+encodeURIComponent(localLic.key)+'&select=plan,active,devices,expires_at,business_name,email',
+        {headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Accept':'application/json'}});
+    }catch(netErr){return _handleOfflineLicense(localLic);}
+    if(!res.ok){return _handleOfflineLicense(localLic);}
+    var rows=await res.json();
+    if(!rows||!rows.length){_showLicError('Licencia no encontrada. Verifica tu clave de activación.','Licencia inválida');return;}
+    var lic=rows[0];
+    db.license=lic;db._localPlan=lic.plan||'';
+    if(!lic.active){_showLicError('Tu licencia está inactiva. Contacta a soporte para reactivarla.','Licencia inactiva');return;}
+    if(lic.expires_at&&new Date(lic.expires_at)<new Date()){
+      _showLicError('Licencia vencida el '+new Date(lic.expires_at).toLocaleDateString(lang||'es')+'. Renueva tu plan para continuar.','Licencia vencida');return;
+    }
+    var machineId=await ipcRenderer.invoke('get-machine-id').catch(function(){return null;});
+    if(machineId){
+      var plan=(lic.plan||'').toLowerCase();
+      var maxDev=(plan.startsWith('pro')||plan==='lifetime')?3:1;
+      var devs=Array.isArray(lic.devices)?lic.devices:[];
+      db.devices=devs;
+      if(!devs.includes(machineId)){
+        if(devs.length>=maxDev){
+          _showLicError('Límite de '+maxDev+' PC'+(maxDev>1?'s':'')+' alcanzado para tu plan. '+(maxDev===1?'Actualiza al plan Pro para usar en hasta 3 PCs.':'Contacta a soporte.'),'Límite de dispositivos');return;
+        }
+        try{
+          var newDevs=devs.concat([machineId]);
+          await fetch(SUPA_URL+'/rest/v1/licenses?key=eq.'+encodeURIComponent(localLic.key),
+            {method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+            body:JSON.stringify({devices:newDevs})});
+          db.devices=newDevs;
+        }catch(regErr){console.warn('[Lic] register:',regErr);}
+      }
+    }
+    _applyPlanUI();
+  }catch(e){
+    console.warn('[Lic]',e);
+    _handleOfflineLicense(await ipcRenderer.invoke('get-license-info').catch(function(){return null;}));
+  }
+}
+function _handleOfflineLicense(localLic){
+  if(!localLic){_showLicError('Sin licencia local. Conecta a internet y reinicia.','Sin licencia');return;}
+  var days=localLic.last_verified?(Date.now()-new Date(localLic.last_verified).getTime())/(864e5):999;
+  if(days<15){
+    db.license={plan:localLic.plan||'',active:true,devices:[],expires_at:localLic.expires_at||null};
+    db._localPlan=localLic.plan||'';
+    _applyPlanUI();
+    setTimeout(function(){toast('⚠ Modo offline — '+Math.floor(days)+' días sin verificar');},1500);
+  }else{
+    _showLicError('Sin conexión por más de 15 días. Conecta a internet e intenta de nuevo.','Verificación requerida');
+  }
+}
+function _applyPlanUI(){_applyMobileDashPlan(null);}
+function startLicenseWatcher(){
+  if(window._licWatchInt)return;
+  window._licWatchInt=setInterval(async function(){
+    try{
+      var localLic=await ipcRenderer.invoke('get-license-info');
+      if(!localLic||!localLic.key)return;
+      var res=await fetch(SUPA_URL+'/rest/v1/licenses?key=eq.'+encodeURIComponent(localLic.key)+'&select=plan,active,expires_at',
+        {headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Accept':'application/json'}});
+      if(!res.ok)return;
+      var rows=await res.json();if(!rows||!rows.length)return;
+      var lic=rows[0];
+      if(!lic.active||(lic.expires_at&&new Date(lic.expires_at)<new Date())){
+        toast('⚠ Licencia no válida. El sistema se bloqueará en 15 minutos.');
+        setTimeout(function(){_showLicError('Licencia expirada o desactivada. Guarda tu trabajo y contacta a soporte.','Licencia no válida');},15*60*1000);
+      }else{
+        db.license=Object.assign(db.license||{},lic);db._localPlan=lic.plan||'';_applyPlanUI();
+      }
+    }catch(e){}
+  },24*60*60*1000);
+}
 function openDashQR(){
-  ipcRenderer.invoke('get-license-info').then(function(info){
-    console.log('[DashQR] plan:', info&&info.plan, '| role:', curUser&&curUser.role);
-    const isAdm=curUser&&curUser.role==='admin';
-    const isPro=info&&['pro','lifetime'].includes((info.plan||'').toLowerCase());
-    if(!isAdm&&!isPro){toast('⚠ '+t('dashboardProOnly'));return;}
-    const url='https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html';
-    const qr=el('dash-qr-img');if(qr)qr.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(url);
-    const lnk=el('dash-qr-link');if(lnk){lnk.dataset.url=url;lnk.textContent=url;}
-    openOv('ov-dash-qr');
-  });
+  if(!checkPlan('mobile_dashboard')){toast('⚠ '+t('dashboardProOnly'));return;}
+  const url='https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html';
+  const qr=el('dash-qr-img');if(qr)qr.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(url);
+  const lnk=el('dash-qr-link');if(lnk){lnk.dataset.url=url;lnk.textContent=url;}
+  openOv('ov-dash-qr');
 }
 function confirm2(msg,cb){confCb=cb;el('conf-msg').textContent=msg;el('confov').classList.add('open');}
 function confYes(){el('confov').classList.remove('open');if(confCb)confCb();confCb=null;}
@@ -3312,71 +3411,38 @@ function exitApp(){
 }
 const DASHBOARD_URL='https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html';
 function openDashboard(){
-  ipcRenderer.invoke('get-license-info').then(function(info){
-    const isAdm=curUser&&curUser.role==='admin';
-    const isPro=info&&['pro','lifetime'].includes((info.plan||'').toLowerCase());
-    if(isAdm||isPro){
-      try{require('electron').shell.openExternal(DASHBOARD_URL);}catch(e){window.open(DASHBOARD_URL,'_blank');}
-    }else{
-      toast('⚠ '+t('dashboardProOnly'));
-    }
-  }).catch(function(){
+  if(checkPlan('mobile_dashboard')){
     try{require('electron').shell.openExternal(DASHBOARD_URL);}catch(e){window.open(DASHBOARD_URL,'_blank');}
-  });
+  }else{
+    toast('⚠ '+t('dashboardProOnly'));
+  }
 }
 function updateDashBtn(){
-  ipcRenderer.invoke('get-license-info').then(function(info){
-    const dash=el('hm-dash');
-    if(dash){
-      const isAdm=curUser&&curUser.role==='admin';
-      const isPro=isAdm||(info&&['pro','lifetime'].includes((info.plan||'').toLowerCase()));
-      dash.style.display='flex';
-      if(isPro){
-        dash.style.opacity='1';dash.style.cursor='pointer';
-        const txt=el('hm-dash-txt');if(txt)txt.textContent=t('dashboardBtn');
-      }else{
-        dash.style.opacity='0.45';dash.style.cursor='default';
-        const txt=el('hm-dash-txt');if(txt)txt.textContent=t('dashboardBtn')+' (Pro)';
-      }
+  const dash=el('hm-dash');
+  if(dash){
+    const isPro=_isPlanPro();
+    dash.style.display='flex';
+    if(isPro){
+      dash.style.opacity='1';dash.style.cursor='pointer';
+      const txt=el('hm-dash-txt');if(txt)txt.textContent=t('dashboardBtn');
+    }else{
+      dash.style.opacity='0.45';dash.style.cursor='default';
+      const txt=el('hm-dash-txt');if(txt)txt.textContent=t('dashboardBtn')+' (Pro)';
     }
-    _applyMobileDashPlan(info);
-  }).catch(function(){
-    const dash=el('hm-dash');if(dash)dash.style.display='flex';
-  });
+  }
+  _applyMobileDashPlan(null);
 }
 function _applyMobileDashPlan(info){
+  const plan=((db.license&&db.license.plan)||db._localPlan||(info&&info.plan)||'').toLowerCase();
   const isAdm=curUser&&curUser.role==='admin';
-  const isPro=isAdm||(info&&['pro','lifetime'].includes((info.plan||'').toLowerCase()));
+  const isPro=isAdm||plan.startsWith('pro')||plan==='lifetime';
   const btn=el('tab-dash-btn');const msg=el('tab-dash-pro-msg');
   if(btn)btn.style.display=isPro?'':'none';
   if(msg)msg.style.display=isPro?'none':'block';
   const sbiQr=el('sbi-dash-qr');
   if(sbiQr){sbiQr.style.opacity=isPro?'1':'0.45';sbiQr.style.pointerEvents=isPro?'':'none';}
 }
-function updateTabDashMobile(){
-  ipcRenderer.invoke('get-license-info').then(function(info){_applyMobileDashPlan(info);}).catch(function(){});
-}
-async function checkDeviceLimit(){
-  try{
-    const info=await ipcRenderer.invoke('get-license-info');
-    if(!info||!db._lic)return;
-    const plan=(info.plan||'').toLowerCase();
-    const isBasic=plan.startsWith('basic');
-    const isPro=plan.startsWith('pro')||plan==='lifetime';
-    const maxPCs=isPro?3:(isBasic?1:1);
-    const hwId=await ipcRenderer.invoke('get-hardware-id').catch(function(){return null;});
-    const devices=db.devices||[];
-    if(devices.length>0){
-      const thisInList=devices.some(function(d){return d.hardware_id===hwId||d.hardwareId===hwId;});
-      if(!thisInList&&devices.length>=maxPCs){
-        const planLabel=isBasic?'Básico':'Pro';
-        const limitEl=el('dev-limit-msg');
-        if(limitEl)limitEl.textContent='Tu plan '+planLabel+' permite solo '+maxPCs+' PC'+(maxPCs>1?'s':'')+' registrada'+(maxPCs>1?'s':'')+'. Para usar 4K POS en más equipos, actualiza al plan Pro (hasta 3 PCs).';
-        openOv('ov-device-limit');
-      }
-    }
-  }catch(e){console.warn('[DeviceLimit]',e);}
-}
+function updateTabDashMobile(){_applyMobileDashPlan(null);}
 // DATA
 async function loadDB(){
   try{
@@ -3748,6 +3814,7 @@ function applyUserPerms(){
   const _hmSal=el('hm-sal');if(_hmSal)_hmSal.style.display=(isAdm||pm.sal)?'flex':'none';
   const _hmConta=el('hm-conta');if(_hmConta)_hmConta.style.display=(isAdm||pm.conta)?'flex':'none';
   const _hmAudit=el('hm-audit');if(_hmAudit)_hmAudit.style.display=isAdm?'flex':'none';
+  if(db.license||db._localPlan)_applyPlanUI();
 }
 function syncShiftStatus(status){
   const now=new Date().toISOString();
@@ -3813,7 +3880,7 @@ function startApp(){
 
   showCategories();
   renderCart();
-  updateLicBadge();updateDashBtn();checkDeviceLimit();
+  updateLicBadge();updateDashBtn();loadLicenseFromSupabase();startLicenseWatcher();
   updateOACounter();_startNotifTimer();
   if(!window._cdSyncInt){window._cdSyncInt=setInterval(syncCreditDirect,30000);setTimeout(syncCreditDirect,3000);}
   if(!window._shiftHbInt){window._shiftHbInt=setInterval(function(){if(db.cfg&&db.cfg.shiftOpen&&curUser){syncShiftStatusDirect({active:true,currentUser:curUser.name,shiftOpenedAt:db.cfg.shiftOpenAt||new Date().toISOString(),lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg.pendingShiftNote||null});}},5*60*1000);}
