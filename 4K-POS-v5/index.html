@@ -201,12 +201,6 @@ body.light .chgbox{color:#15803d!important;border-color:#15803d!important;backgr
 .usr-lbl{font-size:.72rem;color:#fff!important;}
 .hamburger-btn{background:var(--s2);border:1.5px solid var(--b1);color:var(--tx2);padding:8px 13px;border-radius:var(--rs);cursor:pointer;font-size:1.1rem;transition:all .2s;}
 .hamburger-btn:hover{border-color:var(--ac);color:var(--ac);}
-.hmenu{position:fixed;top:60px;left:0;background:var(--s1);border:1.5px solid var(--b2);border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:700;display:none;min-width:210px;overflow:hidden;}
-.hmenu.open{display:block;}
-.hmi{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;transition:background .15s;font-size:.85rem;font-weight:600;border-bottom:1px solid var(--b1);}
-.hmi:last-child{border-bottom:none;}
-.hmi:hover{background:var(--s2);}
-.hmi.adm{color:var(--ac)}.hmi.ret{color:var(--am)}.hmi.can{color:var(--rd)}.hmi.sal{color:var(--gn)}.hmi.conta{color:var(--bl)}.hmi.exit{color:var(--rd)}
 .pp-hd{padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;}
 .pp-item{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--rs);padding:9px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s;}
 .pp-item:hover{border-color:var(--ac);}
@@ -324,63 +318,6 @@ select.fi option{background:var(--s2);color:var(--tx);}
 @media print{body>*:not(#parea){display:none!important;}#parea{display:block!important;font-family:Courier New,monospace;font-size:12px;width:280px;}}
 #parea{display:none;}
 /* ── SIDEBAR ─────────────────────────────────────────────── */
-#sidebar{position:fixed;left:0;top:0;bottom:0;width:200px;background:#1E2A3A;z-index:550;display:none;flex-direction:column;transition:width .2s ease;overflow:hidden;box-shadow:2px 0 10px rgba(0,0,0,.35);}
-#sidebar.collapsed{width:56px;}
-#sidebar.collapsed .sb-lbl,#sidebar.collapsed .sb-section,#sidebar.collapsed #sb-uname,#sidebar.collapsed #sb-urole,#sidebar.collapsed .sb-logo-txt{display:none!important;}
-#sidebar.collapsed .sb-item{justify-content:center;padding:10px 0;}
-#sidebar.collapsed .sb-icon{margin:0;}
-.sb-logo{display:flex;align-items:center;gap:10px;padding:14px 12px 10px;border-bottom:1px solid rgba(255,255,255,.07);cursor:pointer;flex-shrink:0;user-select:none;}
-.sb-logo img{width:32px;height:32px;border-radius:8px;object-fit:contain;background:#fff;flex-shrink:0;}
-.sb-logo-txt .sbl-main{display:block;font-weight:800;font-size:.9rem;color:#fff;}
-.sb-logo-txt .sbl-sub{display:block;font-size:.62rem;color:#2E75B6;font-weight:600;}
-.sb-user{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;overflow:hidden;}
-#sb-uname{font-size:.82rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-#sb-urole{font-size:.68rem;color:rgba(255,255,255,.4);margin-top:2px;}
-.sb-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 0;}
-.sb-nav::-webkit-scrollbar{width:3px;}
-.sb-section{font-size:.58rem;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:1.2px;text-transform:uppercase;padding:10px 14px 3px;white-space:nowrap;}
-.sb-item{display:flex;align-items:center;gap:10px;padding:7px 14px;cursor:pointer;color:rgba(255,255,255,.65);font-size:.8rem;font-weight:500;transition:background .12s,color .12s;white-space:nowrap;border-left:3px solid transparent;user-select:none;}
-.sb-item:hover{background:rgba(255,255,255,.07);color:#fff;}
-.sb-item:active{background:rgba(255,255,255,.13)!important;}
-.sb-item.active{background:rgba(46,117,182,.25);border-left-color:#2E75B6;color:#fff;}
-.sb-icon{font-size:1.05rem;flex-shrink:0;width:20px;text-align:center;line-height:1;}
-.sb-lbl{flex:1;overflow:hidden;text-overflow:ellipsis;}
-.sb-bottom{border-top:1px solid rgba(255,255,255,.07);padding:6px 0;flex-shrink:0;}
-body.sb-open #topbar,body.sb-open #app-main,body.sb-open #botbar,body.sb-open #dashboard-screen{margin-left:200px;transition:margin-left .2s ease;}
-body.sb-open.sb-collapsed #topbar,body.sb-open.sb-collapsed #app-main,body.sb-open.sb-collapsed #botbar,body.sb-open.sb-collapsed #dashboard-screen{margin-left:56px;}
-/* ── DASHBOARD ───────────────────────────────────────────── */
-#dashboard-screen{display:none;flex:1;min-height:0;flex-direction:column;gap:16px;padding:20px;overflow-y:auto;background:var(--bg);color:var(--tx);}
-.db-hd{display:flex;align-items:baseline;gap:10px;flex-shrink:0;}
-.db-hd h2{font-size:1.15rem;font-weight:800;color:var(--tx);}
-.db-hd span{font-size:.75rem;color:var(--tx3);}
-.db-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-@media (max-width:1000px){.db-kpis{grid-template-columns:repeat(2,1fr);}}
-.db-kpi{background:var(--s2);border:1px solid var(--b2);border-left:3px solid var(--ac);border-radius:var(--r);padding:14px 16px;color:var(--tx);}
-.db-kpi .kpi-ico{font-size:1.25rem;margin-bottom:5px;}
-.db-kpi .kpi-lbl{font-size:.65rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
-.db-kpi .kpi-val{font-family:Courier New,monospace;font-size:1.35rem;font-weight:800;color:var(--tx);}
-.db-row{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;}
-@media (max-width:850px){.db-row{grid-template-columns:1fr;}}
-.db-card{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);padding:14px 16px;color:var(--tx);}
-.db-card-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-.db-card-hd h4{font-size:.72rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;}
-.db-toggle{display:flex;gap:3px;}
-.db-toggle button{padding:3px 9px;font-size:.67rem;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx3);cursor:pointer;font-weight:600;}
-.db-toggle button.on{background:var(--acg);border-color:var(--ac);color:var(--ac);}
-.db-chart{display:flex;align-items:flex-end;gap:5px;height:90px;padding:0 2px 2px;}
-.db-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
-.db-bar{width:100%;background:var(--ac);border-radius:3px 3px 0 0;min-height:3px;opacity:.85;}
-.db-bar-lbl{font-size:.55rem;color:var(--tx3);text-align:center;white-space:nowrap;}
-.db-top5 table{width:100%;border-collapse:collapse;}
-.db-top5 th{padding:3px 5px;font-size:.63rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid var(--b2);text-align:left;}
-.db-top5 td{padding:5px 5px;font-size:.78rem;border-bottom:1px solid var(--b1);}
-.stk-list{display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto;}
-.stk-row{display:flex;align-items:center;gap:8px;font-size:.78rem;}
-.stk-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.stk-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx);}
-.stk-qty{font-family:monospace;font-weight:700;color:var(--tx2);}
-/* Hide topbar logo+hamburger when sidebar is visible */
-body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!important;}
 /* ── INVENTORY VIEW TOGGLE ───────────────────────────────── */
 .inv-view-btn{padding:4px 10px;font-size:.73rem;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx3);cursor:pointer;font-weight:600;display:flex;align-items:center;gap:4px;}
 .inv-view-btn.on{background:var(--acg);border-color:var(--ac);color:var(--ac);}
@@ -452,42 +389,6 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
 </div>
 
 <!-- SIDEBAR -->
-<div id="sidebar">
-  <div class="sb-logo" onclick="toggleSidebar()">
-    <img id="sb-logo-img" src="" alt="4K POS">
-    <div class="sb-logo-txt">
-      <span class="sbl-main"><span style="color:#1e3a8a">4</span><span style="color:#1e3a8a">K</span> <span style="color:#1a7a3a">P</span><span style="color:#e6b800">O</span><span style="color:#cc1111">S</span></span>
-      <span class="sbl-sub"><span style="color:#1e3a8a">4K</span> <span style="color:#e6b800">Solutions</span></span>
-    </div>
-  </div>
-  <div class="sb-user">
-    <div id="sb-uname">—</div>
-    <div id="sb-urole"></div>
-  </div>
-  <div class="sb-nav">
-    <div class="sb-item" id="sbi-pos" onclick="sbNav('pos')">
-      <i class="ti ti-shopping-cart sb-icon"></i><span class="sb-lbl" id="sbi-pos-lbl">Vender</span>
-    </div>
-    <div class="sb-item" id="sbi-menu" onclick="reqPin('admin')">
-      <i class="ti ti-menu-2 sb-icon"></i><span class="sb-lbl" id="sbi-menu-lbl">Menú</span>
-    </div>
-    <div class="sb-item" id="sbi-clock" style="display:none" onclick="openClockQuick()">
-      <i class="ti ti-clock sb-icon" style="color:#10b981"></i><span class="sb-lbl" style="color:#10b981" id="sbi-clock-lbl">Clock</span>
-    </div>
-  </div>
-  <div class="sb-bottom">
-    <div class="sb-item" id="sbi-lock" onclick="doQuickLock()">
-      <i class="ti ti-lock sb-icon" style="color:#f87171"></i><span class="sb-lbl" id="sbi-lock-lbl" style="color:#f87171">Bloquear</span>
-    </div>
-    <div class="sb-item" id="sbi-logout" onclick="openLogout()">
-      <i class="ti ti-door-exit sb-icon" style="color:#f87171"></i><span class="sb-lbl" id="sbi-logout-lbl" style="color:#f87171">Cerrar turno</span>
-    </div>
-  </div>
-</div>
-
-<!-- SIDEBAR TOGGLE BTN -->
-<button id="sb-toggle-btn" onclick="toggleSidebar()" title="Colapsar/expandir menú" style="position:fixed;top:50%;left:200px;transform:translateY(-50%);width:20px;height:36px;background:#1E2A3A;border:1.5px solid rgba(255,255,255,.25);border-left:none;border-radius:0 6px 6px 0;color:rgba(255,255,255,.8);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.1rem;z-index:555;padding:0;transition:left .2s ease;line-height:1">‹</button>
-
 <!-- TOPBAR -->
 <div id="topbar" style="display:none">
   <div class="logo">
@@ -623,23 +524,6 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
   <span id="usr-lbl" style="display:none">—</span>
 </div>
 
-<!-- HAMBURGER MENU -->
-<div class="hmenu" id="hmenu">
-  <div class="hmi adm" id="hm-adm" onclick="closeHMenu();reqPin('admin')">🔐 <span id="hm-adm-txt">Administración</span></div>
-  <div class="hmi ret" id="hm-ret" onclick="closeHMenu();reqPin('returns')">🔄 <span id="hm-ret-txt">Devoluciones</span></div>
-  <div class="hmi sal" id="hm-sal" onclick="closeHMenu();reqPin('sales')">📊 <span id="hm-sal-txt">Ventas del día</span></div>
-  <div class="hmi conta" id="hm-conta" onclick="closeHMenu();reqPin('conta')">📒 <span id="hm-conta-txt">Contabilidad</span></div>
-  <div class="hmi" style="color:var(--tx3)" onclick="closeHMenu();openDrawer()">🗃️ <span id="hm-drawer-txt">Abrir Registradora</span></div>
-  <div class="hmi" style="color:#3b82f6" onclick="closeHMenu();openDashQR()">📱 <span id="hm-dash-qr-span">Dashboard Móvil</span></div>
-  <div class="hmi" style="color:#10b981" id="hm-update" onclick="closeHMenu();checkUpdates()">⬆️ <span id="hm-update-txt">Buscar actualizaciones</span></div>
-  <div class="hmi" style="color:#8b5cf6;display:none" id="hm-audit" onclick="closeHMenu();openAudit()">📋 <span id="hm-audit-txt">Auditoría</span></div>
-  <div class="hmi" style="color:#f59e0b" id="hm-abonos" onclick="closeHMenu();openAbonosList()">💰 <span id="hm-abonos-txt">Abonos de crédito</span></div>
-  <div class="hmi" style="color:#fbbf24" id="hm-note" onclick="closeHMenu();openWriteNote()">📋 <span id="hm-note-txt">Nota para el próximo turno</span></div>
-  <div class="hmi" style="color:#10b981;display:none" id="hm-clock" onclick="closeHMenu();openClockQuick()">⏱ <span id="hm-clock-txt">Clock In/Out</span></div>
-  <div class="hmi" style="color:#f87171" onclick="doQuickLock()">🔒 <span id="hm-lock-txt">Bloquear sesión</span></div>
-  <div id="hm-ver" style="padding:8px 16px;font-size:.68rem;color:var(--tx3);text-align:center;border-top:1px solid var(--b1);cursor:default;user-select:none"></div>
-</div>
-
 <!-- DASHBOARD QR -->
 <div class="ov" id="ov-dash-qr">
   <div class="modal" style="max-width:300px;text-align:center">
@@ -689,6 +573,11 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
         <button class="btn btn-s" onclick="admTab('t-combos',this)">🍱 <span id="tab-combos-txt">Combos</span></button>
         <button class="btn btn-s" onclick="admTab('t-specials',this)">⭐ <span id="tab-specials-txt">Especiales</span></button>
         <button class="btn btn-s" onclick="admTab('t-nomina',this)">👷 <span id="tab-nomina-txt">Nómina</span></button>
+        <button class="btn btn-s" onclick="admTab('t-dashboard',this)">📱 <span id="tab-dashboard-txt">Dashboard</span></button>
+        <button class="btn btn-s" onclick="admTab('t-labels',this)">🏷️ <span id="tab-labels-txt">Etiquetas</span></button>
+        <button class="btn btn-s" onclick="admTab('t-audit',this)">📋 <span id="tab-audit-txt">Auditoría</span></button>
+        <button class="btn btn-s" onclick="admTab('t-shiftnote',this)">📝 <span id="tab-shiftnote-txt">Nota de turno</span></button>
+        <button class="btn btn-s" onclick="admTab('t-updates',this)">⬆️ <span id="tab-updates-txt">Actualizaciones</span></button>
       </div>
       <!-- PRODUCTS -->
       <div id="t-prods">
@@ -1035,6 +924,51 @@ body.sb-open #topbar .logo,body.sb-open #topbar .hamburger-btn{display:none!impo
         <div class="slbl" id="emp-list-title">Empleados registrados</div>
         <div id="emp-list"></div>
       </div><!-- /t-nomina -->
+      <!-- DASHBOARD -->
+      <div id="t-dashboard" style="display:none">
+        <div style="text-align:center;padding:30px 16px">
+          <div style="font-size:2.5rem;margin-bottom:10px">📱</div>
+          <div style="font-size:.95rem;font-weight:700;margin-bottom:8px" id="tab-dash-h">Dashboard Móvil</div>
+          <div style="font-size:.82rem;color:var(--tx3);margin-bottom:18px" id="tab-dash-desc">Accede al dashboard en tu celular</div>
+          <button class="btn btn-p" id="tab-dash-btn" onclick="closeOv('ov-unified');setTimeout(openDashQR,80)">📱 Abrir Dashboard</button>
+        </div>
+      </div>
+      <!-- ETIQUETAS -->
+      <div id="t-labels" style="display:none">
+        <div style="text-align:center;padding:30px 16px">
+          <div style="font-size:2.5rem;margin-bottom:10px">🏷️</div>
+          <div style="font-size:.95rem;font-weight:700;margin-bottom:8px" id="tab-lbl-h">Imprimir Etiquetas</div>
+          <div style="font-size:.82rem;color:var(--tx3);margin-bottom:18px" id="tab-lbl-desc">Imprime etiquetas de precios para tus productos</div>
+          <button class="btn btn-p" id="tab-lbl-btn" onclick="closeOv('ov-unified');setTimeout(function(){openLabelModal(null);},80)">🏷️ Abrir Etiquetas</button>
+        </div>
+      </div>
+      <!-- AUDITORÍA -->
+      <div id="t-audit" style="display:none">
+        <div style="text-align:center;padding:30px 16px">
+          <div style="font-size:2.5rem;margin-bottom:10px">📋</div>
+          <div style="font-size:.95rem;font-weight:700;margin-bottom:8px" id="tab-aud-h">Registro de Auditoría</div>
+          <div style="font-size:.82rem;color:var(--tx3);margin-bottom:18px" id="tab-aud-desc">Historial de cambios realizados en el sistema</div>
+          <button class="btn btn-p" id="tab-aud-btn" onclick="closeOv('ov-unified');setTimeout(openAudit,80)">📋 Abrir Auditoría</button>
+        </div>
+      </div>
+      <!-- NOTA DE TURNO -->
+      <div id="t-shiftnote" style="display:none">
+        <div style="text-align:center;padding:30px 16px">
+          <div style="font-size:2.5rem;margin-bottom:10px">📝</div>
+          <div style="font-size:.95rem;font-weight:700;margin-bottom:8px" id="tab-note-h">Nota de turno</div>
+          <div style="font-size:.82rem;color:var(--tx3);margin-bottom:18px" id="tab-note-desc">Escribe una nota para el próximo turno</div>
+          <button class="btn btn-p" id="tab-note-btn" onclick="closeOv('ov-unified');setTimeout(openWriteNote,80)">📝 Escribir nota</button>
+        </div>
+      </div>
+      <!-- ACTUALIZACIONES -->
+      <div id="t-updates" style="display:none">
+        <div style="text-align:center;padding:30px 16px">
+          <div style="font-size:2.5rem;margin-bottom:10px">⬆️</div>
+          <div style="font-size:.95rem;font-weight:700;margin-bottom:8px" id="tab-upd-h">Actualizaciones</div>
+          <div style="font-size:.82rem;color:var(--tx3);margin-bottom:18px" id="tab-upd-desc">Verifica si hay una nueva versión disponible</div>
+          <button class="btn btn-p" id="tab-upd-btn" onclick="checkUpdates()">⬆️ Buscar actualizaciones</button>
+        </div>
+      </div>
       </div><!-- /uni-adm -->
       <div id="uni-conta" style="display:none"></div>
     </div><!-- /mb unified -->
@@ -3332,8 +3266,8 @@ function toggleHMenu(){
   if(btn){const r=btn.getBoundingClientRect();menu.style.top=(r.bottom+4)+'px';menu.style.left=r.left+'px';menu.style.right='auto';}
   menu.classList.add('open');
 }
-function closeHMenu(){el('hmenu').classList.remove('open');}
-document.addEventListener('click',function(e){if(!el('hmenu').contains(e.target)&&!e.target.classList.contains('hamburger-btn'))closeHMenu();});
+function closeHMenu(){}
+
  
 // DRAWER
 function openDrawer(){
@@ -4008,7 +3942,7 @@ function uniTab(section,btn){
     el('uni-adm').style.display='';
     el('uni-conta').style.display='none';
     el('adm-tabs').style.display='none';
-    ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits','t-combos','t-specials','t-nomina'].forEach(function(t){var e=el(t);if(e)e.style.display='none';});
+    ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits','t-combos','t-specials','t-nomina','t-dashboard','t-labels','t-audit','t-shiftnote','t-updates'].forEach(function(t){var e=el(t);if(e)e.style.display='none';});
     var cfg=el('t-cfg');if(cfg)cfg.style.display='';
   }else{
     el('uni-adm').style.display=(section==='uni-adm')?'':'none';
@@ -6218,7 +6152,7 @@ function loadAdminModal(){
   _updateBkpPassUI();
 }
 function admTab(tab,e2){
-  ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits','t-combos','t-specials','t-nomina'].forEach(t=>{const el2=el(t);if(el2)el2.style.display='none';});
+  ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits','t-combos','t-specials','t-nomina','t-dashboard','t-labels','t-audit','t-shiftnote','t-updates'].forEach(t=>{const el2=el(t);if(el2)el2.style.display='none';});
   el(tab).style.display='block';
   document.querySelectorAll('#adm-tabs .btn').forEach(b=>b.className='btn btn-s');
   if(e2)e2.className='btn btn-p';
