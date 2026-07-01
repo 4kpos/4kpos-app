@@ -524,6 +524,19 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <span id="usr-lbl" style="display:none">—</span>
 </div>
 
+<!-- DEVICE LIMIT ERROR -->
+<div class="ov" id="ov-device-limit" style="z-index:9999">
+  <div class="modal" style="max-width:360px;text-align:center">
+    <div class="mh"><h3>⚠ Límite de dispositivos</h3></div>
+    <div class="mb" style="padding:20px 16px">
+      <div style="font-size:2rem;margin-bottom:12px">🖥️</div>
+      <div style="font-size:.92rem;font-weight:700;margin-bottom:10px" id="dev-limit-title">Límite de PCs alcanzado</div>
+      <div style="font-size:.82rem;color:var(--tx3);margin-bottom:18px" id="dev-limit-msg">Tu plan Básico permite solo 1 PC registrada. Para usar 4K POS en más equipos, actualiza al plan Pro (hasta 3 PCs).</div>
+      <button class="btn btn-p" style="width:100%" onclick="try{ipcRenderer.invoke('exit-app');}catch(e){window.close();}">Cerrar programa</button>
+    </div>
+  </div>
+</div>
+
 <!-- DASHBOARD QR -->
 <div class="ov" id="ov-dash-qr">
   <div class="modal" style="max-width:300px;text-align:center">
@@ -573,7 +586,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <button class="btn btn-s" onclick="admTab('t-combos',this)">🍱 <span id="tab-combos-txt">Combos</span></button>
         <button class="btn btn-s" onclick="admTab('t-specials',this)">⭐ <span id="tab-specials-txt">Especiales</span></button>
         <button class="btn btn-s" onclick="admTab('t-nomina',this)">👷 <span id="tab-nomina-txt">Nómina</span></button>
-        <button class="btn btn-s" onclick="admTab('t-dashboard',this)">📱 <span id="tab-dashboard-txt">Dashboard</span></button>
+        <button class="btn btn-s" onclick="admTab('t-dashboard',this)">📊 <span id="tab-dashboard-txt">Dashboard</span></button>
+        <button class="btn btn-s" id="tab-dash-mobile-btn" onclick="admTab('t-dash-mobile',this);updateTabDashMobile()">📱 <span id="tab-dash-mobile-txt">Dashboard Móvil</span></button>
         <button class="btn btn-s" onclick="admTab('t-labels',this)">🏷️ <span id="tab-labels-txt">Etiquetas</span></button>
         <button class="btn btn-s" onclick="admTab('t-audit',this)">📋 <span id="tab-audit-txt">Auditoría</span></button>
         <button class="btn btn-s" onclick="admTab('t-shiftnote',this)">📝 <span id="tab-shiftnote-txt">Nota de turno</span></button>
@@ -927,10 +941,20 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <!-- DASHBOARD -->
       <div id="t-dashboard" style="display:none">
         <div style="text-align:center;padding:30px 16px">
+          <div style="font-size:2.5rem;margin-bottom:10px">📊</div>
+          <div style="font-size:.95rem;font-weight:700;margin-bottom:8px" id="tab-pc-dash-h">Dashboard</div>
+          <div style="font-size:.82rem;color:var(--tx3);margin-bottom:18px" id="tab-pc-dash-desc">Ventas del día, créditos, inventario y más</div>
+          <button class="btn btn-p" onclick="closeOv('ov-unified');setTimeout(function(){sbNav('dash');},80)">📊 Abrir Dashboard</button>
+        </div>
+      </div>
+      <!-- DASHBOARD MÓVIL -->
+      <div id="t-dash-mobile" style="display:none">
+        <div style="text-align:center;padding:30px 16px">
           <div style="font-size:2.5rem;margin-bottom:10px">📱</div>
           <div style="font-size:.95rem;font-weight:700;margin-bottom:8px" id="tab-dash-h">Dashboard Móvil</div>
           <div style="font-size:.82rem;color:var(--tx3);margin-bottom:18px" id="tab-dash-desc">Accede al dashboard en tu celular</div>
           <button class="btn btn-p" id="tab-dash-btn" onclick="closeOv('ov-unified');setTimeout(openDashQR,80)">📱 Abrir Dashboard</button>
+          <div id="tab-dash-pro-msg" style="display:none;margin-top:14px;padding:12px;background:var(--s2);border-radius:var(--rs);font-size:.82rem;color:var(--tx3)">⚠ <span id="tab-dash-pro-txt">Disponible solo en plan Pro</span></div>
         </div>
       </div>
       <!-- ETIQUETAS -->
@@ -2631,7 +2655,7 @@ function t(k){ return (T[lang]&&T[lang][k]) || T.es[k] || k; }
 
 // STATE
 let dark=true;
-let db={products:[],categories:[],sales:[],returns:[],orderNum:1,adminCode:'1234',
+let db={products:[],categories:[],sales:[],returns:[],orderNum:1,adminCode:'1234',devices:[],
   users:[{id:'1',name:'Admin',user:'admin',pass:'1234',role:'admin',perms:{adm:true,ret:true,can:true,sal:true,conta:true,fac:true,gst:true}}],
   fundAmount:0,customers:[],credits:[],payMethods:{cash:true,card:true,transf:true,openAccounts:true,credit:false},
   drawerPort:'COM3',drawerAuto:true,
@@ -3303,20 +3327,55 @@ function openDashboard(){
 function updateDashBtn(){
   ipcRenderer.invoke('get-license-info').then(function(info){
     const dash=el('hm-dash');
-    if(!dash)return;
-    const isAdm=curUser&&curUser.role==='admin';
-    const isPro=isAdm||(info&&['pro','lifetime'].includes((info.plan||'').toLowerCase()));
-    dash.style.display='flex';
-    if(isPro){
-      dash.style.opacity='1';dash.style.cursor='pointer';
-      const txt=el('hm-dash-txt');if(txt)txt.textContent=t('dashboardBtn');
-    }else{
-      dash.style.opacity='0.45';dash.style.cursor='default';
-      const txt=el('hm-dash-txt');if(txt)txt.textContent=t('dashboardBtn')+' (Pro)';
+    if(dash){
+      const isAdm=curUser&&curUser.role==='admin';
+      const isPro=isAdm||(info&&['pro','lifetime'].includes((info.plan||'').toLowerCase()));
+      dash.style.display='flex';
+      if(isPro){
+        dash.style.opacity='1';dash.style.cursor='pointer';
+        const txt=el('hm-dash-txt');if(txt)txt.textContent=t('dashboardBtn');
+      }else{
+        dash.style.opacity='0.45';dash.style.cursor='default';
+        const txt=el('hm-dash-txt');if(txt)txt.textContent=t('dashboardBtn')+' (Pro)';
+      }
     }
+    _applyMobileDashPlan(info);
   }).catch(function(){
     const dash=el('hm-dash');if(dash)dash.style.display='flex';
   });
+}
+function _applyMobileDashPlan(info){
+  const isAdm=curUser&&curUser.role==='admin';
+  const isPro=isAdm||(info&&['pro','lifetime'].includes((info.plan||'').toLowerCase()));
+  const btn=el('tab-dash-btn');const msg=el('tab-dash-pro-msg');
+  if(btn)btn.style.display=isPro?'':'none';
+  if(msg)msg.style.display=isPro?'none':'block';
+  const sbiQr=el('sbi-dash-qr');
+  if(sbiQr){sbiQr.style.opacity=isPro?'1':'0.45';sbiQr.style.pointerEvents=isPro?'':'none';}
+}
+function updateTabDashMobile(){
+  ipcRenderer.invoke('get-license-info').then(function(info){_applyMobileDashPlan(info);}).catch(function(){});
+}
+async function checkDeviceLimit(){
+  try{
+    const info=await ipcRenderer.invoke('get-license-info');
+    if(!info||!db._lic)return;
+    const plan=(info.plan||'').toLowerCase();
+    const isBasic=plan.startsWith('basic');
+    const isPro=plan.startsWith('pro')||plan==='lifetime';
+    const maxPCs=isPro?3:(isBasic?1:1);
+    const hwId=await ipcRenderer.invoke('get-hardware-id').catch(function(){return null;});
+    const devices=db.devices||[];
+    if(devices.length>0){
+      const thisInList=devices.some(function(d){return d.hardware_id===hwId||d.hardwareId===hwId;});
+      if(!thisInList&&devices.length>=maxPCs){
+        const planLabel=isBasic?'Básico':'Pro';
+        const limitEl=el('dev-limit-msg');
+        if(limitEl)limitEl.textContent='Tu plan '+planLabel+' permite solo '+maxPCs+' PC'+(maxPCs>1?'s':'')+' registrada'+(maxPCs>1?'s':'')+'. Para usar 4K POS en más equipos, actualiza al plan Pro (hasta 3 PCs).';
+        openOv('ov-device-limit');
+      }
+    }
+  }catch(e){console.warn('[DeviceLimit]',e);}
 }
 // DATA
 async function loadDB(){
@@ -3371,6 +3430,7 @@ async function loadDB(){
         if(_d.combos&&_d.combos.length)db.combos=_d.combos;
         if(_d.specials&&_d.specials.length)db.specials=_d.specials;
         if(_d.employees&&_d.employees.length)db.employees=_d.employees;
+        if(_d.devices&&_d.devices.length)db.devices=_d.devices;
         if(_d.orderNum)db.orderNum=_d.orderNum;
         if(_d.fundAmount!==undefined)db.fundAmount=_d.fundAmount;
         if(_d.payMethods)db.payMethods=Object.assign(db.payMethods||{},_d.payMethods);
@@ -3753,7 +3813,7 @@ function startApp(){
 
   showCategories();
   renderCart();
-  updateLicBadge();updateDashBtn();
+  updateLicBadge();updateDashBtn();checkDeviceLimit();
   updateOACounter();_startNotifTimer();
   if(!window._cdSyncInt){window._cdSyncInt=setInterval(syncCreditDirect,30000);setTimeout(syncCreditDirect,3000);}
   if(!window._shiftHbInt){window._shiftHbInt=setInterval(function(){if(db.cfg&&db.cfg.shiftOpen&&curUser){syncShiftStatusDirect({active:true,currentUser:curUser.name,shiftOpenedAt:db.cfg.shiftOpenAt||new Date().toISOString(),lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg.pendingShiftNote||null});}},5*60*1000);}
@@ -6152,7 +6212,7 @@ function loadAdminModal(){
   _updateBkpPassUI();
 }
 function admTab(tab,e2){
-  ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits','t-combos','t-specials','t-nomina','t-dashboard','t-labels','t-audit','t-shiftnote','t-updates'].forEach(t=>{const el2=el(t);if(el2)el2.style.display='none';});
+  ['t-prods','t-cats','t-users','t-cfg','t-inv','t-cust','t-credits','t-combos','t-specials','t-nomina','t-dashboard','t-dash-mobile','t-labels','t-audit','t-shiftnote','t-updates'].forEach(t=>{const el2=el(t);if(el2)el2.style.display='none';});
   el(tab).style.display='block';
   document.querySelectorAll('#adm-tabs .btn').forEach(b=>b.className='btn btn-s');
   if(e2)e2.className='btn btn-p';
