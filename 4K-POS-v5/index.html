@@ -201,11 +201,11 @@ body.light .chgbox{color:#15803d!important;border-color:#15803d!important;backgr
 .usr-lbl{font-size:.72rem;color:#fff!important;}
 .hamburger-btn{background:var(--s2);border:1.5px solid var(--b1);color:var(--tx2);padding:8px 13px;border-radius:var(--rs);cursor:pointer;font-size:1.1rem;transition:all .2s;}
 .hamburger-btn:hover{border-color:var(--ac);color:var(--ac);}
-#ham-menu{position:absolute;top:44px;left:0;z-index:2000;background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);padding:5px;min-width:220px;box-shadow:0 8px 28px rgba(0,0,0,.45);display:none;}
-.ham-item{width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;border:none;background:transparent;color:var(--tx);cursor:pointer;border-radius:var(--rs);font-size:.86rem;font-weight:600;text-align:left;transition:background .12s;}
+#ham-menu{position:absolute;top:44px;left:0;z-index:2000;background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);padding:5px;min-width:228px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 28px rgba(0,0,0,.5);display:none;}
+.ham-item{width:100%;display:flex;align-items:center;gap:9px;padding:8px 12px;border:none;background:transparent;color:var(--tx);cursor:pointer;border-radius:var(--rs);font-size:.84rem;font-weight:600;text-align:left;transition:background .12s;}
 .ham-item:hover{background:var(--s2);}
-.ham-sep{height:1px;background:var(--b1);margin:4px 0;}
-.ham-sec{font-size:.65rem;font-weight:700;color:var(--tx3);letter-spacing:.7px;text-transform:uppercase;padding:7px 12px 3px;}
+.ham-sep{height:1px;background:var(--b1);margin:3px 0;}
+.ham-sec{font-size:.62rem;font-weight:700;color:var(--tx3);letter-spacing:.8px;text-transform:uppercase;padding:8px 12px 2px;}
 .pp-hd{padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;}
 .pp-item{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--rs);padding:9px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s;}
 .pp-item:hover{border-color:var(--ac);}
@@ -367,7 +367,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 .db-top5 table{width:100%;border-collapse:collapse;}
 .db-top5 th{font-size:.7rem;color:var(--tx3);font-weight:600;padding:4px 4px;border-bottom:1px solid var(--b1);text-align:left;}
 .db-top5 td{padding:5px 4px;border-bottom:1px solid var(--b1);color:var(--tx2);}
-.stk-list{overflow-y:auto;max-height:210px;}
+.stk-list{overflow-y:auto;max-height:140px;}
 .stk-list table{width:100%;border-collapse:collapse;}
 .stk-list th{font-size:.68rem;color:var(--tx3);font-weight:600;padding:3px 6px;border-bottom:1px solid var(--b1);text-align:left;}
 .stk-list th:last-child{text-align:right;}
@@ -438,17 +438,35 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div style="position:relative;margin:0 6px;flex-shrink:0">
     <button class="hamburger-btn" id="ham-btn" onclick="toggleHamMenu(event)">☰</button>
     <div id="ham-menu">
-      <div class="ham-sec" id="ham-sec-principal">PRINCIPAL</div>
-      <button class="ham-item" onclick="closeHamMenu();sbNav('dash')">📊 <span id="ham-lbl-dash">Dashboard</span></button>
-      <button class="ham-item" id="ham-dash-mobile-btn" onclick="closeHamMenu();_hamOpenDashMobile()">📱 <span id="ham-lbl-dash-mobile">Dashboard Móvil</span></button>
+      <div class="ham-sec">PRINCIPAL</div>
+      <button class="ham-item" onclick="closeHamMenu();sbNav('dash')">📊 Dashboard</button>
+      <button class="ham-item" onclick="closeHamMenu();_hamOpenDashMobile()">📱 Dashboard Móvil</button>
       <div class="ham-sep"></div>
-      <div class="ham-sec" id="ham-sec-gestion">GESTIÓN</div>
-      <button class="ham-item" onclick="closeHamMenu();_sbNextUniSection='uni-adm';reqPin('admin')">🏪 <span id="ham-lbl-adm">Administración</span></button>
-      <button class="ham-item" onclick="closeHamMenu();reqPin('conta')">📒 <span id="ham-lbl-conta">Contabilidad</span></button>
-      <button class="ham-item" onclick="closeHamMenu();_sbNextUniSection='uni-ajustes';reqPin('admin')">⚙️ <span id="ham-lbl-ajustes">Ajustes</span></button>
+      <div class="ham-sec">INVENTARIO</div>
+      <button class="ham-item" onclick="_openDirect('t-prods')">📦 Productos</button>
+      <button class="ham-item" onclick="_openDirect('t-cats')">🗂️ Categorías</button>
+      <button class="ham-item" onclick="_openDirect('t-inv')">📋 Inventario</button>
+      <button class="ham-item" onclick="_openDirect('t-labels')">🏷️ Etiquetas</button>
+      <div class="ham-sep"></div>
+      <div class="ham-sec">VENTAS</div>
+      <button class="ham-item" onclick="closeHamMenu();reqPin('sales')">💰 Ventas del día</button>
+      <button class="ham-item" onclick="closeHamMenu();reqPin('returns')">↩️ Devoluciones</button>
+      <button class="ham-item" onclick="closeHamMenu();openCreditsPanel()">💳 Créditos</button>
+      <div class="ham-sep"></div>
+      <div class="ham-sec">ADMINISTRACIÓN</div>
+      <button class="ham-item" onclick="_openDirect('t-users')">👥 Usuarios</button>
+      <button class="ham-item" onclick="_openDirect('t-nomina')">👷 Nómina</button>
+      <button class="ham-item" onclick="_openDirect('t-audit')">📋 Auditoría</button>
+      <button class="ham-item" onclick="_openDirect('t-shiftnote')">📝 Nota de turno</button>
+      <button class="ham-item" onclick="_openDirect('t-updates')">🔄 Actualizaciones</button>
+      <div class="ham-sep"></div>
+      <div class="ham-sec">CONFIGURACIÓN</div>
+      <button class="ham-item" onclick="_openDirect('t-cfg')">⚙️ Config / Ajustes</button>
+      <button class="ham-item" onclick="_openContaDirect()">📒 Contabilidad</button>
+      <button class="ham-item" onclick="closeHamMenu();openDrawer()">🗃️ Registradora</button>
       <div id="ham-clock-item" style="display:none">
         <div class="ham-sep"></div>
-        <button class="ham-item" style="color:#10b981" onclick="closeHamMenu();openClockQuick()">⏱ <span id="ham-lbl-clock">Clock In/Out</span></button>
+        <button class="ham-item" style="color:#10b981" onclick="closeHamMenu();openClockQuick()">⏱ Clock In/Out</button>
       </div>
     </div>
   </div>
@@ -581,6 +599,16 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <div class="db-card">
       <div class="db-card-hd"><h4>Métodos de pago hoy</h4></div>
       <div id="db-pay-chart"></div>
+    </div>
+  </div>
+  <div class="db-row">
+    <div class="db-card">
+      <div class="db-card-hd"><h4>💳 Créditos pendientes</h4></div>
+      <div id="db-credits-list"></div>
+    </div>
+    <div class="db-card">
+      <div class="db-card-hd"><h4>🧾 Ventas recientes</h4></div>
+      <div id="db-recent-sales"></div>
     </div>
   </div>
 </div>
@@ -4227,6 +4255,18 @@ function reqPin(target){
 var _sbNextAdmTab=null;
 var _sbNextContaTab=null;
 var _sbNextUniSection=null;
+var _hamDirectMode=false;
+function _openDirect(tab){
+  closeHamMenu();
+  _hamDirectMode=true;
+  _sbNextAdmTab=tab;
+  reqPin('admin');
+}
+function _openContaDirect(){
+  closeHamMenu();
+  _hamDirectMode=true;
+  reqPin('conta');
+}
 function uniTab(section,btn){
   document.querySelectorAll('#uni-top-tabs .btn').forEach(function(b){b.className='btn btn-s';});
   if(btn&&!btn.closest('#uni-clock-btn'))btn.className='btn btn-p';
@@ -4247,6 +4287,9 @@ function uniTab(section,btn){
 function openUnified(section){
   loadAdminModal();
   openOv('ov-unified');
+  /* Restore nav bars (may have been hidden by _openDirect) */
+  var _tt=el('uni-top-tabs');if(_tt)_tt.style.display='';
+  var _at=el('adm-tabs');if(_at)_at.style.display='';
   var s=section||'uni-adm';
   var btnMap={'uni-adm':'uni-btn-adm','uni-conta':'uni-btn-conta','uni-ajustes':'uni-btn-ajustes'};
   uniTab(s,el(btnMap[s]||'uni-btn-adm'));
@@ -4256,6 +4299,11 @@ function openUnified(section){
     var _cb=document.querySelector('#conta-tabs .btn[onclick*="\''+_ct+'\'"]');contaTab(_ct,_cb||null);}
   var cb=el('uni-clock-btn');
   if(cb)cb.style.display=(db&&db.settings&&db.settings.clockQuickEnabled&&db.employees&&db.employees.some(function(e){return e.useClockInOut;}))?'':'none';
+  if(_hamDirectMode){
+    _hamDirectMode=false;
+    if(_tt)_tt.style.display='none';
+    if(_at)_at.style.display='none';
+  }
 }
 function initUnifiedModal(){
   var uc=el('uni-conta'),oc=el('ov-conta');
@@ -8375,6 +8423,8 @@ function refreshDashboard(){
   _renderDbTop5();
   _renderDbStock();
   _renderDbPayMethods();
+  _renderDbCredits();
+  _renderDbRecentSales();
 }
 function _shortNum(n){
   if(n>=1000000)return '$'+(n/1000000).toFixed(1)+'M';
@@ -8402,11 +8452,11 @@ function _renderDbChart(){
       cols.push({lbl:'S'+(4-w),val:tot2,today:w===0});
     }
   }
-  var VW=400,VH=120,pL=38,pR=6,pT=16,pB=20;
+  var VW=400,VH=90,pL=36,pR=6,pT=10,pB=16;
   var cW=VW-pL-pR,cH=VH-pT-pB;
   var n=cols.length;
   var slotW=cW/n;
-  var barW=Math.round(slotW*0.44);
+  var barW=Math.min(20,Math.round(slotW*0.38));
   var maxVal=Math.max.apply(null,cols.map(function(c){return c.val;}))||1;
   /* Y-axis grid */
   var grid='';
@@ -8465,6 +8515,52 @@ function _renderDbTop5(){
         +'</div>';
     }).join('')+'</div>'):'';
   el5.innerHTML=card1+grid;
+}
+function _renderDbCredits(){
+  var el6=el('db-credits-list');if(!el6)return;
+  var credits=(db.credits||[]).filter(function(c){return (c.total||0)-(c.paid||0)>0.005;});
+  if(!credits.length){el6.innerHTML='<p style="font-size:.75rem;color:var(--gn);padding:6px 0">✓ Sin créditos pendientes</p>';return;}
+  var sorted=credits.slice().sort(function(a,b){
+    var da=a.creditDueDate?new Date(a.creditDueDate):new Date(a.date);
+    var db2=b.creditDueDate?new Date(b.creditDueDate):new Date(b.date);
+    return da-db2;
+  }).slice(0,8);
+  el6.innerHTML='<div style="display:flex;flex-direction:column;gap:5px">'
+    +sorted.map(function(c){
+      var pending=(c.total||0)-(c.paid||0);
+      var due=c.creditDueDate?new Date(c.creditDueDate):null;
+      var daysLeft=due?Math.ceil((due-Date.now())/864e5):null;
+      var dueStr=daysLeft!=null?(daysLeft<0?'<span style="color:#ef4444;font-weight:700">Vencido '+Math.abs(daysLeft)+'d</span>'
+        :(daysLeft===0?'<span style="color:#f59e0b;font-weight:700">Vence hoy</span>'
+        :(daysLeft<=3?'<span style="color:#f59e0b">'+daysLeft+'d</span>'
+        :'<span style="color:var(--tx3)">'+daysLeft+'d</span>'))):'';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--b1)">'
+        +'<div><div style="font-size:.78rem;font-weight:600;color:var(--tx);overflow:hidden;white-space:nowrap;max-width:100px;text-overflow:ellipsis">'+escHtml(c.client||'—')+'</div>'
+        +(dueStr?'<div style="font-size:.68rem;margin-top:1px">'+dueStr+'</div>':'')
+        +'</div>'
+        +'<span style="font-size:.8rem;font-family:monospace;font-weight:700;color:#ef4444">'+dolr(pending)+'</span>'
+        +'</div>';
+    }).join('')+'</div>';
+}
+function _renderDbRecentSales(){
+  var el7=el('db-recent-sales');if(!el7)return;
+  var today=new Date().toDateString();
+  var sales=(db.sales||[]).filter(function(s){
+    return s.status!=='cancelled'&&new Date(s.date).toDateString()===today;
+  }).slice(-5).reverse();
+  if(!sales.length){el7.innerHTML='<p style="font-size:.75rem;color:var(--tx3);padding:6px 0">Sin ventas hoy todavía</p>';return;}
+  el7.innerHTML='<div style="display:flex;flex-direction:column;gap:5px">'
+    +sales.map(function(s){
+      var t2=fmtTime(s.date);
+      var items=(s.items||[]);
+      var itemsStr=items.length?items.slice(0,2).map(function(i){return i.name;}).join(', ')+(items.length>2?' +'+( items.length-2):''):'—';
+      var payClr={cash:'#22c55e',card:'#3b82f6',transf:'#8b5cf6',credit:'#ef4444',split:'#f59e0b'}[s.payMethod]||'var(--tx3)';
+      return '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--b1)">'
+        +'<div><div style="font-size:.7rem;color:var(--tx3)">'+t2+'</div>'
+        +'<div style="font-size:.76rem;color:var(--tx);overflow:hidden;white-space:nowrap;max-width:120px;text-overflow:ellipsis">'+escHtml(itemsStr)+'</div></div>'
+        +'<span style="font-size:.8rem;font-family:monospace;font-weight:700;color:'+payClr+'">'+dolr(s.total)+'</span>'
+        +'</div>';
+    }).join('')+'</div>';
 }
 function _renderDbPayMethods(){
   var payEl=el('db-pay-chart');if(!payEl)return;
