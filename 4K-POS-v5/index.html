@@ -2943,20 +2943,20 @@ function startLicenseWatcher(){
       var rows=await res.json();if(!rows||!rows.length)return;
       var lic=rows[0];
       if((lic.status&&lic.status!=='active')||(lic.expires_at&&new Date(lic.expires_at)<new Date())){
-        toast('⚠ Licencia no válida. El sistema se bloqueará en 15 minutos.');
-        setTimeout(function(){_showLicError('Licencia expirada o desactivada. Guarda tu trabajo y contacta a soporte.','Licencia no válida');},15*60*1000);
+        _showLicError('Licencia expirada o desactivada. Guarda tu trabajo y contacta a soporte.','Licencia no válida');
       }else{
         var prevPlan=db._localPlan||'';
         db.license=Object.assign(db.license||{},lic);db._localPlan=lic.plan||'';
         _applyPlanUI();
+        updateLicBadge();
         if(typeof refreshLicenseInfo==='function')refreshLicenseInfo();
         if(prevPlan&&lic.plan&&prevPlan!==lic.plan)toast('✅ Plan actualizado: '+_planLabel(lic.plan));
       }
     }catch(e){}
-  },10*60*1000);
+  },2*60*1000);
 }
 function openDashQR(){
-  const url='https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html';
+  const url='https://4kpos.github.io/4kpos-dashboard/4kpos-dashboard.html?v='+Date.now();
   const qr=el('dash-qr-img');if(qr)qr.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(url);
   const lnk=el('dash-qr-link');if(lnk){lnk.dataset.url=url;lnk.textContent=url;}
   const upg=el('dash-qr-upgrade');if(upg)upg.style.display=_isPlanPro()?'none':'block';
@@ -4121,6 +4121,7 @@ function syncShiftStatusDirect(payload){
 function confirmShift(){
   el('shift-open-screen').classList.remove('show');
   syncShiftStatus('open');
+  _autoClockShift('in');
   startApp();
 }
 function startApp(){
@@ -4231,6 +4232,7 @@ function calcCashDiff(){
   }
 }
 function doLogout(){
+  _autoClockShift('out');
   _stopInactivityTimer();_bkpKey=null;
   if(window._shiftHbInt){clearInterval(window._shiftHbInt);window._shiftHbInt=null;}
   // Save shift record
@@ -5351,31 +5353,54 @@ function _cqToggleCompleta(type){
   var row=el('cq-admin-time2-row');
   if(row)row.style.display=(type==='both')?'':'none';
 }
-function cqAdminRecord(){
-  var empId=(el('cq-admin-emp')||{}).value;
-  var type=(el('cq-admin-type')||{}).value;
-  var timeStr=(el('cq-admin-time')||{}).value;
-  if(!empId||!timeStr){toast('Selecciona empleado y hora');return;}
-  var emp=(db.employees||[]).find(function(e){return e.id===empId;});if(!emp)return;
+function _autoClockShift(dir){
+  if(!curUser)return;
+  var emp=(db.employees||[]).find(function(e){
+    if(!e.useClockInOut)return false;
+    if(e.name===curUser.name)return true;
+    if(e._userId)return (db.users||[]).some(function(u){return u.id===e._userId&&u.name===curUser.name;});
+    return false;
+  });
+  if(!emp)return;
   if(!emp.clockEvents)emp.clockEvents=[];
-  var ts=new Date(timeStr).toISOString();
-  if(type==='both'){
-    var timeStr2=(el('cq-admin-time2')||{}).value;
-    if(!timeStr2){toast('Ingresa hora de salida');return;}
-    var ts2=new Date(timeStr2).toISOString();
-    if(new Date(ts2)<=new Date(ts)){toast('La salida debe ser después de la entrada');return;}
-    emp.clockEvents.push({id:'ce_'+Date.now(),in:ts,out:ts2,manual:true});
-    saveDB();toast('Registro completo: '+emp.name);
-  }else if(type==='in'){
-    emp.clockEvents.push({id:'ce_'+Date.now(),in:ts,out:null,manual:true});
-    saveDB();toast('Entrada manual: '+emp.name);
+  var now=new Date().toISOString();
+  if(dir==='in'){
+    if(!emp.clockEvents.find(function(ev){return ev.in&&!ev.out;})){
+      emp.clockEvents.push({id:'ce_'+Date.now(),in:now,out:null,autoShift:true});
+      saveDB();
+    }
   }else{
-    var active=emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
-    if(!active){toast('Sin entrada activa para '+emp.name);return;}
-    active.out=ts;active.manualOut=true;
-    saveDB();toast('Salida manual: '+emp.name);
+    var ae=emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
+    if(ae){ae.out=now;ae.autoShiftOut=true;saveDB();}
   }
-  renderClockQuickList();_renderCqHist();renderEmployeeList();
+}
+function cqAdminRecord(){
+  requireAdminCode('Ajuste manual de asistencia',function(){
+    var empId=(el('cq-admin-emp')||{}).value;
+    var type=(el('cq-admin-type')||{}).value;
+    var timeStr=(el('cq-admin-time')||{}).value;
+    if(!empId||!timeStr){toast('Selecciona empleado y hora');return;}
+    var emp=(db.employees||[]).find(function(e){return e.id===empId;});if(!emp)return;
+    if(!emp.clockEvents)emp.clockEvents=[];
+    var ts=new Date(timeStr).toISOString();
+    if(type==='both'){
+      var timeStr2=(el('cq-admin-time2')||{}).value;
+      if(!timeStr2){toast('Ingresa hora de salida');return;}
+      var ts2=new Date(timeStr2).toISOString();
+      if(new Date(ts2)<=new Date(ts)){toast('La salida debe ser después de la entrada');return;}
+      emp.clockEvents.push({id:'ce_'+Date.now(),in:ts,out:ts2,manual:true});
+      saveDB();toast('Registro completo: '+emp.name);
+    }else if(type==='in'){
+      emp.clockEvents.push({id:'ce_'+Date.now(),in:ts,out:null,manual:true});
+      saveDB();toast('Entrada manual: '+emp.name);
+    }else{
+      var active=emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
+      if(!active){toast('Sin entrada activa para '+emp.name);return;}
+      active.out=ts;active.manualOut=true;
+      saveDB();toast('Salida manual: '+emp.name);
+    }
+    renderClockQuickList();_renderCqHist();renderEmployeeList();
+  });
 }
 function renderClockQuickList(){
   var container=el('cq-list');if(!container)return;
