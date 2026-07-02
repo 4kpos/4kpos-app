@@ -2876,7 +2876,7 @@ async function loadLicenseFromSupabase(){
     db._localPlan=localLic.plan||'';
     var res;
     try{
-      res=await fetch(SUPA_URL+'/rest/v1/licenses?key=eq.'+encodeURIComponent(localLic.key)+'&select=key,plan,active,devices,expires_at,business_name,email,created_at',
+      res=await fetch(SUPA_URL+'/rest/v1/licenses?key=eq.'+encodeURIComponent(localLic.key)+'&select=key,plan,status,device_id,expires_at,business_name,email,created_at',
         {headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Accept':'application/json'}});
     }catch(netErr){return _handleOfflineLicense(localLic);}
     if(!res.ok){return _handleOfflineLicense(localLic);}
@@ -2884,31 +2884,29 @@ async function loadLicenseFromSupabase(){
     if(!rows||!rows.length){_showLicError('Licencia no encontrada. Verifica tu clave de activación.','Licencia inválida');return;}
     var lic=rows[0];
     db.license=lic;db._localPlan=lic.plan||'';
-    /* Ensure key is stored (may not be in select response if column is hidden) */
     if(!db.license.key)db.license.key=localLic.key;
     db._licKeyLocal=localLic.key;
-    if(!lic.active){_showLicError('Tu licencia está inactiva. Contacta a soporte para reactivarla.','Licencia inactiva');return;}
+    if(lic.status&&lic.status!=='active'){_showLicError('Tu licencia está inactiva. Contacta a soporte para reactivarla.','Licencia inactiva');return;}
     if(lic.expires_at&&new Date(lic.expires_at)<new Date()){
       _showLicError('Licencia vencida el '+new Date(lic.expires_at).toLocaleDateString(lang||'es')+'. Renueva tu plan para continuar.','Licencia vencida');return;
     }
     var machineId=await ipcRenderer.invoke('get-machine-id').catch(function(){return null;});
     if(machineId){
       var plan=(lic.plan||'').toLowerCase();
-      var maxDev=(plan.startsWith('pro')||plan==='lifetime')?3:1;
-      var devs=Array.isArray(lic.devices)?lic.devices:[];
-      db.devices=devs;
-      if(!devs.includes(machineId)){
-        if(devs.length>=maxDev){
-          _showLicError('Límite de '+maxDev+' PC'+(maxDev>1?'s':'')+' alcanzado para tu plan. '+(maxDev===1?'Actualiza al plan Pro para usar en hasta 3 PCs.':'Contacta a soporte.'),'Límite de dispositivos');return;
-        }
+      var isPro=plan.startsWith('pro')||plan==='lifetime';
+      var regId=lic.device_id||null;
+      db.device_id=regId;
+      if(!regId){
+        /* First activation — register this machine */
         try{
-          var newDevs=devs.concat([machineId]);
           await fetch(SUPA_URL+'/rest/v1/licenses?key=eq.'+encodeURIComponent(localLic.key),
             {method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
-            body:JSON.stringify({devices:newDevs})});
-          db.devices=newDevs;
-          if(db.license)db.license.devices=newDevs;
+            body:JSON.stringify({device_id:machineId})});
+          db.device_id=machineId;if(db.license)db.license.device_id=machineId;
         }catch(regErr){console.warn('[Lic] register:',regErr);}
+      }else if(regId!==machineId&&!isPro){
+        /* Different machine, basic plan → block */
+        _showLicError('Esta licencia ya está activada en otro PC. Actualiza al plan Pro para usar en múltiples PCs.','Límite de dispositivos');return;
       }
     }
     _applyPlanUI();
@@ -2939,12 +2937,12 @@ function startLicenseWatcher(){
     try{
       var localLic=await ipcRenderer.invoke('get-license-info');
       if(!localLic||!localLic.key)return;
-      var res=await fetch(SUPA_URL+'/rest/v1/licenses?key=eq.'+encodeURIComponent(localLic.key)+'&select=plan,active,expires_at,created_at',
+      var res=await fetch(SUPA_URL+'/rest/v1/licenses?key=eq.'+encodeURIComponent(localLic.key)+'&select=plan,status,expires_at,created_at',
         {headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Accept':'application/json'}});
       if(!res.ok)return;
       var rows=await res.json();if(!rows||!rows.length)return;
       var lic=rows[0];
-      if(!lic.active||(lic.expires_at&&new Date(lic.expires_at)<new Date())){
+      if((lic.status&&lic.status!=='active')||(lic.expires_at&&new Date(lic.expires_at)<new Date())){
         toast('⚠ Licencia no válida. El sistema se bloqueará en 15 minutos.');
         setTimeout(function(){_showLicError('Licencia expirada o desactivada. Guarda tu trabajo y contacta a soporte.','Licencia no válida');},15*60*1000);
       }else{
@@ -3656,8 +3654,8 @@ function refreshLicenseInfo(){
   function _fillLicUI(lic,li){
     var plan=(lic&&lic.plan)||(li&&li.plan)||(db&&db._localPlan)||'';
     var planEl=el('lic-info-plan');if(planEl)planEl.textContent=_planLabel(plan)||'—';
-    /* Status: lic.active is a boolean from Supabase. Offline mode sets active:true */
-    var active=(lic&&(lic.active===true||lic.active===undefined||(lic.status&&lic.status!=='inactive')))||(!lic&&true);
+    /* status is a text field: "active" | "inactive". Offline mode has no status field. */
+    var active=(lic&&(lic.status==='active'||lic.status===undefined))||(!lic&&true);
     var isOfflineMode=!!(lic&&lic._offline);
     var statusEl=el('lic-info-status');var badgeEl=el('lic-info-badge');
     if(!active){
@@ -3690,9 +3688,9 @@ function refreshLicenseInfo(){
     }
     var devEl=el('lic-info-devices');
     if(devEl){
-      var isPro2=_isPlanPro();var maxDev=isPro2?3:1;
-      var devs=Array.isArray(lic&&lic.devices)?lic.devices:(Array.isArray(db&&db.devices)?db.devices:[]);
-      devEl.textContent=devs.length+' de '+maxDev+' PC'+(maxDev>1?'s':'')+' · plan '+(isPro2?'Pro':'Básico');
+      var isPro2=_isPlanPro();
+      var devId=(lic&&lic.device_id)||(db&&db.device_id)||null;
+      devEl.textContent=(devId?'1':'0')+' de '+(isPro2?'∞':'1')+' PC · plan '+(isPro2?'Pro':'Básico');
     }
     /* Store local key for WhatsApp */
     if(li&&li.key)db._licKeyLocal=li.key;
