@@ -3689,8 +3689,15 @@ function refreshLicenseInfo(){
     var devEl=el('lic-info-devices');
     if(devEl){
       var isPro2=_isPlanPro();
-      var devId=(lic&&lic.device_id)||(db&&db.device_id)||null;
-      devEl.textContent=(devId?'1':'0')+' de '+(isPro2?'∞':'1')+' PC · plan '+(isPro2?'Pro':'Básico');
+      var _licKey=(lic&&lic.key)||(db&&db._licKeyLocal)||'';
+      var _devLimit=isPro2?3:1;
+      devEl.textContent='… de '+_devLimit+' PC · plan '+(isPro2?'Pro':'Básico');
+      if(_licKey){
+        fetch(SUPA_URL+'/rest/v1/license_devices?license_key=eq.'+encodeURIComponent(_licKey)+'&select=id',
+          {headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'count=exact'}})
+          .then(function(r){var c=parseInt(r.headers.get('content-range')||'0',10)||0;if(devEl)devEl.textContent=c+' de '+_devLimit+' PC · plan '+(isPro2?'Pro':'Básico');})
+          .catch(function(){});
+      }
     }
     /* Store local key for WhatsApp */
     if(li&&li.key)db._licKeyLocal=li.key;
