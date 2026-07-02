@@ -1490,26 +1490,6 @@ select.fi option{background:var(--s2);color:var(--tx);}
       </div>
     </div>
     <div class="mb">
-      <!-- Admin override (admin only) -->
-      <div id="cq-admin-section" style="display:none;background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);padding:10px;margin-bottom:10px">
-        <div style="font-size:.68rem;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">🔧 Ajuste manual (admin)</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
-          <select class="fi" id="cq-admin-emp" style="flex:1;min-width:110px;font-size:.82rem"><option value="">— Empleado —</option></select>
-          <select class="fi" id="cq-admin-type" style="flex:0;min-width:100px;font-size:.82rem" onchange="_cqToggleCompleta(this.value)">
-            <option value="in">✅ Entrada</option>
-            <option value="out">🚪 Salida</option>
-            <option value="both">📋 Completa</option>
-          </select>
-        </div>
-        <div style="display:flex;gap:6px;margin-bottom:4px">
-          <input type="datetime-local" class="fi" id="cq-admin-time" style="flex:1;font-size:.8rem">
-        </div>
-        <div id="cq-admin-time2-row" style="display:none;margin-bottom:4px">
-          <label style="font-size:.7rem;color:var(--tx3);margin-bottom:2px;display:block">Hora salida</label>
-          <input type="datetime-local" class="fi" id="cq-admin-time2" style="width:100%;font-size:.8rem">
-        </div>
-        <button class="btn btn-p" style="font-size:.8rem;width:100%;margin-top:4px" onclick="cqAdminRecord()">✓ Registrar</button>
-      </div>
       <!-- Asistencia tab -->
       <div id="cq-panel-asist">
         <div id="cq-list"></div>
@@ -7523,12 +7503,36 @@ function _empMonthlyPay(emp,year,month){
   const hrs=_empHoursInMonth(emp,year,month);
   return hrs*(emp.hourlyRate||0);
 }
+function nomEditClock(empId,evId,field){
+  if(!curUser||curUser.role!=='admin'){toast('Solo el admin puede editar');return;}
+  var emp=(db.employees||[]).find(function(e){return e.id===empId;});if(!emp)return;
+  var ev=(emp.clockEvents||[]).find(function(e){return e.id===evId;});if(!ev)return;
+  var current=field==='in'?ev.in:ev.out;
+  var spanId='nomce_'+evId+'_'+field;
+  var span=el(spanId);if(!span)return;
+  var currentTime=current?new Date(current).toTimeString().slice(0,5):new Date().toTimeString().slice(0,5);
+  var inp=document.createElement('input');
+  inp.type='time';inp.value=currentTime;
+  inp.style.cssText='font-size:.72rem;font-family:monospace;border:1px solid #3b82f6;background:var(--s1);color:var(--tx);border-radius:4px;padding:1px 4px;width:68px;outline:none;';
+  span.replaceWith(inp);inp.focus();inp.select();
+  function _save(){
+    var val=inp.value;if(!val){renderEmployeeList();return;}
+    var base=new Date(current||new Date());
+    var parts=val.split(':');base.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
+    if(field==='in')ev.in=base.toISOString();
+    else{ev.out=base.toISOString();ev.manualOut=true;}
+    saveDB();renderEmployeeList();_renderCqHist();toast('Hora actualizada');
+  }
+  inp.addEventListener('blur',_save);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')inp.blur();if(e.key==='Escape')renderEmployeeList();});
+}
 function renderEmployeeList(){
   if(!db.employees)db.employees=[];
   const now=new Date();
   const container=el('emp-list');if(!container)return;
   if(!db.employees.length){container.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('empNoEmployees')+'</div>';return;}
   const payTypeLabel={weekly:t('empPayWeekly'),biweekly:t('empPayBiweekly'),monthly:t('empPayMonthly')};
+  const isAdm=curUser&&curUser.role==='admin';
   container.innerHTML=db.employees.map(function(emp){
     const isIn=!!(emp.clockEvents&&emp.clockEvents.find(function(ev){return ev.in&&!ev.out;}));
     const hrs=emp.useClockInOut?_empHoursInMonth(emp,now.getFullYear(),now.getMonth()):0;
@@ -7539,6 +7543,31 @@ function renderEmployeeList(){
     const statusBadge=emp.useClockInOut&&isIn?('<span style="font-size:.72rem;color:var(--gn);font-weight:700;margin-left:6px">'+t('empCurrentlyIn')+'</span>'):'';
     const hoursInfo=emp.useClockInOut?('<div style="font-size:.76rem;color:var(--tx3);margin-top:2px">'+t('empHoursWorked')+': <b style="color:var(--am)">'+hrs.toFixed(1)+'h</b></div>'):'';
     const payLabel=emp.useClockInOut?(''+dolr(nextPay)):(''+dolr(nextPay)+' / '+payTypeLabel[emp.payType||'monthly']);
+    /* Clock events history (last 6, newest first) */
+    var clockSection='';
+    if(emp.useClockInOut&&(emp.clockEvents||[]).length){
+      var evs=(emp.clockEvents||[]).slice().sort(function(a,b){return new Date(b.in)-new Date(a.in);}).slice(0,6);
+      var editTip=isAdm?' title="Clic para editar" style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,.25)"':'';
+      var rows=evs.map(function(ev){
+        var dayStr=new Date(ev.in).toLocaleDateString(lang||'es',{day:'numeric',month:'short'});
+        var inSpan='<span id="nomce_'+ev.id+'_in"'+editTip+(isAdm?' onclick="nomEditClock(\''+emp.id+'\',\''+ev.id+'\',\'in\')"':'')+'>'+fmtTime(ev.in)+'</span>';
+        var outSpan=ev.out
+          ?('<span id="nomce_'+ev.id+'_out"'+editTip+(isAdm?' onclick="nomEditClock(\''+emp.id+'\',\''+ev.id+'\',\'out\')"':'')+'>'+fmtTime(ev.out)+'</span>')
+          :('<span style="color:#f59e0b;font-weight:700">⏳ Activo'+(isAdm?' · <span style="cursor:pointer;color:#3b82f6;font-size:.7rem;text-decoration:underline" onclick="nomEditClock(\''+emp.id+'\',\''+ev.id+'\',\'out\')">Cerrar</span>':'')+'</span>');
+        var hrsStr=ev.out?((new Date(ev.out)-new Date(ev.in))/3600000).toFixed(1)+'h':'—';
+        return '<tr style="border-top:1px solid rgba(255,255,255,.06)">'
+          +'<td style="padding:4px 5px;color:var(--tx3);white-space:nowrap">'+dayStr+'</td>'
+          +'<td style="padding:4px 5px;text-align:center;color:#22c55e;font-family:monospace;font-size:.72rem">'+inSpan+'</td>'
+          +'<td style="padding:4px 5px;text-align:center;font-family:monospace;font-size:.72rem;color:'+(ev.out?'#f87171':'var(--tx3)')+'">'+outSpan+'</td>'
+          +'<td style="padding:4px 5px;text-align:right;color:var(--tx3);font-size:.7rem">'+hrsStr+'</td>'
+          +'</tr>';
+      }).join('');
+      clockSection='<div style="margin-top:8px;border-top:1px solid var(--b1);padding-top:7px">'
+        +'<div style="font-size:.65rem;font-weight:700;color:var(--tx3);letter-spacing:.6px;margin-bottom:5px">REGISTROS'+(isAdm?' · <span style="font-weight:400;opacity:.7">clic en hora para editar</span>':'')+'</div>'
+        +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.73rem">'
+        +'<tr style="color:var(--tx3);font-size:.66rem"><th style="text-align:left;padding:3px 5px">Fecha</th><th style="padding:3px 5px">Entrada</th><th style="padding:3px 5px">Salida</th><th style="text-align:right;padding:3px 5px">Hrs</th></tr>'
+        +rows+'</table></div></div>';
+    }
     return '<div style="background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--rs);padding:10px 13px;margin-bottom:7px">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">'
       +'<div><span style="font-weight:700;color:var(--tx)">'+escHtml(emp.name)+'</span>'+statusBadge+'</div>'
@@ -7549,6 +7578,7 @@ function renderEmployeeList(){
       +'</div></div>'
       +'<div style="font-size:.76rem;color:var(--tx3);margin-top:4px">'+payTypeLabel[emp.payType||'monthly']+(emp.useClockInOut?' · '+dolr(emp.hourlyRate||0)+'/h':'')+' · '+t('empNextPayment')+': <b style="color:var(--gn)">'+payLabel+'</b></div>'
       +hoursInfo
+      +clockSection
       +'</div>';
   }).join('');
 }

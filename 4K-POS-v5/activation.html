@@ -750,7 +750,14 @@ async function doActivate() {
     // La app se reinicia automáticamente desde main.js
   } else {
     input.classList.add('error');
-    showError(result.error || 'No se pudo activar. Verifica la clave e intenta de nuevo.');
+    const errMap = {
+      'license_invalid': 'Clave de licencia inválida. Verifica que la escribiste correctamente y que no tenga espacios.',
+      'license_expired': 'Esta licencia ha vencido. Contáctanos para renovarla.',
+      'license_inactive': 'Esta licencia está inactiva. Contáctanos para reactivarla.',
+      'device_limit_reached': 'Límite de PCs alcanzado. Con el plan Básico se permite 1 PC; con el plan Pro, hasta 3 PCs.',
+      'hardware_mismatch': 'Esta licencia ya está registrada en otro equipo. Contáctanos si necesitas transferirla.',
+    };
+    showError(errMap[result.error] || result.error || 'No se pudo activar. Verifica la clave e intenta de nuevo.');
   }
 }
 
