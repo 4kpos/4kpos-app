@@ -5976,7 +5976,7 @@ function _buildCreditCard(c,compact,fromList){
       +(c.paid>0?'<div style="font-size:.68rem;color:var(--tx3)">'+t('creditPaid')+' '+dolr(c.paid)+'</div>':'')
     +'</div></div>'
     +'<div style="font-size:.73rem;color:var(--tx3);margin-bottom:4px">'+dateStr
-    +(c.paid>0?' · <span style="color:var(--am);font-weight:600">'+t('creditBalance')+': '+dolr(owed)+'</span>':' · <span style="color:var(--rd)">'+t('creditPending')+'</span>')
+    +(c.paid>0?' · <span style="color:var(--am);font-weight:600">'+t('creditBalance')+': '+dolr(owed)+'</span>':' · <span style="color:#e6b800">'+t('creditPending')+'</span>')
     +'</div>'
     +itemsHtml+paymentsHtml
     +btns+'</div>';
@@ -7194,7 +7194,7 @@ function renderVentasList(){
   const method=(el('vnt-method')||{value:''}).value;
   const srch=((el('vnt-srch')||{value:''}).value||'').toLowerCase().trim();
   const pmLabel={cash:'Efectivo',card:'Tarjeta',transf:'Transferencia',credit:'Crédito',split:'Dividido'};
-  const pmColor={cash:'var(--gn)',card:'var(--bl)',transf:'var(--am)',credit:'var(--rd)',split:'var(--tx3)'};
+  const pmColor={cash:'var(--gn)',card:'var(--bl)',transf:'var(--am)',credit:'#e6b800',split:'var(--tx3)'};
   const sales=(db.sales||[]).filter(function(s){
     if(s.status!=='active')return false;
     const d=new Date(s.date);
@@ -8932,7 +8932,7 @@ function _renderDbRecentSales(){
       var t2=fmtTime(s.date);
       var items=(s.items||[]);
       var itemsStr=items.length?items.slice(0,2).map(function(i){return i.name;}).join(', ')+(items.length>2?' +'+( items.length-2):''):'—';
-      var payClr={cash:'#22c55e',card:'#3b82f6',transf:'#8b5cf6',credit:'#ef4444',split:'#f59e0b'}[s.payMethod]||'var(--tx3)';
+      var payClr={cash:'#22c55e',card:'#3b82f6',transf:'#8b5cf6',credit:'#e6b800',split:'#f59e0b'}[s.payMethod]||'var(--tx3)';
       return '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--b1)">'
         +'<div><div style="font-size:.7rem;color:var(--tx3)">'+t2+'</div>'
         +'<div style="font-size:.76rem;color:var(--tx);overflow:hidden;white-space:nowrap;max-width:120px;text-overflow:ellipsis">'+escHtml(itemsStr)+'</div></div>'
@@ -8958,8 +8958,8 @@ function _renderDbPayMethods(){
   var total=cats.Efectivo+cats.Tarjeta+cats.Crédito;
   if(!total){payEl.innerHTML='<p style="font-size:.75rem;color:var(--tx3);padding:6px 0">Sin ventas hoy</p>';return;}
   var pEf=cats.Efectivo/total*100,pTj=cats.Tarjeta/total*100,pCr=cats.Crédito/total*100;
-  var cg='conic-gradient(#22c55e 0% '+pEf.toFixed(1)+'%,#3b82f6 '+pEf.toFixed(1)+'% '+(pEf+pTj).toFixed(1)+'%,#ef4444 '+(pEf+pTj).toFixed(1)+'% 100%)';
-  var clrs={Efectivo:'#22c55e',Tarjeta:'#3b82f6',Crédito:'#ef4444'};
+  var cg='conic-gradient(#22c55e 0% '+pEf.toFixed(1)+'%,#3b82f6 '+pEf.toFixed(1)+'% '+(pEf+pTj).toFixed(1)+'%,#e6b800 '+(pEf+pTj).toFixed(1)+'% 100%)';
+  var clrs={Efectivo:'#22c55e',Tarjeta:'#3b82f6',Crédito:'#e6b800'};
   var legend=Object.keys(cats).map(function(k){
     var pct=Math.round(cats[k]/total*100);
     return '<div style="display:flex;align-items:center;gap:6px;font-size:.74rem;margin-bottom:6px">'
@@ -9004,7 +9004,7 @@ function _renderDbSparklines(){
   var vTk=ddays.map(dayTicket);
   var elV=el('kpi-spark-ventas');if(elV)elV.innerHTML=makeSpark(vV,'#22c55e');
   var elT=el('kpi-spark-tx');if(elT)elT.innerHTML=makeSpark(vT,'#a78bfa');
-  var elC=el('kpi-spark-cred');if(elC)elC.innerHTML=makeSpark(vV,'#ef4444');
+  var elC=el('kpi-spark-cred');if(elC)elC.innerHTML=makeSpark(vV,'#e6b800');
   var elTk=el('kpi-spark-ticket');if(elTk)elTk.innerHTML=makeSpark(vTk,'#fbbf24');
 }
 function _renderDbStock(){
