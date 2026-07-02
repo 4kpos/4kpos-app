@@ -3695,7 +3695,7 @@ function refreshLicenseInfo(){
       if(_licKey){
         fetch(SUPA_URL+'/rest/v1/license_devices?license_key=eq.'+encodeURIComponent(_licKey)+'&select=id',
           {headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'count=exact'}})
-          .then(function(r){var c=parseInt(r.headers.get('content-range')||'0',10)||0;if(devEl)devEl.textContent=c+' de '+_devLimit+' PC · plan '+(isPro2?'Pro':'Básico');})
+          .then(function(r){var cr=r.headers.get('content-range')||'0/0';var c=parseInt(cr.split('/')[1]||'0',10)||0;if(devEl)devEl.textContent=c+' de '+_devLimit+' PC · plan '+(isPro2?'Pro':'Básico');})
           .catch(function(){});
       }
     }
