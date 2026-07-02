@@ -580,8 +580,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div class="db-card-hd">
         <h4 id="db-h4-period">Ventas por período</h4>
         <div class="db-toggle">
-          <button class="on" id="db-period-week" onclick="setDbPeriod('week',this)">Semana</button>
-          <button id="db-period-month" onclick="setDbPeriod('month',this)">Mes</button>
+          <button class="on" id="db-period-week" onclick="setDbPeriod('week',this)">7 días</button>
+          <button id="db-period-month" onclick="setDbPeriod('month',this)">30 días</button>
         </div>
       </div>
       <div class="db-chart" id="db-chart"></div>
@@ -2147,7 +2147,7 @@ const T = {
     // Dashboard KPIs
     kpiVentasHoy:'Ventas hoy',kpiTx:'Transacciones',kpiTicket:'Ticket promedio',
     dbSalesByPeriod:'Ventas por período',dbTop5Prods:'Top 5 productos',dbStockLight:'Semáforo de stock',
-    dbPeriodWeek:'Semana',dbPeriodMonth:'Mes',
+    dbPeriodWeek:'7 días',dbPeriodMonth:'30 días',
     // OA block
     oaViewAccounts:'📖 Ver cuentas',oaForceClose:'🔑 Forzar cierre',
     // Credit sale modal
@@ -2602,7 +2602,7 @@ const T = {
     // Dashboard KPIs
     kpiVentasHoy:'Today sales',kpiTx:'Transactions',kpiTicket:'Avg. ticket',
     dbSalesByPeriod:'Sales by period',dbTop5Prods:'Top 5 products',dbStockLight:'Stock status',
-    dbPeriodWeek:'Week',dbPeriodMonth:'Month',
+    dbPeriodWeek:'7 days',dbPeriodMonth:'30 days',
     // OA block
     oaViewAccounts:'📖 View accounts',oaForceClose:'🔑 Force close',
     // Credit sale modal
@@ -8719,11 +8719,12 @@ function _renderDbChart(){
       cols.push({lbl:days[dt.getDay()],val:tot,today:d===0});
     }
   }else{
-    for(var w=3;w>=0;w--){
-      var wS=new Date(now);wS.setDate(wS.getDate()-((w+1)*7-1));
-      var wE=new Date(now);wE.setDate(wE.getDate()-w*7);
-      var tot2=sales.filter(function(s){var sd=new Date(s.date);return s.status!=='cancelled'&&s.status!=='returned'&&sd>=wS&&sd<=wE;}).reduce(function(a,s){return a+(s.total||0);},0);
-      cols.push({lbl:'S'+(4-w),val:tot2,today:w===0});
+    for(var d=29;d>=0;d--){
+      var dt=new Date(now);dt.setDate(dt.getDate()-d);
+      var ds=dt.toDateString();
+      var tot2=sales.filter(function(s){return s.status!=='cancelled'&&s.status!=='returned'&&new Date(s.date).toDateString()===ds;}).reduce(function(a,s){return a+(s.total||0);},0);
+      var lbl=(d%5===0)?String(dt.getDate()):'';
+      cols.push({lbl:lbl,val:tot2,today:d===0});
     }
   }
   /* Canvas */
@@ -8739,7 +8740,7 @@ function _renderDbChart(){
   var cW=W-pL-pR,cH=H-pT-pB;
   var n=cols.length;
   var slotW=cW/n;
-  var barW=Math.min(slotW-4,Math.max(28,Math.round(slotW*0.6)));
+  var barW=n>10?Math.max(2,Math.min(slotW-2,Math.round(slotW*0.7))):Math.min(slotW-4,Math.max(28,Math.round(slotW*0.6)));
   var maxVal=Math.max.apply(null,cols.map(function(c){return c.val;}))||1;
   /* Grid (3 lines: 25%, 50%, 100%) */
   [0.25,0.5,1].forEach(function(lvl){
@@ -8767,18 +8768,20 @@ function _renderDbChart(){
     if(ctx.roundRect){ctx.roundRect(bx,by,barW,bh,r);}
     else{ctx.rect(bx,by,barW,bh);}
     ctx.fill();
-    /* Value above bar */
-    if(c.val>0&&bh>4){
+    /* Value above bar — en 30 días solo para hoy */
+    if(c.val>0&&bh>4&&(n<=10||c.today)){
       ctx.fillStyle=c.today?'#93c5fd':'rgba(255,255,255,.7)';
       ctx.font='bold 9px system-ui,sans-serif';
       ctx.textAlign='center';
       ctx.fillText(_shortNum(c.val),cx,by-3);
     }
-    /* Day label */
-    ctx.fillStyle=c.today?'rgba(255,255,255,.85)':'rgba(255,255,255,.45)';
-    ctx.font=(c.today?'bold ':'')+'10px system-ui,sans-serif';
-    ctx.textAlign='center';
-    ctx.fillText(c.lbl,cx,H-5);
+    /* Day label — fuente más pequeña para 30 días */
+    if(c.lbl||c.today){
+      ctx.fillStyle=c.today?'rgba(255,255,255,.85)':'rgba(255,255,255,.45)';
+      ctx.font=(c.today?'bold ':''+(n>10?'':''))+(n>10?'8':'10')+'px system-ui,sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText(c.today&&n>10?'●':c.lbl,cx,H-5);
+    }
   });
 }
 function _renderDbTop5(){
