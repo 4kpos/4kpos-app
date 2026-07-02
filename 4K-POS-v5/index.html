@@ -3739,7 +3739,9 @@ async function loadDB(){
   try{const li=await ipcRenderer.invoke('get-license-info');if(li&&li.key)db._lic=li.key;}catch(e){}
 
   // ── RESTORE COMPLETO desde Supabase en PC nueva (sin datos locales) ────────
-  if(db._lic&&!db.products.length&&!db.users.some(function(u){return u.role==='admin';})){
+  /* Restore si no hay productos NI ventas Y solo está el admin default de fábrica (id=1, pass=1234) */
+  var _onlyDefaultAdmin=db.users.length===0||(db.users.length===1&&db.users[0].id==='1'&&db.users[0].pass==='1234');
+  if(db._lic&&!db.products.length&&!db.sales.length&&_onlyDefaultAdmin){
     try{
       const _r=await fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'load',license_key:db._lic})});
       const _j=await _r.json();
@@ -3771,7 +3773,14 @@ async function loadDB(){
 
   ipcRenderer.invoke('get-device-code').then(function(code){
     if(code)_shiftStatusId='shift_status_'+code;
-    if(db._lic)syncShiftStatusDirect({active:false,updatedAt:new Date().toISOString()});
+    if(db._lic){
+      if(db.cfg&&db.cfg.shiftOpen){
+        /* Shift was open — re-broadcast true state; curUser not set yet, send last known user */
+        syncShiftStatusDirect({active:true,currentUser:db.cfg.shiftUser||'',shiftOpenedAt:db.cfg.shiftOpenAt||new Date().toISOString(),lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg.pendingShiftNote||null});
+      }else{
+        syncShiftStatusDirect({active:false,updatedAt:new Date().toISOString()});
+      }
+    }
   }).catch(function(){});
   if(db._lic){(async function(){
     // Push: enviar datos actuales a Supabase para mantener sincronizado
@@ -4100,8 +4109,12 @@ function syncCreditDirect(){
     var pending=(db.sales||[]).filter(function(s){
       return s.payMethod==='credit'&&s.creditStatus!=='paid'&&(s.total-(s.creditPaid||0))>0;
     });
-    var total=pending.reduce(function(sum,s){return sum+(s.total||0)-(s.creditPaid||0);},0);
-    var body={totalPending:Math.round(total*100)/100,count:pending.length,updatedAt:new Date().toISOString(),items:pending.map(function(s){return {client:s.creditClient||'Sin nombre',total:s.total,paid:s.creditPaid||0,balance:(s.total||0)-(s.creditPaid||0),date:s.date,dueDate:s.creditDueDate||null};})};
+    var legacy=(db.credits||[]).filter(function(c){return (c.total||0)-(c.paid||0)>0;});
+    var total=pending.reduce(function(sum,s){return sum+(s.total||0)-(s.creditPaid||0);},0)
+      +legacy.reduce(function(sum,c){return sum+((c.total||0)-(c.paid||0));},0);
+    var items=pending.map(function(s){return {client:s.creditClient||'Sin nombre',total:s.total,paid:s.creditPaid||0,balance:(s.total||0)-(s.creditPaid||0),date:s.date,dueDate:s.creditDueDate||null};})
+      .concat(legacy.map(function(c){return {client:c.client||'Sin nombre',total:c.total,paid:c.paid||0,balance:(c.total||0)-(c.paid||0),date:c.date,dueDate:c.dueDate||null};}));
+    var body={totalPending:Math.round(total*100)/100,count:pending.length+legacy.length,updatedAt:new Date().toISOString(),items:items};
     fetch(SUPA_URL+'/rest/v1/categories',{
       method:'POST',
       headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
