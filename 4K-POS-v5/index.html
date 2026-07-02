@@ -2883,25 +2883,8 @@ async function loadLicenseFromSupabase(){
     if(lic.expires_at&&new Date(lic.expires_at)<new Date()){
       _showLicError('Licencia vencida el '+new Date(lic.expires_at).toLocaleDateString(lang||'es')+'. Renueva tu plan para continuar.','Licencia vencida');return;
     }
-    var machineId=await ipcRenderer.invoke('get-machine-id').catch(function(){return null;});
-    if(machineId){
-      var plan=(lic.plan||'').toLowerCase();
-      var isPro=plan.startsWith('pro')||plan==='lifetime';
-      var regId=lic.device_id||null;
-      db.device_id=regId;
-      if(!regId){
-        /* First activation — register this machine */
-        try{
-          await fetch(SUPA_URL+'/rest/v1/licenses?key=eq.'+encodeURIComponent(localLic.key),
-            {method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
-            body:JSON.stringify({device_id:machineId})});
-          db.device_id=machineId;if(db.license)db.license.device_id=machineId;
-        }catch(regErr){console.warn('[Lic] register:',regErr);}
-      }else if(regId!==machineId&&!isPro){
-        /* Different machine, basic plan → block */
-        _showLicError('Esta licencia ya está activada en otro PC. Actualiza al plan Pro para usar en múltiples PCs.','Límite de dispositivos');return;
-      }
-    }
+    /* Device-limit enforcement is handled by posapi verify_license at startup
+       (checks license_devices table). No secondary check needed here. */
     _applyPlanUI();
     setTimeout(function(){if(typeof refreshLicenseInfo==='function')refreshLicenseInfo();},200);
   }catch(e){
