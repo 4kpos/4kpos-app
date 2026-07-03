@@ -260,23 +260,39 @@ serve(async (req) => {
 
     if (!lic) return json({ error: "license_invalid" }, 403);
 
+    const incoming = (body.data as Record<string, unknown>) || {};
+    const device_id = (body.device_id as string) || "";
+
+    // Merge sales + returns append-only: nunca descartar registros de otra PC
+    let mergedSales = (incoming.sales as unknown[]) || [];
+    let mergedReturns = (incoming.returns as unknown[]) || [];
+    const { data: existing } = await supabase
+      .from("pos_data").select("data").eq("license_key", license_key).single();
+    if (existing?.data) {
+      const ex = existing.data as Record<string, unknown>;
+      const exSales = (ex.sales as unknown[]) || [];
+      const inSaleIds = new Set(mergedSales.map((s) => String((s as Record<string, unknown>).id)));
+      for (const s of exSales) {
+        if (!inSaleIds.has(String((s as Record<string, unknown>).id))) mergedSales.push(s);
+      }
+      const exRets = (ex.returns as unknown[]) || [];
+      const inRetIds = new Set(mergedReturns.map((r) => String((r as Record<string, unknown>).id)));
+      for (const r of exRets) {
+        if (!inRetIds.has(String((r as Record<string, unknown>).id))) mergedReturns.push(r);
+      }
+    }
+
+    const dataToSave = { ...incoming, sales: mergedSales, returns: mergedReturns };
+
+    // saved_by en el UPSERT (no en UPDATE separado) → evento Realtime lleva saved_by correcto
     const { error: upsertErr } = await supabase
       .from("pos_data")
       .upsert(
-        { license_key, data: body.data, updated_at: new Date().toISOString() },
+        { license_key, data: dataToSave, updated_at: new Date().toISOString(), saved_by: device_id },
         { onConflict: "license_key" }
       );
 
     if (upsertErr) return json({ error: upsertErr.message }, 500);
-
-    // Update saved_by separately so it tolerates missing column (before migration)
-    if (body.device_id) {
-      supabase.from("pos_data")
-        .update({ saved_by: body.device_id as string })
-        .eq("license_key", license_key)
-        .then(() => {});
-    }
-
     return json({ success: true });
   }
 

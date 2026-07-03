@@ -3765,16 +3765,13 @@ async function loadDB(){
       }else{
         syncShiftStatusDirect({active:false,updatedAt:new Date().toISOString()});
       }
+      // Startup push: dentro del .then para que _deviceCode esté disponible → saved_by correcto
+      try{
+        fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'save',license_key:db._lic,data:_buildSlim(),device_id:_deviceCode||''})}).catch(function(){});
+        syncCategories();
+      }catch(e2){}
     }
   }).catch(function(){});
-  if(db._lic){(async function(){
-    // Push: enviar datos actuales a Supabase para mantener sincronizado
-    try{
-      const slim=_buildSlim();
-      fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'save',license_key:db._lic,data:slim})}).catch(function(){});
-      syncCategories();
-    }catch(e){}
-  })();}
 }
 function _buildSlim(){
   return {
@@ -3811,7 +3808,9 @@ async function saveDB(){
   try{
     const licKey=db._lic||'';
     if(licKey&&!_skipRemotePush){
-      fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'save',license_key:licKey,data:_buildSlim(),device_id:_deviceCode||''})}).catch(function(){});
+      var _slim=_buildSlim();
+      _ls('saveDB push sales='+(_slim.sales?_slim.sales.length:0)+' products='+(_slim.products?_slim.products.length:0));
+      fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'save',license_key:licKey,data:_slim,device_id:_deviceCode||''})}).catch(function(){});
     }
     _skipRemotePush=false;
   }catch(e){}
