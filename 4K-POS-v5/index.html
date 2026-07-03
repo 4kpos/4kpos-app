@@ -500,6 +500,9 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <button class="ham-item" id="tbtn-theme" onclick="closeHamMenu();toggleTheme()">🌙 Tema</button>
         <button class="ham-item" onclick="closeHamMenu();refreshPOS()">🔄 Actualizar</button>
         <button class="ham-item" onclick="closeHamMenu();openLogout()" style="color:var(--rd)">🚪 Cerrar turno</button>
+        <div class="ham-sep" style="margin-top:6px"></div>
+        <button class="ham-item" id="ham-upd-btn" onclick="checkUpdates()" style="color:var(--ac)">🔄 Buscar actualizaciones</button>
+        <div id="hm-ver" style="font-size:.7rem;color:var(--tx3);padding:2px 12px 6px;letter-spacing:.3px;text-align:center"></div>
       </div>
     </div>
   </div>
@@ -1865,27 +1868,41 @@ var _manualUpdateCheck = false;
 var _updateBannerDismissed = false;
 try {
   ipcRenderer.on('update-status', function(e, status) {
+    var _hb=el('ham-upd-btn');
+    function _hbReset(txt){if(_hb){_hb.textContent=txt||'🔄 Buscar actualizaciones';_hb.disabled=false;}}
     if (status === 'ready') {
       toast(t('updateReady'));
       _manualUpdateCheck = false;
-      // Update banner if still visible
+      _hbReset('🔄 Buscar actualizaciones');
       var _ub=el('upd-banner');if(_ub&&_ub.style.display!=='none')_ub.style.display='none';
       return;
     }
     if (status === 'downloading') {
       _manualUpdateCheck = false;
+      if(_hb){_hb.textContent='⬇ Descargando actualización...';_hb.disabled=true;}
       if (!_updateBannerDismissed) _showUpdBanner();
       return;
     }
     // Only show checking/no-update/error toasts on manual check
     if (!_manualUpdateCheck) return;
-    if (status === 'checking') toast(t('updateChecking'));
-    else if (status === 'no-update') { toast(t('updateNone')); _manualUpdateCheck = false; }
-    else if (status === 'error') { toast(t('updateError')); _manualUpdateCheck = false; }
+    if (status === 'checking') {
+      if(_hb){_hb.textContent='🔄 Buscando...';_hb.disabled=true;}
+      toast(t('updateChecking'));
+    } else if (status === 'no-update') {
+      if(_hb){_hb.textContent='✓ Ya tienes la última versión';_hb.disabled=false;setTimeout(function(){_hbReset();},3000);}
+      toast(t('updateNone'));
+      _manualUpdateCheck = false;
+    } else if (status === 'error') {
+      _hbReset();
+      toast(t('updateError'));
+      _manualUpdateCheck = false;
+    }
   });
 } catch(e) {}
 function checkUpdates() {
   _manualUpdateCheck = true;
+  var _hb=el('ham-upd-btn');
+  if(_hb){_hb.textContent='🔄 Buscando...';_hb.disabled=true;}
   toast(t('updateChecking'));
   try { ipcRenderer.send('check-updates'); } catch(e) {}
 }
