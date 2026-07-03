@@ -381,6 +381,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 .stk-list td:last-child{text-align:right;font-family:monospace;font-weight:700;}
 .stk-dot{display:inline-block;width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-right:5px;vertical-align:middle;}
 </style>
+<script src="supabase-js.min.js"></script>
 </head>
 <body>
 
@@ -3809,36 +3810,29 @@ async function saveDB(){
   try{
     const licKey=db._lic||'';
     if(licKey&&!_skipRemotePush){
-      _myLastPushAt=Date.now();
       fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'save',license_key:licKey,data:_buildSlim(),device_id:_deviceCode||''})}).catch(function(){});
     }
     _skipRemotePush=false;
   }catch(e){}
 }
-function _startSyncPoller(){
-  if(_syncPollInt)clearInterval(_syncPollInt);
-  setTimeout(_syncPoll,5000);
-  _syncPollInt=setInterval(_syncPoll,10000);
-}
-async function _syncPoll(){
-  if(!db||!db._lic||!_deviceCode)return;
-  try{
-    var r=await fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'poll',license_key:db._lic})});
-    var j=await r.json();
-    if(!j.updated_at)return;
-    var remoteMs=new Date(j.updated_at).getTime();
-    // Skip if it's our own save (by device code when column exists, or by time window)
-    if(j.saved_by&&j.saved_by===_deviceCode)return;
-    if(!j.saved_by&&remoteMs<_myLastPushAt+20000)return;
-    // Skip if we already processed this timestamp
-    if(remoteMs<=_lastSeenRemoteMs)return;
-    _lastSeenRemoteMs=remoteMs;
-    // Fetch full data and merge
-    var r2=await fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'load',license_key:db._lic})});
-    var j2=await r2.json();
-    if(!j2.success||!j2.data)return;
-    _applyRemoteMerge(j2.data);
-  }catch(e){}
+function _startRealtimeSync(){
+  if(!db||!db._lic||!window.supabase)return;
+  if(_supaChannel){try{_supaChannel.unsubscribe();}catch(e){}}_supaChannel=null;
+  var client=window.supabase.createClient(SUPA_URL,SUPA_KEY,{realtime:{params:{eventsPerSecond:10}}});
+  _supaChannel=client
+    .channel('pos-sync-'+db._lic)
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pos_data',filter:'license_key=eq.'+db._lic},
+      function(payload){
+        var row=payload.new;if(!row||!row.data)return;
+        if(row.saved_by&&row.saved_by===_deviceCode)return;
+        _applyRemoteMerge(row.data);
+      }
+    )
+    .subscribe(function(status){
+      if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
+        setTimeout(function(){_startRealtimeSync();},5000);
+      }
+    });
 }
 function _checkPendingMerge(){
   if(!_pendingMerge)return;
@@ -4217,7 +4211,7 @@ function startApp(){
   updateLicBadge();updateDashBtn();loadLicenseFromSupabase();startLicenseWatcher();
   updateOACounter();_startNotifTimer();
   if(!window._cdSyncInt){window._cdSyncInt=setInterval(syncCreditDirect,30000);setTimeout(syncCreditDirect,3000);}
-  if(!_syncPollInt)_startSyncPoller();
+  _startRealtimeSync();
   if(!window._shiftHbInt){window._shiftHbInt=setInterval(function(){if(db.cfg&&db.cfg.shiftOpen&&curUser){syncShiftStatusDirect({active:true,currentUser:curUser.name,shiftOpenedAt:db.cfg.shiftOpenAt||new Date().toISOString(),lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg.pendingShiftNote||null});}},5*60*1000);}
   setEl('ord-lbl','#'+db.orderNum);
   updateClockQuickBtn();
@@ -5162,7 +5156,7 @@ document.addEventListener('click',function(e){
 })();
 
 // CHECKOUTD
-function checkout(){
+async function checkout(){
   if(!cart.length)return;
   const total=getFinalTotal();
   let recv,chg,splitCash=0,splitCard=0;
@@ -5176,6 +5170,13 @@ function checkout(){
     if(payMethod==='cash' && cashIn && recv<total){toast(t('insufficientAmt'));return;}
     chg=recv-total;
   }
+  // Construir lista de ítems para validación de stock en servidor (expandir combos)
+  var _stockItems=[];
+  cart.forEach(function(item){
+    if(item.isCombo){(item.comboItems||[]).forEach(function(ci){_stockItems.push({id:String(ci.productId),qty:ci.qty*item.qty,name:ci.name||item.name});});}
+    else{_stockItems.push({id:String(item.id),qty:item.qty,name:item.name});}
+  });
+  // Descontar stock local y construir la venta
   cart.forEach(function(item){if(item.isCombo){(item.comboItems||[]).forEach(function(ci){const p=db.products.find(function(x){return x.id===ci.productId;});if(p)p.stock=Math.max(0,(p.stock||0)-ci.qty*item.qty);});}else{const p=db.products.find(function(x){return x.id===item.id;});if(p)p.stock=Math.max(0,(p.stock||0)-item.qty);}});
   const rnum=String(db.orderNum).padStart(6,'0');
   const rcode='4K-'+rnum+'-'+Date.now().toString(36).toUpperCase();
@@ -5183,6 +5184,31 @@ function checkout(){
   const _tax=getTaxCalc();
   const sale={id:db.orderNum,date:new Date().toISOString(),items:JSON.parse(JSON.stringify(cart)),total:parseFloat(_tax.total.toFixed(2)),subtotal:(db.cfg&&db.cfg.taxEnabled)?parseFloat(_tax.subtotal.toFixed(2)):undefined,taxAmount:(db.cfg&&db.cfg.taxEnabled)?parseFloat(_tax.taxAmount.toFixed(2)):undefined,taxRate:(db.cfg&&db.cfg.taxEnabled)?_tax.taxRate:undefined,taxName:(db.cfg&&db.cfg.taxEnabled)?_tax.taxName:undefined,recv,change:chg,payMethod,payLabel:payLabels[payMethod]||payMethod,splitCash:splitCash||undefined,splitCard:splitCard||undefined,status:'active',rnum,rcode,cashier:curUser?curUser.name:'—'};
   db.sales.push(sale);db.orderNum++;
+  // Validación atómica de stock en servidor (si hay licencia activa)
+  if(db._lic){
+    var _ckBtn=el('ck-confirm');
+    if(_ckBtn){_ckBtn.disabled=true;_ckBtn.textContent='Verificando...';}
+    var _serverOk=false;
+    try{
+      var _cr=await fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'commit_sale',license_key:db._lic,items:_stockItems,data:_buildSlim(),device_id:_deviceCode||''})});
+      var _cj=await _cr.json();
+      if(_cj.ok===false&&_cj.error==='stock_insuficiente'){
+        // Revertir cambios locales
+        db.sales.pop();db.orderNum--;
+        cart.forEach(function(item){if(item.isCombo){(item.comboItems||[]).forEach(function(ci){const p=db.products.find(function(x){return x.id===ci.productId;});if(p)p.stock=(p.stock||0)+ci.qty*item.qty;});}else{const p=db.products.find(function(x){return x.id===item.id;});if(p)p.stock=(p.stock||0)+item.qty;}});
+        if(_ckBtn){_ckBtn.disabled=false;_ckBtn.textContent='✓ Confirmar pago — '+dolr(total);}
+        toast('⚠ Stock insuficiente: '+_cj.product+' (disponible: '+_cj.available+', necesario: '+_cj.needed+'). Alguien más ya vendió este producto.');
+        return;
+      }
+      _serverOk=_cj.ok===true;
+    }catch(e){
+      // Sin conexión → continuar sin validación server-side
+      _serverOk=false;
+    }
+    if(_ckBtn){_ckBtn.disabled=false;_ckBtn.textContent='✓ Confirmar pago — '+dolr(total);}
+    // Si el servidor guardó exitosamente, saltamos el push en saveDB
+    if(_serverOk)_skipRemotePush=true;
+  }
   saveDB();
   if(editingAccountId){const ls=_loadOAs().filter(x=>x.id!==editingAccountId);_saveOAs(ls);editingAccountId=null;}
   closeOv('ov-checkout');
@@ -5354,11 +5380,9 @@ setInterval(doAutoBackup,5*60*1000);
 
 // ── SYNC ENTRE PCs ──────────────────────────────
 var _deviceCode=null;
-var _myLastPushAt=0;
-var _lastSeenRemoteMs=0;
+var _supaChannel=null;
 var _skipRemotePush=false;
 var _pendingMerge=null;
-var _syncPollInt=null;
 
 // ── INACTIVIDAD ─────────────────────────────────
 var _iTimer=null;

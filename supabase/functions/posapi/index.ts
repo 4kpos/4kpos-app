@@ -306,6 +306,25 @@ serve(async (req) => {
     });
   }
 
+  // ── Commit atómico con validación de stock ────────────────────────────────
+  if (action === "commit_sale") {
+    if (!license_key) return json({ error: "license_key required" }, 400);
+
+    const { data: lic } = await supabase
+      .from("licenses").select("key").eq("key", license_key).eq("status", "active").single();
+    if (!lic) return json({ error: "license_invalid" }, 403);
+
+    const { data: result, error: rpcErr } = await supabase.rpc("pos_commit_sale", {
+      p_license_key: license_key,
+      p_items: body.items ?? [],
+      p_new_data: body.data,
+      p_device_id: (body.device_id as string) || "",
+    });
+
+    if (rpcErr) return json({ ok: false, error: rpcErr.message }, 500);
+    return json(result);
+  }
+
   // ── Poll liviano para sincronización entre PCs ────────────────────────────
   if (action === "poll") {
     if (!license_key) return json({ error: "license_key required" }, 400);
