@@ -3843,10 +3843,13 @@ function _startRealtimeSync(){
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pos_data',filter:'license_key=eq.'+db._lic},
       function(payload){
         var row=payload.new;
-        _ls('realtime event saved_by='+(row&&row.saved_by||'')+ ' myDevice='+(_deviceCode||'')+ ' hasData='+(row&&row.data?'YES':'NO'));
-        if(!row||!row.data)return;
+        // Supabase Realtime devuelve columnas JSONB como string en postgres_changes — parsear si es necesario
+        var rowData=row&&row.data;
+        if(typeof rowData==='string'){try{rowData=JSON.parse(rowData);}catch(e){rowData=null;}}
+        _ls('realtime event saved_by='+(row&&row.saved_by||'')+ ' myDevice='+(_deviceCode||'')+ ' hasData='+(rowData?'YES':'NO')+' salesLen='+(rowData&&rowData.sales?rowData.sales.length:0));
+        if(!row||!rowData)return;
         if(row.saved_by&&row.saved_by===_deviceCode){_ls('realtime SKIP own device');return;}
-        _applyRemoteMerge(row.data);
+        _applyRemoteMerge(rowData);
       }
     )
     .subscribe(function(status){
