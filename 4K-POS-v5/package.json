@@ -36,8 +36,7 @@
       "requestedExecutionLevel": "asInvoker"
     },
     "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
+      "oneClick": true,
       "language": "3082",
       "multiLanguageInstaller": true,
       "installerLanguages": [

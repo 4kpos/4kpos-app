@@ -237,6 +237,7 @@ ipcMain.handle('activate-license', async (_, licenseKey) => {
 ipcMain.handle('get-license-info', () => getLicenseInfo())
 ipcMain.handle('get-hardware-id', () => getHardwareId())
 ipcMain.handle('get-machine-id', () => getMachineId())
+ipcMain.handle('get-app-version', () => app.getVersion())
 
 // ── Extensión offline ─────────────────────────────────────
 ipcMain.handle('get-device-code', () => {

@@ -1135,7 +1135,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
         <div style="text-align:center;padding:30px 16px">
           <div style="font-size:2.5rem;margin-bottom:10px">⬆️</div>
           <div style="font-size:.95rem;font-weight:700;margin-bottom:8px" id="tab-upd-h">Actualizaciones</div>
-          <div style="font-size:.82rem;color:var(--tx3);margin-bottom:18px" id="tab-upd-desc">Verifica si hay una nueva versión disponible</div>
+          <div style="font-size:.82rem;color:var(--tx3);margin-bottom:6px" id="tab-upd-desc">Verifica si hay una nueva versión disponible</div>
+          <div id="app-ver-lbl" style="font-size:.75rem;color:var(--tx3);font-family:monospace;margin-bottom:18px;letter-spacing:.3px"></div>
           <button class="btn btn-p" id="tab-upd-btn" onclick="checkUpdates()">⬆️ Buscar actualizaciones</button>
         </div>
       </div>
@@ -1838,7 +1839,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 
 <script>
 // Supabase anon key — get it from: Supabase dashboard → Settings → API → Project API keys → "anon public"
-const APP_VERSION = (function(){try{return require('./package.json').version;}catch(e){return '5.3.0';}})();
+var APP_VERSION = (function(){try{return require('./package.json').version;}catch(e){return '';}})()
 let bcrypt; try{bcrypt=require('bcryptjs');}catch(e){console.warn('bcryptjs no disponible:',e.message);}
 let _shiftStatusId='shift_status_main';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6YWxuaGx1d3R5b3R1eHdrcXJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDg2OTEsImV4cCI6MjA5NTkyNDY5MX0.qtaMdroQMP4CIARsStkSWx6vGU-T5id98zczaGKGAvk';
@@ -7857,7 +7858,18 @@ el('splash').style.display='none';
 // hideMainUI();
 el('shift-open-screen').classList.remove('show');
 el('login-screen').style.display='flex';
-(function(){var v='v'+APP_VERSION;var sv=el('splash-ver');if(sv)sv.textContent=v;var lv=el('login-ver');if(lv)lv.textContent=v;var hv=el('hm-ver');if(hv)hv.textContent='4K POS '+v;})();
+(function(){
+  function _applyVer(v){
+    APP_VERSION=v;
+    var s='v'+v;
+    var sv=el('splash-ver');if(sv)sv.textContent=s;
+    var lv=el('login-ver');if(lv)lv.textContent=s;
+    var hv=el('hm-ver');if(hv)hv.textContent='4K POS '+s;
+    var av=el('app-ver-lbl');if(av)av.textContent='Versión instalada: '+s;
+  }
+  if(APP_VERSION)_applyVer(APP_VERSION);
+  try{ipcRenderer.invoke('get-app-version').then(function(v){if(v)_applyVer(v);}).catch(function(){});}catch(e){}
+})();
 loadDB().then(()=>{
   applyLang();
   initUnifiedModal();
