@@ -3755,7 +3755,7 @@ async function loadDB(){
   // ── Fin restore ───────────────────────────────────────────────────────────
 
   ipcRenderer.invoke('get-device-code').then(function(code){
-    if(code)_shiftStatusId='shift_status_'+code;
+    if(code){_shiftStatusId='shift_status_'+code;_deviceCode=code;}
     if(db._lic){
       if(db.cfg&&db.cfg.shiftOpen){
         /* Shift was open — re-broadcast true state; curUser not set yet, send last known user */
@@ -3808,10 +3808,86 @@ async function saveDB(){
   try{await ipcRenderer.invoke('save-data',db);}catch(e){}
   try{
     const licKey=db._lic||'';
-    if(licKey){
-      fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'save',license_key:licKey,data:_buildSlim()})}).catch(function(){});
+    if(licKey&&!_skipRemotePush){
+      _myLastPushAt=Date.now();
+      fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'save',license_key:licKey,data:_buildSlim(),device_id:_deviceCode||''})}).catch(function(){});
     }
+    _skipRemotePush=false;
   }catch(e){}
+}
+function _startSyncPoller(){
+  if(_syncPollInt)clearInterval(_syncPollInt);
+  setTimeout(_syncPoll,5000);
+  _syncPollInt=setInterval(_syncPoll,10000);
+}
+async function _syncPoll(){
+  if(!db||!db._lic||!_deviceCode)return;
+  try{
+    var r=await fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'poll',license_key:db._lic})});
+    var j=await r.json();
+    if(!j.updated_at)return;
+    var remoteMs=new Date(j.updated_at).getTime();
+    // Skip if it's our own save (by device code when column exists, or by time window)
+    if(j.saved_by&&j.saved_by===_deviceCode)return;
+    if(!j.saved_by&&remoteMs<_myLastPushAt+20000)return;
+    // Skip if we already processed this timestamp
+    if(remoteMs<=_lastSeenRemoteMs)return;
+    _lastSeenRemoteMs=remoteMs;
+    // Fetch full data and merge
+    var r2=await fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'load',license_key:db._lic})});
+    var j2=await r2.json();
+    if(!j2.success||!j2.data)return;
+    _applyRemoteMerge(j2.data);
+  }catch(e){}
+}
+function _checkPendingMerge(){
+  if(!_pendingMerge)return;
+  var m=_pendingMerge;_pendingMerge=null;
+  setTimeout(function(){_applyRemoteMerge(m);},300);
+}
+function _applyRemoteMerge(remote){
+  if(!remote||!db)return;
+  if(cart&&cart.length>0){_pendingMerge=remote;toast('🔄 Datos de otra PC listos — se aplicarán al terminar la venta');return;}
+  var newSales=0;
+  // 1. Sales: unión por id (append-only)
+  var myIds=new Set((db.sales||[]).map(function(s){return String(s.id);}));
+  (remote.sales||[]).forEach(function(s){if(!myIds.has(String(s.id))){db.sales.push(s);newSales++;}});
+  // 2. Returns: unión por id
+  var myRIds=new Set((db.returns||[]).map(function(r){return String(r.id);}));
+  (remote.returns||[]).forEach(function(r){if(!myRIds.has(String(r.id)))db.returns.push(r);});
+  // 3. orderNum: máx+1
+  if((remote.orderNum||0)>=db.orderNum)db.orderNum=(remote.orderNum||0)+1;
+  // 4. Products: remoto gana por id
+  var remProds=remote.products||[];
+  if(remProds.length){var pm={};(db.products||[]).forEach(function(p){pm[String(p.id)]=p;});remProds.forEach(function(p){pm[String(p.id)]=p;});db.products=Object.values(pm);}
+  // 5. Credits: unión por id
+  var myCIds=new Set((db.credits||[]).map(function(c){return String(c.id);}));
+  (remote.credits||[]).forEach(function(c){if(!myCIds.has(String(c.id)))db.credits.push(c);});
+  // 6. Customers: unión por id
+  var myCustIds=new Set((db.customers||[]).map(function(c){return String(c.id);}));
+  (remote.customers||[]).forEach(function(c){if(!myCustIds.has(String(c.id)))db.customers.push(c);});
+  // 7. Categories, combos, specials, payMethods, adminCode: remoto gana
+  if(remote.categories&&remote.categories.length)db.categories=remote.categories;
+  if(remote.combos&&remote.combos.length)db.combos=remote.combos;
+  if(remote.specials&&remote.specials.length)db.specials=remote.specials;
+  if(remote.payMethods)db.payMethods=Object.assign(db.payMethods||{},remote.payMethods);
+  if(remote.adminCode)db.adminCode=remote.adminCode;
+  // 8. Employees: remoto gana por id
+  if(remote.employees&&remote.employees.length){var em={};(db.employees||[]).forEach(function(e){em[String(e.id)]=e;});remote.employees.forEach(function(e){em[String(e.id)]=Object.assign(em[String(e.id)]||{},e);});db.employees=Object.values(em);}
+  // 9. Users: unión por id, remoto gana en conflicto
+  if(remote.users&&remote.users.length){var um={};(db.users||[]).forEach(function(u){um[String(u.id)]=u;});remote.users.forEach(function(u){um[String(u.id)]=u;});db.users=Object.values(um);}
+  // 10. cfg: merge superficial; shift state local gana siempre
+  if(remote.cfg){var lso=db.cfg&&db.cfg.shiftOpen,lsu=db.cfg&&db.cfg.shiftUser,lsa=db.cfg&&db.cfg.shiftOpenAt;db.cfg=Object.assign({},db.cfg||{},remote.cfg);db.cfg.shiftOpen=lso;db.cfg.shiftUser=lsu;db.cfg.shiftOpenAt=lsa;}
+  // 11. Settings: merge superficial
+  if(remote.settings)db.settings=Object.assign(db.settings||{},remote.settings);
+  // Persistir localmente sin re-subir (evita bucle)
+  _skipRemotePush=true;saveDB();
+  // Re-renderizar vista actual
+  try{if(typeof showCategories==='function')showCategories();}catch(e){}
+  try{if(typeof renderCart==='function')renderCart();}catch(e){}
+  try{if(typeof renderProds==='function')renderProds();}catch(e){}
+  var msg='🔄 '+(newSales>0?newSales+(newSales===1?' venta nueva':' ventas nuevas')+' de otra PC':'Sincronizado con otra PC');
+  toast(msg);
 }
    function doLogin(){
   const u=el('lu').value,p=el('lp').value;
@@ -4141,6 +4217,7 @@ function startApp(){
   updateLicBadge();updateDashBtn();loadLicenseFromSupabase();startLicenseWatcher();
   updateOACounter();_startNotifTimer();
   if(!window._cdSyncInt){window._cdSyncInt=setInterval(syncCreditDirect,30000);setTimeout(syncCreditDirect,3000);}
+  if(!_syncPollInt)_startSyncPoller();
   if(!window._shiftHbInt){window._shiftHbInt=setInterval(function(){if(db.cfg&&db.cfg.shiftOpen&&curUser){syncShiftStatusDirect({active:true,currentUser:curUser.name,shiftOpenedAt:db.cfg.shiftOpenAt||new Date().toISOString(),lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg.pendingShiftNote||null});}},5*60*1000);}
   setEl('ord-lbl','#'+db.orderNum);
   updateClockQuickBtn();
@@ -5110,6 +5187,7 @@ function checkout(){
   if(editingAccountId){const ls=_loadOAs().filter(x=>x.id!==editingAccountId);_saveOAs(ls);editingAccountId=null;}
   closeOv('ov-checkout');
   showRcpt(sale);
+  _checkPendingMerge();
   setEl('ord-lbl','#'+db.orderNum);
   if(db.drawerAuto)openDrawer();
 }
@@ -5273,6 +5351,14 @@ function doAutoBackup(){
   }catch(e){}
 }
 setInterval(doAutoBackup,5*60*1000);
+
+// ── SYNC ENTRE PCs ──────────────────────────────
+var _deviceCode=null;
+var _myLastPushAt=0;
+var _lastSeenRemoteMs=0;
+var _skipRemotePush=false;
+var _pendingMerge=null;
+var _syncPollInt=null;
 
 // ── INACTIVIDAD ─────────────────────────────────
 var _iTimer=null;

@@ -1,5 +1,5 @@
 // 4K POS — posapi Edge Function
-// Acciones: activate_license | verify_license | request_license_by_email | save | load
+// Acciones: activate_license | verify_license | request_license_by_email | save | load | poll
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -268,6 +268,15 @@ serve(async (req) => {
       );
 
     if (upsertErr) return json({ error: upsertErr.message }, 500);
+
+    // Update saved_by separately so it tolerates missing column (before migration)
+    if (body.device_id) {
+      supabase.from("pos_data")
+        .update({ saved_by: body.device_id as string })
+        .eq("license_key", license_key)
+        .then(() => {});
+    }
+
     return json({ success: true });
   }
 
@@ -295,6 +304,25 @@ serve(async (req) => {
       data: posRow?.data ?? null,
       updated_at: posRow?.updated_at ?? null,
     });
+  }
+
+  // ── Poll liviano para sincronización entre PCs ────────────────────────────
+  if (action === "poll") {
+    if (!license_key) return json({ error: "license_key required" }, 400);
+
+    const { data: lic } = await supabase
+      .from("licenses").select("key").eq("key", license_key).eq("status", "active").single();
+    if (!lic) return json({ error: "license_invalid" }, 403);
+
+    // Try with saved_by first; fall back if column doesn't exist yet
+    const { data: row, error: rowErr } = await supabase
+      .from("pos_data").select("updated_at, saved_by").eq("license_key", license_key).single();
+    if (rowErr) {
+      const { data: row2 } = await supabase
+        .from("pos_data").select("updated_at").eq("license_key", license_key).single();
+      return json({ updated_at: row2?.updated_at ?? null, saved_by: null });
+    }
+    return json({ updated_at: row?.updated_at ?? null, saved_by: (row as any)?.saved_by ?? null });
   }
 
   return json({ error: "Acción desconocida" }, 400);
