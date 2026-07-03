@@ -34,6 +34,12 @@ function logUpdate(msg) {
   try { fs.appendFileSync(logFile, new Date().toISOString() + ' ' + msg + '\n') } catch(e) {}
 }
 
+// ── sync-debug.log ─────────────────────────────────────────────────────────
+const syncLogFile = path.join(app.getPath('userData'), 'sync-debug.log')
+function logSync(msg) {
+  try { fs.appendFileSync(syncLogFile, new Date().toISOString() + '  ' + msg + '\n') } catch(e) {}
+}
+
 let mainWindow = null
 let autoUpdater = null
 
@@ -238,6 +244,7 @@ ipcMain.handle('get-license-info', () => getLicenseInfo())
 ipcMain.handle('get-hardware-id', () => getHardwareId())
 ipcMain.handle('get-machine-id', () => getMachineId())
 ipcMain.handle('get-app-version', () => app.getVersion())
+ipcMain.handle('log-sync', (_, msg) => { logSync(msg); return null; })
 
 // ── Extensión offline ─────────────────────────────────────
 ipcMain.handle('get-device-code', () => {

@@ -3816,20 +3816,25 @@ async function saveDB(){
     _skipRemotePush=false;
   }catch(e){}
 }
+function _ls(msg){try{ipcRenderer.invoke('log-sync','['+(_deviceCode||'?')+'] '+msg).catch(function(){});}catch(e){}}
 function _startRealtimeSync(){
-  if(!db||!db._lic||!window.supabase)return;
+  if(!db||!db._lic||!window.supabase){_ls('startRealtimeSync SKIP no-db/lic/supabase');return;}
+  _ls('startRealtimeSync lic='+db._lic+' device='+(_deviceCode||'?'));
   if(_supaChannel){try{_supaChannel.unsubscribe();}catch(e){}}_supaChannel=null;
   var client=window.supabase.createClient(SUPA_URL,SUPA_KEY,{realtime:{params:{eventsPerSecond:10}}});
   _supaChannel=client
     .channel('pos-sync-'+db._lic)
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pos_data',filter:'license_key=eq.'+db._lic},
       function(payload){
-        var row=payload.new;if(!row||!row.data)return;
-        if(row.saved_by&&row.saved_by===_deviceCode)return;
+        var row=payload.new;
+        _ls('realtime event saved_by='+(row&&row.saved_by||'')+ ' myDevice='+(_deviceCode||'')+ ' hasData='+(row&&row.data?'YES':'NO'));
+        if(!row||!row.data)return;
+        if(row.saved_by&&row.saved_by===_deviceCode){_ls('realtime SKIP own device');return;}
         _applyRemoteMerge(row.data);
       }
     )
     .subscribe(function(status){
+      _ls('subscribe status='+status);
       if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
         setTimeout(function(){_startRealtimeSync();},5000);
       }
@@ -3842,6 +3847,7 @@ function _checkPendingMerge(){
 }
 function _applyRemoteMerge(remote){
   if(!remote||!db)return;
+  _ls('applyMerge start cart='+(cart?cart.length:0)+' db.sales='+(db.sales?db.sales.length:0)+' remote.sales='+(remote.sales?remote.sales.length:0));
   if(cart&&cart.length>0){_pendingMerge=remote;toast('🔄 Datos de otra PC listos — se aplicarán al terminar la venta');return;}
   var newSales=0;
   // 1. Sales: unión por id (append-only)
@@ -3877,38 +3883,39 @@ function _applyRemoteMerge(remote){
   if(remote.settings)db.settings=Object.assign(db.settings||{},remote.settings);
   // Persistir localmente sin re-subir (evita bucle)
   _skipRemotePush=true;saveDB();
+  _ls('applyMerge done newSales='+newSales+' db.sales='+db.sales.length+' db.products='+(db.products?db.products.length:0));
   // Re-renderizar la pantalla activa en ese momento
   _syncRefreshActiveScreen();
   var msg='🔄 '+(newSales>0?newSales+(newSales===1?' venta nueva':' ventas nuevas')+' de otra PC':'Sincronizado con otra PC');
   toast(msg);
 }
 function _syncRefreshActiveScreen(){
-  var _try=function(fn){try{if(typeof fn==='function')fn();}catch(e){console.warn('[sync render]',e);}};
+  var _try=function(fn,lbl){try{if(typeof fn==='function'){_ls('render '+lbl);fn();}}catch(e){console.warn('[sync render]',e);_ls('render '+lbl+' ERROR '+e.message);}};
   var _vis=function(id){var e=el(id);return !!(e&&e.style.display!=='none'&&e.offsetParent!==null);};
+  var _ovOpen=function(id){var e=el(id);return !!(e&&e.classList.contains('open'));};
+  _ls('syncRefresh mainDisplay='+(el('app-main')?el('app-main').style.display:'?')+' uniOpen='+_ovOpen('ov-unified')+' salesOpen='+_ovOpen('ov-sales')+' credOpen='+_ovOpen('ov-credits'));
   // Siempre: contador de orden
-  _try(function(){setEl('ord-lbl','#'+db.orderNum);});
+  _try(function(){setEl('ord-lbl','#'+db.orderNum);},'ord-lbl');
   // Pantalla POS (app-main visible)
   var mainEl=el('app-main');
   if(mainEl&&mainEl.style.display!=='none'){
-    _try(showCategories);_try(renderProds);_try(renderCart);
+    _try(showCategories,'showCategories');_try(renderProds,'renderProds');_try(renderCart,'renderCart');
   }
   // Dashboard interno
-  if(_vis('dashboard-screen')){_try(refreshDashboard);}
-  // Panel unificado admin (ov-unified abierto)
-  var uniEl=el('ov-unified');
-  if(uniEl&&uniEl.style.display!=='none'){
-    if(_vis('t-prods'))  _try(renderProdList);
-    if(_vis('t-users'))  _try(renderUserList);
-    if(_vis('t-inv'))    _try(renderInv);
-    if(_vis('t-cust'))   _try(renderCustList);
-    if(_vis('t-credits'))_try(renderAdmCredits);
-    if(_vis('t-nomina')) _try(renderEmployeeList);
-    if(_vis('uni-conta'))_try(renderConta);
+  if(_vis('dashboard-screen')){_try(refreshDashboard,'refreshDashboard');}
+  // Panel unificado admin (ov-unified abierto — usa _ovOpen porque es position:fixed)
+  if(_ovOpen('ov-unified')){
+    if(_vis('t-prods'))  _try(renderProdList,'renderProdList');
+    if(_vis('t-users'))  _try(renderUserList,'renderUserList');
+    if(_vis('t-inv'))    _try(renderInv,'renderInv');
+    if(_vis('t-cust'))   _try(renderCustList,'renderCustList');
+    if(_vis('t-credits'))_try(renderAdmCredits,'renderAdmCredits');
+    if(_vis('t-nomina')) _try(renderEmployeeList,'renderEmployeeList');
+    if(_vis('uni-conta'))_try(renderConta,'renderConta');
   }
-  // Overlay ventas
-  if(_vis('ov-sales')){_try(renderSales);}
-  // Overlay créditos
-  if(_vis('ov-credits')){_try(renderCreditsPanel);}
+  // Overlays de posición fija: no usar _vis (offsetParent siempre null en fixed)
+  if(_ovOpen('ov-sales')){_try(renderSales,'renderSales');}
+  if(_ovOpen('ov-credits')){_try(renderCreditsPanel,'renderCreditsPanel');}
 }
    function doLogin(){
   const u=el('lu').value,p=el('lp').value;
