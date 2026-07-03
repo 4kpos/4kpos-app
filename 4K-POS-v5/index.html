@@ -3876,12 +3876,38 @@ function _applyRemoteMerge(remote){
   if(remote.settings)db.settings=Object.assign(db.settings||{},remote.settings);
   // Persistir localmente sin re-subir (evita bucle)
   _skipRemotePush=true;saveDB();
-  // Re-renderizar vista actual
-  try{if(typeof showCategories==='function')showCategories();}catch(e){}
-  try{if(typeof renderCart==='function')renderCart();}catch(e){}
-  try{if(typeof renderProds==='function')renderProds();}catch(e){}
+  // Re-renderizar la pantalla activa en ese momento
+  _syncRefreshActiveScreen();
   var msg='🔄 '+(newSales>0?newSales+(newSales===1?' venta nueva':' ventas nuevas')+' de otra PC':'Sincronizado con otra PC');
   toast(msg);
+}
+function _syncRefreshActiveScreen(){
+  var _try=function(fn){try{if(typeof fn==='function')fn();}catch(e){console.warn('[sync render]',e);}};
+  var _vis=function(id){var e=el(id);return !!(e&&e.style.display!=='none'&&e.offsetParent!==null);};
+  // Siempre: contador de orden
+  _try(function(){setEl('ord-lbl','#'+db.orderNum);});
+  // Pantalla POS (app-main visible)
+  var mainEl=el('app-main');
+  if(mainEl&&mainEl.style.display!=='none'){
+    _try(showCategories);_try(renderProds);_try(renderCart);
+  }
+  // Dashboard interno
+  if(_vis('dashboard-screen')){_try(refreshDashboard);}
+  // Panel unificado admin (ov-unified abierto)
+  var uniEl=el('ov-unified');
+  if(uniEl&&uniEl.style.display!=='none'){
+    if(_vis('t-prods'))  _try(renderProdList);
+    if(_vis('t-users'))  _try(renderUserList);
+    if(_vis('t-inv'))    _try(renderInv);
+    if(_vis('t-cust'))   _try(renderCustList);
+    if(_vis('t-credits'))_try(renderAdmCredits);
+    if(_vis('t-nomina')) _try(renderEmployeeList);
+    if(_vis('uni-conta'))_try(renderConta);
+  }
+  // Overlay ventas
+  if(_vis('ov-sales')){_try(renderSales);}
+  // Overlay créditos
+  if(_vis('ov-credits')){_try(renderCreditsPanel);}
 }
    function doLogin(){
   const u=el('lu').value,p=el('lp').value;
