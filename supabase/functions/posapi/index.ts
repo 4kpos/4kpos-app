@@ -315,9 +315,12 @@ serve(async (req) => {
       .eq("license_key", license_key)
       .single();
 
+    // Supabase Deno client devuelve JSONB como string preserializado → parsear antes de embeber
+    const rawData = posRow?.data ?? null;
+    const parsedData = typeof rawData === "string" ? JSON.parse(rawData) : rawData;
     return json({
       success: true,
-      data: posRow?.data ?? null,
+      data: parsedData,
       updated_at: posRow?.updated_at ?? null,
     });
   }
