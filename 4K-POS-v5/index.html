@@ -3718,6 +3718,8 @@ async function loadDB(){
       if(d.adminCode)db.adminCode=d.adminCode;
       if(d.fundAmount!==undefined)db.fundAmount=d.fundAmount;
       if(d.users&&d.users.length)db.users=d.users;
+      // Recovery: restaurar campo user si quedó vacío por bug de sync (user field faltaba en _buildSlim)
+      {let _m=false;db.users.forEach(function(u){if(!u.user){u.user=(u.id==='1'?'admin':(u.name||'').toLowerCase().replace(/\s+/g,'').replace(/[^a-z0-9_]/g,'')||('u'+u.id));_m=true;}});if(_m)saveDB();}
       if(bcrypt){let _m=false;db.users.forEach(function(u){if(u.pass&&!u.pass.startsWith('$2')){u.pass=bcrypt.hashSync(u.pass,10);_m=true;}});if(_m)saveDB();}
       if(d.cfg)db.cfg=Object.assign(db.cfg,d.cfg);
       if(d.facturas)db.facturas=d.facturas;
@@ -3801,7 +3803,7 @@ function _buildSlim(){
     combos:db.combos||[],
     specials:db.specials||[],
     employees:(db.employees||[]).map(function(e){return {id:e.id,name:e.name,payType:e.payType,amount:e.amount||0,useClockInOut:!!e.useClockInOut,hourlyRate:e.hourlyRate||0,clockHistory:e.clockHistory||[]};}),
-    users:(db.users||[]).map(function(u){return {id:u.id,name:u.name,role:u.role,pass:u.pass||'',perms:u.perms||{}};}),
+    users:(db.users||[]).map(function(u){return {id:u.id,name:u.name,user:u.user||'',role:u.role,pass:u.pass||'',perms:u.perms||{}};}),
     cfg:db.cfg||{},
     settings:db.settings||{},
     orderNum:db.orderNum||1,
@@ -3894,8 +3896,8 @@ function _applyRemoteMerge(remote){
   if(remote.adminCode)db.adminCode=remote.adminCode;
   // 8. Employees: remoto gana por id
   if(remote.employees&&remote.employees.length){var em={};(db.employees||[]).forEach(function(e){em[String(e.id)]=e;});remote.employees.forEach(function(e){em[String(e.id)]=Object.assign(em[String(e.id)]||{},e);});db.employees=Object.values(em);}
-  // 9. Users: unión por id, remoto gana en conflicto
-  if(remote.users&&remote.users.length){var um={};(db.users||[]).forEach(function(u){um[String(u.id)]=u;});remote.users.forEach(function(u){um[String(u.id)]=u;});db.users=Object.values(um);}
+  // 9. Users: unión por id, remoto gana en conflicto; preservar user/pass local si remoto los trae vacíos
+  if(remote.users&&remote.users.length){var um={};(db.users||[]).forEach(function(u){um[String(u.id)]=u;});remote.users.forEach(function(ru){var loc=um[String(ru.id)]||{};um[String(ru.id)]=Object.assign({},loc,ru,{user:ru.user||loc.user||'',pass:(ru.pass&&ru.pass.startsWith('$2'))?ru.pass:(loc.pass||ru.pass||'')});});db.users=Object.values(um);}
   // 10. cfg: merge superficial; shift state local gana siempre
   if(remote.cfg){var lso=db.cfg&&db.cfg.shiftOpen,lsu=db.cfg&&db.cfg.shiftUser,lsa=db.cfg&&db.cfg.shiftOpenAt;db.cfg=Object.assign({},db.cfg||{},remote.cfg);db.cfg.shiftOpen=lso;db.cfg.shiftUser=lsu;db.cfg.shiftOpenAt=lsa;}
   // 11. Settings: merge superficial
