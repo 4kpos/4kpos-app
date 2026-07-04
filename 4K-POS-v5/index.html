@@ -350,8 +350,9 @@ select.fi option{background:var(--s2);color:var(--tx);}
 .db-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
 .db-hd h2{font-size:1.1rem;font-weight:800;}
 .db-hd span{font-size:.78rem;color:var(--tx3);}
-.db-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-@media(max-width:900px){.db-kpis{grid-template-columns:repeat(2,1fr);}}
+.db-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+@media(max-width:1100px){.db-kpis{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:700px){.db-kpis{grid-template-columns:repeat(2,1fr);}}
 .db-kpi{background:linear-gradient(135deg,#152238,#0f1826);border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;}
 .kpi-ico{font-size:1.4rem;}
 .kpi-lbl{font-size:.7rem;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
@@ -364,7 +365,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 .db-toggle{display:flex;background:var(--s2);border-radius:var(--rs);border:1.5px solid var(--b1);padding:2px;gap:2px;}
 .db-toggle button{padding:3px 12px;font-size:.72rem;border:none;border-radius:calc(var(--rs) - 2px);background:transparent;color:var(--tx3);cursor:pointer;transition:all .18s;font-weight:600;}
 .db-toggle button.on{background:var(--ac);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);}
-.db-chart{display:block;width:100%;height:140px;overflow:hidden;}
+.db-chart{display:block;width:100%;height:220px;overflow:hidden;}
 .db-bar-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:2px;}
 .db-bar-val{font-size:.58rem;color:var(--ac);font-weight:700;min-height:13px;line-height:13px;text-align:center;white-space:nowrap;}
 .db-bar{background:var(--ac);border-radius:3px 3px 0 0;width:100%;min-height:4px;transition:height .3s;flex:1;}
@@ -563,7 +564,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <h2>📊 Dashboard</h2>
     <div style="display:flex;align-items:center;gap:10px">
       <span id="db-date" style="font-size:.78rem;color:var(--tx3)"></span>
-      <button class="btn btn-s" onclick="sbNav('pos')" style="padding:5px 13px;font-size:.78rem">← Vender</button>
+      <button class="btn btn-s" onclick="sbNav('pos')" style="padding:5px 13px;font-size:.78rem;background:#CC1111;border-color:#CC1111;color:#fff">← Vender</button>
     </div>
   </div>
   <div class="db-kpis">
@@ -590,6 +591,12 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div class="kpi-lbl" id="db-kpi-lbl-ticket">Ticket promedio</div>
       <div class="kpi-val" id="db-kpi-ticket">$0.00</div>
       <div id="kpi-spark-ticket" style="margin-top:8px;line-height:0"></div>
+    </div>
+    <div class="db-kpi">
+      <div class="kpi-ico">📈</div>
+      <div class="kpi-lbl">Venta total</div>
+      <div class="kpi-val" id="db-kpi-alltime">$0.00</div>
+      <div style="margin-top:4px;font-size:.68rem;color:var(--tx3)" id="db-kpi-alltime-sub"></div>
     </div>
   </div>
   <div class="db-row">
@@ -8919,6 +8926,10 @@ function refreshDashboard(){
     credSub.style.cssText=overdueCount>0?'font-size:.65rem;color:#EF4444;margin-top:2px':'';
   }
   setEl('db-kpi-ticket',dolr(ticketProm));
+  var allTimeTotal=sales.filter(function(s){return s.status!=='cancelled'&&s.status!=='returned';}).reduce(function(sum,s){return sum+(s.total||0);},0);
+  var allTimeTx=sales.filter(function(s){return s.status!=='cancelled'&&s.status!=='returned';}).length;
+  setEl('db-kpi-alltime',dolr(allTimeTotal));
+  setEl('db-kpi-alltime-sub',allTimeTx+' venta'+(allTimeTx!==1?'s':'')+' totales');
   _renderDbChart();
   _renderDbTop5();
   _renderDbStock();
@@ -8971,7 +8982,7 @@ function _renderDbChart(){
   var canvas=chartEl.querySelector('canvas');
   if(!canvas){chartEl.innerHTML='';canvas=document.createElement('canvas');chartEl.appendChild(canvas);}
   if(!canvas._dbTipInit){canvas._dbTipInit=true;canvas.addEventListener('mousemove',_dbChartHover);canvas.addEventListener('mouseleave',function(){var t=el('db-chart-tip');if(t)t.style.display='none';});}
-  var H=140,dpr=window.devicePixelRatio||1;
+  var H=220,dpr=window.devicePixelRatio||1;
   canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
   canvas.style.width=W+'px';canvas.style.height=H+'px';canvas.style.display='block';
   var ctx=canvas.getContext('2d');
@@ -9128,13 +9139,13 @@ function _renderDbPayMethods(){
       +'<span style="font-size:.68rem;color:var(--tx3);margin-left:4px">'+dolr(cats[k])+'</span>'
       +'</div>';
   }).join('');
-  payEl.innerHTML='<div style="display:flex;align-items:center;gap:16px">'
-    +'<div style="flex-shrink:0;position:relative;width:88px;height:88px">'
-    +'<div style="width:88px;height:88px;border-radius:50%;background:'+cg+';box-shadow:0 0 16px rgba(59,130,246,.2)"></div>'
+  payEl.innerHTML='<div style="display:flex;align-items:center;gap:20px">'
+    +'<div style="flex-shrink:0;position:relative;width:140px;height:140px">'
+    +'<div style="width:140px;height:140px;border-radius:50%;background:'+cg+';box-shadow:0 0 20px rgba(59,130,246,.2)"></div>'
     +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">'
-    +'<div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#152238,#0f1826);display:flex;flex-direction:column;align-items:center;justify-content:center">'
-    +'<div style="font-size:.55rem;color:var(--tx3);font-weight:600;letter-spacing:.4px">TOTAL</div>'
-    +'<div style="font-size:.78rem;font-weight:800;color:var(--tx)">'+dolr(total)+'</div>'
+    +'<div style="width:84px;height:84px;border-radius:50%;background:linear-gradient(135deg,#152238,#0f1826);display:flex;flex-direction:column;align-items:center;justify-content:center">'
+    +'<div style="font-size:.6rem;color:var(--tx3);font-weight:600;letter-spacing:.4px">TOTAL</div>'
+    +'<div style="font-size:.88rem;font-weight:800;color:var(--tx)">'+dolr(total)+'</div>'
     +'</div></div></div>'
     +'<div style="flex:1">'+legend+'</div>'
     +'</div>';
