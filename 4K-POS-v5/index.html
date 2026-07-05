@@ -3907,6 +3907,7 @@ function _applyRemoteMerge(remote){
   _ls('applyMerge done newSales='+newSales+' db.sales='+db.sales.length+' db.products='+(db.products?db.products.length:0));
   // Re-renderizar la pantalla activa en ese momento
   _syncRefreshActiveScreen();
+  updateClockQuickBtn();
   var msg='🔄 '+(newSales>0?newSales+(newSales===1?' venta nueva':' ventas nuevas')+' de otra PC':'Sincronizado con otra PC');
   toast(msg);
 }
