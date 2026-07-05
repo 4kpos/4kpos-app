@@ -138,157 +138,115 @@ la topbar entre el ícono de refrescar 🔄 y el botón ☰.
 
 ---
 
-## 5. Buscador por nombre en "Productos comprados" — PENDIENTE (aún no implementado)
+## 5. Buscador por nombre en "Productos comprados" — RESUELTO
 
-Confirmado con grep/cat: la pantalla es "Contabilidad → Compras"
-(`Facturas` de proveedor), sección `COMPRAS DE INVENTARIO`:
+Antes: `<select>` plano con todos los productos (línea original
+7048-7051, ver ronda anterior de este documento para la cita exacta).
 
-```
-4K-POS-v5/index.html:1365-1383  <!-- COMPRAS DE INVENTARIO --> ... <div class="slbl">Productos comprados</div> ... <div id="comp-items"></div>
-```
-
-Cada línea de producto se agrega con `compAddItem()` y se renderiza con
-`renderCompItems()`, que arma un `<select>` con **todos** los productos
-sin ningún filtro:
+Ahora: cada línea de producto es un `<input type="text" list="comp-prod-dl">`
+con un `<datalist>` de nombres de producto (filtra mientras escribes) y
+un hint de stock debajo:
 
 ```
-4K-POS-v5/index.html:7048-7051
-function renderCompItems(){
-  const opts='<option value="">'+t('invSelectProd')+'</option>'+(db.products||[]).map(function(p){
-    return '<option value="'+p.id+'">'+escHtml(p.name)+' (Stock: '+(p.stock||0)+')</option>';
-  }).join('');
+4K-POS-v5/index.html — renderCompItems()
+const dl='<datalist id="comp-prod-dl">'+(db.products||[]).map(function(p){
+  return '<option value="'+escHtml(p.name)+'">';
+}).join('')+'</datalist>';
+...
++'<input type="text" class="fi" id="cit-prod-'+i+'" list="comp-prod-dl" placeholder="'+t('compProdSearchPh')+'" value="'+escHtml(curProd?curProd.name:'')+'" oninput="_compSyncItem('+i+')" ...>'
++'<div ... id="cit-stock-'+i+'">'+stockHint+'</div>'
 ```
+`_compSyncItem(i)` resuelve el texto escrito a un producto real por
+nombre (`_compFindProdByName`, coincidencia exacta sin distinguir
+mayúsculas), y actualiza `_compItems[i].prodId` — el resto del flujo
+(`saveCompInvoice`, etc.) no cambió, sigue esperando ese mismo campo.
 
-No encontré ningún input de búsqueda/filtro por nombre ni en esta
-función ni en el HTML de la sección (`comp-content`, líneas 1368-1395).
-Confirmado: **no existe hoy** — es un `<select>` plano con el listado
-completo de productos, sin escáner de código de barras tampoco en esta
-pantalla específica. Falta implementar.
+**Commit:** `e2cadbf` → release **v5.4.95**.
 
 ---
 
-## 6. Calculadora sin soporte de teclado físico — PENDIENTE (aún no implementado)
+## 6. Calculadora — teclado físico — RESUELTO
 
-Confirmado con grep/cat: la calculadora arma sus botones dinámicamente
-y solo les asigna `onclick`, sin ningún listener de teclado:
+Se agregó un listener de teclado global, activo solo si `#fcalc` tiene
+la clase `open` **y** no hay otro input/textarea enfocado (para no
+robar teclas mientras escribes en otro formulario con la calculadora
+abierta al mismo tiempo):
 
 ```
-4K-POS-v5/index.html:7834-7840
-(function buildCalc(){
-  const keys=[{l:'C',c:'cl s2'},{l:'⌫',c:'op'},{l:'÷',c:'op'},...];
-  const g=el('fc-grid');
-  keys.forEach(k=>{const b=document.createElement('button');...
-    b.onclick=()=>calcPress(k.l);g.appendChild(b);});
-  ...
-})();
+4K-POS-v5/index.html — justo después de calcPress()
+document.addEventListener('keydown',function(e){
+  const fc=el('fcalc');
+  if(!fc||!fc.classList.contains('open'))return;
+  const active=document.activeElement;
+  if(active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA'||active.isContentEditable))return;
+  const digitOp={'0':'0',...,'.':'.','+':'+','-':'−','*':'×','/':'÷'};
+  if(digitOp[e.key]!==undefined){e.preventDefault();calcPress(digitOp[e.key]);}
+  else if(e.key==='Enter'||e.key==='='){e.preventDefault();calcPress('=');}
+  else if(e.key==='Backspace'){e.preventDefault();calcPress('⌫');}
+  else if(e.key==='Escape'){e.preventDefault();calcPress('C');}
+});
 ```
+Cubre teclado numérico normal y numpad (ambos generan el mismo `e.key`).
+Backspace borra el último dígito, Escape limpia todo (`C`), tal como
+pediste.
 
-Busqué cualquier `addEventListener('keydown'...)` relacionado con
-`fcalc`/`fc-grid`/`calcPress` en todo el archivo — los únicos
-`keydown` que existen (líneas 1860, 4819, 5720, 7690, 7915, 8112, 8146)
-son para: bloquear DevTools, inputs de búsqueda/cantidad (Enter/Escape),
-y otros modales — **ninguno** alimenta `calcPress()`. Confirmado: la
-calculadora solo responde a clics de mouse hoy. Falta implementar un
-listener de teclado (mientras `#fcalc` tenga la clase `open`) que
-mapee dígitos, `+ - * /`, Enter/`=`, Backspace/`⌫` y Escape hacia
-`calcPress()`.
+**Commit:** `e2cadbf` → release **v5.4.95**.
 
 ---
 
-## 7. Auditoría de traducciones ES/EN — reporte (aún sin corregir, como pediste)
+## 7. Auditoría de traducciones ES/EN — corregido
 
-Encargué una auditoría de solo-lectura (grep/cat) de todo
-`4K-POS-v5/index.html` (9243 líneas) contra el sistema `T`/`t()`/
-`applyLang()` (líneas 1930, 2843, 2982-3505). Resultado: **~140+ sitios
-de texto hardcodeado confirmados**, repartidos así:
+De los ~140+ sitios reportados la ronda pasada, se corrigieron todas
+las categorías identificadas:
 
-| Categoría | Cantidad aprox. | Detalle |
+| Categoría | Antes | Ahora |
 |---|---|---|
-| Menú hamburguesa (`#ham-menu`) completo | ~24 strings | Todo el dropdown, sin un solo `id` cubierto por `applyLang()` |
-| `toast('...')` literal vs `toast(t('...'))` | 80 literales / 77 traducidos | ~51% de los toasts son texto fijo en español |
-| Placeholders sin cobertura en `applyLang()` | ~8 confirmados | La mayoría de placeholders SÍ están cubiertos — estos son la excepción |
-| Tooltips (`title="..."`) hardcodeados | ~15+ | Sobre todo botones que solo tienen ícono/emoji |
-| Encabezados de tabla en HTML generado por JS | ~4 funciones (12+ `<th>`) | Inconsistente: mismas funciones con una tabla traducida y otra no |
-| Botones del diálogo de confirmación global | 2 (usado en ~25 lugares) | `Cancelar` / `Confirmar` nunca cambian de idioma |
+| Menú hamburguesa completo | 0% traducido, sin ids | Todos los labels llevan `<span id="...">` + entrada en `applyLang()` |
+| `toast('...')` literal vs `toast(t('...'))` | 80 literales / 77 traducidos | **~10 literales** (todos legítimos: emoji+nombre de variable, ej. `toast('✓ '+p.name)`) / **128 traducidos** |
+| Placeholders sin cobertura | 6 confirmados | 6/6 arreglados |
+| Tooltips (`title="..."`) hardcodeados | ~15+ | Todos los citados arreglados (2 ya estaban cubiertos por una clave existente que la auditoría no detectó — `cmb-img-clear-btn`) |
+| Encabezados de tabla en JS | 4 funciones | 4/4 arregladas (la de "renderMonthlyResumen" en realidad era `_renderCqHist()` — corregido el nombre real) |
+| Botones del diálogo de confirmación global | Nunca traducidos | `Cancelar`/`Confirmar` y el cancelar del modal de PIN de Clock In/Out, traducidos |
+| Tarjetas del dashboard | 7 de 9 ya estaban cubiertas (la auditoría no estaba segura) | Las 2 que faltaban ("Venta total", "Métodos de pago hoy") ya tienen `id` + `applyLang()` |
+| Overlay de error de licencia | Hardcodeado | Título/mensaje default + ambos botones "Cerrar programa" + el modal de límite de dispositivos, todos traducidos |
 
-**Hallazgo más grande — el menú hamburguesa completo nunca se tradujo:**
-```
-4K-POS-v5/index.html:464  <div class="ham-sec">PRINCIPAL</div>
-4K-POS-v5/index.html:465  <button ...>📊 Dashboard</button>
-4K-POS-v5/index.html:467  ...<span style="flex:1">Notificaciones</span>...   ← solo el title="" se traduce, el texto visible no
-4K-POS-v5/index.html:469  <span>💰 Ventas e Inventario</span>
-4K-POS-v5/index.html:471-477  Ventas del día / Devoluciones / Créditos / Productos / Categorías / Inventario / Etiquetas
-4K-POS-v5/index.html:479  <span>👥 Administración y Configuración</span>
-4K-POS-v5/index.html:481-491  Usuarios / Nómina / Auditoría / Nota de turno / Actualizaciones / Config·Ajustes / Idioma / Tema / Contabilidad / Registradora
-4K-POS-v5/index.html:494  <div class="ham-sec">ACCIONES</div>
-4K-POS-v5/index.html:495-498  Clock In/Out / Cerrar turno / Buscar actualizaciones
-```
-No existe ninguna clave `PRINCIPAL` ni `ACCIONES` en el diccionario `T`
-(confirmado con grep). Este menú es una pieza de UI más nueva que nunca
-se conectó a `applyLang()` — a diferencia del panel `#ov-unified`
-(pestañas Productos/Usuarios/etc.), que sí usa `<span id="tab-prods-txt">`
-+ `t('tabProds')` correctamente.
+**Verificado en vivo (no solo código):** abrí la app real, cambié de
+español a inglés con `switchLang()` y comparé el menú hamburguesa
+completo antes/después:
 
-**Botones de confirmar/cancelar globales — alto impacto, bajo esfuerzo de arreglar:**
 ```
-4K-POS-v5/index.html:1525  <p id="conf-msg">¿Confirmar?</p>            ← el mensaje SÍ se traduce por llamada, pero el default no
-4K-POS-v5/index.html:1527  <button ... onclick="confNo()">Cancelar</button>   ← sin id, nunca traducido
-4K-POS-v5/index.html:1528  <button ... onclick="confYes()">Confirmar</button> ← sin id, nunca traducido
-```
-Este único diálogo (`confirm2()`) se usa en ~25 lugares del programa
-(borrar producto, borrar empleado, cerrar turno, etc.) — arreglar estos
-2 botones arregla la mayoría de las confirmaciones de la app de un solo
-golpe.
+ES: PRINCIPAL / Dashboard / Dashboard Móvil / Notificaciones / Nota para
+    el próximo turno / VENTAS E INVENTARIO / ADMINISTRACIÓN Y
+    CONFIGURACIÓN / ACCIONES / Clock In/Out / Cerrar Turno / Buscar
+    actualizaciones
 
-**Muestra de `toast()` 100% en español fijo** (hay 80 en total, esta es
-una muestra representativa con cita exacta):
+EN: MAIN / Dashboard / Mobile Dashboard / Notifications / Note for next
+    shift / SALES & INVENTORY / ADMINISTRATION & SETTINGS / ACTIONS /
+    Clock In/Out / Close Shift / Check for updates
 ```
-4K-POS-v5/index.html:5556  toast('Selecciona empleado y hora');
-4K-POS-v5/index.html:5564  toast('La salida debe ser después de la entrada');
-4K-POS-v5/index.html:6014  toast('⚠ Nombre requerido');
-4K-POS-v5/index.html:6016  toast('⚠ Ya existe un cliente con esa cédula');
-4K-POS-v5/index.html:7091  toast('⚠ El nombre del proveedor es obligatorio');
-4K-POS-v5/index.html:7121  toast('✅ Factura guardada. Stock actualizado — '+facItems.length+' producto(s), total '+dolr(total));
-4K-POS-v5/index.html:7163  toast('🗑 Factura eliminada — stock revertido');
-```
-Patrón encontrado: los flujos de carrito/checkout/crédito sí usan
-`toast('⚠ '+t('key'))` de forma consistente; las áreas de **Facturas de
-compra (~7091-7172), nómina/clock in-out (~5556-5717) y respaldo/backup
-(~5826-5852)** son casi 100% texto fijo.
+Los botones del diálogo de confirmación también cambiaron a
+`Cancel`/`Confirm` correctamente.
 
-**Encabezados de tabla inconsistentes dentro de la misma función:**
-```
-4K-POS-v5/index.html:7731       <th>Fecha</th><th>Entrada</th><th>Salida</th><th>Hrs</th>     ← hardcodeado
-4K-POS-v5/index.html:7809-7813  ...misma función renderMonthlyResumen(), la OTRA tabla sí usa t('empNameLbl') etc.
-```
+**Bug encontrado y arreglado de paso (no estaba en la auditoría
+original):** `toggleTheme()` hacía
+`el('tbtn-theme').textContent=dark?'🌙':'☀️'` — esto **borraba por
+completo** la etiqueta "Tema" del botón la primera vez que lo tocabas
+(quedaba solo el ícono, para siempre, hasta reiniciar la app). Ahora el
+ícono vive en un `<span id="tbtn-theme-icon">` separado y `toggleTheme()`
+solo actualiza ese span. Verificado en vivo: después de hacer clic en
+Tema, el botón muestra `"☀️ Theme"` (antes habría quedado solo `"☀️"`).
 
-**Placeholders sin cubrir (los pocos que sí faltan):**
-```
-4K-POS-v5/index.html:772   id="u-user" placeholder="maria123"
-4K-POS-v5/index.html:992   id="cmb-name" placeholder="Ej: Combo Familiar"
-4K-POS-v5/index.html:1060  id="emp-name" placeholder="Juan Pérez"
-4K-POS-v5/index.html:1631  id="oa-name" placeholder="Ej: Juan"
-4K-POS-v5/index.html:1632  id="oa-table" placeholder="Ej: Mesa 3"
-4K-POS-v5/index.html:915   id="cfg-tax-rate" placeholder="Ej: 18"
-```
-(la gran mayoría de placeholders del resto de la app SÍ están bien
-cubiertos por `applyLang()` — no es un problema generalizado, solo estos).
+**Qué NO toqué** (fuera del alcance del reporte original, para no
+seguir expandiendo sin que lo pidas):
+- Las etiquetas dinámicas que arma `_showLicError(msg,title)` en cada
+  punto de la app donde se llama (son decenas de mensajes distintos,
+  cada uno hardcodeado en su sitio) — solo traduje el texto default
+  estático del overlay, no cada mensaje específico de error de licencia.
+- El texto que le pasa `requireAdminCode('Ajuste manual de asistencia',...)`
+  al log de auditoría — es una descripción interna del registro, no un
+  texto que se muestra en un modal.
 
-**Otros hallazgos puntuales:**
-- Tarjetas del dashboard interno (`Ventas hoy`, `Transacciones`,
-  `Créditos pendientes`, `Ticket promedio`, `Venta total`, `Ventas por
-  período`, `Top 5 productos`, `Métodos de pago hoy`, `Semáforo de
-  stock` — líneas 566-617) — texto plano sin `id`, candidatas a revisar.
-- Overlay de error de licencia (líneas 637-654): "Error de licencia",
-  "Contacta a soporte.", "Cerrar programa", "Límite de PCs alcanzado" —
-  todo hardcodeado.
-
-**No corregí nada de esto todavía** — es el reporte que pediste "antes
-de corregirlos". Si quieres, en la próxima ronda lo puedo arreglar
-empezando por lo de mayor impacto/menor esfuerzo: (1) los 2 botones del
-diálogo de confirmación global, (2) el menú hamburguesa completo
-(agregar ids + entradas en `applyLang()`), y después ir por los `toast()`
-literales por bloques (facturas, nómina, backup).
+**Commit:** `e2cadbf` → release **v5.4.95**.
 
 ---
 
@@ -328,11 +286,10 @@ concluyente pero cero riesgo sobre tus datos.
 | 2. Fix scroll+toast al editar empleado | `4kpos-app` | `8008790` | **v5.4.92** |
 | 3. Idioma/Tema dentro de Configuración | `4kpos-app` | `8008790` | **v5.4.92** |
 | 4. Calculadora junto al ☰ | `4kpos-app` | `8008790` | **v5.4.92** |
-| 5. Buscador en Productos comprados | `4kpos-app` | — (pendiente, sin implementar) | — |
-| 6. Calculadora con teclado físico | `4kpos-app` | — (pendiente, sin implementar) | — |
-| 7. Auditoría traducciones ES/EN | `4kpos-app` | — (solo reporte, sin corregir) | — |
+| 5. Buscador en Productos comprados | `4kpos-app` | `e2cadbf` | **v5.4.95** |
+| 6. Calculadora con teclado físico | `4kpos-app` | `e2cadbf` | **v5.4.95** |
+| 7. Auditoría traducciones ES/EN (corregida) | `4kpos-app` | `e2cadbf` | **v5.4.95** |
 
-**Instala la release `v5.4.92`** para verificar los puntos 1 al 4. Los
-puntos 5, 6 y 7 quedan documentados y confirmados con evidencia real
-(grep/cat) pero **todavía no se implementaron** — a la espera de que me
-digas si seguimos con esos ahora o en otra ronda.
+**Instala la release `v5.4.95`** — incluye los 7 puntos completos (los
+1-4 ya estaban en v5.4.92, y quedan también dentro de v5.4.95 porque es
+una versión más nueva sobre la misma rama).
