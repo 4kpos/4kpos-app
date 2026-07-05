@@ -1,171 +1,163 @@
-# Pendientes — verificación con evidencia (2026-07-04)
+# Pendientes — verificación con evidencia (actualizado 2026-07-04, ronda 2)
 
-Para cada punto: código real citado (archivo + línea), qué hace, y por qué
-podría no verse en la app aunque el código exista.
+Para cada punto: código real citado (archivo + línea), qué se hizo hoy, y
+commit/versión para instalar y verificar tú mismo.
 
 ---
 
 ## 1. Clock In/Out en el menú hamburguesa
 
-**Estado real: el botón y el flujo completo SÍ existen en el código**, pero
-están ocultos por una condición de configuración — probablemente por eso
-"no se ve".
-
-Botón dentro del acordeón "Ventas e Inventario" del menú:
+**El botón y el flujo SÍ existen en el código** (no es un placeholder):
 
 ```
 4K-POS-v5/index.html:478
 <button class="ham-item ham-sub" id="ham-clock-item" style="display:none;color:#10b981" onclick="closeHamMenu();openClockQuick()">⏱ Clock In/Out</button>
 ```
+Está dentro del acordeón "Ventas e Inventario" (ver punto 3).
 
-Nótese `style="display:none"` — arranca oculto. Se muestra solo si se cumplen
-**las dos condiciones siguientes a la vez**:
-
-```
-4K-POS-v5/index.html:5466
-const enabled=db.settings&&db.settings.clockQuickEnabled;
-4K-POS-v5/index.html:5467
-const hasClock=(db.employees||[]).some(function(e){return e.useClockInOut;});
-...
-4K-POS-v5/index.html:5471
-const hamClock=el('ham-clock-item');if(hamClock)hamClock.style.display=(enabled&&hasClock)?'':'none';
-```
-
-`clockQuickEnabled` es `false` por defecto:
-```
-4K-POS-v5/index.html:2853
-settings:{...,clockQuickEnabled:false}
-```
-
-Se activa desde Configuración con este toggle (por ahora probablemente
-apagado en tu instalación):
-```
-4K-POS-v5/index.html:923
-<div class="tog"><span class="tog-label" id="cfg-clock-quick-lbl">⏱ Mostrar botón Clock In/Out en menú</span><label class="tog-sw"><input type="checkbox" id="cfg-clock-quick" onchange="saveClockQuickCfg()"><span class="slider"></span></label></div>
-```
-
-Y además necesita que **al menos un empleado** tenga marcado "usar reloj
-checador" (`useClockInOut:true`) en su ficha, en Usuarios/Nómina.
-
-El flujo de selección de usuario + contraseña **ya está implementado**
-(no es un placeholder):
-
+Flujo empleado → contraseña → fichar, ya implementado:
 ```
 4K-POS-v5/index.html:5494  function openClockQuick(){...}       → abre modal, lista empleados
-4K-POS-v5/index.html:5578  function renderClockQuickList(){...} → un botón Entrada/Salida por empleado
+4K-POS-v5/index.html:5578  function renderClockQuickList(){...} → botón Entrada/Salida por empleado
 4K-POS-v5/index.html:5599  function cqClockWithPin(id){...}     → pide contraseña de esa cuenta
-4K-POS-v5/index.html:5611  function cqVerifyPass(){...}         → valida contra db.users (bcrypt), solo
+4K-POS-v5/index.html:5611  function cqVerifyPass(){...}         → valida contra db.users (bcrypt); solo
                                                                     el propio usuario o un admin puede fichar
 ```
 
-**Conclusión:** no está "sin implementar" — está implementado y reubicado
-correctamente en el menú (commit `afee6c3`), pero permanece invisible hasta
-que actives el toggle de Configuración Y marques `useClockInOut` en al
-menos un empleado. Si lo que quieres es que aparezca siempre sin ese
-requisito, eso es un cambio de comportamiento nuevo a decidir, no un bug.
+**Bug real que encontré y arreglé hoy:** `_applyRemoteMerge()` (la función
+que aplica cambios recibidos por Realtime desde otra PC) actualiza
+`db.employees` y `db.settings`, pero nunca volvía a llamar
+`updateClockQuickBtn()`. Si activabas el toggle o marcabas
+`useClockInOut` en un empleado desde OTRA PC (o esa data llegaba por
+sync), esta PC nunca refrescaba el botón hasta reiniciar la app. Ya
+arreglado:
+
+```
+4K-POS-v5/index.html:3910  updateClockQuickBtn();   ← agregado dentro de _applyRemoteMerge()
+```
+
+**Esto sigue siendo cierto y no es un bug — es la condición de diseño
+para que aparezca:**
+```
+4K-POS-v5/index.html:2853  settings:{...,clockQuickEnabled:false}   ← apagado por defecto
+4K-POS-v5/index.html:5466  function updateClockQuickBtn(){
+                              const enabled=db.settings&&db.settings.clockQuickEnabled;
+                              const hasClock=(db.employees||[]).some(e=>e.useClockInOut);
+                              ...
+```
+Necesitas **las dos cosas** en tu cuenta real, desde la misma PC donde lo
+vas a usar (o desde cualquiera, ahora que el sync ya refresca el botón):
+1. Configuración → activar "⏱ Mostrar botón Clock In/Out en menú".
+2. En Usuarios/Nómina, marcar "usar reloj checador" en al menos un empleado.
+
+Si después de eso sigue sin verse, ahí sí sería un bug nuevo a reportar —
+pero el código y el flujo ya están completos.
+
+**Commit del fix:** `7143eb8` → release **v5.4.90**.
 
 ---
 
-## 2. Mini-gráficas (sparklines) en Semana/Mes — dashboard móvil
+## 2. Mini-gráficas (sparklines) en Semana y Mes
 
-**Este código vive en otro repositorio**, no en `4kpos-app`:
-`C:\Users\4k\4kpos-dashboard` (`4kpos-dashboard.html`, servido por GitHub
-Pages en `4kpos.github.io/4kpos-dashboard/`, abierto desde el POS solo vía
-QR — no está embebido en el instalador de Windows).
-
-**Estado real: el código SÍ existe, está commiteado y pusheado** a
-`origin/main` de ese repo (verificado con `git status` → "up to date with
-origin/main", "nothing to commit"):
+**Verificado de forma más fuerte que la vez pasada:** no solo grep — abrí
+`4kpos-dashboard.html` en un navegador real (Edge headless vía
+Playwright), inyecté datos de venta de prueba y ejecuté `renderWeek()` /
+`renderMonth()` directamente. Las 6 mini-gráficas se generaron como SVG
+real en el DOM y se ven correctamente en captura de pantalla:
 
 ```
-4kpos-dashboard.html:560  function makeSpark(vals,color){...}     → genera el SVG del sparkline
-4kpos-dashboard.html:702  // Sparklines — totales diarios de los últimos 7 días  (renderWeek)
-4kpos-dashboard.html:707  var _si=document.getElementById('w-spark-inc');if(_si)_si.innerHTML=makeSpark(_v7,'#34d399');
-4kpos-dashboard.html:721  // Sparklines — totales diarios de los últimos 30 días (renderMonth)
-4kpos-dashboard.html:726  var _mi=document.getElementById('m-spark-inc');if(_mi)_mi.innerHTML=makeSpark(_v30,'#34d399');
+4kpos-dashboard.html:279  <div id="w-spark-inc"...></div>   → Esta semana
+4kpos-dashboard.html:280  <div id="w-spark-avg"...></div>   → Promedio/día
+4kpos-dashboard.html:281  <div id="w-spark-best"...></div>  → Mejor día
+4kpos-dashboard.html:282  <div id="w-spark-yest"...></div>  → Ventas de ayer
+4kpos-dashboard.html:292  <div id="m-spark-inc"...></div>   → Este mes
+4kpos-dashboard.html:293  <div id="m-spark-avg"...></div>   → Promedio/día (mes)
 ```
+Todas terminaron con `<svg viewBox="0 0 72 22"...><polyline .../></svg>`
+dentro tras llamar a `renderWeek()`/`renderMonth()` — no vacías.
 
-Y los contenedores existen en las tarjetas KPI de ambas pestañas:
+**No encontré ningún bug de código.** No hay service worker ni caché de
+PWA en este repo que pudiera explicar contenido viejo servido. Si en tu
+teléfono real sigues sin verlas:
+- Prueba en una pestaña nueva / modo incógnito para descartar caché del
+  navegador.
+- Si el negocio no tuvo ventas en varios de esos días, la línea se dibuja
+  igual pero puede verse casi plana pegada abajo de la tarjeta — no
+  ausente, solo poco visible.
 
-```
-4kpos-dashboard.html:279  <div id="w-spark-inc" style="margin-top:8px;line-height:0"></div>   (Esta semana)
-4kpos-dashboard.html:280  <div id="w-spark-avg" style="margin-top:8px;line-height:0"></div>
-4kpos-dashboard.html:281  <div id="w-spark-best" style="margin-top:8px;line-height:0"></div>
-4kpos-dashboard.html:282  <div id="w-spark-yest" style="margin-top:8px;line-height:0"></div>
-4kpos-dashboard.html:292  <div id="m-spark-inc" style="margin-top:8px;line-height:0"></div>    (Este mes)
-4kpos-dashboard.html:293  <div id="m-spark-avg" style="margin-top:8px;line-height:0"></div>
-```
-
-Commit: `cdf1180` — "feat(mobile-dashboard): sparklines SVG en pestañas
-Semana y Mes" (2026-07-04 16:49).
-
-**Lo que NO pude verificar yo:** no abrí el dashboard real en un navegador
-con tus datos sincronizados (necesita license key + datos de Supabase), así
-que no confirmé con mis propios ojos que se dibuje en tu teléfono. Si tú lo
-abriste y no lo viste, las causas más probables — en orden de probabilidad —
-son:
-- **Caché del navegador/PWA** en el teléfono: si lo instalaste como PWA o
-  ya lo tenías abierto en una pestaña, puede seguir sirviendo la versión
-  vieja. Prueba cerrar completamente la pestaña/app y volver a abrir, o
-  forzar refresco (en Android Chrome: menú → Configuración → Privacidad →
-  Borrar datos de navegación, solo para ese sitio; o desinstalar/reinstalar
-  la PWA).
-- El sparkline solo dibuja una línea de 7 o 30 puntos; si son todos $0
-  (sin ventas en esos días) se ve como una línea plana casi invisible, no
-  como que "no está" — vale la pena mirar de cerca.
-
-No es un caso de "código faltante": el código está y está publicado.
+No hice cambios de código para este punto (no hacía falta). Commit ya
+existente: `cdf1180` en `4kpos-dashboard` (repo aparte de `4kpos-app`,
+sin número de versión de instalador — se sirve directo desde GitHub
+Pages, ya está publicado).
 
 ---
 
-## 3. Reorganización del menú hamburguesa
+## 3. Reorganización del menú hamburguesa — los 5 cambios, uno por uno
 
-**Confirmado: sí se aplicó**, commit `afee6c3` en `4kpos-app` (incluido en
-la release `v5.4.88`).
-
-Categorías fusionadas:
-```
-4K-POS-v5/index.html:469  <button class="ham-acc-hdr" onclick="toggleHamSection('ham-s-ventinv')"><span>💰 Ventas e Inventario</span>...
-4K-POS-v5/index.html:480  <button class="ham-acc-hdr" onclick="toggleHamSection('ham-s-admcfg')"><span>👥 Administración y Configuración</span>...
-```
-
-Refrescar fuera del menú, de vuelta en la topbar:
-```
-4K-POS-v5/index.html:450  <button id="refresh-btn" onclick="refreshPOS()" title="Actualizar datos">🔄</button>
-```
-(y ya no existe ningún `<button ... onclick="refreshPOS()">` dentro de
-`#ham-menu` — se movió, no se duplicó.)
-
-Campana y buzón dentro del menú, con badge rojo:
-```
-4K-POS-v5/index.html:466  <button class="ham-item" id="notif-btn" onclick="closeHamMenu();toggleNotifPanel()" title="Notificaciones">🔔 <span style="flex:1">Notificaciones</span><span id="notif-badge">0</span></button>
-4K-POS-v5/index.html:467  <button class="ham-item" id="note-btn" onclick="closeHamMenu();openWriteNote()" title="Nota para el próximo turno">📬 <span style="flex:1">Nota para el próximo turno</span><span id="note-badge">1</span></button>
-```
-Ya no existen esos dos botones en la topbar (`#topbar .top-mid`).
-
-Badge agregado extra en el propio ícono ☰, visible sin abrir el menú:
-```
-4K-POS-v5/index.html:461  <span id="ham-badge" style="display:none;position:absolute;...">0</span>
-4K-POS-v5/index.html:8023 function _updateHamBadge(){...} // suma notificaciones sin leer + nota pendiente
-```
-
-Verificado en vivo (no solo por código): abrí la app real con Playwright,
-inicié sesión como Admin y tomé capturas — el acordeón fusionado, el badge
-rojo "2" en Notificaciones y en el ícono ☰, y el botón 🔄 en la topbar se
-ven exactamente como se describe arriba.
-
----
-
-## Versión / commit a instalar
-
-| Item | Repo | Commit | Incluido en |
+| # | Cambio pedido | ¿Está? | Evidencia |
 |---|---|---|---|
-| 1. Clock In/Out (reubicado, gating existente) | `4kpos-app` | `afee6c3` | **v5.4.88** |
-| 3. Reorganización del menú | `4kpos-app` | `afee6c3` | **v5.4.88** |
-| 2. Sparklines dashboard móvil | `4kpos-dashboard` (repo aparte, sin versión de instalador — se sirve directo desde GitHub Pages) | `cdf1180` | ya publicado en `origin/main`, no requiere instalar nada en el POS |
+| 1 | Fusionar Ventas + Inventario | ✅ Sí | `4K-POS-v5/index.html:470` → `<div id="ham-s-ventinv" class="ham-acc-body">` (un solo acordeón "💰 Ventas e Inventario") |
+| 2 | Fusionar Administración + Configuración | ✅ Sí | `4K-POS-v5/index.html:481` → `<div id="ham-s-admcfg" class="ham-acc-body">` (un solo acordeón "👥 Administración y Configuración") |
+| 3 | Sacar Refrescar del menú, devolverlo a pantalla principal | ✅ Sí | `4K-POS-v5/index.html:450` → `<button id="refresh-btn" onclick="refreshPOS()" title="Actualizar datos">🔄</button>` en la topbar; ya no existe ningún botón `onclick="refreshPOS()"` dentro de `#ham-menu` |
+| 4 | Campana de notificaciones dentro del menú, con badge | ✅ Sí | `4K-POS-v5/index.html:466` → `<button class="ham-item" id="notif-btn"...>🔔 ... <span id="notif-badge">0</span></button>` dentro de `#ham-menu`; ya no está en la topbar |
+| 5 | Buzón/nota dentro del menú, con badge | ✅ Sí | `4K-POS-v5/index.html:467` → mismo patrón, `id="note-btn"` / `id="note-badge"` |
 
-**Instala/descarga la release `v5.4.88` de `4kpos-app`** (tag creado
-automáticamente por el workflow de GitHub Actions tras el push de
-`afee6c3`) para los puntos 1 y 3. El punto 2 no depende de qué versión del
-POS instales — se actualiza solo la próxima vez que el navegador/PWA del
-dashboard cargue la versión nueva de `4kpos-dashboard.html`.
+Extra no pedido explícitamente pero agregado para que se note sin abrir
+el menú: badge rojo agregado en el propio ícono ☰
+(`4K-POS-v5/index.html:461`, `id="ham-badge"`).
+
+**Los 5 están confirmados en código y verificados en vivo** (login real +
+capturas de pantalla en la sesión anterior). Commit `afee6c3` → release
+**v5.4.88** (o cualquier versión posterior, sigue incluido).
+
+---
+
+## 4. "Turno abierto" se actualizaba muy espaciado (dashboard móvil)
+
+**Confirmado el problema:** el indicador leía `DB.shiftStatuses`, poblado
+por `loadShiftStatus()`, pero esa función solo se llamaba dentro del ciclo
+pesado de `loadData()` cada 30s:
+```
+4kpos-dashboard.html:1108 (antes)  refreshInterval=setInterval(function(){loadData(false);},30000);
+```
+`loadData()` recarga el blob completo de `pos_data` (ventas, productos,
+etc.) — no es la tabla `pos_data` la que tiene Realtime activo en este
+archivo (ese Realtime vive en `4K-POS-v5/index.html`, es un proyecto
+aparte); aquí todo se hace por `fetch()` REST normal, sin websockets.
+Meter un poll de 10-15s a `loadData()` completo habría triplicado esa
+carga pesada solo para refrescar un indicador chico.
+
+**Lo que hice:** separé el estado de turno en su propio poll liviano,
+que solo consulta la tabla `categories` (filas `shift_status_*`, ya
+liviana de por sí vía `loadShiftStatus()`), cada 12 segundos:
+```
+4kpos-dashboard.html:1109-1111
+    if(shiftPollInterval)clearInterval(shiftPollInterval);
+    shiftPollInterval=setInterval(async function(){await loadShiftStatus();renderShiftStatus();},12000);
+```
+El poll pesado de `loadData()` (ventas/productos) se queda igual en 30s.
+
+**Commit:** `304f93a` en `4kpos-dashboard` (repo aparte, ya pusheado a
+`main` — no requiere instalar nada en el POS, se sirve solo desde GitHub
+Pages).
+
+---
+
+## Resumen — qué instalar para verificar
+
+| Punto | Repo | Commit | Versión a instalar |
+|---|---|---|---|
+| 1. Clock In/Out + fix de sync | `4kpos-app` | `7143eb8` | **v5.4.90** |
+| 2. Sparklines Semana/Mes | `4kpos-dashboard` | `cdf1180` (sin cambios hoy) | ya publicado, sin versión de instalador |
+| 3. Reorganización del menú | `4kpos-app` | `afee6c3` | **v5.4.88** (incluido también en v5.4.90) |
+| 4. Turno abierto cada 12s | `4kpos-dashboard` | `304f93a` | ya publicado, sin versión de instalador |
+
+**Instala la release `v5.4.90` de `4kpos-app`** para verificar los puntos
+1 y 3 juntos. Los puntos 2 y 4 ya están live en
+`4kpos.github.io/4kpos-dashboard/` sin necesidad de reinstalar el POS —
+si no ves el cambio de inmediato, prueba en pestaña nueva/incógnito por
+posible caché del navegador.
+
+Pendiente real de tu lado para el punto 1: activar el toggle de
+Configuración + marcar `useClockInOut` en al menos un empleado, si aún
+no lo has hecho — sin eso el botón sigue oculto a propósito.
