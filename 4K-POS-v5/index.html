@@ -461,41 +461,41 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <button class="hamburger-btn" id="ham-btn" onclick="toggleHamMenu(event)" title="Menú">☰</button>
       <span id="ham-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border-radius:50%;font-size:.62rem;font-weight:800;min-width:16px;height:16px;align-items:center;justify-content:center;padding:0 3px;line-height:1;box-shadow:0 0 0 2px var(--bg);pointer-events:none">0</span>
       <div id="ham-menu">
-        <div class="ham-sec">PRINCIPAL</div>
-        <button class="ham-item" onclick="closeHamMenu();sbNav('dash')">📊 Dashboard</button>
-        <button class="ham-item" onclick="closeHamMenu();_hamOpenDashMobile()">📱 Dashboard Móvil</button>
-        <button class="ham-item" id="notif-btn" onclick="closeHamMenu();toggleNotifPanel()" title="Notificaciones">🔔 <span style="flex:1">Notificaciones</span><span id="notif-badge">0</span></button>
-        <button class="ham-item" id="note-btn" onclick="closeHamMenu();openWriteNote()" title="Nota para el próximo turno">📬 <span style="flex:1">Nota para el próximo turno</span><span id="note-badge">1</span></button>
+        <div class="ham-sec" id="ham-sec-main">PRINCIPAL</div>
+        <button class="ham-item" onclick="closeHamMenu();sbNav('dash')">📊 <span id="ham-dash-txt">Dashboard</span></button>
+        <button class="ham-item" onclick="closeHamMenu();_hamOpenDashMobile()">📱 <span id="ham-dashmobile-txt">Dashboard Móvil</span></button>
+        <button class="ham-item" id="notif-btn" onclick="closeHamMenu();toggleNotifPanel()" title="Notificaciones">🔔 <span style="flex:1" id="ham-notif-txt">Notificaciones</span><span id="notif-badge">0</span></button>
+        <button class="ham-item" id="note-btn" onclick="closeHamMenu();openWriteNote()" title="Nota para el próximo turno">📬 <span style="flex:1" id="ham-note-txt">Nota para el próximo turno</span><span id="note-badge">1</span></button>
         <div class="ham-sep"></div>
-        <button class="ham-acc-hdr" onclick="toggleHamSection('ham-s-ventinv')"><span>💰 Ventas e Inventario</span><span class="ham-acc-arr">›</span></button>
+        <button class="ham-acc-hdr" onclick="toggleHamSection('ham-s-ventinv')"><span id="ham-cat-ventinv-txt">💰 Ventas e Inventario</span><span class="ham-acc-arr">›</span></button>
         <div id="ham-s-ventinv" class="ham-acc-body">
-          <button class="ham-item ham-sub" onclick="closeHamMenu();reqPin('sales')">💰 Ventas del día</button>
-          <button class="ham-item ham-sub" onclick="closeHamMenu();reqPin('returns')">↩️ Devoluciones</button>
-          <button class="ham-item ham-sub" onclick="closeHamMenu();openCreditsPanel()">💳 Créditos</button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-prods')">📦 Productos</button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-cats')">🗂️ Categorías</button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-inv')">📋 Inventario</button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-labels')">🏷️ Etiquetas</button>
+          <button class="ham-item ham-sub" onclick="closeHamMenu();reqPin('sales')">💰 <span id="ham-ventasdia-txt">Ventas del día</span></button>
+          <button class="ham-item ham-sub" onclick="closeHamMenu();reqPin('returns')">↩️ <span id="ham-devol-txt">Devoluciones</span></button>
+          <button class="ham-item ham-sub" onclick="closeHamMenu();openCreditsPanel()">💳 <span id="ham-creditos-txt">Créditos</span></button>
+          <button class="ham-item ham-sub" onclick="_openDirect('t-prods')">📦 <span id="ham-prods-txt">Productos</span></button>
+          <button class="ham-item ham-sub" onclick="_openDirect('t-cats')">🗂️ <span id="ham-cats-txt">Categorías</span></button>
+          <button class="ham-item ham-sub" onclick="_openDirect('t-inv')">📋 <span id="ham-inv-txt">Inventario</span></button>
+          <button class="ham-item ham-sub" onclick="_openDirect('t-labels')">🏷️ <span id="ham-labels-txt">Etiquetas</span></button>
         </div>
-        <button class="ham-acc-hdr" onclick="toggleHamSection('ham-s-admcfg')"><span>👥 Administración y Configuración</span><span class="ham-acc-arr">›</span></button>
+        <button class="ham-acc-hdr" onclick="toggleHamSection('ham-s-admcfg')"><span id="ham-cat-admcfg-txt">👥 Administración y Configuración</span><span class="ham-acc-arr">›</span></button>
         <div id="ham-s-admcfg" class="ham-acc-body">
-          <button class="ham-item ham-sub" onclick="_openDirect('t-users')">👥 Usuarios</button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-nomina')">👷 Nómina</button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-audit')">📋 Auditoría</button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-shiftnote')">📝 Nota de turno</button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-updates')">🔄 Actualizaciones</button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-cfg')">⚙️ Config / Ajustes</button>
-          <button class="ham-item ham-sub" id="lang-toggle-btn" onclick="closeHamMenu();switchLang()" title="Cambiar idioma / Switch language">🌐 Idioma</button>
-          <button class="ham-item ham-sub" id="tbtn-theme" onclick="closeHamMenu();toggleTheme()">🌙 Tema</button>
-          <button class="ham-item ham-sub" onclick="_openContaDirect()">📒 Contabilidad</button>
-          <button class="ham-item ham-sub" onclick="closeHamMenu();openDrawer()">🗃️ Registradora</button>
+          <button class="ham-item ham-sub" onclick="_openDirect('t-users')">👥 <span id="ham-users-txt">Usuarios</span></button>
+          <button class="ham-item ham-sub" onclick="_openDirect('t-nomina')">👷 <span id="ham-nomina-txt">Nómina</span></button>
+          <button class="ham-item ham-sub" onclick="_openDirect('t-audit')">📋 <span id="ham-audit-txt">Auditoría</span></button>
+          <button class="ham-item ham-sub" onclick="_openDirect('t-shiftnote')">📝 <span id="ham-shiftnote-txt">Nota de turno</span></button>
+          <button class="ham-item ham-sub" onclick="_openDirect('t-updates')">🔄 <span id="ham-updates-txt">Actualizaciones</span></button>
+          <button class="ham-item ham-sub" onclick="_openDirect('t-cfg')">⚙️ <span id="ham-cfgajustes-txt">Config / Ajustes</span></button>
+          <button class="ham-item ham-sub" id="lang-toggle-btn" onclick="closeHamMenu();switchLang()" title="Cambiar idioma / Switch language">🌐 <span id="ham-idioma-txt">Idioma</span></button>
+          <button class="ham-item ham-sub" id="tbtn-theme" onclick="closeHamMenu();toggleTheme()"><span id="tbtn-theme-icon">🌙</span> <span id="ham-tema-txt">Tema</span></button>
+          <button class="ham-item ham-sub" onclick="_openContaDirect()">📒 <span id="ham-conta-txt">Contabilidad</span></button>
+          <button class="ham-item ham-sub" onclick="closeHamMenu();openDrawer()">🗃️ <span id="ham-drawer-txt">Registradora</span></button>
         </div>
         <div class="ham-sep"></div>
-        <div class="ham-sec">ACCIONES</div>
-        <button class="ham-item" id="ham-clock-item" style="display:none;color:#10b981" onclick="closeHamMenu();openClockQuick()">⏱ Clock In/Out</button>
-        <button class="ham-item" onclick="closeHamMenu();openLogout()" style="color:var(--rd)">🚪 Cerrar turno</button>
+        <div class="ham-sec" id="ham-sec-acciones">ACCIONES</div>
+        <button class="ham-item" id="ham-clock-item" style="display:none;color:#10b981" onclick="closeHamMenu();openClockQuick()">⏱ <span id="ham-clock-txt">Clock In/Out</span></button>
+        <button class="ham-item" onclick="closeHamMenu();openLogout()" style="color:var(--rd)">🚪 <span id="ham-logout-txt">Cerrar turno</span></button>
         <div class="ham-sep" style="margin-top:6px"></div>
-        <button class="ham-item" id="ham-upd-btn" onclick="checkUpdates()" style="color:var(--ac)">🔄 Buscar actualizaciones</button>
+        <button class="ham-item" id="ham-upd-btn" onclick="checkUpdates()" style="color:var(--ac)">🔄 <span id="ham-upd-txt">Buscar actualizaciones</span></button>
         <div id="hm-ver" style="font-size:.7rem;color:var(--tx3);padding:2px 12px 6px;letter-spacing:.3px;text-align:center"></div>
       </div>
     </div>
@@ -587,7 +587,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
     </div>
     <div class="db-kpi">
       <div class="kpi-ico">📈</div>
-      <div class="kpi-lbl">Venta total</div>
+      <div class="kpi-lbl" id="db-kpi-lbl-totalsale">Venta total</div>
       <div class="kpi-val" id="db-kpi-alltime">$0.00</div>
       <div style="margin-top:4px;font-size:.68rem;color:var(--tx3)" id="db-kpi-alltime-sub"></div>
     </div>
@@ -614,7 +614,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div class="stk-list" id="db-stock"></div>
     </div>
     <div class="db-card">
-      <div class="db-card-hd"><h4>Métodos de pago hoy</h4></div>
+      <div class="db-card-hd"><h4 id="db-h4-paymethods">Métodos de pago hoy</h4></div>
       <div id="db-pay-chart"></div>
     </div>
   </div>
@@ -638,7 +638,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <div class="mb" style="padding:20px 16px">
       <div style="font-size:2rem;margin-bottom:12px">🔒</div>
       <div style="font-size:.82rem;color:var(--tx3);margin-bottom:18px" id="lic-err-msg">Contacta a soporte.</div>
-      <button class="btn btn-p" style="width:100%" onclick="try{ipcRenderer.invoke('exit-app');}catch(e){window.close();}">Cerrar programa</button>
+      <button class="btn btn-p" id="lic-err-close-btn" style="width:100%" onclick="try{ipcRenderer.invoke('exit-app');}catch(e){window.close();}">Cerrar programa</button>
     </div>
   </div>
 </div>
@@ -646,12 +646,12 @@ select.fi option{background:var(--s2);color:var(--tx);}
 <!-- DEVICE LIMIT ERROR -->
 <div class="ov" id="ov-device-limit" style="z-index:9999">
   <div class="modal" style="max-width:360px;text-align:center">
-    <div class="mh"><h3>⚠ Límite de dispositivos</h3></div>
+    <div class="mh"><h3>⚠ <span id="dev-limit-h3">Límite de dispositivos</span></h3></div>
     <div class="mb" style="padding:20px 16px">
       <div style="font-size:2rem;margin-bottom:12px">🖥️</div>
       <div style="font-size:.92rem;font-weight:700;margin-bottom:10px" id="dev-limit-title">Límite de PCs alcanzado</div>
       <div style="font-size:.82rem;color:var(--tx3);margin-bottom:18px" id="dev-limit-msg">Tu plan Básico permite solo 1 PC registrada. Para usar 4K POS en más equipos, actualiza al plan Pro (hasta 3 PCs).</div>
-      <button class="btn btn-p" style="width:100%" onclick="try{ipcRenderer.invoke('exit-app');}catch(e){window.close();}">Cerrar programa</button>
+      <button class="btn btn-p" id="dev-limit-close-btn" style="width:100%" onclick="try{ipcRenderer.invoke('exit-app');}catch(e){window.close();}">Cerrar programa</button>
     </div>
   </div>
 </div>
@@ -1511,7 +1511,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <input type="password" class="fi" id="cq-pass-input" placeholder="Contraseña" autocomplete="off" style="text-align:center;letter-spacing:2px;margin-bottom:10px" onkeydown="if(event.key==='Enter')cqVerifyPass()">
           <div id="cq-pass-error" style="display:none;font-size:.75rem;color:#ef4444;margin-bottom:8px"></div>
           <button class="btn btn-p" style="width:100%;margin-bottom:8px" onclick="cqVerifyPass()">✓ Confirmar</button>
-          <button class="btn btn-s" style="width:100%" onclick="cqCancelPin()">Cancelar</button>
+          <button class="btn btn-s" style="width:100%" id="cq-pin-cancel-btn" onclick="cqCancelPin()">Cancelar</button>
         </div>
       </div>
     </div>
@@ -1524,8 +1524,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <div style="font-size:1.8rem">⚠️</div>
     <p id="conf-msg">¿Confirmar?</p>
     <div class="conf-btns">
-      <button class="btn btn-s" onclick="confNo()">Cancelar</button>
-      <button class="btn btn-d" onclick="confYes()">Confirmar</button>
+      <button class="btn btn-s" id="conf-no-btn" onclick="confNo()">Cancelar</button>
+      <button class="btn btn-d" id="conf-yes-btn" onclick="confYes()">Confirmar</button>
     </div>
   </div>
 </div>
@@ -2382,6 +2382,53 @@ const T = {
     // Menú unificado
     uniModalTitle:'Menú',uniTabAdm:'Administración',uniTabConta:'Contabilidad',uniTabAjustes:'Ajustes',uniTabClock:'Clock',
     sbiMenu:'Menú',sbiClock:'Clock',
+    // Menú hamburguesa — antes hardcodeado, ahora traducido
+    hmSecPrincipal:'PRINCIPAL',hmSecAcciones:'ACCIONES',hmDashboard:'Dashboard',hmDashMobile:'Dashboard Móvil',
+    hmNotifications:'Notificaciones',hmVentasInv:'Ventas e Inventario',hmAdmCfg:'Administración y Configuración',
+    hmConfigAjustes:'Config / Ajustes',hmIdioma:'Idioma',hmTema:'Tema',hmDrawer:'Registradora',
+    tabLabels:'Etiquetas',tabAudit:'Auditoría',tabShiftNote:'Nota de turno',tabUpdates:'Actualizaciones',
+    // Diálogo de confirmación global
+    confirmDefaultMsg:'¿Confirmar?',confirmCancelBtn:'Cancelar',confirmYesBtn:'Confirmar',
+    // Compras — buscador de producto
+    compProdSearchPh:'🔍 Buscar producto...',
+    // Toasts — validaciones y confirmaciones varias (antes hardcodeadas)
+    toastProviderRequired:'⚠ El nombre del proveedor es obligatorio',toastInvoiceNumRequired:'⚠ El número de factura es obligatorio',
+    toastAddValidProduct:'⚠ Agrega al menos un producto con cantidad y precio',toastNoValidProduct:'⚠ Ningún producto válido encontrado',
+    toastInvoiceSaved:'✅ Factura guardada. Stock actualizado — ',toastInvoiceSavedItemsMid:' producto(s), total ',
+    toastInvoiceDeleted:'🗑 Factura eliminada — stock revertido',toastInvoiceFieldsRequired:'⚠ Producto, cantidad y costo requeridos',
+    toastProductNotFound:'⚠ Producto no encontrado',toastInvoiceStockUpdated:'✅ Factura — Stock: ',
+    toastSelectEmpTime:'Selecciona empleado y hora',toastEnterExitTime:'Ingresa hora de salida',
+    toastExitAfterEntry:'La salida debe ser después de la entrada',toastFullRecord:'Registro completo: ',
+    toastManualEntry:'Entrada manual: ',toastNoActiveEntry:'Sin entrada activa para ',toastManualExit:'Salida manual: ',
+    toastAdminOnlyEdit:'Solo el admin puede editar',toastTimeUpdated:'Hora actualizada',
+    toastDataExportedEnc:'🔐 Datos exportados y cifrados',toastDataExported:'✅ Datos exportados',
+    toastInvalidFile:'⚠ Archivo inválido',toastFileReadError:'⚠ Error al leer archivo',
+    toastNameRequired:'⚠ Nombre requerido',toastIdRequired:'⚠ Cédula requerida',toastDuplicateId:'⚠ Ya existe un cliente con esa cédula',
+    toastEditingUser:'✏️ Editando usuario: ',toastFundSaved:'✅ Fondo: ',toastConfigSaved:'✅ Configuración guardada',
+    toastCreditConfigSaved:'✅ Configuración de crédito guardada',toastOtherPcData:'🔄 Datos de otra PC listos — se aplicarán al terminar la venta',
+    clockEntrada:'Entrada',clockSalida:'Salida',cqEnterPassFor:'Ingresa tu contraseña para registrar ',
+    toastOfflineModePrefix:'⚠ Modo offline — ',toastOfflineModeSuffix:' días sin verificar',
+    toastPlanUpdated:'✅ Plan actualizado: ',toastCsvPrefix:'📥 CSV: ',
+    toastCsvRecordsSuffix:' registros',toastCsvSalesSuffix:' ventas',toastCsvCreditsSuffix:' créditos',
+    toastInsufficientStockPrefix:'⚠ Stock insuficiente: ',toastInsufficientStockMid:' (disponible: ',
+    toastInsufficientStockMid2:', necesario: ',toastInsufficientStockSuffix:'). Alguien más ya vendió este producto.',
+    toastNoProducts:'⚠ Sin productos',toastPagaLessThanLleva:'⚠ "Paga" debe ser menor que "Lleva"',
+    toastSelectAtLeastOneProduct:'⚠ Selecciona al menos un producto',toastNoProductSelected:'⚠ Sin producto seleccionado',
+    toastNoLabels:'⚠ Sin etiquetas',toastPdfSaved:'✅ PDF guardado',toastErrorPrefix:'❌ ',
+    toastEncryptError:'⚠ Error al cifrar: ',toastSelectCustomer:'⚠ Selecciona un cliente',toastCustomerNotFound:'⚠ Cliente no encontrado',
+    time24h:'Hora 24h',time12h:'Hora 12h AM/PM',fieldRequiredSuffix:' requerido',
+    thEmployee:'Empleado',thHoras:'Horas',noRecordsToday:'Sin registros hoy',
+    thFecha:'Fecha',thHora:'Hora',thOrden:'Orden',thItems:'Items',thMetodo:'Método',thTotal:'Total',thCajero:'Cajero',thEstado:'Estado',
+    thHrs:'Hrs',thStock:'Stock',thProducto:'Producto',recordsLabel:'REGISTROS',clickHourToEdit:'clic en hora para editar',
+    dbTotalSaleLbl:'Venta total',dbPayMethodsToday:'Métodos de pago hoy',
+    licErrorTitle:'Error de licencia',licContactSupport:'Contacta a soporte.',licClosePrograma:'Cerrar programa',licDeviceLimitTitle:'Límite de PCs alcanzado',
+    devLimitH3:'Límite de dispositivos',devLimitMsg:'Tu plan Básico permite solo 1 PC registrada. Para usar 4K POS en más equipos, actualiza al plan Pro (hasta 3 PCs).',
+    phUsername:'maria123',phComboName:'Ej: Combo Familiar',phEmpName:'Juan Pérez',
+    phOaName:'Ej: Juan',phOaTable:'Ej: Mesa 3',phTaxRate:'Ej: 18',
+    wifiConnected:'Conectado',refreshTitle:'Actualizar datos',oaCounterTxt:'Cuentas',oaCounterTitle:'Cuentas abiertas',calcTitle:'Calculadora',menuTitle:'Menú',
+    removeImageTitle:'Quitar imagen',dateFromTitle:'Desde',dateToTitle:'Hasta',
+    editQtyTitle:'Clic para editar cantidad',editAdminTitle:'Click para editar (admin)',editTitle:'Editar',
+    resetPassTitle:'Resetear contraseña',dismissTitle:'Descartar',clickToEditTitle:'Clic para editar',
   },
   en:{
     srch:'🔍 Search or scan...',all:'All',cobrar:'✓ Charge',cash:'Cash',card:'Card',transfer:'Transfer',split:'Split',
@@ -2837,6 +2884,53 @@ const T = {
     // Unified menu
     uniModalTitle:'Menu',uniTabAdm:'Administration',uniTabConta:'Accounting',uniTabAjustes:'Settings',uniTabClock:'Clock',
     sbiMenu:'Menu',sbiClock:'Clock',
+    // Hamburger menu — previously hardcoded, now translated
+    hmSecPrincipal:'MAIN',hmSecAcciones:'ACTIONS',hmDashboard:'Dashboard',hmDashMobile:'Mobile Dashboard',
+    hmNotifications:'Notifications',hmVentasInv:'Sales & Inventory',hmAdmCfg:'Administration & Settings',
+    hmConfigAjustes:'Config / Settings',hmIdioma:'Language',hmTema:'Theme',hmDrawer:'Cash Drawer',
+    tabLabels:'Labels',tabAudit:'Audit',tabShiftNote:'Shift Note',tabUpdates:'Updates',
+    // Global confirm dialog
+    confirmDefaultMsg:'Confirm?',confirmCancelBtn:'Cancel',confirmYesBtn:'Confirm',
+    // Purchases — product search
+    compProdSearchPh:'🔍 Search product...',
+    // Toasts — misc validations and confirmations (previously hardcoded)
+    toastProviderRequired:'⚠ Supplier name is required',toastInvoiceNumRequired:'⚠ Invoice number is required',
+    toastAddValidProduct:'⚠ Add at least one product with quantity and price',toastNoValidProduct:'⚠ No valid product found',
+    toastInvoiceSaved:'✅ Invoice saved. Stock updated — ',toastInvoiceSavedItemsMid:' product(s), total ',
+    toastInvoiceDeleted:'🗑 Invoice deleted — stock reverted',toastInvoiceFieldsRequired:'⚠ Product, quantity and cost are required',
+    toastProductNotFound:'⚠ Product not found',toastInvoiceStockUpdated:'✅ Invoice — Stock: ',
+    toastSelectEmpTime:'Select employee and time',toastEnterExitTime:'Enter exit time',
+    toastExitAfterEntry:'Exit time must be after entry time',toastFullRecord:'Complete record: ',
+    toastManualEntry:'Manual entry: ',toastNoActiveEntry:'No active entry for ',toastManualExit:'Manual exit: ',
+    toastAdminOnlyEdit:'Only admin can edit',toastTimeUpdated:'Time updated',
+    toastDataExportedEnc:'🔐 Data exported and encrypted',toastDataExported:'✅ Data exported',
+    toastInvalidFile:'⚠ Invalid file',toastFileReadError:'⚠ Error reading file',
+    toastNameRequired:'⚠ Name is required',toastIdRequired:'⚠ ID is required',toastDuplicateId:'⚠ A customer with that ID already exists',
+    toastEditingUser:'✏️ Editing user: ',toastFundSaved:'✅ Fund: ',toastConfigSaved:'✅ Settings saved',
+    toastCreditConfigSaved:'✅ Credit settings saved',toastOtherPcData:'🔄 Data from another PC ready — will apply once the sale is completed',
+    clockEntrada:'Check In',clockSalida:'Check Out',cqEnterPassFor:'Enter your password to register ',
+    toastOfflineModePrefix:'⚠ Offline mode — ',toastOfflineModeSuffix:' days unverified',
+    toastPlanUpdated:'✅ Plan updated: ',toastCsvPrefix:'📥 CSV: ',
+    toastCsvRecordsSuffix:' records',toastCsvSalesSuffix:' sales',toastCsvCreditsSuffix:' credits',
+    toastInsufficientStockPrefix:'⚠ Insufficient stock: ',toastInsufficientStockMid:' (available: ',
+    toastInsufficientStockMid2:', needed: ',toastInsufficientStockSuffix:'). Someone else already sold this product.',
+    toastNoProducts:'⚠ No products',toastPagaLessThanLleva:'⚠ "Pay" must be less than "Take"',
+    toastSelectAtLeastOneProduct:'⚠ Select at least one product',toastNoProductSelected:'⚠ No product selected',
+    toastNoLabels:'⚠ No labels',toastPdfSaved:'✅ PDF saved',toastErrorPrefix:'❌ ',
+    toastEncryptError:'⚠ Encryption error: ',toastSelectCustomer:'⚠ Select a customer',toastCustomerNotFound:'⚠ Customer not found',
+    time24h:'24h Time',time12h:'12h AM/PM Time',fieldRequiredSuffix:' is required',
+    thEmployee:'Employee',thHoras:'Hours',noRecordsToday:'No records today',
+    thFecha:'Date',thHora:'Time',thOrden:'Order',thItems:'Items',thMetodo:'Method',thTotal:'Total',thCajero:'Cashier',thEstado:'Status',
+    thHrs:'Hrs',thStock:'Stock',thProducto:'Product',recordsLabel:'RECORDS',clickHourToEdit:'click the time to edit',
+    dbTotalSaleLbl:'Total Sale',dbPayMethodsToday:'Payment methods today',
+    licErrorTitle:'License error',licContactSupport:'Contact support.',licClosePrograma:'Close program',licDeviceLimitTitle:'PC limit reached',
+    devLimitH3:'Device limit',devLimitMsg:'Your Basic plan allows only 1 registered PC. To use 4K POS on more devices, upgrade to the Pro plan (up to 3 PCs).',
+    phUsername:'maria123',phComboName:'E.g.: Family Combo',phEmpName:'John Smith',
+    phOaName:'E.g.: John',phOaTable:'E.g.: Table 3',phTaxRate:'E.g.: 18',
+    wifiConnected:'Connected',refreshTitle:'Refresh data',oaCounterTxt:'Accounts',oaCounterTitle:'Open accounts',calcTitle:'Calculator',menuTitle:'Menu',
+    removeImageTitle:'Remove image',dateFromTitle:'From',dateToTitle:'To',
+    editQtyTitle:'Click to edit quantity',editAdminTitle:'Click to edit (admin)',editTitle:'Edit',
+    resetPassTitle:'Reset password',dismissTitle:'Dismiss',clickToEditTitle:'Click to edit',
   }
 };
 let lang = localStorage.getItem('4kpos_lang')||'es';
@@ -2919,7 +3013,7 @@ function _handleOfflineLicense(localLic){
       activated_at:localLic.activated_at||null,key:localLic.key||''};
     db._localPlan=localLic.plan||'';db._licKeyLocal=localLic.key||'';
     _applyPlanUI();
-    setTimeout(function(){toast('⚠ Modo offline — '+Math.floor(days)+' días sin verificar');},1500);
+    setTimeout(function(){toast(t('toastOfflineModePrefix')+Math.floor(days)+t('toastOfflineModeSuffix'));},1500);
     setTimeout(function(){if(typeof refreshLicenseInfo==='function')refreshLicenseInfo();},300);
   }else{
     _showLicError('Sin conexión por más de 15 días. Conecta a internet e intenta de nuevo.','Verificación requerida');
@@ -2945,7 +3039,7 @@ function startLicenseWatcher(){
         _applyPlanUI();
         updateLicBadge();
         if(typeof refreshLicenseInfo==='function')refreshLicenseInfo();
-        if(prevPlan&&lic.plan&&prevPlan!==lic.plan)toast('✅ Plan actualizado: '+_planLabel(lic.plan));
+        if(prevPlan&&lic.plan&&prevPlan!==lic.plan)toast(t('toastPlanUpdated')+_planLabel(lic.plan));
       }
     }catch(e){}
   },2*60*1000);
@@ -3081,6 +3175,28 @@ function applyLang(){
   // Lang toggle topbar title
   const _langBtn=el('lang-toggle-btn');
   if(_langBtn)_langBtn.title=lang==='es'?'Switch to English':'Cambiar a Español';
+  // Diálogo de confirmación global
+  const _confNoBtn=el('conf-no-btn');if(_confNoBtn)_confNoBtn.textContent=t('confirmCancelBtn');
+  const _confYesBtn=el('conf-yes-btn');if(_confYesBtn)_confYesBtn.textContent=t('confirmYesBtn');
+  const _cqPinCancelBtn=el('cq-pin-cancel-btn');if(_cqPinCancelBtn)_cqPinCancelBtn.textContent=t('confirmCancelBtn');
+  // Placeholders sin cobertura previa
+  const _uUserInput=el('u-user');if(_uUserInput)_uUserInput.placeholder=t('phUsername');
+  const _cmbNameInput=el('cmb-name');if(_cmbNameInput)_cmbNameInput.placeholder=t('phComboName');
+  const _empNameInput=el('emp-name');if(_empNameInput)_empNameInput.placeholder=t('phEmpName');
+  const _oaNameInput=el('oa-name');if(_oaNameInput)_oaNameInput.placeholder=t('phOaName');
+  const _oaTableInput=el('oa-table');if(_oaTableInput)_oaTableInput.placeholder=t('phOaTable');
+  const _cfgTaxInput=el('cfg-tax-rate');if(_cfgTaxInput)_cfgTaxInput.placeholder=t('phTaxRate');
+  // Tooltips/títulos sin cobertura previa
+  const _wifiDot=el('wifi-dot');if(_wifiDot)_wifiDot.title=t('wifiConnected');
+  const _refreshBtn=el('refresh-btn');if(_refreshBtn)_refreshBtn.title=t('refreshTitle');
+  const _oaCounterBtn=el('oa-counter-btn');if(_oaCounterBtn)_oaCounterBtn.title=t('oaCounterTitle');
+  const _oaCounterTxt=el('oa-counter-txt');if(_oaCounterTxt)_oaCounterTxt.textContent=t('oaCounterTxt');
+  const _calcBtn=el('calc-btn');if(_calcBtn)_calcBtn.title=t('calcTitle');
+  const _hamBtn=el('ham-btn');if(_hamBtn)_hamBtn.title=t('menuTitle');
+  const _invViewTblTitle=el('inv-view-table');if(_invViewTblTitle)_invViewTblTitle.title=t('invViewTable');
+  const _invViewGrdTitle=el('inv-view-grid');if(_invViewGrdTitle)_invViewGrdTitle.title=t('invViewCards');
+  const _audDateFrom=el('aud-date-from');if(_audDateFrom)_audDateFrom.title=t('dateFromTitle');
+  const _audDateTo=el('aud-date-to');if(_audDateTo)_audDateTo.title=t('dateToTitle');
   // Admin tabs
   const _tabProds=el('tab-prods-txt');if(_tabProds)_tabProds.textContent=t('tabProds');
   const _tabCats=el('tab-cats-txt');if(_tabCats)_tabCats.textContent=t('tabCats');
@@ -3089,6 +3205,39 @@ function applyLang(){
   const _tabInv=el('tab-inv-txt');if(_tabInv)_tabInv.textContent=t('tabInv');
   const _tabCust=el('tab-cust-txt');if(_tabCust)_tabCust.textContent=t('tabCust');
   const _tabCombos=el('tab-combos-txt');if(_tabCombos)_tabCombos.textContent=t('tabCombos');
+  const _tabLabels=el('tab-labels-txt');if(_tabLabels)_tabLabels.textContent=t('tabLabels');
+  const _tabAudit=el('tab-audit-txt');if(_tabAudit)_tabAudit.textContent=t('tabAudit');
+  const _tabShiftnote=el('tab-shiftnote-txt');if(_tabShiftnote)_tabShiftnote.textContent=t('tabShiftNote');
+  const _tabUpdates=el('tab-updates-txt');if(_tabUpdates)_tabUpdates.textContent=t('tabUpdates');
+  // Menú hamburguesa
+  const _hamSecMain=el('ham-sec-main');if(_hamSecMain)_hamSecMain.textContent=t('hmSecPrincipal');
+  const _hamSecAcc=el('ham-sec-acciones');if(_hamSecAcc)_hamSecAcc.textContent=t('hmSecAcciones');
+  const _hamDash=el('ham-dash-txt');if(_hamDash)_hamDash.textContent=t('hmDashboard');
+  const _hamDashM=el('ham-dashmobile-txt');if(_hamDashM)_hamDashM.textContent=t('hmDashMobile');
+  const _hamNotifTxt=el('ham-notif-txt');if(_hamNotifTxt)_hamNotifTxt.textContent=t('hmNotifications');
+  const _hamNoteTxt=el('ham-note-txt');if(_hamNoteTxt)_hamNoteTxt.textContent=t('writeNoteMenu');
+  const _hamCatVentinv=el('ham-cat-ventinv-txt');if(_hamCatVentinv)_hamCatVentinv.textContent='💰 '+t('hmVentasInv');
+  const _hamVentasdia=el('ham-ventasdia-txt');if(_hamVentasdia)_hamVentasdia.textContent=t('sal');
+  const _hamDevol=el('ham-devol-txt');if(_hamDevol)_hamDevol.textContent=t('returns');
+  const _hamCreditos=el('ham-creditos-txt');if(_hamCreditos)_hamCreditos.textContent=t('tabCredits');
+  const _hamProds=el('ham-prods-txt');if(_hamProds)_hamProds.textContent=t('tabProds');
+  const _hamCats=el('ham-cats-txt');if(_hamCats)_hamCats.textContent=t('tabCats');
+  const _hamInv=el('ham-inv-txt');if(_hamInv)_hamInv.textContent=t('tabInv');
+  const _hamLabels=el('ham-labels-txt');if(_hamLabels)_hamLabels.textContent=t('tabLabels');
+  const _hamCatAdmcfg=el('ham-cat-admcfg-txt');if(_hamCatAdmcfg)_hamCatAdmcfg.textContent='👥 '+t('hmAdmCfg');
+  const _hamUsers=el('ham-users-txt');if(_hamUsers)_hamUsers.textContent=t('tabUsers');
+  const _hamNomina=el('ham-nomina-txt');if(_hamNomina)_hamNomina.textContent=t('tabNomina');
+  const _hamAudit=el('ham-audit-txt');if(_hamAudit)_hamAudit.textContent=t('tabAudit');
+  const _hamShiftnote=el('ham-shiftnote-txt');if(_hamShiftnote)_hamShiftnote.textContent=t('tabShiftNote');
+  const _hamUpdates=el('ham-updates-txt');if(_hamUpdates)_hamUpdates.textContent=t('tabUpdates');
+  const _hamCfgAjustes=el('ham-cfgajustes-txt');if(_hamCfgAjustes)_hamCfgAjustes.textContent=t('hmConfigAjustes');
+  const _hamIdioma=el('ham-idioma-txt');if(_hamIdioma)_hamIdioma.textContent=t('hmIdioma');
+  const _hamTema=el('ham-tema-txt');if(_hamTema)_hamTema.textContent=t('hmTema');
+  const _hamContaTxt=el('ham-conta-txt');if(_hamContaTxt)_hamContaTxt.textContent=t('conta');
+  const _hamDrawer=el('ham-drawer-txt');if(_hamDrawer)_hamDrawer.textContent=t('hmDrawer');
+  const _hamClockTxt=el('ham-clock-txt');if(_hamClockTxt)_hamClockTxt.textContent=t('hmClockTxt');
+  const _hamLogoutTxt=el('ham-logout-txt');if(_hamLogoutTxt)_hamLogoutTxt.textContent=t('logoutTitle');
+  const _hamUpdTxt=el('ham-upd-txt');if(_hamUpdTxt)_hamUpdTxt.textContent=t('checkUpdates');
   const _tabSpecials=el('tab-specials-txt');if(_tabSpecials)_tabSpecials.textContent=t('tabSpecials');
   // Product form labels
   const _lblPN=el('lbl-p-name');if(_lblPN)_lblPN.textContent=t('fldName');
@@ -3339,6 +3488,16 @@ function applyLang(){
   const _dbH4Period=el('db-h4-period');if(_dbH4Period)_dbH4Period.textContent=t('dbSalesByPeriod');
   const _dbH4Top5=el('db-h4-top5');if(_dbH4Top5)_dbH4Top5.textContent=t('dbTop5Prods');
   const _dbH4Stock=el('db-h4-stock');if(_dbH4Stock)_dbH4Stock.textContent=t('dbStockLight');
+  const _dbKpiTotalSale=el('db-kpi-lbl-totalsale');if(_dbKpiTotalSale)_dbKpiTotalSale.textContent=t('dbTotalSaleLbl');
+  const _dbH4PayMethods=el('db-h4-paymethods');if(_dbH4PayMethods)_dbH4PayMethods.textContent=t('dbPayMethodsToday');
+  // Overlays de error de licencia (solo default estático — _showLicError() sobreescribe con el mensaje real)
+  const _licErrTitle=el('lic-err-title');if(_licErrTitle&&_licErrTitle.textContent==='Error de licencia')_licErrTitle.textContent=t('licErrorTitle');
+  const _licErrMsg=el('lic-err-msg');if(_licErrMsg&&_licErrMsg.textContent==='Contacta a soporte.')_licErrMsg.textContent=t('licContactSupport');
+  const _licErrCloseBtn=el('lic-err-close-btn');if(_licErrCloseBtn)_licErrCloseBtn.textContent=t('licClosePrograma');
+  const _devLimitH3=el('dev-limit-h3');if(_devLimitH3)_devLimitH3.textContent=t('devLimitH3');
+  const _devLimitTitle=el('dev-limit-title');if(_devLimitTitle)_devLimitTitle.textContent=t('licDeviceLimitTitle');
+  const _devLimitMsg=el('dev-limit-msg');if(_devLimitMsg)_devLimitMsg.textContent=t('devLimitMsg');
+  const _devLimitCloseBtn=el('dev-limit-close-btn');if(_devLimitCloseBtn)_devLimitCloseBtn.textContent=t('licClosePrograma');
   const _dbPeriodWeek=el('db-period-week');if(_dbPeriodWeek)_dbPeriodWeek.textContent=t('dbPeriodWeek');
   const _dbPeriodMonth=el('db-period-month');if(_dbPeriodMonth)_dbPeriodMonth.textContent=t('dbPeriodMonth');
   // OA block modal
@@ -3552,7 +3711,7 @@ function updateLicBadge(){
 }
 
 // THEME
-function toggleTheme(){dark=!dark;document.body.classList.toggle('light',!dark);el('tbtn-theme').textContent=dark?'🌙':'☀️';}
+function toggleTheme(){dark=!dark;document.body.classList.toggle('light',!dark);const ic=el('tbtn-theme-icon');if(ic)ic.textContent=dark?'🌙':'☀️';}
 
 // HAMBURGER
 function toggleHMenu(){
@@ -3869,7 +4028,7 @@ function _checkPendingMerge(){
 function _applyRemoteMerge(remote){
   if(!remote||!db)return;
   _ls('applyMerge start cart='+(cart?cart.length:0)+' db.sales='+(db.sales?db.sales.length:0)+' remote.sales='+(remote.sales?remote.sales.length:0));
-  if(cart&&cart.length>0){_pendingMerge=remote;toast('🔄 Datos de otra PC listos — se aplicarán al terminar la venta');return;}
+  if(cart&&cart.length>0){_pendingMerge=remote;toast(t('toastOtherPcData'));return;}
   var newSales=0;
   // 1. Sales: unión por id (append-only)
   var myIds=new Set((db.sales||[]).map(function(s){return String(s.id);}));
@@ -4180,7 +4339,7 @@ function exportAuditCSV(){
   const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download='auditoria_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(url);
-  toast('📥 CSV: '+entries.length+' registros');
+  toast(t('toastCsvPrefix')+entries.length+t('toastCsvRecordsSuffix'));
 }
 
 setTimeout(renderLoginUsers,500);
@@ -4940,7 +5099,7 @@ function exportCSV(){
 // CUSTOMERS
 function saveCust(){
   const name=el('cust-name').value.trim();
-  if(!name){toast('⚠ '+t('fldUserName')+' requerido');return;}
+  if(!name){toast('⚠ '+t('fldUserName')+t('fieldRequiredSuffix'));return;}
   const cedula=el('cust-cedula').value.trim();
   if(!cedula){toast(t('custCedulaRequired'));return;}
   const eid=el('cust-eid').value;
@@ -5010,7 +5169,7 @@ function renderCart(){
         else if(_sp.type==='qty_price'&&item.qty>=_sp.minQty)extraTag='<div class="ci-spc-tag">📦 precio especial</div>';
       }
     }
-    div.innerHTML=th+'<div class="ci-inf"><div class="ci-name">'+item.name+'</div>'+extraTag+'<div class="ci-uprice">'+dolr(item.price)+' c/u</div></div><div class="ci-qty"><button class="qb" onclick="changeQty(\''+item.id+'\',-1)">−</button><span class="qn" style="cursor:pointer;min-width:26px;border-bottom:1.5px dashed var(--tx3)" onclick="qtyInputMode(\''+item.id+'\',this)" title="Clic para editar cantidad">'+item.qty+'</span><button class="qb" onclick="changeQty(\''+item.id+'\',1)">+</button></div><div class="ci-tot">'+dolr(effTotal)+'</div><button class="ci-del" onclick="changeQty(\''+item.id+'\',-99)">✕</button>';
+    div.innerHTML=th+'<div class="ci-inf"><div class="ci-name">'+item.name+'</div>'+extraTag+'<div class="ci-uprice">'+dolr(item.price)+' c/u</div></div><div class="ci-qty"><button class="qb" onclick="changeQty(\''+item.id+'\',-1)">−</button><span class="qn" style="cursor:pointer;min-width:26px;border-bottom:1.5px dashed var(--tx3)" onclick="qtyInputMode(\''+item.id+'\',this)" title="'+t('editQtyTitle')+'">'+item.qty+'</span><button class="qb" onclick="changeQty(\''+item.id+'\',1)">+</button></div><div class="ci-tot">'+dolr(effTotal)+'</div><button class="ci-del" onclick="changeQty(\''+item.id+'\',-99)">✕</button>';
     list.appendChild(div);
   });
   calcChange();
@@ -5253,7 +5412,7 @@ async function checkout(){
         db.sales.pop();db.orderNum--;
         cart.forEach(function(item){if(item.isCombo){(item.comboItems||[]).forEach(function(ci){const p=db.products.find(function(x){return x.id===ci.productId;});if(p)p.stock=(p.stock||0)+ci.qty*item.qty;});}else{const p=db.products.find(function(x){return x.id===item.id;});if(p)p.stock=(p.stock||0)+item.qty;}});
         if(_ckBtn){_ckBtn.disabled=false;_ckBtn.textContent='✓ Confirmar pago — '+dolr(total);}
-        toast('⚠ Stock insuficiente: '+_cj.product+' (disponible: '+_cj.available+', necesario: '+_cj.needed+'). Alguien más ya vendió este producto.');
+        toast(t('toastInsufficientStockPrefix')+_cj.product+t('toastInsufficientStockMid')+_cj.available+t('toastInsufficientStockMid2')+_cj.needed+t('toastInsufficientStockSuffix'));
         return;
       }
       _serverOk=_cj.ok===true;
@@ -5553,25 +5712,25 @@ function cqAdminRecord(){
     var empId=(el('cq-admin-emp')||{}).value;
     var type=(el('cq-admin-type')||{}).value;
     var timeStr=(el('cq-admin-time')||{}).value;
-    if(!empId||!timeStr){toast('Selecciona empleado y hora');return;}
+    if(!empId||!timeStr){toast(t('toastSelectEmpTime'));return;}
     var emp=(db.employees||[]).find(function(e){return e.id===empId;});if(!emp)return;
     if(!emp.clockEvents)emp.clockEvents=[];
     var ts=new Date(timeStr).toISOString();
     if(type==='both'){
       var timeStr2=(el('cq-admin-time2')||{}).value;
-      if(!timeStr2){toast('Ingresa hora de salida');return;}
+      if(!timeStr2){toast(t('toastEnterExitTime'));return;}
       var ts2=new Date(timeStr2).toISOString();
-      if(new Date(ts2)<=new Date(ts)){toast('La salida debe ser después de la entrada');return;}
+      if(new Date(ts2)<=new Date(ts)){toast(t('toastExitAfterEntry'));return;}
       emp.clockEvents.push({id:'ce_'+Date.now(),in:ts,out:ts2,manual:true});
-      saveDB();toast('Registro completo: '+emp.name);
+      saveDB();toast(t('toastFullRecord')+emp.name);
     }else if(type==='in'){
       emp.clockEvents.push({id:'ce_'+Date.now(),in:ts,out:null,manual:true});
-      saveDB();toast('Entrada manual: '+emp.name);
+      saveDB();toast(t('toastManualEntry')+emp.name);
     }else{
       var active=emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
-      if(!active){toast('Sin entrada activa para '+emp.name);return;}
+      if(!active){toast(t('toastNoActiveEntry')+emp.name);return;}
       active.out=ts;active.manualOut=true;
-      saveDB();toast('Salida manual: '+emp.name);
+      saveDB();toast(t('toastManualExit')+emp.name);
     }
     renderClockQuickList();_renderCqHist();renderEmployeeList();
   });
@@ -5593,7 +5752,7 @@ function renderClockQuickList(){
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--b1)">'
       +'<div><div style="font-weight:600;color:var(--tx)">'+escHtml(emp.name)+lockBadge+'</div>'+statusLine+'</div>'
       +'<button class="btn '+(isIn?'btn-d':'btn-p')+'" style="font-size:.82rem;padding:7px 18px;min-width:90px" onclick="cqClockWithPin(\''+emp.id+'\')">'
-      +(isIn?'🚪 Salida':'✅ Entrada')+'</button>'
+      +(isIn?'🚪 '+t('clockSalida'):'✅ '+t('clockEntrada'))+'</button>'
       +'</div>';
   }).join('');
 }
@@ -5604,7 +5763,7 @@ function cqClockWithPin(id){
   var nm=el('cq-pin-emp-name');if(nm)nm.textContent=emp.name;
   var activeEv=emp.clockEvents&&emp.clockEvents.find(function(ev){return ev.in&&!ev.out;});
   var act=el('cq-pin-action');
-  if(act)act.textContent='Ingresa tu contraseña para registrar '+(activeEv?'Salida':'Entrada');
+  if(act)act.textContent=t('cqEnterPassFor')+(activeEv?t('clockSalida'):t('clockEntrada'));
   var passErr=el('cq-pass-error');if(passErr)passErr.style.display='none';
   var passInp=el('cq-pass-input');if(passInp){passInp.value='';setTimeout(function(){passInp.focus();},80);}
   el('cq-pin-panel').style.display='';
@@ -5669,16 +5828,16 @@ function _renderCqHist(){
     });
   });
   var isAdm=curUser&&curUser.role==='admin';
-  if(!rows.length){container.innerHTML='<p style="font-size:.78rem;color:var(--tx3);text-align:center;padding:20px">Sin registros hoy</p>';return;}
+  if(!rows.length){container.innerHTML='<p style="font-size:.78rem;color:var(--tx3);text-align:center;padding:20px">'+t('noRecordsToday')+'</p>';return;}
   rows.sort(function(a,b){return new Date(a.in)-new Date(b.in);});
   var total=rows.reduce(function(s,r){return s+(r.hrs||0);},0);
-  var editTip=isAdm?' title="Click para editar (admin)" style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,.3)"':'';
+  var editTip=isAdm?' title="'+t('editAdminTitle')+'" style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,.3)"':'';
   var editFn=function(r,field){return isAdm?'onclick="cqEditClockTime(\''+r.empId+'\',\''+r.evId+'\',\''+field+'\')"':'';};
   container.innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.75rem">'
-    +'<tr style="color:var(--tx3)"><th style="text-align:left;padding:5px 4px">Empleado</th>'
-    +'<th style="padding:5px 4px;text-align:center">Entrada</th>'
-    +'<th style="padding:5px 4px;text-align:center">Salida</th>'
-    +'<th style="padding:5px 4px;text-align:center">Horas</th></tr>'
+    +'<tr style="color:var(--tx3)"><th style="text-align:left;padding:5px 4px">'+t('thEmployee')+'</th>'
+    +'<th style="padding:5px 4px;text-align:center">'+t('clockEntrada')+'</th>'
+    +'<th style="padding:5px 4px;text-align:center">'+t('clockSalida')+'</th>'
+    +'<th style="padding:5px 4px;text-align:center">'+t('thHoras')+'</th></tr>'
     +rows.map(function(r){
       var inCell='<span id="cqt-'+r.evId+'-in" '+editTip+' '+editFn(r,'in')+'>'+fmtTime(r.in)+'</span>';
       var outCell=r.out?('<span id="cqt-'+r.evId+'-out" '+editTip+' '+editFn(r,'out')+'>'+fmtTime(r.out)+'</span>'):'<span style="color:var(--tx3)">—</span>';
@@ -5694,7 +5853,7 @@ function _renderCqHist(){
     +(total>0?'<div style="text-align:right;font-size:.76rem;font-weight:700;color:var(--tx3);margin-top:4px">Total: '+total.toFixed(1)+'h</div>':'');
 }
 function cqEditClockTime(empId,evId,field){
-  if(!curUser||curUser.role!=='admin'){toast('Solo el admin puede editar');return;}
+  if(!curUser||curUser.role!=='admin'){toast(t('toastAdminOnlyEdit'));return;}
   var emp=(db.employees||[]).find(function(e){return e.id===empId;});if(!emp)return;
   var ev=(emp.clockEvents||[]).find(function(e){return e.id===evId;});if(!ev)return;
   var current=field==='in'?ev.in:ev.out;
@@ -5714,7 +5873,7 @@ function cqEditClockTime(empId,evId,field){
     base.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
     if(field==='in')ev.in=base.toISOString();
     else{ev.out=base.toISOString();ev.manualOut=true;}
-    saveDB();renderEmployeeList();_renderCqHist();toast('Hora actualizada');
+    saveDB();renderEmployeeList();_renderCqHist();toast(t('toastTimeUpdated'));
   }
   inp.addEventListener('blur',_save);
   inp.addEventListener('keydown',function(e){
@@ -5823,9 +5982,9 @@ function exportDB(){
       a.href=URL.createObjectURL(blob);
       a.download='4kpos-backup-enc-'+new Date().toISOString().slice(0,10)+'.json';
       a.click();URL.revokeObjectURL(a.href);
-      toast('🔐 Datos exportados y cifrados');
+      toast(t('toastDataExportedEnc'));
       return;
-    }catch(e){toast('⚠ Error al cifrar: '+e.message);return;}
+    }catch(e){toast(t('toastEncryptError')+e.message);return;}
   }
   const data=JSON.stringify({ts:new Date().toISOString(),version:'4kpos-v5',db:db},null,2);
   const blob=new Blob([data],{type:'application/json'});
@@ -5833,7 +5992,7 @@ function exportDB(){
   a.href=URL.createObjectURL(blob);
   a.download='4kpos-backup-'+new Date().toISOString().slice(0,10)+'.json';
   a.click();URL.revokeObjectURL(a.href);
-  toast('✅ Datos exportados');
+  toast(t('toastDataExported'));
 }
 function importDB(input){
   const file=input.files[0];if(!file)return;
@@ -5847,9 +6006,9 @@ function importDB(input){
         return;
       }
       const data=parsed.db||parsed;
-      if(!data.products&&!data.sales){toast('⚠ Archivo inválido');return;}
+      if(!data.products&&!data.sales){toast(t('toastInvalidFile'));return;}
       _doImportData(data);
-    }catch(err){toast('⚠ Error al leer archivo');}
+    }catch(err){toast(t('toastFileReadError'));}
     input.value='';
   };
   reader.readAsText(file);
@@ -6011,9 +6170,9 @@ function showAddCustInline(){
 function saveNewCustAndSelect(){
   const name=(el('nc-name').value||'').trim();
   const cedula=(el('nc-cedula').value||'').trim();
-  if(!name){toast('⚠ Nombre requerido');return;}
-  if(!cedula){toast('⚠ Cédula requerida');return;}
-  if(db.customers.find(c=>c.cedula===cedula)){toast('⚠ Ya existe un cliente con esa cédula');return;}
+  if(!name){toast(t('toastNameRequired'));return;}
+  if(!cedula){toast(t('toastIdRequired'));return;}
+  if(db.customers.find(c=>c.cedula===cedula)){toast(t('toastDuplicateId'));return;}
   const phone=(el('nc-phone').value||'').trim();
   const newC={id:Date.now().toString(),name,cedula,phone,email:'',notes:'',created:new Date().toISOString()};
   db.customers.push(newC);saveDB();
@@ -6023,9 +6182,9 @@ function saveNewCustAndSelect(){
   toast('✓ '+name);
 }
 function confirmCreditSale(){
-  if(!_creditSelectedCustId){toast('⚠ Selecciona un cliente');return;}
+  if(!_creditSelectedCustId){toast(t('toastSelectCustomer'));return;}
   const cust=db.customers.find(c=>c.id===_creditSelectedCustId);
-  if(!cust){toast('⚠ Cliente no encontrado');return;}
+  if(!cust){toast(t('toastCustomerNotFound'));return;}
   const name=cust.name;
   const total=getFinalTotal();
   cart.forEach(function(item){if(item.isCombo){(item.comboItems||[]).forEach(function(ci){const p=db.products.find(function(x){return x.id===ci.productId;});if(p)p.stock=Math.max(0,(p.stock||0)-ci.qty*item.qty);});}else{const p=db.products.find(function(x){return x.id===item.id;});if(p)p.stock=Math.max(0,(p.stock||0)-item.qty);}});
@@ -6863,7 +7022,7 @@ function saveUser(){
   el('pm-gst').checked=!!u.perms.gst;
   el('pm-contaFull').checked=!!u.perms.contaFull;
 
-  toast('✏️ Editando usuario: '+u.name);
+  toast(t('toastEditingUser')+u.name);
 }
 function clearUser(){
   ['u-name','u-user','u-pass','u-role'].forEach(id=>el(id).value='');
@@ -6878,8 +7037,8 @@ function renderUserList(){
       '<div class="pli-name">'+u.name+(u.tempPassword?'<span style="margin-left:6px;font-size:.66rem;color:#f59e0b;font-weight:700;vertical-align:middle">⏳ temp</span>':'')+'</div>'+
       '<div class="pli-meta">'+u.user+' · '+u.role+'</div>'+
       '</div>'+
-      '<button class="btn btn-s" onclick="editUser(\''+u.id+'\')" style="font-size:.72rem;padding:4px 7px" title="Editar">🖊️</button>'+
-      '<button class="btn btn-s" onclick="resetUserPass(\''+u.id+'\')" style="font-size:.72rem;padding:4px 7px;color:#f59e0b" title="Resetear contraseña">🔑</button>'+
+      '<button class="btn btn-s" onclick="editUser(\''+u.id+'\')" style="font-size:.72rem;padding:4px 7px" title="'+t('editTitle')+'">🖊️</button>'+
+      '<button class="btn btn-s" onclick="resetUserPass(\''+u.id+'\')" style="font-size:.72rem;padding:4px 7px;color:#f59e0b" title="'+t('resetPassTitle')+'">🔑</button>'+
 (u.id!=='1'
  ?'<button class="xb" onclick="delUser(\''+u.id+'\')">✕</button>'
  :'')+
@@ -6889,26 +7048,26 @@ function renderUserList(){
 
 // CONFIG
 function changeCode(){const old=el('cc-old').value,nw=el('cc-new').value;if(old!==db.adminCode){toast(t('codeBadOld'));return;}if(nw.length<4){toast('⚠ '+t('min4chars'));return;}db.adminCode=nw;saveDB();el('cc-old').value='';el('cc-new').value='';toast(t('codeUpdated'));}
-function saveFund(){db.fundAmount=getNum('cfg-fund');saveDB();toast('✅ Fondo: '+dolr(db.fundAmount));}
+function saveFund(){db.fundAmount=getNum('cfg-fund');saveDB();toast(t('toastFundSaved')+dolr(db.fundAmount));}
 function setTimeFormat(fmt){
   if(!db.cfg)db.cfg={};
   db.cfg.timeFormat=fmt;
   const btn12=el('cfg-time-12h'),btn24=el('cfg-time-24h');
   if(btn12)btn12.className=fmt==='12h'?'btn btn-p':'btn btn-s';
   if(btn24)btn24.className=fmt==='24h'?'btn btn-p':'btn btn-s';
-  saveDB();toast('✅ '+(fmt==='24h'?'Hora 24h':'Hora 12h AM/PM'));
+  saveDB();toast('✅ '+(fmt==='24h'?t('time24h'):t('time12h')));
 }
 function saveCfg(){
   db.cfg.bizName=el('cfg-biz-name').value||'4K Negocio';db.cfg.bizSub=el('cfg-biz-sub').value||'';
   db.cfg.thanks=el('cfg-thanks').value||'¡Gracias por tu compra! 💕';db.cfg.phone=el('cfg-phone').value||'';
   db.cfg.s1=el('cfg-s1').value||'';db.cfg.s2=el('cfg-s2').value||'';db.cfg.qr=el('cfg-qr').value||'';
-  saveDB();el('cfg-msg').style.display='block';setTimeout(()=>el('cfg-msg').style.display='none',2000);toast('✅ Configuración guardada');
+  saveDB();el('cfg-msg').style.display='block';setTimeout(()=>el('cfg-msg').style.display='none',2000);toast(t('toastConfigSaved'));
 }
 function saveCreditCfg(){
   if(!db.cfg)db.cfg={};
   db.cfg.creditDueDays=parseInt((el('cfg-credit-due-days')||{}).value)||30;
   db.cfg.creditDueCashierCanSet=(el('cfg-allow-cashier-due')||{}).checked!==false;
-  saveDB();toast('✅ Configuración de crédito guardada');
+  saveDB();toast(t('toastCreditConfigSaved'));
 }
 function loadAdminModal(){
   renderProdList();renderCatList();renderUserList();updatePCat();renderInv();renderCustList();
@@ -7045,28 +7204,40 @@ function compRemoveItem(i){
 function _compSyncAllItems(){
   _compItems.forEach(function(_,i){_compSyncItem(i);});
 }
+function _compFindProdByName(name){
+  const q=(name||'').trim().toLowerCase();
+  if(!q)return null;
+  return (db.products||[]).find(function(p){return p.name&&p.name.trim().toLowerCase()===q;})||null;
+}
 function renderCompItems(){
-  const opts='<option value="">'+t('invSelectProd')+'</option>'+(db.products||[]).map(function(p){
-    return '<option value="'+p.id+'">'+escHtml(p.name)+' (Stock: '+(p.stock||0)+')</option>';
-  }).join('');
-  el('comp-items').innerHTML=_compItems.map(function(it,i){
+  const dl='<datalist id="comp-prod-dl">'+(db.products||[]).map(function(p){
+    return '<option value="'+escHtml(p.name)+'">';
+  }).join('')+'</datalist>';
+  el('comp-items').innerHTML=dl+_compItems.map(function(it,i){
     const sub=(parseFloat(it.unitPrice)||0)*(parseInt(it.qty)||0);
-    return '<div style="display:grid;grid-template-columns:1fr 70px 90px 80px 24px;gap:4px;align-items:center;margin-bottom:5px">'
-      +'<select class="fi" id="cit-prod-'+i+'" onchange="_compSyncItem('+i+')" style="font-size:.79rem">'+opts+'</select>'
+    const curProd=it.prodId?(db.products||[]).find(function(p){return p.id===it.prodId;}):null;
+    const stockHint=curProd?(t('stock')+': '+(curProd.stock||0)):'';
+    return '<div style="display:grid;grid-template-columns:1fr 70px 90px 80px 24px;gap:4px;align-items:start;margin-bottom:5px">'
+      +'<div>'
+      +'<input type="text" class="fi" id="cit-prod-'+i+'" list="comp-prod-dl" placeholder="'+t('compProdSearchPh')+'" value="'+escHtml(curProd?curProd.name:'')+'" oninput="_compSyncItem('+i+')" style="font-size:.79rem;width:100%">'
+      +'<div style="font-size:.66rem;color:var(--tx3);margin-top:2px" id="cit-stock-'+i+'">'+stockHint+'</div>'
+      +'</div>'
       +'<input type="number" class="fi" id="cit-qty-'+i+'" min="1" placeholder="0" value="'+escHtml(String(it.qty||''))+'" oninput="_compSyncItem('+i+')" style="font-size:.79rem;text-align:right">'
       +'<input type="number" class="fi" id="cit-price-'+i+'" min="0" step="0.01" placeholder="0.00" value="'+escHtml(String(it.unitPrice||''))+'" oninput="_compSyncItem('+i+')" style="font-size:.79rem;text-align:right">'
       +'<span style="font-family:monospace;font-size:.78rem;color:var(--am);text-align:right" id="cit-sub-'+i+'">'+dolr(sub)+'</span>'
       +'<button class="xb" onclick="compRemoveItem('+i+')">✕</button>'
       +'</div>';
   }).join('');
-  _compItems.forEach(function(_,i){
-    const ps=el('cit-prod-'+i);if(ps&&_compItems[i].prodId)ps.value=_compItems[i].prodId;
-  });
   compCalcTotal();
 }
 function _compSyncItem(i){
   const ps=el('cit-prod-'+i),qs=el('cit-qty-'+i),cs=el('cit-price-'+i);
-  if(ps)_compItems[i].prodId=ps.value;
+  if(ps){
+    const match=_compFindProdByName(ps.value);
+    _compItems[i].prodId=match?match.id:'';
+    const stockEl=el('cit-stock-'+i);
+    if(stockEl)stockEl.textContent=match?(t('stock')+': '+(match.stock||0)):'';
+  }
   if(qs)_compItems[i].qty=qs.value;
   if(cs)_compItems[i].unitPrice=cs.value;
   // Update subtotal span
@@ -7088,14 +7259,14 @@ function clearCompForm(){
 }
 function saveCompInvoice(){
   const proveedor=el('comp-prov')?el('comp-prov').value.trim():'';
-  if(!proveedor){toast('⚠ El nombre del proveedor es obligatorio');return;}
+  if(!proveedor){toast(t('toastProviderRequired'));return;}
   const numFac=el('comp-num')?el('comp-num').value.trim():'';
-  if(!numFac){toast('⚠ El número de factura es obligatorio');return;}
+  if(!numFac){toast(t('toastInvoiceNumRequired'));return;}
   _compSyncAllItems();
   const validItems=_compItems.filter(function(it){
     return it.prodId&&parseInt(it.qty)>0&&parseFloat(it.unitPrice)>0;
   });
-  if(!validItems.length){toast('⚠ Agrega al menos un producto con cantidad y precio');return;}
+  if(!validItems.length){toast(t('toastAddValidProduct'));return;}
   const facItems=[];
   validItems.forEach(function(it){
     const prod=(db.products||[]).find(function(p){return p.id===it.prodId;});
@@ -7105,7 +7276,7 @@ function saveCompInvoice(){
     if(unitPrice>0)prod.costPrice=unitPrice;
     facItems.push({prodId:prod.id,prodName:prod.name,qty:qty,unitPrice:unitPrice,lineCost:lineCost});
   });
-  if(!facItems.length){toast('⚠ Ningún producto válido encontrado');return;}
+  if(!facItems.length){toast(t('toastNoValidProduct'));return;}
   const total=facItems.reduce(function(s,x){return s+x.lineCost;},0);
   const dateVal=el('comp-date')&&el('comp-date').value?new Date(el('comp-date').value).toISOString():new Date().toISOString();
   if(!db.facturas)db.facturas=[];
@@ -7118,7 +7289,7 @@ function saveCompInvoice(){
     items:facItems,total:total
   });
   saveDB();renderProds();clearCompForm();renderCompList();
-  toast('✅ Factura guardada. Stock actualizado — '+facItems.length+' producto(s), total '+dolr(total));
+  toast(t('toastInvoiceSaved')+facItems.length+t('toastInvoiceSavedItemsMid')+dolr(total));
 }
 function renderCompList(){
   const list=el('comp-list');if(!list)return;
@@ -7160,16 +7331,16 @@ function delCompInvoice(id){
     }
     db.facturas=(db.facturas||[]).filter(function(x){return x.id!==id;});
     saveDB();renderProds();renderCompList();
-    toast('🗑 Factura eliminada — stock revertido');
+    toast(t('toastInvoiceDeleted'));
   });
 }
 function saveFactura(){
   const prodId=el('fac-prod').value,qty=parseInt(el('fac-qty').value)||0,cost=parseFloat(el('fac-cost').value)||0;
-  if(!prodId||!qty||!cost){toast('⚠ Producto, cantidad y costo requeridos');return;}
-  const prod=db.products.find(p=>p.id===prodId);if(!prod){toast('⚠ Producto no encontrado');return;}
+  if(!prodId||!qty||!cost){toast(t('toastInvoiceFieldsRequired'));return;}
+  const prod=db.products.find(p=>p.id===prodId);if(!prod){toast(t('toastProductNotFound'));return;}
   prod.stock=(prod.stock||0)+qty;
   db.facturas.push({id:Date.now().toString(),date:new Date().toISOString(),prodId,prodName:prod.name,qty,cost,costUnit:cost/qty,proveedor:el('fac-prov').value.trim(),numFac:el('fac-num').value.trim(),notes:el('fac-notes').value.trim()});
-  saveDB();renderFacList();renderProds();clearFactura();toast('✅ Factura — Stock: '+prod.name+' → '+prod.stock);
+  saveDB();renderFacList();renderProds();clearFactura();toast(t('toastInvoiceStockUpdated')+prod.name+' → '+prod.stock);
 }
 function clearFactura(){['fac-qty','fac-cost','fac-prov','fac-num','fac-notes'].forEach(id=>el(id).value='');el('fac-prod').value='';}
 function delFactura(id){confirm2(t('delFacConfirm'),()=>{db.facturas=db.facturas.filter(f=>f.id!==id);saveDB();renderFacList();});}
@@ -7414,7 +7585,7 @@ function exportVentasCSV(){
   var blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');a.href=url;a.download='ventas_'+period+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(url);
-  toast('📥 CSV: '+sales.length+' ventas');
+  toast(t('toastCsvPrefix')+sales.length+t('toastCsvSalesSuffix'));
 }
 function printReporteVentas(){
   var period=(el('vnt-period')||{value:'mes'}).value;
@@ -7462,7 +7633,7 @@ function printReporteVentas(){
     +'<span><b>Cobrado:</b> $'+(total-credAmt).toFixed(2)+'</span>'
     +(credAmt>0?'<span style="color:#dc2626"><b>Crédito pendiente:</b> $'+credAmt.toFixed(2)+'</span>':'')
     +'</div>'
-    +'<table><thead><tr><th>Fecha</th><th>Hora</th><th>Orden</th><th>Items</th><th>Método</th><th>Total</th><th>Cajero</th><th>Estado</th></tr></thead>'
+    +'<table><thead><tr><th>'+t('thFecha')+'</th><th>'+t('thHora')+'</th><th>'+t('thOrden')+'</th><th>'+t('thItems')+'</th><th>'+t('thMetodo')+'</th><th>'+t('thTotal')+'</th><th>'+t('thCajero')+'</th><th>'+t('thEstado')+'</th></tr></thead>'
     +'<tbody>'+rows+'</tbody></table>'
     +'<div style="margin-top:12px;font-size:10px;color:#999">Generado: '+new Date().toLocaleString()+'</div>'
     +'</body></html>';
@@ -7490,7 +7661,7 @@ function exportCreditosCSV(){
   var blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');a.href=url;a.download='creditos_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(url);
-  toast('📥 CSV: '+list.length+' créditos');
+  toast(t('toastCsvPrefix')+list.length+t('toastCsvCreditsSuffix'));
 }
 let _credFilter='pending';
 let _credSearch='';
@@ -7667,7 +7838,7 @@ function _empMonthlyPay(emp,year,month){
   return hrs*(emp.hourlyRate||0);
 }
 function nomEditClock(empId,evId,field){
-  if(!curUser||curUser.role!=='admin'){toast('Solo el admin puede editar');return;}
+  if(!curUser||curUser.role!=='admin'){toast(t('toastAdminOnlyEdit'));return;}
   var emp=(db.employees||[]).find(function(e){return e.id===empId;});if(!emp)return;
   var ev=(emp.clockEvents||[]).find(function(e){return e.id===evId;});if(!ev)return;
   var current=field==='in'?ev.in:ev.out;
@@ -7684,7 +7855,7 @@ function nomEditClock(empId,evId,field){
     var parts=val.split(':');base.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
     if(field==='in')ev.in=base.toISOString();
     else{ev.out=base.toISOString();ev.manualOut=true;}
-    saveDB();renderEmployeeList();_renderCqHist();toast('Hora actualizada');
+    saveDB();renderEmployeeList();_renderCqHist();toast(t('toastTimeUpdated'));
   }
   inp.addEventListener('blur',_save);
   inp.addEventListener('keydown',function(e){if(e.key==='Enter')inp.blur();if(e.key==='Escape')renderEmployeeList();});
@@ -7710,7 +7881,7 @@ function renderEmployeeList(){
     var clockSection='';
     if(emp.useClockInOut&&(emp.clockEvents||[]).length){
       var evs=(emp.clockEvents||[]).slice().sort(function(a,b){return new Date(b.in)-new Date(a.in);}).slice(0,6);
-      var editTip=isAdm?' title="Clic para editar" style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,.25)"':'';
+      var editTip=isAdm?' title="'+t('clickToEditTitle')+'" style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,.25)"':'';
       var rows=evs.map(function(ev){
         var dayStr=new Date(ev.in).toLocaleDateString(lang||'es',{day:'numeric',month:'short'});
         var inSpan='<span id="nomce_'+ev.id+'_in"'+editTip+(isAdm?' onclick="nomEditClock(\''+emp.id+'\',\''+ev.id+'\',\'in\')"':'')+'>'+fmtTime(ev.in)+'</span>';
@@ -7726,9 +7897,9 @@ function renderEmployeeList(){
           +'</tr>';
       }).join('');
       clockSection='<div style="margin-top:8px;border-top:1px solid var(--b1);padding-top:7px">'
-        +'<div style="font-size:.65rem;font-weight:700;color:var(--tx3);letter-spacing:.6px;margin-bottom:5px">REGISTROS'+(isAdm?' · <span style="font-weight:400;opacity:.7">clic en hora para editar</span>':'')+'</div>'
+        +'<div style="font-size:.65rem;font-weight:700;color:var(--tx3);letter-spacing:.6px;margin-bottom:5px">'+t('recordsLabel')+(isAdm?' · <span style="font-weight:400;opacity:.7">'+t('clickHourToEdit')+'</span>':'')+'</div>'
         +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.73rem">'
-        +'<tr style="color:var(--tx3);font-size:.66rem"><th style="text-align:left;padding:3px 5px">Fecha</th><th style="padding:3px 5px">Entrada</th><th style="padding:3px 5px">Salida</th><th style="text-align:right;padding:3px 5px">Hrs</th></tr>'
+        +'<tr style="color:var(--tx3);font-size:.66rem"><th style="text-align:left;padding:3px 5px">'+t('thFecha')+'</th><th style="padding:3px 5px">'+t('clockEntrada')+'</th><th style="padding:3px 5px">'+t('clockSalida')+'</th><th style="text-align:right;padding:3px 5px">'+t('thHrs')+'</th></tr>'
         +rows+'</table></div></div>';
     }
     return '<div style="background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--rs);padding:10px 13px;margin-bottom:7px">'
@@ -7872,6 +8043,18 @@ function calcPress(k){
 
   dv.textContent=fcNum;
 }
+// Teclado físico: solo actúa si la calculadora está abierta y no hay otro campo enfocado
+document.addEventListener('keydown',function(e){
+  const fc=el('fcalc');
+  if(!fc||!fc.classList.contains('open'))return;
+  const active=document.activeElement;
+  if(active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA'||active.isContentEditable))return;
+  const digitOp={'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9','.':'.','+':'+','-':'−','*':'×','/':'÷'};
+  if(digitOp[e.key]!==undefined){e.preventDefault();calcPress(digitOp[e.key]);}
+  else if(e.key==='Enter'||e.key==='='){e.preventDefault();calcPress('=');}
+  else if(e.key==='Backspace'){e.preventDefault();calcPress('⌫');}
+  else if(e.key==='Escape'){e.preventDefault();calcPress('C');}
+});
 
 // INIT
 document.querySelectorAll('.ov').forEach(m=>{
@@ -8068,7 +8251,7 @@ function openNotifPanel(){
           +'<div style="font-size:.82rem;color:var(--tx2)">'+n.msg+'</div>'
         +'</div>'
         +(n.read?'':'<div class="notif-dot" style="background:'+n.color+'"></div>')
-        +'<button onclick="event.stopPropagation();_notifDismiss(\''+n.id+'\')" style="background:none;border:none;cursor:pointer;color:var(--tx3);font-size:.75rem;padding:2px 5px;line-height:1;margin-left:4px;flex-shrink:0;opacity:.65;pointer-events:auto" title="Descartar">✕</button>'
+        +'<button onclick="event.stopPropagation();_notifDismiss(\''+n.id+'\')" style="background:none;border:none;cursor:pointer;color:var(--tx3);font-size:.75rem;padding:2px 5px;line-height:1;margin-left:4px;flex-shrink:0;opacity:.65;pointer-events:auto" title="'+t('dismissTitle')+'">✕</button>'
         +'</div>';
     }).join('');
   }
@@ -8257,7 +8440,7 @@ function renderCmbItemsEditor(){
   _updateCmbCostTotal();
 }
 function cmbAddItem(){
-  if(!db.products.length){toast('⚠ Sin productos');return;}
+  if(!db.products.length){toast(t('toastNoProducts'));return;}
   _cmbItems.push({productId:db.products[0].id,qty:1});
   renderCmbItemsEditor();
 }
@@ -8370,7 +8553,7 @@ function saveSpecial(){
   }else if(_spcType==='bogo'){
     const bq=Math.max(2,parseInt((el('spc-buy-qty')||{}).value)||2);
     const pq=Math.max(1,parseInt((el('spc-pay-qty')||{}).value)||1);
-    if(pq>=bq){toast('⚠ "Paga" debe ser menor que "Lleva"');return;}
+    if(pq>=bq){toast(t('toastPagaLessThanLleva'));return;}
     spc.buyQty=bq;spc.payQty=pq;
   }else if(_spcType==='qty_price'){
     const mq=parseInt((el('spc-minqty')||{}).value)||0;
@@ -8578,7 +8761,7 @@ function openLabelModal(pid){
 }
 
 function printSelectedLabels(){
-  if(!_invSel.size){toast('⚠ Selecciona al menos un producto');return;}
+  if(!_invSel.size){toast(t('toastSelectAtLeastOneProduct'));return;}
   _lblMulti=true;
   _lblPids=[..._invSel];
   const sr=el('lbl-single-row');if(sr)sr.style.display='none';
@@ -8756,14 +8939,14 @@ function printLabels(){
   var pids;
   if(_lblMulti&&_lblPids.length){pids=_lblPids;}
   else{const sel=el('lbl-prod-sel');pids=sel&&sel.value?[sel.value]:(_lblPids.length?_lblPids:[]);}
-  if(!pids.length){toast('⚠ Sin producto seleccionado');return;}
+  if(!pids.length){toast(t('toastNoProductSelected'));return;}
   const labels=[];
   pids.forEach(function(pid){
     const p=db.products.find(function(x){return x.id===pid;});
     if(!p)return;
     for(var i=0;i<qty;i++)labels.push(_buildOneLabelHTML(p,_lblSize));
   });
-  if(!labels.length){toast('⚠ Sin etiquetas');return;}
+  if(!labels.length){toast(t('toastNoLabels'));return;}
   const printArea=el('lbl-print-area');
   if(_lblSize==='t58'||_lblSize==='t80'){
     var pgW=_lblSize==='t58'?'58mm':'80mm';
@@ -8786,14 +8969,14 @@ async function downloadLabelsPDF(){
   var pids;
   if(_lblMulti&&_lblPids.length){pids=_lblPids;}
   else{const sel=el('lbl-prod-sel');pids=sel&&sel.value?[sel.value]:(_lblPids.length?_lblPids:[]);}
-  if(!pids.length){toast('⚠ Sin producto seleccionado');return;}
+  if(!pids.length){toast(t('toastNoProductSelected'));return;}
   const labels=[];
   pids.forEach(function(pid){
     const p=db.products.find(function(x){return x.id===pid;});
     if(!p)return;
     for(var i=0;i<qty;i++)labels.push(_buildOneLabelHTML(p,_lblSize));
   });
-  if(!labels.length){toast('⚠ Sin etiquetas');return;}
+  if(!labels.length){toast(t('toastNoLabels'));return;}
   const printArea=el('lbl-print-area');
   if(_lblSize==='t58'||_lblSize==='t80'){
     var pgW=_lblSize==='t58'?'58mm':'80mm';
@@ -8810,12 +8993,12 @@ async function downloadLabelsPDF(){
     const result=await ipcRenderer.invoke('save-pdf');
     document.body.classList.remove('lbl-pm');
     printArea.innerHTML='';
-    if(result.ok){toast('✅ PDF guardado');}
-    else if(result.error){toast('❌ '+result.error);}
+    if(result.ok){toast(t('toastPdfSaved'));}
+    else if(result.error){toast(t('toastErrorPrefix')+result.error);}
   }catch(e){
     document.body.classList.remove('lbl-pm');
     printArea.innerHTML='';
-    toast('❌ '+e.message);
+    toast(t('toastErrorPrefix')+e.message);
   }
 }
 
@@ -9198,7 +9381,7 @@ function _renderDbStock(){
     var name=p.name.length>28?p.name.substring(0,26)+'…':p.name;
     return '<tr><td><span class="stk-dot" style="background:'+clr+'"></span>'+name+'</td><td style="color:'+clr+'">'+stk+'</td></tr>';
   }).join('');
-  stkEl.innerHTML='<table><thead><tr><th>Producto</th><th style="text-align:right">Stock</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  stkEl.innerHTML='<table><thead><tr><th>'+t('thProducto')+'</th><th style="text-align:right">'+t('thStock')+'</th></tr></thead><tbody>'+rows+'</tbody></table>';
 }
 
 // ── INVENTORY VIEW TOGGLE ─────────────────────────────────────────────────────
