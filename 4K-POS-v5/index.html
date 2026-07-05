@@ -46,8 +46,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .lic-ok{background:var(--gnb);border-color:var(--gn);color:var(--gn);}
 .lic-warn{background:var(--amb);border-color:var(--am);color:var(--am);}
 .lic-err{background:var(--rdb);border-color:var(--rd);color:var(--rd);}
-#refresh-btn{background:none;border:none;cursor:pointer;font-size:1.05rem;padding:4px 5px;position:relative;color:var(--tx2);line-height:1;border-radius:8px;display:flex;align-items:center;}
-#refresh-btn:hover{background:var(--s2);}
+#refresh-btn,#calc-btn{background:none;border:none;cursor:pointer;font-size:1.05rem;padding:4px 5px;position:relative;color:var(--tx2);line-height:1;border-radius:8px;display:flex;align-items:center;}
+#refresh-btn:hover,#calc-btn:hover{background:var(--s2);}
 #notif-btn,#note-btn{position:relative;}
 #notif-badge,#note-badge{display:none;position:static;margin-left:auto;background:#ef4444;color:#fff;border-radius:50%;font-size:.64rem;font-weight:800;min-width:17px;height:17px;align-items:center;justify-content:center;padding:0 3px;line-height:1;flex-shrink:0;}
 #notif-panel{display:none;position:fixed;top:60px;right:10px;width:320px;max-height:440px;overflow-y:auto;background:var(--s1);border:1.5px solid var(--b2);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.45);z-index:8501;}
@@ -456,6 +456,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
 
     
      <button class="tbtn" id="oa-counter-btn" onclick="openOAManager()" title="Cuentas abiertas" style="position:relative;display:none;background:var(--ac);border-color:var(--ac);color:#fff;font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;padding:8px 14px;gap:4px;width:auto;height:auto;min-width:80px"><span id="oa-counter-txt">Cuentas</span><span id="oa-badge" style="display:none;position:absolute;top:-7px;right:-7px;background:#f44;color:#fff;border-radius:50%;font-size:.6rem;font-weight:800;min-width:18px;height:18px;align-items:center;justify-content:center;padding:0 3px;line-height:1;box-shadow:0 0 0 2px var(--bg)">0</span></button>
+    <button id="calc-btn" onclick="toggleCalc()" title="Calculadora">🧮</button>
     <div style="position:relative;flex-shrink:0">
       <button class="hamburger-btn" id="ham-btn" onclick="toggleHamMenu(event)" title="Menú">☰</button>
       <span id="ham-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border-radius:50%;font-size:.62rem;font-weight:800;min-width:16px;height:16px;align-items:center;justify-content:center;padding:0 3px;line-height:1;box-shadow:0 0 0 2px var(--bg);pointer-events:none">0</span>
@@ -475,7 +476,6 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <button class="ham-item ham-sub" onclick="_openDirect('t-cats')">🗂️ Categorías</button>
           <button class="ham-item ham-sub" onclick="_openDirect('t-inv')">📋 Inventario</button>
           <button class="ham-item ham-sub" onclick="_openDirect('t-labels')">🏷️ Etiquetas</button>
-          <button class="ham-item ham-sub" id="ham-clock-item" style="display:none;color:#10b981" onclick="closeHamMenu();openClockQuick()">⏱ Clock In/Out</button>
         </div>
         <button class="ham-acc-hdr" onclick="toggleHamSection('ham-s-admcfg')"><span>👥 Administración y Configuración</span><span class="ham-acc-arr">›</span></button>
         <div id="ham-s-admcfg" class="ham-acc-body">
@@ -485,14 +485,14 @@ select.fi option{background:var(--s2);color:var(--tx);}
           <button class="ham-item ham-sub" onclick="_openDirect('t-shiftnote')">📝 Nota de turno</button>
           <button class="ham-item ham-sub" onclick="_openDirect('t-updates')">🔄 Actualizaciones</button>
           <button class="ham-item ham-sub" onclick="_openDirect('t-cfg')">⚙️ Config / Ajustes</button>
+          <button class="ham-item ham-sub" id="lang-toggle-btn" onclick="closeHamMenu();switchLang()" title="Cambiar idioma / Switch language">🌐 Idioma</button>
+          <button class="ham-item ham-sub" id="tbtn-theme" onclick="closeHamMenu();toggleTheme()">🌙 Tema</button>
           <button class="ham-item ham-sub" onclick="_openContaDirect()">📒 Contabilidad</button>
           <button class="ham-item ham-sub" onclick="closeHamMenu();openDrawer()">🗃️ Registradora</button>
         </div>
         <div class="ham-sep"></div>
         <div class="ham-sec">ACCIONES</div>
-        <button class="ham-item" id="lang-toggle-btn" onclick="closeHamMenu();switchLang()" title="Cambiar idioma / Switch language">🌐 Idioma</button>
-        <button class="ham-item" onclick="closeHamMenu();toggleCalc()">🧮 Calculadora</button>
-        <button class="ham-item" id="tbtn-theme" onclick="closeHamMenu();toggleTheme()">🌙 Tema</button>
+        <button class="ham-item" id="ham-clock-item" style="display:none;color:#10b981" onclick="closeHamMenu();openClockQuick()">⏱ Clock In/Out</button>
         <button class="ham-item" onclick="closeHamMenu();openLogout()" style="color:var(--rd)">🚪 Cerrar turno</button>
         <div class="ham-sep" style="margin-top:6px"></div>
         <button class="ham-item" id="ham-upd-btn" onclick="checkUpdates()" style="color:var(--ac)">🔄 Buscar actualizaciones</button>
@@ -7619,7 +7619,8 @@ function editEmployee(id){
   el('emp-hourly').value=emp.hourlyRate||'';
   if(el('emp-pin'))el('emp-pin').value=emp.pin||'';
   toggleEmpClock();
-  const formTitle=el('nomina-form-title');if(formTitle)formTitle.textContent=t('empEditing')+emp.name;
+  const formTitle=el('nomina-form-title');if(formTitle){formTitle.textContent=t('empEditing')+emp.name;formTitle.scrollIntoView({behavior:'smooth',block:'start'});}
+  toast(t('empEditing')+emp.name);
 }
 function deleteEmployee(id){
   confirm2(t('empDelConfirm'),function(){
