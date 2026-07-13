@@ -159,10 +159,24 @@ function createWindow() {
   win.loadFile(path.join(__dirname, 'index.html'))
   if (isDev) win.webContents.openDevTools()
 
-  // Show window on first paint; fallback after 5s in case ready-to-show never fires
+  // Show window only once BOTH ready-to-show AND dom-ready have fired.
+  // ready-to-show alone can fire before dom-ready on this page (it's large,
+  // with several inline base64 images), which showed the window mid-parse —
+  // before the script that hides #app-main/#topbar and shows #login-screen
+  // had run. Waiting for dom-ready too closes that gap. Fallback after 5s
+  // in case one of the events never fires.
   let _shown = false
-  function _showMain() { if (!_shown) { _shown = true; win.show() } }
-  win.once('ready-to-show', _showMain)
+  let _readyToShowFired = false
+  let _domReadyFired = false
+  function _showMain() {
+    if (!_shown) {
+      _shown = true
+      win.show()
+    }
+  }
+  function _maybeShowMain() { if (_readyToShowFired && _domReadyFired) _showMain() }
+  win.once('ready-to-show', () => { _readyToShowFired = true; _maybeShowMain() })
+  win.webContents.once('dom-ready', () => { _domReadyFired = true; _maybeShowMain() })
   setTimeout(_showMain, 5000)
 
   // Auto-retry on load failure (e.g. first-launch file system race)
