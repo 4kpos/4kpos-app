@@ -1,5 +1,5 @@
 // 4K POS — posapi Edge Function
-// Acciones: activate_license | verify_license | request_license_by_email | save | load | poll
+// Acciones: activate_license | verify_license | request_license_by_email | save | load | commit_sale | reset_data | poll
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -338,6 +338,24 @@ serve(async (req) => {
       p_items: body.items ?? [],
       p_new_data: body.data,
       p_device_id: (body.device_id as string) || "",
+    });
+
+    if (rpcErr) return json({ ok: false, error: rpcErr.message }, 500);
+    return json(result);
+  }
+
+  // ── Reset total de datos (atómico, admin-only, validado en el cliente) ────
+  if (action === "reset_data") {
+    if (!license_key) return json({ error: "license_key required" }, 400);
+
+    const { data: lic } = await supabase
+      .from("licenses").select("key").eq("key", license_key).eq("status", "active").single();
+    if (!lic) return json({ error: "license_invalid" }, 403);
+
+    const { data: result, error: rpcErr } = await supabase.rpc("pos_reset_data", {
+      p_license_key: license_key,
+      p_device_id: (body.device_id as string) || "",
+      p_audit_entry: body.audit_entry ?? null,
     });
 
     if (rpcErr) return json({ ok: false, error: rpcErr.message }, 500);

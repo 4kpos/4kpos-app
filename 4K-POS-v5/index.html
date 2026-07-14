@@ -239,6 +239,8 @@ select.fi option{background:var(--s2);color:var(--tx);}
 .btn-p{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;}
 .btn-s{background:var(--s2);border:1.5px solid var(--b1);color:var(--tx2);}
 .btn-d{background:var(--rdb);border:1.5px solid rgba(248,113,113,.3);color:var(--rd);}
+.btn-dz{background:#dc2626;border:1.5px solid #dc2626;color:#fff;}
+.btn-dz:disabled{opacity:.45;cursor:not-allowed;}
 .btn-g{background:var(--gnb);border:1.5px solid var(--gn);color:var(--gn);}
 .slbl{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);margin:12px 0 8px;}
 .sep-line{height:1px;background:var(--b1);margin:12px 0;}
@@ -938,6 +940,13 @@ select.fi option{background:var(--s2);color:var(--tx);}
         </div>
         <div class="frow">
           <button class="btn btn-p" onclick="_openRenewalWA()">💬 Renovar / Soporte</button>
+        </div>
+        <div class="sep-line"></div>
+        <div id="cfg-danger-zone" style="display:none">
+          <div class="slbl" id="cfg-danger-zone-lbl" style="color:var(--rd)">Zona Peligrosa</div>
+          <div style="background:var(--rdb);border:1.5px solid rgba(248,113,113,.35);border-radius:var(--rs);padding:12px;margin-bottom:10px">
+            <div class="frow"><button class="btn btn-dz" id="reset-data-btn" onclick="openResetWarning()" style="width:100%">🗑️ Borrar Todos los Datos</button></div>
+          </div>
         </div>
       </div>
       <!-- INVENTORY -->
@@ -1759,6 +1768,48 @@ select.fi option{background:var(--s2);color:var(--tx);}
   </div>
 </div>
 
+<!-- RESET TOTAL DE DATOS - PASO 1: ADVERTENCIA -->
+<div class="ov" id="ov-reset-warn">
+  <div class="modal" style="max-width:480px">
+    <div class="mh"><h3 id="rw-title" style="color:var(--rd)">⚠️ ESTA ACCIÓN ES IRREVERSIBLE</h3><button class="mx" onclick="closeOv('ov-reset-warn')">✕</button></div>
+    <div class="mb">
+      <div style="font-size:.82rem;color:var(--tx2);margin-bottom:8px" id="rw-intro">Se eliminarán permanentemente los siguientes datos:</div>
+      <div style="background:var(--s2);border-radius:var(--rs);padding:10px 12px;font-size:.78rem;color:var(--tx2);margin-bottom:14px" id="rw-will-delete"></div>
+      <div style="font-size:.76rem;font-weight:700;color:var(--gn);margin-bottom:6px" id="rw-wont-intro">NO se eliminarán:</div>
+      <div style="background:var(--s2);border-radius:var(--rs);padding:10px 12px;font-size:.78rem;color:var(--tx2);margin-bottom:14px" id="rw-wont-delete"></div>
+      <div style="font-size:.73rem;color:var(--tx3);margin-bottom:12px" id="rw-backup-advice">Se recomienda crear un backup encriptado antes de continuar.</div>
+      <div class="frow" style="margin-bottom:12px"><button class="btn btn-s" id="rw-backup-btn" onclick="exportDB()" style="width:100%">💾 Crear Backup Ahora</button></div>
+      <div class="frow">
+        <button class="btn btn-s" id="rw-cancel-btn" onclick="closeOv('ov-reset-warn')" style="flex:1">Cancelar</button>
+        <button class="btn btn-dz" id="rw-continue-btn" onclick="_resetStep2()" style="flex:1">Continuar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESET TOTAL DE DATOS - PASO 2: CONFIRMACION -->
+<div class="ov" id="ov-reset-confirm">
+  <div class="modal" style="max-width:420px">
+    <div class="mh"><h3 id="rc-title">Confirmación Final</h3><button class="mx" onclick="closeOv('ov-reset-confirm')">✕</button></div>
+    <div class="mb">
+      <div class="fg">
+        <label class="lbl" id="rc-instruction-lbl">Para confirmar, escribe exactamente:</label>
+        <div style="font-weight:800;letter-spacing:.05em;margin-bottom:6px;color:var(--rd)" id="rc-keyword-target"></div>
+        <input type="text" class="fi" id="rc-keyword-input" autocomplete="off" oninput="_resetValidate()">
+      </div>
+      <div class="fg">
+        <label class="lbl" id="rc-pass-lbl">Contraseña de administrador</label>
+        <input type="password" class="fi" id="rc-pass-input" autocomplete="off" oninput="_resetValidate()">
+      </div>
+      <div id="rc-err" style="color:#ef4444;font-size:.73rem;min-height:16px;margin-bottom:4px"></div>
+      <div class="frow">
+        <button class="btn btn-s" id="rc-cancel-btn" onclick="closeOv('ov-reset-confirm')" style="flex:1">Cancelar</button>
+        <button class="btn btn-dz" id="rc-final-btn" disabled style="flex:1" onclick="_executeReset()">Borrar Definitivamente</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- FORCE CHANGE PASSWORD -->
 <div class="ov" id="ov-force-chpass">
   <div class="modal mnarrow">
@@ -2108,6 +2159,19 @@ const T = {
     updateDownloadNow:'Descargar ahora',updateLater:'Más tarde',
     noteSavedToast:'📋 Nota guardada',noteClearedToast:'📋 Nota eliminada',
     adminOnly:'Solo administrador',forceCloseConfirm:'¿Forzar cierre con diferencia de efectivo?',
+    settings_danger_zone:'Zona Peligrosa',reset_button:'Borrar Todos los Datos',
+    reset_warning_title:'⚠️ ESTA ACCIÓN ES IRREVERSIBLE',reset_warning_intro:'Se eliminarán permanentemente los siguientes datos:',
+    reset_will_delete:'Ventas, productos, categorías, clientes, créditos y abonos, combos, turnos, clock in/out, registro de auditoría y notificaciones.',
+    reset_wont_delete_intro:'NO se eliminarán:',
+    reset_wont_delete:'Usuarios, licencia y activación, configuración de impresora, impuestos y datos del negocio.',
+    reset_backup_advice:'Se recomienda crear un backup encriptado antes de continuar.',reset_backup_now:'Crear Backup Ahora',
+    reset_cancel:'Cancelar',reset_continue:'Continuar',
+    reset_confirm_title:'Confirmación Final',reset_confirm_instruction:'Para confirmar, escribe exactamente:',
+    reset_confirm_keyword:'BORRAR TODO',reset_password_label:'Contraseña de administrador',
+    reset_final_button:'Borrar Definitivamente',reset_countdown:'Espera {seconds}s...',
+    reset_invalid_keyword:'El texto no coincide.',reset_invalid_password:'Contraseña incorrecta.',
+    reset_in_progress:'Borrando datos...',reset_success:'Todos los datos fueron eliminados correctamente.',
+    reset_error:'Error al borrar los datos. No se realizó ningún cambio.',
     deleteUserConfirm:'¿Eliminar usuario ',deleteCatConfirm:'¿Eliminar categoría?',
     noCreditsFoundFor:'No se encontraron créditos para',noPendingCreditsCheck:'Sin créditos pendientes ✓',
     cpayProductsSec:'Productos',cpayNoDetail:'Sin detalle',cpayPriorPayments:'Abonos anteriores',
@@ -2324,6 +2388,7 @@ const T = {
     // Audit log action names
     auditLoginFail:'Login fallido',auditPassReset:'Contraseña reseteada',
     auditUserDel:'Usuario eliminado',auditShiftClose:'Cierre de turno',
+    auditDataReset:'Reset total de datos',
     auditAdminExempt:'Acción admin (exento)',auditAdminCfgExempt:'Config admin-exempt',
     auditAdminCode:'Código admin verificado',auditPriceEdit:'Precio editado',
     auditProdDel:'Producto eliminado',auditTaxUpdate:'Impuesto actualizado',
@@ -2610,6 +2675,19 @@ const T = {
     updateDownloadNow:'Download now',updateLater:'Later',
     noteSavedToast:'📋 Note saved',noteClearedToast:'📋 Note cleared',
     adminOnly:'Admin only',forceCloseConfirm:'Force close shift with cash difference?',
+    settings_danger_zone:'Danger Zone',reset_button:'Delete All Data',
+    reset_warning_title:'⚠️ THIS ACTION IS IRREVERSIBLE',reset_warning_intro:'The following data will be permanently deleted:',
+    reset_will_delete:'Sales, products, categories, customers, credits and payments, combos, shifts, clock in/out, audit log and notifications.',
+    reset_wont_delete_intro:'This will NOT be deleted:',
+    reset_wont_delete:'Users, license and activation, printer settings, taxes and business information.',
+    reset_backup_advice:'We recommend creating an encrypted backup before continuing.',reset_backup_now:'Create Backup Now',
+    reset_cancel:'Cancel',reset_continue:'Continue',
+    reset_confirm_title:'Final Confirmation',reset_confirm_instruction:'To confirm, type exactly:',
+    reset_confirm_keyword:'DELETE ALL',reset_password_label:'Administrator password',
+    reset_final_button:'Delete Permanently',reset_countdown:'Wait {seconds}s...',
+    reset_invalid_keyword:'The text does not match.',reset_invalid_password:'Incorrect password.',
+    reset_in_progress:'Deleting data...',reset_success:'All data was deleted successfully.',
+    reset_error:'Error deleting data. No changes were made.',
     deleteUserConfirm:'Delete user ',deleteCatConfirm:'Delete category?',
     noCreditsFoundFor:'No credits found for',noPendingCreditsCheck:'No pending credits ✓',
     cpayProductsSec:'Products',cpayNoDetail:'No detail',cpayPriorPayments:'Prior payments',
@@ -2826,6 +2904,7 @@ const T = {
     // Audit log action names
     auditLoginFail:'Login failed',auditPassReset:'Password reset',
     auditUserDel:'User deleted',auditShiftClose:'Shift closed',
+    auditDataReset:'Total data reset',
     auditAdminExempt:'Admin action (exempt)',auditAdminCfgExempt:'Admin-exempt config',
     auditAdminCode:'Admin code verified',auditPriceEdit:'Price edited',
     auditProdDel:'Product deleted',auditTaxUpdate:'Tax updated',
@@ -2951,6 +3030,7 @@ let editingAccountId=null;
 let curUser=null,curCat='all',pinTarget=null,pinVal='';
 let editingUserId=null;
 let confCb=null,fcExpr='',fcNum='0',fcNew=true;
+let _resetCountdownTimer=null,_resetCountdownLeft=0;
 let invCatFilter='',icCatFilter='';
 
 function el(id){return document.getElementById(id);}
@@ -3645,6 +3725,24 @@ function applyLang(){
   const _cfgClockSecLbl=el('cfg-clock-section-lbl');if(_cfgClockSecLbl)_cfgClockSecLbl.textContent=t('cfgClockSectionLbl');
   const _cfgClockLbl=el('cfg-clock-quick-lbl');if(_cfgClockLbl)_cfgClockLbl.textContent=t('cfgClockQuickLbl');
   const _cfgClockInfo=el('cfg-clock-quick-info');if(_cfgClockInfo)_cfgClockInfo.textContent=t('cfgClockQuickInfo');
+  // Reset total de datos (Danger Zone)
+  const _cfgDzLbl=el('cfg-danger-zone-lbl');if(_cfgDzLbl)_cfgDzLbl.textContent=t('settings_danger_zone');
+  const _resetBtn=el('reset-data-btn');if(_resetBtn)_resetBtn.textContent='🗑️ '+t('reset_button');
+  const _rwTitle=el('rw-title');if(_rwTitle)_rwTitle.textContent=t('reset_warning_title');
+  const _rwIntro=el('rw-intro');if(_rwIntro)_rwIntro.textContent=t('reset_warning_intro');
+  const _rwWillDel=el('rw-will-delete');if(_rwWillDel)_rwWillDel.textContent=t('reset_will_delete');
+  const _rwWontIntro=el('rw-wont-intro');if(_rwWontIntro)_rwWontIntro.textContent=t('reset_wont_delete_intro');
+  const _rwWontDel=el('rw-wont-delete');if(_rwWontDel)_rwWontDel.textContent=t('reset_wont_delete');
+  const _rwBkpAdvice=el('rw-backup-advice');if(_rwBkpAdvice)_rwBkpAdvice.textContent=t('reset_backup_advice');
+  const _rwBkpBtn=el('rw-backup-btn');if(_rwBkpBtn)_rwBkpBtn.textContent='💾 '+t('reset_backup_now');
+  const _rwCancelBtn=el('rw-cancel-btn');if(_rwCancelBtn)_rwCancelBtn.textContent=t('reset_cancel');
+  const _rwContinueBtn=el('rw-continue-btn');if(_rwContinueBtn)_rwContinueBtn.textContent=t('reset_continue');
+  const _rcTitle=el('rc-title');if(_rcTitle)_rcTitle.textContent=t('reset_confirm_title');
+  const _rcInstrLbl=el('rc-instruction-lbl');if(_rcInstrLbl)_rcInstrLbl.textContent=t('reset_confirm_instruction');
+  const _rcKwTarget=el('rc-keyword-target');if(_rcKwTarget)_rcKwTarget.textContent=t('reset_confirm_keyword');
+  const _rcPassLbl=el('rc-pass-lbl');if(_rcPassLbl)_rcPassLbl.textContent=t('reset_password_label');
+  const _rcCancelBtn=el('rc-cancel-btn');if(_rcCancelBtn)_rcCancelBtn.textContent=t('reset_cancel');
+  _resetValidate();
   // Sidebar simplificado
   const _sbiMenuLbl=el('sbi-menu-lbl');if(_sbiMenuLbl)_sbiMenuLbl.textContent=t('sbiMenu');
   const _sbiClockLbl=el('sbi-clock-lbl');if(_sbiClockLbl)_sbiClockLbl.textContent=t('sbiClock');
@@ -4010,6 +4108,7 @@ function _startRealtimeSync(){
         _ls('realtime event saved_by='+(row&&row.saved_by||'')+ ' myDevice='+(_deviceCode||'')+ ' hasData='+(rowData?'YES':'NO')+' salesLen='+(rowData&&rowData.sales?rowData.sales.length:0));
         if(!row||!rowData)return;
         if(row.saved_by&&row.saved_by===_deviceCode){_ls('realtime SKIP own device');return;}
+        if(rowData._resetAt&&rowData._resetAt!==db._lastResetAt){_applyRemoteReset(rowData);return;}
         _applyRemoteMerge(rowData);
       }
     )
@@ -4352,6 +4451,7 @@ function applyUserPerms(){
   const _hmSal=el('hm-sal');if(_hmSal)_hmSal.style.display=(isAdm||pm.sal)?'flex':'none';
   const _hmConta=el('hm-conta');if(_hmConta)_hmConta.style.display=(isAdm||pm.conta)?'flex':'none';
   const _hmAudit=el('hm-audit');if(_hmAudit)_hmAudit.style.display=isAdm?'flex':'none';
+  const _dzone=el('cfg-danger-zone');if(_dzone)_dzone.style.display=isAdm?'':'none';
   if(db.license||db._localPlan)_applyPlanUI();
 }
 function syncShiftStatus(status){
@@ -4560,6 +4660,95 @@ function doLogout(){
 function forceAdminLogout(){
   if(!curUser||curUser.role!=='admin'){toast('⚠ '+t('adminOnly'));return;}
   confirm2(t('forceCloseConfirm'),doLogout);
+}
+// ── RESET TOTAL DE DATOS ────────────────────────────────────────────────────
+function openResetWarning(){
+  if(!curUser||curUser.role!=='admin'){toast('⚠ '+t('adminOnly'));return;}
+  openOv('ov-reset-warn');
+  setTimeout(function(){var b=el('rw-cancel-btn');if(b)b.focus();},50);
+}
+function _resetStep2(){
+  closeOv('ov-reset-warn');
+  if(!curUser||curUser.role!=='admin')return;
+  var kwEl=el('rc-keyword-input'),passEl=el('rc-pass-input'),errEl=el('rc-err');
+  if(kwEl)kwEl.value='';
+  if(passEl)passEl.value='';
+  if(errEl)errEl.textContent='';
+  var tgt=el('rc-keyword-target');if(tgt)tgt.textContent=t('reset_confirm_keyword');
+  _resetCountdownLeft=5;
+  if(_resetCountdownTimer){clearInterval(_resetCountdownTimer);_resetCountdownTimer=null;}
+  _resetCountdownTimer=setInterval(function(){
+    _resetCountdownLeft--;
+    if(_resetCountdownLeft<=0){clearInterval(_resetCountdownTimer);_resetCountdownTimer=null;_resetCountdownLeft=0;}
+    _resetValidate();
+  },1000);
+  _resetValidate();
+  openOv('ov-reset-confirm');
+  setTimeout(function(){var i=el('rc-keyword-input');if(i)i.focus();},50);
+}
+function _resetValidate(){
+  var btn=el('rc-final-btn');if(!btn)return;
+  var kwEl=el('rc-keyword-input'),passEl=el('rc-pass-input');
+  var kwOk=!!kwEl&&kwEl.value.trim()===t('reset_confirm_keyword');
+  var passOk=!!passEl&&passEl.value.length>0;
+  var countdownDone=_resetCountdownLeft<=0;
+  btn.disabled=!(kwOk&&passOk&&countdownDone);
+  btn.textContent=countdownDone?t('reset_final_button'):t('reset_countdown').replace('{seconds}',_resetCountdownLeft);
+}
+async function _executeReset(){
+  if(!curUser||curUser.role!=='admin')return;
+  var kwEl=el('rc-keyword-input'),passEl=el('rc-pass-input'),errEl=el('rc-err'),btn=el('rc-final-btn');
+  var kw=kwEl?kwEl.value.trim():'',pass=passEl?passEl.value:'';
+  if(errEl)errEl.textContent='';
+  if(_resetCountdownLeft>0)return;
+  if(kw!==t('reset_confirm_keyword')){if(errEl)errEl.textContent=t('reset_invalid_keyword');return;}
+  if(!bcrypt||!curUser.pass||!bcrypt.compareSync(pass,curUser.pass)){if(errEl)errEl.textContent=t('reset_invalid_password');return;}
+  if(!db._lic){if(errEl)errEl.textContent=t('reset_error');return;}
+  if(btn){btn.disabled=true;btn.textContent=t('reset_in_progress');}
+  var auditEntry={
+    id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+    fecha:new Date().toLocaleDateString(),
+    hora:new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
+    userId:curUser.id,userName:curUser.name,
+    accion:t('auditDataReset'),
+    detalle:'device:'+(_deviceCode||'?'),
+    antes:'',despues:''
+  };
+  try{
+    var res=await fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'reset_data',license_key:db._lic,device_id:_deviceCode||'',audit_entry:auditEntry})});
+    var j=await res.json();
+    if(!j||j.ok!==true)throw new Error((j&&j.error)||'reset_failed');
+    _applyLocalReset(auditEntry,j.reset_at);
+    toast('✅ '+t('reset_success'));
+    closeOv('ov-reset-confirm');
+    setTimeout(function(){doLogout();},600);
+  }catch(e){
+    if(errEl)errEl.textContent=t('reset_error');
+    if(btn){btn.disabled=false;_resetValidate();}
+  }
+}
+function _applyLocalReset(auditEntry,resetAt){
+  db.products=[];db.categories=[];db.sales=[];db.returns=[];db.orderNum=1;
+  db.customers=[];db.credits=[];db.combos=[];db.shifts=[];db.fundAmount=0;
+  (db.employees||[]).forEach(function(e){e.clockEvents=[];e.clockHistory=[];});
+  db.auditLog=[auditEntry];
+  if(db.cfg)db.cfg.pendingShiftNote=null;
+  db._lastResetAt=resetAt||new Date().toISOString();
+  cart=[];
+  _skipRemotePush=true;saveDB();
+}
+function _applyRemoteReset(remote){
+  db.products=remote.products||[];db.categories=remote.categories||[];db.sales=remote.sales||[];db.returns=remote.returns||[];
+  db.orderNum=remote.orderNum||1;db.customers=remote.customers||[];db.credits=remote.credits||[];db.combos=remote.combos||[];
+  db.shifts=remote.shifts||[];db.fundAmount=remote.fundAmount||0;db.auditLog=remote.auditLog||[];
+  if(remote.employees&&remote.employees.length)db.employees=remote.employees;
+  else (db.employees||[]).forEach(function(e){e.clockEvents=[];e.clockHistory=[];});
+  if(remote.cfg)db.cfg=Object.assign({},db.cfg||{},remote.cfg);
+  db._lastResetAt=remote._resetAt;
+  cart=[];
+  _skipRemotePush=true;saveDB();
+  _syncRefreshActiveScreen();
+  toast('🔄 '+t('reset_success'));
 }
 
 // ── DOBLE CONFIRMACIÓN CON CÓDIGO ADMIN ────────
