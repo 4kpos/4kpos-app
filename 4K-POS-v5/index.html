@@ -4716,7 +4716,7 @@ async function _executeReset(){
   };
   var _alerted=false;
   try{
-    var res=await fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'reset_data',license_key:db._lic,device_id:_deviceCode||'',audit_entry:auditEntry})});
+    var res=await fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'reset_data',license_key:db._lic,device_id:_deviceCode||'',audit_entry:auditEntry,user:curUser.user||curUser.name,password:pass})});
     var j=null;try{j=await res.json();}catch(eParse){}
     if(!j||j.ok!==true){
       // TEMPORAL — diagnóstico del error real de Supabase (quitar cuando esté resuelto)

@@ -3,6 +3,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import bcrypt from "https://esm.sh/bcryptjs@2.4.3";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -344,13 +345,42 @@ serve(async (req) => {
     return json(result);
   }
 
-  // ── Reset total de datos (atómico, admin-only, validado en el cliente) ────
+  // ── Reset total de datos (atómico) ─────────────────────────────────────────
+  // El cliente ya valida keyword+password+countdown en su UI, pero eso es
+  // solo UX — la identidad real (usuario admin + password) se re-valida acá
+  // contra el hash bcrypt guardado en pos_data.data.users, para no confiar
+  // ciegamente en lo que mande el frontend.
   if (action === "reset_data") {
     if (!license_key) return json({ error: "license_key required" }, 400);
 
     const { data: lic } = await supabase
       .from("licenses").select("key").eq("key", license_key).eq("status", "active").single();
     if (!lic) return json({ error: "license_invalid" }, 403);
+
+    const username = ((body.user as string) || "").trim();
+    const password = (body.password as string) || "";
+    if (!username || !password) {
+      return json({ ok: false, error: "missing_credentials" }, 400);
+    }
+
+    const { data: posRow, error: posErr } = await supabase
+      .from("pos_data").select("data").eq("license_key", license_key).single();
+    if (posErr || !posRow) return json({ ok: false, error: "pos_data_not_found" }, 404);
+
+    const rawData = posRow.data;
+    const currentData = (typeof rawData === "string" ? JSON.parse(rawData) : rawData) ?? {};
+    const users = (currentData.users as Array<Record<string, unknown>>) || [];
+    const foundUser = users.find((u) =>
+      (u.user as string) === username || (u.name as string) === username
+    );
+
+    if (!foundUser || foundUser.role !== "admin") {
+      return json({ ok: false, error: "not_admin" }, 403);
+    }
+    const passHash = (foundUser.pass as string) || "";
+    if (!passHash || !bcrypt.compareSync(password, passHash)) {
+      return json({ ok: false, error: "invalid_credentials" }, 403);
+    }
 
     const { data: result, error: rpcErr } = await supabase.rpc("pos_reset_data", {
       p_license_key: license_key,
