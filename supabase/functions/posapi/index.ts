@@ -358,7 +358,19 @@ serve(async (req) => {
       p_audit_entry: body.audit_entry ?? null,
     });
 
-    if (rpcErr) return json({ ok: false, error: rpcErr.message }, 500);
+    if (rpcErr) {
+      // No tragarse el error: loguearlo completo en los logs de la Edge
+      // Function (Supabase Dashboard → Edge Functions → Logs) y devolver
+      // message/details/hint/code al cliente para diagnóstico.
+      console.error("[reset_data] pos_reset_data RPC error:", JSON.stringify(rpcErr));
+      return json({
+        ok: false,
+        error: rpcErr.message,
+        details: rpcErr.details ?? null,
+        hint: rpcErr.hint ?? null,
+        code: rpcErr.code ?? null,
+      }, 500);
+    }
     return json(result);
   }
 

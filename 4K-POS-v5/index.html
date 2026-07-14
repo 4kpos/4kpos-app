@@ -4716,13 +4716,21 @@ async function _executeReset(){
   };
   try{
     var res=await fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'reset_data',license_key:db._lic,device_id:_deviceCode||'',audit_entry:auditEntry})});
-    var j=await res.json();
-    if(!j||j.ok!==true)throw new Error((j&&j.error)||'reset_failed');
+    var j=null;try{j=await res.json();}catch(eParse){}
+    if(!j||j.ok!==true){
+      // No tragarse el error: dejar el detalle completo en consola para diagnóstico
+      // (el usuario solo ve el mensaje genérico traducido, pero devtools tiene todo).
+      console.error('[reset_data] Falló el reset. httpStatus='+res.status,{
+        error:j&&j.error,details:j&&j.details,hint:j&&j.hint,code:j&&j.code,raw:j
+      });
+      throw new Error((j&&j.error)||('http_'+res.status));
+    }
     _applyLocalReset(auditEntry,j.reset_at);
     toast('✅ '+t('reset_success'));
     closeOv('ov-reset-confirm');
     setTimeout(function(){doLogout();},600);
   }catch(e){
+    console.error('[reset_data] Excepción en _executeReset:',e);
     if(errEl)errEl.textContent=t('reset_error');
     if(btn){btn.disabled=false;_resetValidate();}
   }
