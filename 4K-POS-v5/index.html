@@ -4714,15 +4714,15 @@ async function _executeReset(){
     detalle:'device:'+(_deviceCode||'?'),
     antes:'',despues:''
   };
+  var _alerted=false;
   try{
     var res=await fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'reset_data',license_key:db._lic,device_id:_deviceCode||'',audit_entry:auditEntry})});
     var j=null;try{j=await res.json();}catch(eParse){}
     if(!j||j.ok!==true){
-      // No tragarse el error: dejar el detalle completo en consola para diagnóstico
-      // (el usuario solo ve el mensaje genérico traducido, pero devtools tiene todo).
-      console.error('[reset_data] Falló el reset. httpStatus='+res.status,{
-        error:j&&j.error,details:j&&j.details,hint:j&&j.hint,code:j&&j.code,raw:j
-      });
+      // TEMPORAL — diagnóstico del error real de Supabase (quitar cuando esté resuelto)
+      console.error('RESET ERROR:', JSON.stringify({httpStatus:res.status,error:j&&j.error,details:j&&j.details,hint:j&&j.hint,code:j&&j.code,raw:j}, null, 2));
+      _alerted=true;
+      alert('RESET ERROR\n\nhttpStatus: '+res.status+'\nmessage: '+(j&&j.error)+'\ncode: '+(j&&j.code)+'\ndetails: '+(j&&j.details)+'\nhint: '+(j&&j.hint));
       throw new Error((j&&j.error)||('http_'+res.status));
     }
     _applyLocalReset(auditEntry,j.reset_at);
@@ -4730,7 +4730,9 @@ async function _executeReset(){
     closeOv('ov-reset-confirm');
     setTimeout(function(){doLogout();},600);
   }catch(e){
-    console.error('[reset_data] Excepción en _executeReset:',e);
+    // TEMPORAL — diagnóstico (quitar cuando esté resuelto)
+    console.error('RESET ERROR:', JSON.stringify({message:e&&e.message,code:e&&e.code,details:e&&e.details,hint:e&&e.hint}, null, 2));
+    if(!_alerted)alert('RESET ERROR (excepción de red/JS)\n\n'+(e&&e.message));
     if(errEl)errEl.textContent=t('reset_error');
     if(btn){btn.disabled=false;_resetValidate();}
   }
