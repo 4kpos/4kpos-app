@@ -346,24 +346,56 @@ select.fi option{background:var(--s2);color:var(--tx);}
 .inv-tbl tbody tr[data-pid]:hover td{background:rgba(99,102,241,.08);cursor:pointer;}
 .inv-tbl tbody tr[data-pid].inv-row-sel td{background:rgba(99,102,241,.16)!important;border-bottom-color:rgba(99,102,241,.28);}
 /* ── DASHBOARD PC ──────────────────────────────────────────── */
-#dashboard-screen{flex:1;overflow-y:auto;padding:18px 20px;flex-direction:column;gap:14px;background:var(--bg);}
+/* Tokens de restyle con scope A ESTA PANTALLA únicamente (no toca :root,
+   así que el resto de la app no cambia todavía — se promueven pantalla por
+   pantalla). --ac/--gn/--am/--rd NO se tocan acá: siguen siendo el azul de
+   marca / verde / ámbar / rojo que ya usa toda la app, sin variar de tono.
+   Lo nuevo es --cy (Transacciones), la superficie navy, el --tx3 con más
+   contraste, y las escalas de radio/sombra/glow/espaciado. */
+#dashboard-screen{
+  --bg:#0a0e1a; --s1:#111729; --s2:#1a2036; --s3:#232a45;
+  --tx3:#a6acc9;
+  --cy:#22d3ee; --cyb:rgba(34,211,238,.14);
+  --r-card:18px; --r-pill:999px;
+  --sh-1:0 1px 2px rgba(0,0,0,.35);
+  --sh-2:0 8px 24px -10px rgba(0,0,0,.55);
+  --glow-ac:0 0 0 1px rgba(59,130,246,.18),0 8px 20px -8px rgba(59,130,246,.35);
+  --glow-cy:0 0 0 1px rgba(34,211,238,.18),0 8px 20px -8px rgba(34,211,238,.35);
+  --glow-gn:0 0 0 1px rgba(52,211,153,.18),0 8px 20px -8px rgba(52,211,153,.35);
+  --glow-am:0 0 0 1px rgba(251,191,36,.18),0 8px 20px -8px rgba(251,191,36,.35);
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px;
+  --fs-2xs:.68rem; --fs-xs:.74rem; --fs-sm:.82rem; --fs-2xl:1.85rem;
+  --fw-bold:700; --fw-black:800; --ls-label:.06em;
+  flex:1;overflow-y:auto;padding:var(--sp-5) var(--sp-6);flex-direction:column;gap:var(--sp-4);background:var(--bg);
+}
+body.light #dashboard-screen{
+  --bg:#eef1f8; --s1:#ffffff; --s2:#e7ebf5; --s3:#dbe0f0;
+  --tx3:#565f8c;
+  --cy:#0e7490; --cyb:rgba(14,116,144,.10);
+  --sh-1:0 1px 2px rgba(20,25,60,.08); --sh-2:0 8px 24px -10px rgba(20,25,60,.18);
+  --glow-ac:0 0 0 1px rgba(30,58,138,.14),0 8px 20px -8px rgba(30,58,138,.20);
+  --glow-cy:0 0 0 1px rgba(14,116,144,.14),0 8px 20px -8px rgba(14,116,144,.20);
+  --glow-gn:0 0 0 1px rgba(4,120,87,.14),0 8px 20px -8px rgba(4,120,87,.20);
+  --glow-am:0 0 0 1px rgba(146,64,14,.14),0 8px 20px -8px rgba(146,64,14,.20);
+}
 .db-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-.db-hd h2{font-size:1.1rem;font-weight:800;}
-.db-hd span{font-size:.78rem;color:var(--tx3);}
-.db-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+.db-hd h2{font-size:1.1rem;font-weight:var(--fw-black);}
+.db-hd span{font-size:var(--fs-sm);color:var(--tx3);}
+.db-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-3);}
 @media(max-width:1100px){.db-kpis{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:700px){.db-kpis{grid-template-columns:repeat(2,1fr);}}
-.db-kpi{background:linear-gradient(135deg,#152238,#0f1826);border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;}
-.kpi-ico{font-size:1.4rem;}
-.kpi-lbl{font-size:.7rem;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
-.kpi-val{font-size:1.3rem;font-weight:800;color:var(--tx);}
-.db-row{display:grid;grid-template-columns:2fr 1fr;gap:12px;}
+.db-kpi{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r-card);padding:var(--sp-4);display:flex;flex-direction:column;gap:4px;box-shadow:var(--sh-1);transition:box-shadow .18s,transform .18s;}
+.db-kpi:hover{box-shadow:var(--glow,var(--sh-2));transform:translateY(-1px);}
+.kpi-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;background:var(--tint,var(--s2));color:var(--acc,var(--tx2));margin-bottom:4px;flex-shrink:0;}
+.kpi-lbl{font-size:var(--fs-xs);color:var(--tx3);font-weight:var(--fw-bold);text-transform:uppercase;letter-spacing:var(--ls-label);}
+.kpi-val{font-size:var(--fs-2xl);font-weight:var(--fw-black);color:var(--tx);font-family:'Consolas','Courier New',monospace;letter-spacing:-.01em;}
+.db-row{display:grid;grid-template-columns:2fr 1fr;gap:var(--sp-3);}
 @media(max-width:900px){.db-row{grid-template-columns:1fr;}}
-.db-card{background:linear-gradient(135deg,#152238,#0f1826);border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 16px;}
+.db-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r-card);padding:var(--sp-4);box-shadow:var(--sh-1);}
 .db-card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.db-card-hd h4{font-size:.85rem;font-weight:700;color:var(--tx2);}
-.db-toggle{display:flex;background:var(--s2);border-radius:var(--rs);border:1.5px solid var(--b1);padding:2px;gap:2px;}
-.db-toggle button{padding:3px 12px;font-size:.72rem;border:none;border-radius:calc(var(--rs) - 2px);background:transparent;color:var(--tx3);cursor:pointer;transition:all .18s;font-weight:600;}
+.db-card-hd h4{font-size:var(--fs-sm);font-weight:var(--fw-bold);color:var(--tx2);}
+.db-toggle{display:flex;background:var(--s2);border-radius:var(--rs);border:1px solid var(--b1);padding:2px;gap:2px;}
+.db-toggle button{padding:3px 12px;font-size:var(--fs-2xs);border:none;border-radius:calc(var(--rs) - 2px);background:transparent;color:var(--tx3);cursor:pointer;transition:all .18s;font-weight:var(--fw-bold);}
 .db-toggle button.on{background:var(--ac);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);}
 .db-chart{display:block;width:100%;height:220px;overflow:hidden;}
 .db-bar-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:2px;}
@@ -558,30 +590,30 @@ select.fi option{background:var(--s2);color:var(--tx);}
   <div class="db-hd">
     <h2>📊 Dashboard</h2>
     <div style="display:flex;align-items:center;gap:10px">
-      <span id="db-date" style="font-size:.78rem;color:var(--tx3)"></span>
-      <button class="btn btn-s" onclick="sbNav('pos')" style="padding:5px 13px;font-size:.78rem;background:#CC1111;border-color:#CC1111;color:#fff">← Vender</button>
+      <span id="db-date" style="font-size:var(--fs-sm);color:var(--tx3)"></span>
+      <button class="btn btn-s" onclick="sbNav('pos')" style="padding:5px 13px;font-size:var(--fs-sm);background:var(--rd);border-color:var(--rd);color:#fff">← Vender</button>
     </div>
   </div>
   <div class="db-kpis">
-    <div class="db-kpi">
+    <div class="db-kpi" style="--tint:var(--acg);--acc:var(--ac);--glow:var(--glow-ac)">
       <div class="kpi-ico">💰</div>
       <div class="kpi-lbl" id="db-kpi-lbl-ventas">Ventas hoy</div>
       <div class="kpi-val" id="db-kpi-ventas">$0.00</div>
       <div id="kpi-spark-ventas" style="margin-top:8px;line-height:0"></div>
     </div>
-    <div class="db-kpi">
+    <div class="db-kpi" style="--tint:var(--cyb);--acc:var(--cy);--glow:var(--glow-cy)">
       <div class="kpi-ico">🧾</div>
       <div class="kpi-lbl" id="db-kpi-lbl-tx">Transacciones</div>
       <div class="kpi-val" id="db-kpi-tx">0</div>
       <div id="kpi-spark-tx" style="margin-top:8px;line-height:0"></div>
     </div>
-    <div class="db-kpi">
+    <div class="db-kpi" style="--tint:var(--amb);--acc:var(--am);--glow:var(--glow-am)">
       <div class="kpi-ico">💳</div>
       <div class="kpi-lbl" id="db-kpi-lbl-cred">Créditos pendientes</div>
       <div class="kpi-val" id="db-kpi-cred">$0.00</div>
       <div id="kpi-spark-cred" style="margin-top:8px;line-height:0"></div>
     </div>
-    <div class="db-kpi">
+    <div class="db-kpi" style="--tint:var(--gnb);--acc:var(--gn);--glow:var(--glow-gn)">
       <div class="kpi-ico">🎫</div>
       <div class="kpi-lbl" id="db-kpi-lbl-ticket">Ticket promedio</div>
       <div class="kpi-val" id="db-kpi-ticket">$0.00</div>
@@ -591,7 +623,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
       <div class="kpi-ico">📈</div>
       <div class="kpi-lbl" id="db-kpi-lbl-totalsale">Venta total</div>
       <div class="kpi-val" id="db-kpi-alltime">$0.00</div>
-      <div style="margin-top:4px;font-size:.68rem;color:var(--tx3)" id="db-kpi-alltime-sub"></div>
+      <div style="margin-top:4px;font-size:var(--fs-2xs);color:var(--tx3)" id="db-kpi-alltime-sub"></div>
     </div>
   </div>
   <div class="db-row">
@@ -9440,7 +9472,7 @@ function refreshDashboard(){
     var credSub=credKpiEl.nextElementSibling;
     if(!credSub||!credSub.dataset.credSub){credSub=document.createElement('div');credSub.dataset.credSub='1';credKpiEl.parentNode.insertBefore(credSub,credKpiEl.nextSibling);}
     credSub.textContent=overdueCount>0?('⚠ '+overdueCount+' vencido'+(overdueCount>1?'s':'')):'';
-    credSub.style.cssText=overdueCount>0?'font-size:.65rem;color:#EF4444;margin-top:2px':'';
+    credSub.style.cssText=overdueCount>0?'font-size:var(--fs-2xs,.65rem);color:var(--rd);margin-top:2px':'';
   }
   setEl('db-kpi-ticket',dolr(ticketProm));
   var allTimeTotal=sales.filter(function(s){return s.status!=='cancelled'&&s.status!=='returned';}).reduce(function(sum,s){return sum+(s.total||0);},0);
@@ -9458,6 +9490,14 @@ function _shortNum(n){
   if(n>=1000000)return '$'+(n/1000000).toFixed(1)+'M';
   if(n>=1000)return '$'+(n/1000).toFixed(n>=10000?0:1)+'k';
   return '$'+Math.round(n);
+}
+// Canvas/SVG a veces necesitan el color resuelto, no un var(--x) — se usa
+// para leer tokens CSS (getComputedStyle) y convertirlos a rgb() usable.
+function _hexToRgb(hex){
+  var h=(hex||'').trim().replace('#','');
+  if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  var n=parseInt(h,16)||0;
+  return {r:(n>>16)&255,g:(n>>8)&255,b:n&255};
 }
 var _dbChartMeta=null;
 function _dbChartHover(e){
@@ -9499,6 +9539,12 @@ function _renderDbChart(){
   var canvas=chartEl.querySelector('canvas');
   if(!canvas){chartEl.innerHTML='';canvas=document.createElement('canvas');chartEl.appendChild(canvas);}
   if(!canvas._dbTipInit){canvas._dbTipInit=true;canvas.addEventListener('mousemove',_dbChartHover);canvas.addEventListener('mouseleave',function(){var t=el('db-chart-tip');if(t)t.style.display='none';});}
+  // Canvas no entiende var(--x) — se resuelve el color real de --ac (mismo
+  // acento que la KPI "Ventas hoy") en tiempo de render, para no hardcodear
+  // el azul y que quede en sync con el token si algún día cambia.
+  var acHex=(getComputedStyle(chartEl).getPropertyValue('--ac')||'#3b82f6').trim();
+  var acRgb=_hexToRgb(acHex);
+  var acRgbStr=acRgb.r+','+acRgb.g+','+acRgb.b;
   var H=220,dpr=window.devicePixelRatio||1;
   canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
   canvas.style.width=W+'px';canvas.style.height=H+'px';canvas.style.display='block';
@@ -9528,19 +9574,19 @@ function _renderDbChart(){
   var pts=cols.map(function(c,i){return{x:Math.round(pL+(i+0.5)*slotW),y:c.val>0?Math.round(pT+cH-(c.val/maxVal)*cH):Math.round(pT+cH)};});
   if(maxVal>1){
     var grad=ctx.createLinearGradient(0,pT,0,pT+cH);
-    grad.addColorStop(0,'rgba(59,130,246,.35)');grad.addColorStop(1,'rgba(59,130,246,.03)');
+    grad.addColorStop(0,'rgba('+acRgbStr+',.35)');grad.addColorStop(1,'rgba('+acRgbStr+',.03)');
     ctx.beginPath();ctx.moveTo(pts[0].x,pT+cH);ctx.lineTo(pts[0].x,pts[0].y);
     for(var li=1;li<pts.length;li++){var lcx=Math.round((pts[li-1].x+pts[li].x)/2);ctx.bezierCurveTo(lcx,pts[li-1].y,lcx,pts[li].y,pts[li].x,pts[li].y);}
     ctx.lineTo(pts[pts.length-1].x,pT+cH);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
     ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
     for(var li=1;li<pts.length;li++){var lcx=Math.round((pts[li-1].x+pts[li].x)/2);ctx.bezierCurveTo(lcx,pts[li-1].y,lcx,pts[li].y,pts[li].x,pts[li].y);}
-    ctx.strokeStyle='#3b82f6';ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
+    ctx.strokeStyle=acHex;ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
   }
-  /* Dots and labels */
+  /* Dots and labels — "hoy" resalta en blanco puro sobre la línea de acento */
   cols.forEach(function(c,i){
     var pt=pts[i];var cx=pt.x;
-    if(c.val>0){ctx.beginPath();ctx.arc(cx,pt.y,c.today?4:2.5,0,Math.PI*2);ctx.fillStyle=c.today?'#93c5fd':'#3b82f6';ctx.fill();}
-    if(c.val>0&&(n<=10||c.today)){ctx.fillStyle=c.today?'#93c5fd':'rgba(255,255,255,.7)';ctx.font='bold 9px system-ui,sans-serif';ctx.textAlign='center';ctx.fillText(_shortNum(c.val),cx,pt.y-8);}
+    if(c.val>0){ctx.beginPath();ctx.arc(cx,pt.y,c.today?4:2.5,0,Math.PI*2);ctx.fillStyle=c.today?'#ffffff':acHex;ctx.fill();}
+    if(c.val>0&&(n<=10||c.today)){ctx.fillStyle=c.today?'#ffffff':'rgba(255,255,255,.7)';ctx.font='bold 9px system-ui,sans-serif';ctx.textAlign='center';ctx.fillText(_shortNum(c.val),cx,pt.y-8);}
     if(c.lbl||c.today){ctx.fillStyle=c.today?'rgba(255,255,255,.85)':'rgba(255,255,255,.45)';ctx.font=(c.today?'bold ':'')+(n>10?'8':'10')+'px system-ui,sans-serif';ctx.textAlign='center';ctx.fillText(c.today&&n>10?'●':c.lbl,cx,H-5);}
   });
   _dbChartMeta={cols:cols,pL:pL,slotW:slotW,n:n};
@@ -9562,20 +9608,20 @@ function _renderDbTop5(){
   var top5=Object.values(counts).sort(function(a,b){return b.qty-a.qty;}).slice(0,5);
   if(!top5.length){el5.innerHTML='<p style="font-size:.75rem;color:var(--tx3);text-align:center;padding:12px">'+t('noSalesToday')+'</p>';return;}
   var p0=top5[0];
-  var card1='<div style="background:linear-gradient(135deg,#1e3a8a11,#1e3a8a22);border:1.5px solid #1e3a8a44;border-radius:var(--r);padding:12px;margin-bottom:8px">'
+  var card1='<div style="background:var(--acg);border:1px solid var(--b2);border-radius:var(--r-card);padding:12px;margin-bottom:8px">'
     +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">'
-    +'<div style="min-width:0"><div style="font-size:.82rem;font-weight:700;color:#3b82f6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(p0.name)+'</div>'
+    +'<div style="min-width:0"><div style="font-size:.82rem;font-weight:700;color:var(--ac);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(p0.name)+'</div>'
     +'<div style="font-size:.68rem;color:var(--tx3);margin-top:1px">'+p0.qty+' '+(p0.qty===1?'unidad':'unidades')+'</div></div>'
-    +'<span style="background:#1e3a8a;color:#fff;font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0">★ más vendido</span>'
+    +'<span style="background:var(--ac);color:#fff;font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:var(--r-pill);white-space:nowrap;flex-shrink:0">★ más vendido</span>'
     +'</div>'
-    +'<div style="font-size:1.25rem;font-weight:800;color:#3b82f6;margin-top:8px">'+dolr(p0.revenue)+'</div>'
+    +'<div style="font-size:1.25rem;font-weight:800;color:var(--ac);margin-top:8px">'+dolr(p0.revenue)+'</div>'
     +'</div>';
   var rest=top5.slice(1);
   var grid=rest.length?('<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'
     +rest.map(function(p){
-      return '<div style="background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--rs);padding:9px">'
+      return '<div style="background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);padding:9px">'
         +'<div style="font-size:.74rem;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px">'+escHtml(p.name)+'</div>'
-        +'<div style="font-size:.88rem;font-weight:800;color:#3b82f6">'+dolr(p.revenue)+'</div>'
+        +'<div style="font-size:.88rem;font-weight:800;color:var(--ac)">'+dolr(p.revenue)+'</div>'
         +'<div style="font-size:.67rem;color:var(--tx3)">'+p.qty+' uds</div>'
         +'</div>';
     }).join('')+'</div>'):'';
@@ -9619,7 +9665,7 @@ function _renderDbRecentSales(){
       var t2=fmtTime(s.date);
       var items=(s.items||[]);
       var itemsStr=items.length?items.slice(0,2).map(function(i){return i.name;}).join(', ')+(items.length>2?' +'+( items.length-2):''):'—';
-      var payClr={cash:'#22c55e',card:'#3b82f6',transf:'#8b5cf6',credit:'#e6b800',split:'#f59e0b'}[s.payMethod]||'var(--tx3)';
+      var payClr={cash:'var(--gn)',card:'var(--ac)',transf:'var(--cy)',credit:'var(--am)',split:'var(--am)'}[s.payMethod]||'var(--tx3)';
       return '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--b1)">'
         +'<div><div style="font-size:.7rem;color:var(--tx3)">'+t2+'</div>'
         +'<div style="font-size:.76rem;color:var(--tx);overflow:hidden;white-space:nowrap;max-width:120px;text-overflow:ellipsis">'+escHtml(itemsStr)+'</div></div>'
@@ -9645,8 +9691,8 @@ function _renderDbPayMethods(){
   var total=cats.Efectivo+cats.Tarjeta+cats.Crédito;
   if(!total){payEl.innerHTML='<p style="font-size:.75rem;color:var(--tx3);padding:6px 0">Sin ventas hoy</p>';return;}
   var pEf=cats.Efectivo/total*100,pTj=cats.Tarjeta/total*100,pCr=cats.Crédito/total*100;
-  var cg='conic-gradient(#22c55e 0% '+pEf.toFixed(1)+'%,#3b82f6 '+pEf.toFixed(1)+'% '+(pEf+pTj).toFixed(1)+'%,#e6b800 '+(pEf+pTj).toFixed(1)+'% 100%)';
-  var clrs={Efectivo:'#22c55e',Tarjeta:'#3b82f6',Crédito:'#e6b800'};
+  var cg='conic-gradient(var(--gn) 0% '+pEf.toFixed(1)+'%,var(--ac) '+pEf.toFixed(1)+'% '+(pEf+pTj).toFixed(1)+'%,var(--am) '+(pEf+pTj).toFixed(1)+'% 100%)';
+  var clrs={Efectivo:'var(--gn)',Tarjeta:'var(--ac)',Crédito:'var(--am)'};
   var legend=Object.keys(cats).map(function(k){
     var pct=Math.round(cats[k]/total*100);
     return '<div style="display:flex;align-items:center;gap:6px;font-size:.74rem;margin-bottom:6px">'
@@ -9658,9 +9704,9 @@ function _renderDbPayMethods(){
   }).join('');
   payEl.innerHTML='<div style="display:flex;align-items:center;gap:20px">'
     +'<div style="flex-shrink:0;position:relative;width:140px;height:140px">'
-    +'<div style="width:140px;height:140px;border-radius:50%;background:'+cg+';box-shadow:0 0 20px rgba(59,130,246,.2)"></div>'
+    +'<div style="width:140px;height:140px;border-radius:50%;background:'+cg+';box-shadow:var(--glow-ac)"></div>'
     +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">'
-    +'<div style="width:84px;height:84px;border-radius:50%;background:linear-gradient(135deg,#152238,#0f1826);display:flex;flex-direction:column;align-items:center;justify-content:center">'
+    +'<div style="width:84px;height:84px;border-radius:50%;background:var(--s2);display:flex;flex-direction:column;align-items:center;justify-content:center">'
     +'<div style="font-size:.6rem;color:var(--tx3);font-weight:600;letter-spacing:.4px">TOTAL</div>'
     +'<div style="font-size:.88rem;font-weight:800;color:var(--tx)">'+dolr(total)+'</div>'
     +'</div></div></div>'
@@ -9679,8 +9725,10 @@ function _renderDbSparklines(){
       var y=Math.round(SH-pw-(SH-pw*2)*((v-min)/range));
       return x+','+y;
     }).join(' ');
+    // style="stroke:..." (no el atributo "stroke" plano) para que var(--x)
+    // se resuelva por el cascade normal de CSS dentro del SVG inline.
     return '<svg viewBox="0 0 '+W+' '+SH+'" width="'+W+'" height="'+SH+'" style="display:block;opacity:.8">'
-      +'<polyline points="'+points+'" fill="none" stroke="'+color+'" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>'
+      +'<polyline points="'+points+'" fill="none" style="stroke:'+color+'" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>'
       +'</svg>';
   }
   function dayTotals(ds){return sales.filter(function(s){return s.status!=='cancelled'&&s.status!=='returned'&&new Date(s.date).toDateString()===ds;}).reduce(function(a,s){return a+(s.total||0);},0);}
@@ -9689,10 +9737,12 @@ function _renderDbSparklines(){
   var vV=ddays.map(dayTotals);
   var vT=ddays.map(dayCount);
   var vTk=ddays.map(dayTicket);
-  var elV=el('kpi-spark-ventas');if(elV)elV.innerHTML=makeSpark(vV,'#22c55e');
-  var elT=el('kpi-spark-tx');if(elT)elT.innerHTML=makeSpark(vT,'#a78bfa');
-  var elC=el('kpi-spark-cred');if(elC)elC.innerHTML=makeSpark(vV,'#e6b800');
-  var elTk=el('kpi-spark-ticket');if(elTk)elTk.innerHTML=makeSpark(vTk,'#fbbf24');
+  // Cada sparkline usa el mismo acento que su KPI card (ver #dashboard-screen
+  // en el <style>: Ventas=--ac, Transacciones=--cy, Créditos=--am, Ticket=--gn).
+  var elV=el('kpi-spark-ventas');if(elV)elV.innerHTML=makeSpark(vV,'var(--ac)');
+  var elT=el('kpi-spark-tx');if(elT)elT.innerHTML=makeSpark(vT,'var(--cy)');
+  var elC=el('kpi-spark-cred');if(elC)elC.innerHTML=makeSpark(vV,'var(--am)');
+  var elTk=el('kpi-spark-ticket');if(elTk)elTk.innerHTML=makeSpark(vTk,'var(--gn)');
 }
 function _renderDbStock(){
   var stkEl=el('db-stock');if(!stkEl)return;
