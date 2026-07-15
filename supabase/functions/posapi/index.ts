@@ -263,27 +263,65 @@ serve(async (req) => {
 
     const incoming = (body.data as Record<string, unknown>) || {};
     const device_id = (body.device_id as string) || "";
+    const knownResetAt = (body.known_reset_at as string) || null;
 
-    // Merge sales + returns append-only: nunca descartar registros de otra PC
-    let mergedSales = (incoming.sales as unknown[]) || [];
-    let mergedReturns = (incoming.returns as unknown[]) || [];
+    // pos_data.data es TEXT en producción (ver 003_reset_data.sql) — select()
+    // devuelve el valor crudo tal cual está en la columna, que es un STRING
+    // con JSON adentro, no un objeto. Sin este parseo, "ex" es un string y
+    // ex.sales/ex._resetAt son siempre undefined: el merge de abajo quedaba
+    // como no-op silencioso (nunca protegía nada) y jamás se detectaba un
+    // reset previo. Mismo patrón que ya usa la acción "load" más abajo.
     const { data: existing } = await supabase
       .from("pos_data").select("data").eq("license_key", license_key).single();
-    if (existing?.data) {
-      const ex = existing.data as Record<string, unknown>;
-      const exSales = (ex.sales as unknown[]) || [];
-      const inSaleIds = new Set(mergedSales.map((s) => String((s as Record<string, unknown>).id)));
-      for (const s of exSales) {
-        if (!inSaleIds.has(String((s as Record<string, unknown>).id))) mergedSales.push(s);
-      }
-      const exRets = (ex.returns as unknown[]) || [];
-      const inRetIds = new Set(mergedReturns.map((r) => String((r as Record<string, unknown>).id)));
-      for (const r of exRets) {
-        if (!inRetIds.has(String((r as Record<string, unknown>).id))) mergedReturns.push(r);
-      }
+    const exRaw = existing?.data;
+    const ex: Record<string, unknown> =
+      (typeof exRaw === "string" ? JSON.parse(exRaw) : exRaw) || {};
+
+    const serverResetAt = (ex._resetAt as string) || null;
+    // "Atrasado" = el servidor ya vio un reset que este cliente no conoce.
+    const isStale = !!serverResetAt && knownResetAt !== serverResetAt;
+
+    // Merge sales + returns append-only: nunca descartar registros de otra PC
+    // (esto corre SIEMPRE, esté o no atrasado el cliente — una venta real
+    // nunca se pierde solo porque el resto del payload esté desactualizado).
+    let mergedSales = (incoming.sales as unknown[]) || [];
+    let mergedReturns = (incoming.returns as unknown[]) || [];
+    const exSales = (ex.sales as unknown[]) || [];
+    const inSaleIds = new Set(mergedSales.map((s) => String((s as Record<string, unknown>).id)));
+    for (const s of exSales) {
+      if (!inSaleIds.has(String((s as Record<string, unknown>).id))) mergedSales.push(s);
+    }
+    const exRets = (ex.returns as unknown[]) || [];
+    const inRetIds = new Set(mergedReturns.map((r) => String((r as Record<string, unknown>).id)));
+    for (const r of exRets) {
+      if (!inRetIds.has(String((r as Record<string, unknown>).id))) mergedReturns.push(r);
     }
 
-    const dataToSave = { ...incoming, sales: mergedSales, returns: mergedReturns };
+    const mergedOrderNum = Math.max(
+      Number(ex.orderNum as number) || 0,
+      Number(incoming.orderNum as number) || 0
+    ) || (incoming.orderNum as number) || 0;
+
+    const dataToSave: Record<string, unknown> = {
+      ...incoming,
+      sales: mergedSales,
+      returns: mergedReturns,
+      orderNum: mergedOrderNum,
+    };
+
+    // Campos que un reset controla: si el cliente no conoce el último reset,
+    // NO se le acepta su copia (puede ser el catálogo/clientes/créditos de
+    // ANTES del reset) — se conserva lo que ya está en Supabase para esos
+    // campos puntuales. cfg/settings/users/payMethods/employees/etc, que no
+    // son resetables, siguen viniendo del cliente sin restricción.
+    if (isStale) {
+      const RESET_FIELDS = ["products", "categories", "customers", "combos", "specials", "credits", "creditSummary"];
+      for (const f of RESET_FIELDS) {
+        if (f in ex) dataToSave[f] = ex[f];
+        else delete dataToSave[f];
+      }
+      dataToSave._resetAt = serverResetAt;
+    }
 
     // saved_by en el UPSERT (no en UPDATE separado) → evento Realtime lleva saved_by correcto
     const { error: upsertErr } = await supabase
@@ -294,7 +332,14 @@ serve(async (req) => {
       );
 
     if (upsertErr) return json({ error: upsertErr.message }, 500);
-    return json({ success: true });
+    return json({
+      success: true,
+      stale: isStale,
+      reset_at: serverResetAt,
+      // Solo viaja el estado completo cuando el cliente estaba atrasado —
+      // así puede autocorregirse sin esperar a Realtime.
+      data: isStale ? dataToSave : undefined,
+    });
   }
 
   // ── Cargar datos POS ──────────────────────────────────────────────────────
