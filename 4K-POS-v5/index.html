@@ -10,7 +10,63 @@ body.light{--bg:#f0f2f5;--s1:#ffffff;--s2:#e8eaf0;--s3:#dde0ea;--b1:rgba(0,0,0,0
 *{margin:0;padding:0;box-sizing:border-box;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 input[type=number]{-moz-appearance:textfield;}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:15px;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:row;overflow:hidden;font-size:15px;}
+/* #main-shell reproduce el layout vertical que antes hacía "body" solo
+   (topbar arriba, pantallas abajo) — ahora corre AL LADO del sidebar en
+   vez de ser body mismo, sin tocar el contenido de #topbar/#app-main/
+   #dashboard-screen/#botbar (siguen siendo los mismos elementos, con los
+   mismos ids, solo un nivel más adentro en el DOM). */
+#main-shell{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+
+/* ── SIDEBAR (shell global de navegación) ──────────────────────────── */
+#sidebar{
+  --bg:#0a0e1a; --s1:#111729; --s2:#1a2036; --s3:#232a45;
+  --tx3:#a6acc9;
+  --cy:#22d3ee; --cyb:rgba(34,211,238,.14);
+  --r-card:14px; --r-pill:999px;
+  --sh-1:0 1px 2px rgba(0,0,0,.35);
+  --glow-ac:0 0 0 1px rgba(59,130,246,.18),0 8px 20px -8px rgba(59,130,246,.35);
+  --sp-2:8px; --sp-3:12px; --sp-4:16px;
+  --fs-2xs:.68rem; --fs-xs:.74rem; --fs-sm:.82rem;
+  --fw-bold:700; --fw-black:800; --ls-label:.06em;
+  display:none;flex-direction:column;width:212px;min-width:212px;background:var(--s1);border-right:1px solid var(--b1);flex-shrink:0;transition:width .18s,min-width .18s;position:relative;overflow:hidden;}
+body.light #sidebar{
+  --bg:#eef1f8; --s1:#ffffff; --s2:#e7ebf5; --s3:#dbe0f0;
+  --tx3:#565f8c;
+  --cy:#0e7490; --cyb:rgba(14,116,144,.10);
+  --sh-1:0 1px 2px rgba(20,25,60,.08);
+  --glow-ac:0 0 0 1px rgba(30,58,138,.14),0 8px 20px -8px rgba(30,58,138,.20);
+}
+body.sb-collapsed #sidebar{width:60px;min-width:60px;}
+#sidebar .sb-brand{display:flex;align-items:center;gap:8px;padding:14px 14px 10px;flex-shrink:0;}
+#sidebar .sb-brand-txt{font-weight:800;font-size:.98rem;white-space:nowrap;overflow:hidden;}
+#sb-toggle-btn{position:absolute;top:14px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--s2);border:1px solid var(--b1);color:var(--tx3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;z-index:2;}
+#sb-toggle-btn:hover{border-color:var(--ac);color:var(--ac);}
+body.sb-collapsed #sb-toggle-btn{right:auto;left:50%;top:52px;transform:translateX(-50%);}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 10px;display:flex;flex-direction:column;gap:2px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border:none;border-radius:var(--rs);background:transparent;color:var(--tx2);cursor:pointer;font-size:var(--fs-sm);font-weight:600;text-align:left;width:100%;transition:background .15s,color .15s;}
+.sb-item:hover{background:var(--s2);color:var(--tx);}
+.sb-item.active{background:var(--acg);color:var(--ac);font-weight:var(--fw-bold);}
+.sb-ico{font-size:1.05rem;line-height:1;flex-shrink:0;width:20px;text-align:center;}
+.sb-lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+body.sb-collapsed .sb-lbl,body.sb-collapsed .sb-subrow,body.sb-collapsed .sb-brand-txt,body.sb-collapsed .sb-footer{display:none;}
+body.sb-collapsed .sb-item{justify-content:center;padding:9px 4px;}
+body.sb-collapsed .sb-ico{width:auto;}
+.sb-subrow{display:flex;flex-direction:column;padding:0 10px 4px 38px;gap:1px;}
+.sb-sublink{background:none;border:none;color:var(--tx3);font-size:var(--fs-2xs);font-weight:600;text-align:left;cursor:pointer;padding:3px 0;}
+.sb-sublink:hover{color:var(--ac);}
+.sb-footer{padding:10px;border-top:1px solid var(--b1);display:flex;flex-direction:column;gap:8px;flex-shrink:0;}
+.sb-caja-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r-card);padding:10px;}
+.sb-caja-lbl{font-size:var(--fs-2xs);color:var(--tx3);text-transform:uppercase;letter-spacing:var(--ls-label);font-weight:var(--fw-bold);margin-bottom:3px;}
+.sb-caja-amt{font-family:'Consolas','Courier New',monospace;font-size:1.05rem;font-weight:var(--fw-black);color:var(--gn);}
+.sb-caja-time{font-size:var(--fs-2xs);color:var(--tx3);margin-top:2px;}
+.sb-status{display:flex;align-items:center;gap:6px;font-size:var(--fs-xs);color:var(--tx3);font-weight:600;padding:0 2px;}
+.sb-status-dot{width:7px;height:7px;border-radius:50%;background:var(--gn);flex-shrink:0;}
+.sb-status-dot.off{background:var(--rd);}
+.sb-status-dot.synced{background:var(--ac);box-shadow:0 0 0 3px var(--acg);}
+.sb-credits-card{display:flex;align-items:center;justify-content:space-between;background:var(--amb);border:1px solid var(--am);border-radius:var(--r-card);padding:9px 10px;cursor:pointer;font-size:var(--fs-xs);font-weight:700;color:var(--am);width:100%;}
+.sb-credits-card:hover{box-shadow:var(--glow-ac);}
+.sb-credits-amt{font-family:'Consolas','Courier New',monospace;}
 ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:var(--s2);}::-webkit-scrollbar-thumb{background:var(--ac);border-radius:3px;}
 #lang-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:none;align-items:center;justify-content:center;}
 .lsbox{background:var(--s1);border:1.5px solid var(--b2);border-radius:16px;padding:36px 40px;width:360px;text-align:center;}
@@ -245,7 +301,7 @@ body.light .chgbox{color:#15803d!important;border-color:#15803d!important;backgr
 .usr-lbl{font-size:.72rem;color:#fff!important;}
 .hamburger-btn{background:var(--s2);border:1.5px solid var(--b1);color:var(--tx2);padding:8px 13px;border-radius:var(--rs);cursor:pointer;font-size:1.1rem;transition:all .2s;}
 .hamburger-btn:hover{border-color:var(--ac);color:var(--ac);}
-#ham-menu{position:absolute;top:44px;right:0;z-index:2000;background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);padding:5px;min-width:228px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 28px rgba(0,0,0,.5);display:none;}
+.dropdown-menu{position:absolute;top:44px;right:0;z-index:2000;background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);padding:5px;min-width:228px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 28px rgba(0,0,0,.5);display:none;}
 .ham-item{width:100%;display:flex;align-items:center;gap:9px;padding:8px 12px;border:none;background:transparent;color:var(--tx);cursor:pointer;border-radius:var(--rs);font-size:.84rem;font-weight:600;text-align:left;transition:background .12s;}
 .ham-item:hover{background:var(--s2);}
 .ham-sep{height:1px;background:var(--b1);margin:3px 0;}
@@ -529,13 +585,49 @@ body.light #dashboard-screen{
 </div>
 
 <!-- SIDEBAR -->
+<div id="sidebar" style="display:none">
+  <div class="sb-brand">
+    <img id="sb-logo-img" src="assets/icon-512.png" width="30" height="30" style="border-radius:7px;object-fit:contain;flex-shrink:0">
+    <div class="sb-brand-txt"><span class="c1">4K</span> <span class="c2">P</span><span class="c3">O</span><span class="c4">S</span></div>
+  </div>
+  <button id="sb-toggle-btn" onclick="toggleSidebar()" title="Plegar/expandir">‹</button>
+  <nav class="sb-nav">
+    <button class="sb-item" id="sbi-dash" onclick="sbNav('dash')"><span class="sb-ico">📊</span><span class="sb-lbl" id="sbi-dash-lbl">Dashboard</span></button>
+    <div class="sb-item-group">
+      <button class="sb-item" id="sbi-pos" onclick="sbNav('pos')"><span class="sb-ico">🛒</span><span class="sb-lbl" id="sbi-pos-lbl">Ventas</span></button>
+      <div class="sb-subrow">
+        <button class="sb-sublink" onclick="reqPin('sales')" id="sbi-ventasdia-lbl">Ventas del día</button>
+        <button class="sb-sublink" onclick="reqPin('returns')" id="sbi-devol-lbl">Devoluciones</button>
+      </div>
+    </div>
+    <button class="sb-item" id="sbi-prods" onclick="sbNav('prods')"><span class="sb-ico">📦</span><span class="sb-lbl" id="sbi-prods-lbl">Productos</span></button>
+    <button class="sb-item" id="sbi-cust" onclick="sbNav('cust')"><span class="sb-ico">👥</span><span class="sb-lbl" id="sbi-cust-lbl">Clientes</span></button>
+    <button class="sb-item" id="sbi-inv" onclick="sbNav('inv')"><span class="sb-ico">📋</span><span class="sb-lbl" id="sbi-inv-lbl">Inventario</span></button>
+    <button class="sb-item" id="sbi-compras" onclick="sbNav('compras')"><span class="sb-ico">🧾</span><span class="sb-lbl" id="sbi-compras-lbl">Compras</span></button>
+    <button class="sb-item" id="sbi-gastos" onclick="sbNav('gastos')"><span class="sb-ico">💸</span><span class="sb-lbl" id="sbi-gastos-lbl">Gastos</span></button>
+    <button class="sb-item" id="sbi-reportes" onclick="sbNav('reportes')"><span class="sb-ico">📈</span><span class="sb-lbl" id="sbi-reportes-lbl">Reportes</span></button>
+    <button class="sb-item" id="sbi-cfg" onclick="sbNav('cfg')"><span class="sb-ico">⚙️</span><span class="sb-lbl" id="sbi-cfg-lbl">Configuración</span></button>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-caja-card">
+      <div class="sb-caja-lbl" id="sb-caja-lbl">Caja actual</div>
+      <div class="sb-caja-amt" id="sb-caja-amt">$0.00</div>
+      <div class="sb-caja-time" id="sb-caja-time">—</div>
+    </div>
+    <div class="sb-status" id="sb-status"><span class="sb-status-dot" id="sb-status-dot"></span><span id="sb-status-txt">En línea</span></div>
+    <button class="sb-credits-card" id="sb-credits-card" onclick="openCreditsPanel()">
+      <span id="sb-credits-lbl">Créditos</span>
+      <span class="sb-credits-amt" id="sb-credits-amt">$0.00</span>
+    </button>
+  </div>
+</div>
+<div id="main-shell">
 <!-- TOPBAR -->
 <div id="topbar" style="display:none">
   <div class="logo">
     <img src="assets/icon-512.png" width="34" height="34" style="border-radius:8px;object-fit:contain">
     <div class="logo-txt"><span class="c1">4K</span> <span class="c2">P</span><span class="c3">O</span><span class="c4">S</span><div style="font-size:10px;font-weight:600;letter-spacing:.5px;line-height:1;margin-top:2px"><span style="color:#1e3a8a">4K</span> <span style="color:#e6b800">Solutions</span></div></div>
   </div>
-  <div id="tb-user" style="font-size:.82rem;font-weight:700;color:#fff;padding:0 4px;white-space:nowrap;display:none"></div>
   <div class="top-mid">
     <div class="clk" id="clk-date">Lun 01</div>
     <div class="clk" id="clk">00:00:00</div>
@@ -543,53 +635,27 @@ body.light #dashboard-screen{
 
     <button id="refresh-btn" onclick="refreshPOS()" title="Actualizar datos">🔄</button>
   </div>
-  <div style="display:flex;gap:5px">
-    <div style="position:relative">
-    </div>
-  
-
-    
-     <button class="tbtn" id="oa-counter-btn" onclick="openOAManager()" title="Cuentas abiertas" style="position:relative;display:none;background:var(--ac);border-color:var(--ac);color:#fff;font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;padding:8px 14px;gap:4px;width:auto;height:auto;min-width:80px"><span id="oa-counter-txt">Cuentas</span><span id="oa-badge" style="display:none;position:absolute;top:-7px;right:-7px;background:#f44;color:#fff;border-radius:50%;font-size:.6rem;font-weight:800;min-width:18px;height:18px;align-items:center;justify-content:center;padding:0 3px;line-height:1;box-shadow:0 0 0 2px var(--bg)">0</span></button>
-    <button id="calc-btn" onclick="toggleCalc()" title="Calculadora">🧮</button>
+  <div style="display:flex;gap:5px;align-items:center">
+    <button class="tbtn" id="oa-counter-btn" onclick="openOAManager()" title="Cuentas abiertas" style="position:relative;display:none;background:var(--ac);border-color:var(--ac);color:#fff;font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;padding:8px 14px;gap:4px;width:auto;height:auto;min-width:80px"><span id="oa-counter-txt">Cuentas</span><span id="oa-badge" style="display:none;position:absolute;top:-7px;right:-7px;background:#f44;color:#fff;border-radius:50%;font-size:.6rem;font-weight:800;min-width:18px;height:18px;align-items:center;justify-content:center;padding:0 3px;line-height:1;box-shadow:0 0 0 2px var(--bg)">0</span></button>
+    <button class="tbtn" id="calc-btn" onclick="toggleCalc()" title="Calculadora">🧮</button>
+    <!-- Notificaciones: ícono propio en el topbar (antes vivía adentro del hamburgueso) -->
+    <button class="tbtn" id="notif-btn" onclick="toggleNotifPanel()" title="Notificaciones" style="position:relative">🔔<span id="notif-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border-radius:50%;font-size:.62rem;font-weight:800;min-width:16px;height:16px;align-items:center;justify-content:center;padding:0 3px;line-height:1;box-shadow:0 0 0 2px var(--bg)">0</span></button>
+    <!-- Menú de usuario: reemplaza al hamburgueso para las acciones de sesión/config
+         que no son navegación principal (esa vive en el sidebar). -->
     <div style="position:relative;flex-shrink:0">
-      <button class="hamburger-btn" id="ham-btn" onclick="toggleHamMenu(event)" title="Menú">☰</button>
-      <span id="ham-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border-radius:50%;font-size:.62rem;font-weight:800;min-width:16px;height:16px;align-items:center;justify-content:center;padding:0 3px;line-height:1;box-shadow:0 0 0 2px var(--bg);pointer-events:none">0</span>
-      <div id="ham-menu">
-        <div class="ham-sec" id="ham-sec-main">PRINCIPAL</div>
-        <button class="ham-item" onclick="closeHamMenu();sbNav('dash')">📊 <span id="ham-dash-txt">Dashboard</span></button>
-        <button class="ham-item" onclick="closeHamMenu();_hamOpenDashMobile()">📱 <span id="ham-dashmobile-txt">Dashboard Móvil</span></button>
-        <button class="ham-item" id="notif-btn" onclick="closeHamMenu();toggleNotifPanel()" title="Notificaciones">🔔 <span style="flex:1" id="ham-notif-txt">Notificaciones</span><span id="notif-badge">0</span></button>
-        <button class="ham-item" id="note-btn" onclick="closeHamMenu();openWriteNote()" title="Nota para el próximo turno">📬 <span style="flex:1" id="ham-note-txt">Nota para el próximo turno</span><span id="note-badge">1</span></button>
+      <button id="tb-user" onclick="toggleUserMenu(event)" style="display:none;background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:var(--rs);font-size:.82rem;font-weight:700;color:#fff;white-space:nowrap"></button>
+      <div id="user-menu" class="dropdown-menu" style="right:0">
+        <button class="ham-item" onclick="closeUserMenu();_hamOpenDashMobile()">📱 <span id="um-dashmobile-txt">Dashboard Móvil</span></button>
+        <button class="ham-item" id="note-btn" onclick="closeUserMenu();openWriteNote()" title="Nota para el próximo turno">📬 <span style="flex:1" id="um-note-txt">Nota para el próximo turno</span><span id="note-badge">1</span></button>
         <div class="ham-sep"></div>
-        <button class="ham-acc-hdr" onclick="toggleHamSection('ham-s-ventinv')"><span id="ham-cat-ventinv-txt">💰 Ventas e Inventario</span><span class="ham-acc-arr">›</span></button>
-        <div id="ham-s-ventinv" class="ham-acc-body">
-          <button class="ham-item ham-sub" onclick="closeHamMenu();reqPin('sales')">💰 <span id="ham-ventasdia-txt">Ventas del día</span></button>
-          <button class="ham-item ham-sub" onclick="closeHamMenu();reqPin('returns')">↩️ <span id="ham-devol-txt">Devoluciones</span></button>
-          <button class="ham-item ham-sub" onclick="closeHamMenu();openCreditsPanel()">💳 <span id="ham-creditos-txt">Créditos</span></button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-prods')">📦 <span id="ham-prods-txt">Productos</span></button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-cats')">🗂️ <span id="ham-cats-txt">Categorías</span></button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-inv')">📋 <span id="ham-inv-txt">Inventario</span></button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-labels')">🏷️ <span id="ham-labels-txt">Etiquetas</span></button>
-        </div>
-        <button class="ham-acc-hdr" onclick="toggleHamSection('ham-s-admcfg')"><span id="ham-cat-admcfg-txt">👥 Administración y Configuración</span><span class="ham-acc-arr">›</span></button>
-        <div id="ham-s-admcfg" class="ham-acc-body">
-          <button class="ham-item ham-sub" onclick="_openDirect('t-users')">👥 <span id="ham-users-txt">Usuarios</span></button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-nomina')">👷 <span id="ham-nomina-txt">Nómina</span></button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-audit')">📋 <span id="ham-audit-txt">Auditoría</span></button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-shiftnote')">📝 <span id="ham-shiftnote-txt">Nota de turno</span></button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-updates')">🔄 <span id="ham-updates-txt">Actualizaciones</span></button>
-          <button class="ham-item ham-sub" onclick="_openDirect('t-cfg')">⚙️ <span id="ham-cfgajustes-txt">Config / Ajustes</span></button>
-          <button class="ham-item ham-sub" id="lang-toggle-btn" onclick="closeHamMenu();switchLang()" title="Cambiar idioma / Switch language">🌐 <span id="ham-idioma-txt">Idioma</span></button>
-          <button class="ham-item ham-sub" id="tbtn-theme" onclick="closeHamMenu();toggleTheme()"><span id="tbtn-theme-icon">🌙</span> <span id="ham-tema-txt">Tema</span></button>
-          <button class="ham-item ham-sub" onclick="_openContaDirect()">📒 <span id="ham-conta-txt">Contabilidad</span></button>
-          <button class="ham-item ham-sub" onclick="closeHamMenu();openDrawer()">🗃️ <span id="ham-drawer-txt">Registradora</span></button>
-        </div>
+        <button class="ham-item" id="lang-toggle-btn" onclick="closeUserMenu();switchLang()" title="Cambiar idioma / Switch language">🌐 <span id="um-idioma-txt">Idioma</span></button>
+        <button class="ham-item" id="tbtn-theme" onclick="closeUserMenu();toggleTheme()"><span id="tbtn-theme-icon">🌙</span> <span id="um-tema-txt">Tema</span></button>
+        <button class="ham-item" onclick="closeUserMenu();openDrawer()">🗃️ <span id="um-drawer-txt">Registradora</span></button>
+        <button class="ham-item" id="um-clock-item" style="display:none;color:#10b981" onclick="closeUserMenu();openClockQuick()">⏱ <span id="um-clock-txt">Clock In/Out</span></button>
         <div class="ham-sep"></div>
-        <div class="ham-sec" id="ham-sec-acciones">ACCIONES</div>
-        <button class="ham-item" id="ham-clock-item" style="display:none;color:#10b981" onclick="closeHamMenu();openClockQuick()">⏱ <span id="ham-clock-txt">Clock In/Out</span></button>
-        <button class="ham-item" onclick="closeHamMenu();openLogout()" style="color:var(--rd)">🚪 <span id="ham-logout-txt">Cerrar turno</span></button>
-        <div class="ham-sep" style="margin-top:6px"></div>
-        <button class="ham-item" id="ham-upd-btn" onclick="checkUpdates()" style="color:var(--ac)">🔄 <span id="ham-upd-txt">Buscar actualizaciones</span></button>
+        <button class="ham-item" onclick="closeUserMenu();openLogout()" style="color:var(--rd)">🚪 <span id="um-logout-txt">Cerrar turno</span></button>
+        <div class="ham-sep" style="margin-top:2px"></div>
+        <button class="ham-item" id="um-upd-btn" onclick="checkUpdates()" style="color:var(--ac)">🔄 <span id="um-upd-txt">Buscar actualizaciones</span></button>
         <div id="hm-ver" style="font-size:.7rem;color:var(--tx3);padding:2px 12px 6px;letter-spacing:.3px;text-align:center"></div>
       </div>
     </div>
@@ -760,6 +826,8 @@ body.light #dashboard-screen{
 <div id="botbar" style="display:none">
   <span id="usr-lbl" style="display:none">—</span>
 </div>
+</div>
+<!-- fin #main-shell -->
 
 <!-- LICENSE ERROR -->
 <div class="ov" id="ov-lic-error" style="z-index:9999">
@@ -2073,7 +2141,7 @@ var _manualUpdateCheck = false;
 var _updateBannerDismissed = false;
 try {
   ipcRenderer.on('update-status', function(e, status) {
-    var _hb=el('ham-upd-btn');
+    var _hb=el('um-upd-btn');
     function _hbReset(txt){if(_hb){_hb.textContent=txt||'🔄 Buscar actualizaciones';_hb.disabled=false;}}
     if (status === 'ready') {
       toast(t('updateReady'));
@@ -2106,7 +2174,7 @@ try {
 } catch(e) {}
 function checkUpdates() {
   _manualUpdateCheck = true;
-  var _hb=el('ham-upd-btn');
+  var _hb=el('um-upd-btn');
   if(_hb){_hb.textContent='🔄 Buscando...';_hb.disabled=true;}
   toast(t('updateChecking'));
   try { ipcRenderer.send('check-updates'); } catch(e) {}
@@ -2380,6 +2448,8 @@ const T = {
     sbDashMobile:'Dashboard Móvil',sbSell:'Vender',sbLabels:'Etiquetas',
     sbNote:'Nota de turno',sbUpdates:'Actualizaciones',sbConfig:'Configuración',
     sbLock:'Bloquear',roleAdmin:'Administrador',roleCashierShort:'Cajero',
+    sbReportes:'Reportes',sbCajaActual:'Caja actual',sbShiftOpenedAt:'Turno desde',
+    sbNoShiftOpen:'Sin turno abierto',sbOffline:'Sin conexión',sbSynced:'Sincronizado',sbOnline:'En línea',
     // Dashboard KPIs
     kpiVentasHoy:'Ventas hoy',kpiTx:'Transacciones',kpiTicket:'Ticket promedio',
     kpiGanancia:'Ganancia hoy',kpiGananciaAprox:'aprox.',
@@ -2908,6 +2978,8 @@ const T = {
     sbDashMobile:'Mobile Dashboard',sbSell:'Sell',sbLabels:'Labels',
     sbNote:'Shift note',sbUpdates:'Updates',sbConfig:'Settings',
     sbLock:'Lock',roleAdmin:'Admin',roleCashierShort:'Cashier',
+    sbReportes:'Reports',sbCajaActual:'Current till',sbShiftOpenedAt:'Shift since',
+    sbNoShiftOpen:'No shift open',sbOffline:'Offline',sbSynced:'Synced',sbOnline:'Online',
     // Dashboard KPIs
     kpiVentasHoy:'Today sales',kpiTx:'Transactions',kpiTicket:'Avg. ticket',
     kpiGanancia:'Profit today',kpiGananciaAprox:'approx.',
@@ -3504,6 +3576,20 @@ function applyLang(){
   const _hamClockTxt=el('ham-clock-txt');if(_hamClockTxt)_hamClockTxt.textContent=t('hmClockTxt');
   const _hamLogoutTxt=el('ham-logout-txt');if(_hamLogoutTxt)_hamLogoutTxt.textContent=t('logoutTitle');
   const _hamUpdTxt=el('ham-upd-txt');if(_hamUpdTxt)_hamUpdTxt.textContent=t('checkUpdates');
+  // Sidebar (shell global)
+  var _sbLbl=function(id,key){var e=el(id);if(e)e.textContent=t(key);};
+  _sbLbl('sbi-dash-lbl','hmDashboard');_sbLbl('sbi-pos-lbl','sbSell');
+  _sbLbl('sbi-prods-lbl','tabProds');_sbLbl('sbi-cust-lbl','tabCust');_sbLbl('sbi-inv-lbl','tabInv');
+  _sbLbl('sbi-compras-lbl','tabPurchases');_sbLbl('sbi-gastos-lbl','tabExpenses');
+  _sbLbl('sbi-reportes-lbl','sbReportes');_sbLbl('sbi-cfg-lbl','sbConfig');
+  _sbLbl('sbi-ventasdia-lbl','sal');_sbLbl('sbi-devol-lbl','returns');
+  _sbLbl('sb-caja-lbl','sbCajaActual');_sbLbl('sb-credits-lbl','tabCredits');
+  // Menú de usuario del topbar (reemplaza al hamburgueso para acciones sueltas)
+  _sbLbl('um-dashmobile-txt','hmDashMobile');_sbLbl('um-note-txt','writeNoteMenu');
+  _sbLbl('um-idioma-txt','hmIdioma');_sbLbl('um-tema-txt','hmTema');_sbLbl('um-drawer-txt','hmDrawer');
+  _sbLbl('um-clock-txt','hmClockTxt');_sbLbl('um-logout-txt','logoutTitle');_sbLbl('um-upd-txt','checkUpdates');
+  if(typeof _sbUpdateCaja==='function')_sbUpdateCaja();
+  if(typeof _sbUpdateStatus==='function')_sbUpdateStatus();
   const _tabSpecials=el('tab-specials-txt');if(_tabSpecials)_tabSpecials.textContent=t('tabSpecials');
   // Product form labels
   const _lblPN=el('lbl-p-name');if(_lblPN)_lblPN.textContent=t('fldName');
@@ -3980,6 +4066,7 @@ setInterval(updateClock,1000); updateClock();
 function setConnDot(ok){
   const ico=el('wifi-icon');if(ico)ico.setAttribute('stroke',ok?'#22c55e':'#ef4444');
   const d=el('wifi-dot');if(d)d.title=ok?t('connectedTitle'):t('noConnectionTitle');
+  if(typeof _sbUpdateStatus==='function')_sbUpdateStatus(ok);
 }
 function checkConn(){setConnDot(navigator.onLine);}
 window.addEventListener('online',()=>{setConnDot(true);updateLicBadge();});
@@ -4331,11 +4418,14 @@ function _startRealtimeSync(){
     )
     .subscribe(function(status){
       _ls('subscribe status='+status);
+      _realtimeStatus=status;
+      if(typeof _sbUpdateStatus==='function')_sbUpdateStatus();
       if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
         setTimeout(function(){_startRealtimeSync();},5000);
       }
     });
 }
+var _realtimeStatus=null;
 function _checkPendingMerge(){
   if(!_pendingMerge)return;
   var m=_pendingMerge;_pendingMerge=null;
@@ -6133,7 +6223,7 @@ function updateClockQuickBtn(){
   const hmClock=el('hm-clock');if(hmClock)hmClock.style.display=show;
   const sbiClock=el('sbi-clock');if(sbiClock)sbiClock.style.display=show;
   const cb=el('uni-clock-btn');if(cb)cb.style.display=(enabled&&hasClock)?'':'none';
-  const hamClock=el('ham-clock-item');if(hamClock)hamClock.style.display=(enabled&&hasClock)?'':'none';
+  const umClock=el('um-clock-item');if(umClock)umClock.style.display=(enabled&&hasClock)?'':'none';
 }
 function toggleHamMenu(e){
   if(e)e.stopPropagation();
@@ -6146,6 +6236,16 @@ function toggleHamMenu(e){
   m.style.display=visible?'none':'block';
 }
 function closeHamMenu(){var m=el('ham-menu');if(m)m.style.display='none';}
+// Menú de usuario del topbar — reemplaza al hamburgueso para las acciones
+// de sesión/config que no son navegación principal (mismo patrón que
+// toggleHamMenu/closeHamMenu, target distinto).
+function toggleUserMenu(e){
+  if(e)e.stopPropagation();
+  var m=el('user-menu');if(!m)return;
+  m.style.display=m.style.display==='block'?'none':'block';
+}
+function closeUserMenu(){var m=el('user-menu');if(m)m.style.display='none';}
+if(!window._userMenuClickOut){window._userMenuClickOut=true;document.addEventListener('click',function(ev){var m=el('user-menu');if(m&&m.style.display==='block'){var tb=el('tb-user');if(!m.contains(ev.target)&&(!tb||!tb.contains(ev.target)))m.style.display='none';}});}
 function toggleHamSection(id){
   var body=el(id);if(!body)return;
   var hdr=body.previousElementSibling;
@@ -7583,7 +7683,7 @@ function renderUserList(){
 
 // CONFIG
 function changeCode(){const old=el('cc-old').value,nw=el('cc-new').value;if(old!==db.adminCode){toast(t('codeBadOld'));return;}if(nw.length<4){toast('⚠ '+t('min4chars'));return;}db.adminCode=nw;saveDB();el('cc-old').value='';el('cc-new').value='';toast(t('codeUpdated'));}
-function saveFund(){db.fundAmount=getNum('cfg-fund');saveDB();toast(t('toastFundSaved')+dolr(db.fundAmount));}
+function saveFund(){db.fundAmount=getNum('cfg-fund');saveDB();toast(t('toastFundSaved')+dolr(db.fundAmount));if(typeof _sbUpdateCaja==='function')_sbUpdateCaja();}
 function setTimeFormat(fmt){
   if(!db.cfg)db.cfg={};
   db.cfg.timeFormat=fmt;
@@ -9539,10 +9639,10 @@ async function downloadLabelsPDF(){
 
 // ── SIDEBAR ──────────────────────────────────────────────────────────────────
 function _sbSetToggle(collapsed){
+  // El posicionamiento (colapsado vs expandido) lo maneja el CSS vía
+  // body.sb-collapsed — acá solo cambia la flecha.
   var btn=el('sb-toggle-btn');if(!btn)return;
-  btn.style.display='flex';
   btn.textContent=collapsed?'›':'‹';
-  btn.style.left=collapsed?'56px':'200px';
 }
 function initSidebar(){
   var sb=el('sidebar');if(!sb)return;
@@ -9556,6 +9656,9 @@ function initSidebar(){
   _sbSetToggle(coll);
   _sbUpdateUser();
   _sbUpdatePerms();
+  _sbUpdateCaja();
+  _sbUpdateStatus();
+  _sbUpdateCredits();
 }
 function toggleSidebar(){
   var sb=el('sidebar');if(!sb)return;
@@ -9574,22 +9677,61 @@ function _sbUpdateUser(){
   if(nameEl)nameEl.textContent=curUser?curUser.name:'—';
   if(roleEl)roleEl.textContent=curUser?(curUser.role==='admin'?t('roleAdmin'):t('roleCashierShort')):'';
 }
+// "Caja actual" — mismos campos que ya usa el turno (db.cfg.fundAmount al
+// abrir turno se guarda como fondo, db.cfg.shiftOpenAt la hora). Dato real,
+// no inventado.
+function _sbUpdateCaja(){
+  var amtEl=el('sb-caja-amt'),timeEl=el('sb-caja-time');
+  if(amtEl)amtEl.textContent=dolr(db.fundAmount||0);
+  if(timeEl){
+    if(db.cfg&&db.cfg.shiftOpen&&db.cfg.shiftOpenAt){
+      timeEl.textContent=t('sbShiftOpenedAt')+' '+new Date(db.cfg.shiftOpenAt).toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'});
+    }else{
+      timeEl.textContent=t('sbNoShiftOpen');
+    }
+  }
+}
+// Estado del sistema: un solo indicador con 3 estados reales — Sincronizado
+// (canal Realtime suscripto), En línea (hay internet pero el canal no está
+// activo/no hay licencia), o Sin conexión (navigator.onLine=false). No hay
+// un booleano "synced" separado inventado — se deriva de _realtimeStatus,
+// que ya setea _startRealtimeSync() en su callback .subscribe().
+function _sbUpdateStatus(onlineOverride){
+  var dot=el('sb-status-dot'),txt=el('sb-status-txt');if(!dot||!txt)return;
+  var online=onlineOverride!==undefined?onlineOverride:navigator.onLine;
+  dot.classList.remove('off','synced');
+  if(!online){dot.classList.add('off');txt.textContent=t('sbOffline');}
+  else if(_realtimeStatus==='SUBSCRIBED'){dot.classList.add('synced');txt.textContent=t('sbSynced');}
+  else{txt.textContent=t('sbOnline');}
+}
+// Bloque de créditos: misma fuente que ya usa el panel de créditos real
+// (_getPendingCredits), no un cálculo aparte.
+function _sbUpdateCredits(){
+  var amtEl=el('sb-credits-amt');if(!amtEl)return;
+  var list=(typeof _getPendingCredits==='function')?_getPendingCredits():[];
+  var total=list.reduce(function(s,c){return s+((c.total||0)-(c.paid||0));},0);
+  amtEl.textContent=dolr(total);
+}
+// Retargeteado a los 9 ítems reales del sidebar (el original apuntaba a una
+// lista distinta — combos/specials/sales/returns/audit/conta como ítems
+// propios — que nunca llegó a tener HTML). Mismo criterio de permisos que
+// ya usaba: pm.adm para catálogo, pm.conta para el área contable, admin-only
+// para Config.
 function _sbUpdatePerms(){
   if(!curUser)return;
   var isAdm=curUser.role==='admin';
   var pm=curUser.perms||{adm:true,ret:true,can:true,sal:true,conta:true};
   var show=function(id,v){var e=el(id);if(e)e.style.display=v?'flex':'none';};
-  show('sbi-audit',isAdm);
   show('sbi-prods',(isAdm||pm.adm));
+  show('sbi-cust',(isAdm||pm.adm));
   show('sbi-inv',(isAdm||pm.adm));
-  show('sbi-combos',(isAdm||pm.adm));
-  show('sbi-specials',(isAdm||pm.adm));
-  show('sbi-sales',(isAdm||pm.sal));
-  show('sbi-returns',(isAdm||pm.ret));
-  show('sbi-credits',(isAdm||pm.adm||pm.sal));
   show('sbi-compras',(isAdm||pm.conta));
-  show('sbi-conta',(isAdm||pm.conta));
+  show('sbi-gastos',(isAdm||pm.conta));
+  show('sbi-reportes',(isAdm||pm.conta));
   show('sbi-cfg',isAdm);
+  var showBtn=function(id,v){var e=el(id);if(e)e.style.display=v?'':'none';};
+  showBtn('sbi-ventasdia-lbl',(isAdm||pm.sal));
+  showBtn('sbi-devol-lbl',(isAdm||pm.ret));
 }
 function sbNav(screen){
   document.querySelectorAll('.sb-item').forEach(function(i){i.classList.remove('active');});
@@ -9614,6 +9756,9 @@ function sbNav(screen){
   else if(screen==='conta'){reqPin('conta');}
   else if(screen==='compras'){_sbNextContaTab='ct-comp';reqPin('conta');}
   else if(screen==='audit'){openAudit();}
+  else if(screen==='cust'){_sbNextAdmTab='t-cust';reqPin('admin');}
+  else if(screen==='gastos'){_sbNextContaTab='ct-gst';reqPin('conta');}
+  else if(screen==='reportes'){_sbNextContaTab='ct-res';reqPin('conta');}
 }
 
 // ── DASHBOARD ────────────────────────────────────────────────────────────────
@@ -9662,6 +9807,8 @@ function refreshDashboard(){
   _renderDbCredits();
   _renderDbInvSummary();
   _renderDbSparklines();
+  if(typeof _sbUpdateCredits==='function')_sbUpdateCredits();
+  if(typeof _sbUpdateCaja==='function')_sbUpdateCaja();
 }
 // Suma de unidades vendidas (item.qty) en un conjunto de ventas ya filtrado
 // por estado válido (no cancelada/no devuelta) — usado para "Productos
