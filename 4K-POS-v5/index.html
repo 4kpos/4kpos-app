@@ -61,7 +61,39 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .tbtn:hover{border-color:var(--ac);color:var(--ac);}
 #tb-user,#tb-user *{color:#fff!important;}
 .pbadge-dot{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--rd);color:#fff;border-radius:50%;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;}
-.app{display:flex;flex:1;overflow:hidden;}
+/* ── VENTAS / POS ──────────────────────────────────────────── */
+/* Mismo criterio que #dashboard-screen: tokens con scope SOLO a esta
+   pantalla, --ac/--gn/--am/--rd sin tocar (siguen siendo el azul de marca/
+   verde/ámbar/rojo de siempre). Lo nuevo: --cy, navy, --tx3 con contraste,
+   radio/sombra/glow/espaciado. */
+#app-main{
+  --bg:#0a0e1a; --s1:#111729; --s2:#1a2036; --s3:#232a45;
+  --tx3:#a6acc9;
+  --cy:#22d3ee; --cyb:rgba(34,211,238,.14);
+  --r-card:18px; --r-pill:999px;
+  --sh-1:0 1px 2px rgba(0,0,0,.35);
+  --sh-2:0 8px 24px -10px rgba(0,0,0,.55);
+  --glow-ac:0 0 0 1px rgba(59,130,246,.18),0 8px 20px -8px rgba(59,130,246,.35);
+  --glow-cy:0 0 0 1px rgba(34,211,238,.18),0 8px 20px -8px rgba(34,211,238,.35);
+  --glow-gn:0 0 0 1px rgba(52,211,153,.18),0 8px 20px -8px rgba(52,211,153,.35);
+  --glow-am:0 0 0 1px rgba(251,191,36,.18),0 8px 20px -8px rgba(251,191,36,.35);
+  --glow-rd:0 0 0 1px rgba(248,113,113,.18),0 8px 20px -8px rgba(248,113,113,.35);
+  --sp-2:8px; --sp-3:12px; --sp-4:16px;
+  --fs-2xs:.68rem; --fs-xs:.74rem; --fs-sm:.82rem;
+  --fw-bold:700; --fw-black:800; --ls-label:.06em;
+}
+body.light #app-main{
+  --bg:#eef1f8; --s1:#ffffff; --s2:#e7ebf5; --s3:#dbe0f0;
+  --tx3:#565f8c;
+  --cy:#0e7490; --cyb:rgba(14,116,144,.10);
+  --sh-1:0 1px 2px rgba(20,25,60,.08); --sh-2:0 8px 24px -10px rgba(20,25,60,.18);
+  --glow-ac:0 0 0 1px rgba(30,58,138,.14),0 8px 20px -8px rgba(30,58,138,.20);
+  --glow-cy:0 0 0 1px rgba(14,116,144,.14),0 8px 20px -8px rgba(14,116,144,.20);
+  --glow-gn:0 0 0 1px rgba(4,120,87,.14),0 8px 20px -8px rgba(4,120,87,.20);
+  --glow-am:0 0 0 1px rgba(146,64,14,.14),0 8px 20px -8px rgba(146,64,14,.20);
+  --glow-rd:0 0 0 1px rgba(185,28,28,.14),0 8px 20px -8px rgba(185,28,28,.20);
+}
+.app{display:flex;flex:1;overflow:hidden;background:var(--bg);}
 .ppanel{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:2px solid var(--b1);}
 .psearch{padding:10px 13px;border-bottom:1.5px solid var(--b1);display:flex;gap:7px;}
 .sinp{flex:1;background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--rs);padding:9px 13px;font-size:.9rem;outline:none;color:var(--tx);transition:border-color .2s;}
@@ -71,18 +103,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .cats::-webkit-scrollbar{height:0;}
 .chip{background:var(--s2);border:1.5px solid var(--b1);border-radius:20px;padding:5px 14px;font-size:.78rem;cursor:pointer;white-space:nowrap;color:var(--tx2);font-weight:600;transition:all .2s;}
 .chip.on{background:var(--acg);border-color:var(--ac);color:var(--ac);}
+.pgrid-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 13px 0;flex-wrap:wrap;}
+.pgrid-filters{display:flex;background:var(--s2);border-radius:var(--rs);border:1px solid var(--b1);padding:2px;gap:2px;}
+.pgrid-filters button{padding:5px 13px;font-size:var(--fs-xs);border:none;border-radius:calc(var(--rs) - 2px);background:transparent;color:var(--tx3);cursor:pointer;transition:all .18s;font-weight:var(--fw-bold);}
+.pgrid-filters button.on{background:var(--ac);color:#fff;}
+.pgrid-sort{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);color:var(--tx2);font-size:var(--fs-xs);font-weight:600;padding:6px 10px;cursor:pointer;}
 .pgrid{flex:1;overflow-y:auto;padding:11px 13px;display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;align-content:start;}
-.pcard{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);padding:8px 8px 10px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;position:relative;min-height:150px;user-select:none;}
-.pcard:hover{border-color:var(--ac);transform:scale(.97);}
-.pcard.out{opacity:.35;cursor:not-allowed;}
-.pcard-img{width:100%;height:115px;border-radius:7px;object-fit:cover;}
-.pcard-ph{width:100%;height:115px;border-radius:7px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:700;color:var(--ac);}
+.pcard{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r-card);padding:8px 8px 10px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;position:relative;min-height:150px;user-select:none;box-shadow:var(--sh-1);}
+.pcard:hover{border-color:var(--ac);box-shadow:var(--glow-ac);transform:translateY(-1px);}
+.pcard.out{opacity:.4;cursor:not-allowed;}
+.pcard.out:hover{border-color:var(--b1);box-shadow:var(--sh-1);transform:none;}
+.pcard-img{width:100%;height:115px;border-radius:10px;object-fit:cover;}
+.pcard-ph{width:100%;height:115px;border-radius:10px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:700;color:var(--ac);}
 .pcard-name{font-size:14px;font-weight:600;color:var(--tx);line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2em;margin-top:5px;}
 .pcard-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:4px;padding-top:2px;}
-.pcard-price{font-family:Courier New,monospace;font-size:14px;font-weight:700;color:var(--gn);}
-.pcard-stk{font-size:12px;color:var(--tx3);}
+.pcard-price{font-family:'Consolas','Courier New',monospace;font-size:14px;font-weight:700;color:var(--gn);}
+.pcard-stk{font-size:var(--fs-2xs);color:var(--tx3);font-weight:600;}
 .pcard-stk.low{color:var(--am);}
-.pbadge{position:absolute;top:7px;right:7px;width:20px;height:20px;border-radius:50%;background:var(--gn);color:#000;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.pbadge{position:absolute;top:7px;right:7px;width:20px;height:20px;border-radius:50%;background:var(--gn);color:#000;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-1);}
+.pcard-add{position:absolute;bottom:8px;right:8px;width:22px;height:22px;border-radius:50%;background:var(--ac);color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:var(--sh-1);pointer-events:none;}
+.pcard.out .pcard-add{display:none;}
 .egrid-empty{grid-column:1/-1;text-align:center;color:var(--tx3);padding:36px;font-size:.88rem;}
 .cart{width:355px;min-width:310px;display:flex;flex-direction:column;background:var(--s1);flex-shrink:0;}
 .cart-hd{padding:13px 15px;border-bottom:1.5px solid var(--b1);display:flex;align-items:center;justify-content:space-between;}
@@ -98,7 +138,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .ci-img{width:34px;height:34px;border-radius:6px;object-fit:cover;flex-shrink:0;}
 .ci-inf{flex:1;min-width:0;}
 .ci-name{font-size:.82rem;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ci-uprice{font-size:.7rem;color:var(--tx3);}
+.ci-uprice{font-size:.7rem;color:var(--tx3);font-weight:600;}
 .ci-qty{display:flex;align-items:center;gap:4px;flex-shrink:0;}
 .qb{width:22px;height:22px;border-radius:5px;border:1.5px solid var(--b2);background:var(--s3);color:var(--tx);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
 .qb:hover{border-color:var(--ac);color:var(--ac);}
@@ -108,8 +148,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .ci-del:hover{color:var(--rd);}
 .cfoot{padding:12px 14px;border-top:1.5px solid var(--b1);display:flex;flex-direction:column;gap:9px;}
 .trow{display:flex;justify-content:space-between;font-size:.83rem;color:var(--tx2);}
-.trow.main{font-size:1.08rem;font-weight:700;color:var(--tx);}
-.trow.main .amt{font-family:Courier New,monospace;color:var(--gn);font-size:1.15rem;}
+.trow.main{font-size:1.08rem;font-weight:800;color:var(--tx);}
+.trow.main .amt{font-family:'Consolas','Courier New',monospace;color:var(--ac);font-size:1.3rem;}
 .sep{height:1px;background:var(--b1);}
 .plbl{font-size:.7rem;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;}
 .pbtns{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
@@ -119,17 +159,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .pbtn.hidden{display:none!important;}
 body.light .pbtn{color:#1a1a1a;border-color:#cccccc;background:#f4f4f8;font-weight:700;}
 body.light .pbtn.on{color:#ffffff;border-color:#1e3a8a;background:#1e3a8a;}
+/* Métodos de pago del panel de orden (NO el modal de cobro/descuento, que
+   reusa .pbtn pero es otra pantalla — se deja sin tocar): cada botón lleva
+   su propio --tint/--acc (mismo patrón que las KPI cards del Dashboard).
+   Reposo = tinte suave del color propio; seleccionado = color sólido. */
+#app-main .pbtn,body.light #app-main .pbtn{background:var(--tint,var(--s2));color:var(--acc,var(--tx2));border-color:var(--b1);}
+#app-main .pbtn.on,body.light #app-main .pbtn.on{background:var(--acc,var(--ac));border-color:var(--acc,var(--ac));color:#fff;}
 /* ── Light mode: contraste, tamaño y pesos ── */
 body.light .lbl,body.light .slbl,body.light .plbl,body.light .sclbl{color:#333344;font-weight:700;}
-body.light .ci-name{font-size:14px;font-weight:600;color:#1a1a1a;}
-body.light .ci-uprice{font-size:.76rem;color:#3d3d58;font-weight:500;}
-body.light .ci-tot{font-size:14px;font-weight:700;color:#1a6040;}
-body.light .qn{font-size:14px;font-weight:600;color:#1a1a1a;}
-body.light .trow{font-size:14px;font-weight:500;color:#1a1a2e;}
-body.light .trow.main{font-size:20px;font-weight:700;color:#0a0a1a;}
-body.light .trow.main .amt{font-size:20px;font-weight:700;color:#0a0a1a;font-family:Courier New,monospace;}
-body.light .pcard-stk{color:#3d3d58;font-weight:500;}
-body.light .pcard{border-color:#cccccc;}
+body.light .ci-name{font-size:14px;font-weight:600;color:var(--tx);}
+body.light .ci-uprice{font-size:.76rem;color:var(--tx3);font-weight:600;}
+body.light .ci-tot{font-size:14px;font-weight:700;color:var(--gn);}
+body.light .qn{font-size:14px;font-weight:600;color:var(--tx);}
+body.light .trow{font-size:14px;font-weight:500;color:var(--tx2);}
+body.light .trow.main{font-size:20px;font-weight:800;color:var(--tx);}
+body.light .trow.main .amt{font-size:1.3rem;font-weight:800;color:var(--ac);font-family:'Consolas','Courier New',monospace;}
+body.light .pcard-stk{color:var(--tx3);font-weight:600;}
+body.light .pcard{border-color:var(--b1);}
 body.light .fi,body.light .sinp,body.light .lfi{border-color:#cccccc;}
 body.light .chip{border-color:#cccccc;color:#1a1a1a;font-weight:600;}
 body.light .ci-del{color:#555570;}
@@ -137,8 +183,8 @@ body.light .eb{border-color:#cccccc;color:#333344;}
 body.light .xb{color:#3d3d58;}
 body.light .hmi{border-color:#cccccc;}
 body.light .egrid-empty,body.light .cempty{color:#3d3d58;}
-body.light .cat-card .cc-cnt{color:#3d3d58;}
-body.light .back-bar{border-bottom-color:#cccccc;}
+body.light .cat-card .cc-cnt{color:var(--tx3);}
+body.light .back-bar{border-bottom-color:var(--b1);}
 body.light .ord-lbl{color:#333344;font-weight:600;}
 body.light .pli-meta{color:#3d3d58;}
 body.light .tog-label{color:#1a1a2e;font-weight:500;}
@@ -151,8 +197,8 @@ body.light label{color:#333344!important;font-weight:600!important;}
 body.light .pli-price{font-size:16px!important;font-weight:700!important;color:#1a6040!important;}
 body.light .pli-name{font-size:14px!important;font-weight:600!important;color:#1a1a1a!important;}
 body.light .pli-meta{font-size:.73rem!important;color:#3d3d58!important;}
-body.light .pcard-name{color:#1a1a1a!important;font-weight:700!important;}
-body.light .pcard-price{color:#15803d!important;font-weight:700!important;}
+body.light .pcard-name{color:var(--tx)!important;font-weight:700!important;}
+body.light .pcard-price{color:var(--gn)!important;font-weight:700!important;}
 body.light .chgbox{color:#15803d!important;border-color:#15803d!important;background:rgba(21,128,61,0.08)!important;}
 .spc-badge{position:absolute;top:6px;left:6px;border-radius:5px;padding:2px 6px;font-size:10px;font-weight:800;line-height:1.4;z-index:1;letter-spacing:.2px;pointer-events:none;}
 .spc-badge.disc{background:#f59e0b;color:#000;}
@@ -171,9 +217,9 @@ body.light .chgbox{color:#15803d!important;border-color:#15803d!important;backgr
 .inv-chk{width:15px;height:15px;cursor:pointer;accent-color:var(--ac);}
 @media print{body.lbl-pm>*:not(#lbl-print-area){display:none!important;}body.lbl-pm,body.lbl-pm #lbl-print-area{background:#fff!important;color:#000!important;}body.lbl-pm #lbl-print-area{display:block!important;}.lbl-grid{display:flex;flex-wrap:wrap;}.lbl-itm{background:#fff!important;color:#000!important;border:none!important;box-shadow:none!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;box-sizing:border-box;overflow:hidden;page-break-inside:avoid;display:flex;flex-direction:column;font-family:Arial,Helvetica,sans-serif;padding:2mm;}@page{size:8.5in 11in;margin:.25in;}}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;padding:10px;}
-.cat-card{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r);padding:8px 8px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .18s;text-align:center;min-height:150px;}
-.cat-card:hover{border-color:var(--ac);transform:scale(.97);}
-.cat-card .cc-img{width:100%;height:115px;border-radius:7px;object-fit:cover;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:800;color:var(--ac);margin-bottom:6px;}
+.cat-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r-card);padding:8px 8px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .18s;text-align:center;min-height:150px;box-shadow:var(--sh-1);}
+.cat-card:hover{border-color:var(--acc,var(--ac));box-shadow:var(--glow-ac);transform:translateY(-1px);}
+.cat-card .cc-img{width:100%;height:115px;border-radius:10px;object-fit:cover;background:var(--tint,var(--s3));display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:800;color:var(--acc,var(--ac));margin-bottom:6px;}
 .cat-card img.cc-img{font-size:0;}
 .cat-card .cc-name{font-size:16px;font-weight:700;color:var(--tx);line-height:1.2;}
 .cat-card .cc-cnt{font-size:13px;color:var(--tx3);margin-top:2px;}
@@ -188,7 +234,7 @@ body.light .chgbox{color:#15803d!important;border-color:#15803d!important;backgr
 .npbtn.del{background:var(--acg);border-color:var(--ac);color:var(--ac);}
 .chgbox{background:var(--gnb);border:1.5px solid rgba(52,211,153,.25);border-radius:var(--rs);padding:7px 11px;font-family:Courier New,monospace;font-size:.92rem;color:var(--gn);text-align:center;font-weight:600;}
 .chgbox.neg{background:var(--rdb);border-color:rgba(248,113,113,.25);color:var(--rd);}
-.cobrar{background:linear-gradient(135deg,#1e3a8a,#3b82f6);border:none;border-radius:var(--r);color:#fff;padding:12px 10px;font-size:15px;font-weight:800;cursor:pointer;width:100%;letter-spacing:.3px;transition:all .2s;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cobrar{background:linear-gradient(135deg,var(--ac),var(--cy));border:none;border-radius:var(--r-card);color:#fff;padding:14px 10px;font-size:15px;font-weight:800;cursor:pointer;width:100%;letter-spacing:.3px;transition:all .2s;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:var(--glow-ac);}
 .btn-red-soft.btn-p{background:#f87171!important;border-color:#f87171!important;color:#fff!important;}
 .btn-red-soft.btn-s{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.3)!important;color:#f87171!important;}
 .cobrar:hover{opacity:.88;}
@@ -561,6 +607,21 @@ body.light #dashboard-screen{
     </div>
     <div id="prod-view" style="display:none">
       <div class="back-bar" id="back-bar" onclick="showCategories()">← <span id="back-cat-name">Categorías</span></div>
+      <div class="pgrid-toolbar">
+        <div class="pgrid-filters">
+          <button class="on" id="prod-filter-all-btn" onclick="setProdFilter('all',this)"><span id="prod-filter-all">Todos</span></button>
+          <button id="prod-filter-top-btn" onclick="setProdFilter('top',this)"><span id="prod-filter-top">Más vendidos</span></button>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+        <span id="prod-sort-lbl" style="font-size:var(--fs-2xs);color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:var(--ls-label)">Ordenar</span>
+        <select class="pgrid-sort" id="prod-sort-select" onchange="setProdSort(this.value)">
+          <option value="name" id="prod-sort-name">Nombre</option>
+          <option value="price_asc" id="prod-sort-price-asc">Precio ↑</option>
+          <option value="price_desc" id="prod-sort-price-desc">Precio ↓</option>
+          <option value="stock" id="prod-sort-stock">Stock</option>
+        </select>
+        </div>
+      </div>
       <div class="pgrid" id="pgrid"></div>
     </div>
   </div>
@@ -582,10 +643,11 @@ body.light #dashboard-screen{
       <div>
         <div class="plbl" style="margin-bottom:5px" id="pay-lbl">Método de pago</div>
         <div class="pbtns">
-          <button class="pbtn on" id="pb-cash" onclick="setPay('cash',this)"><span class="pico">💵</span><span id="pb-cash-txt">Efectivo</span></button>
-          <button class="pbtn" id="pb-card" onclick="setPay('card',this)"><span class="pico">💳</span><span id="pb-card-txt">Tarjeta</span></button>
+          <button class="pbtn on" id="pb-cash" onclick="setPay('cash',this)" style="--tint:var(--gnb);--acc:var(--gn)"><span class="pico">💵</span><span id="pb-cash-txt">Efectivo</span></button>
+          <button class="pbtn" id="pb-card" onclick="setPay('card',this)" style="--tint:var(--acg);--acc:var(--ac)"><span class="pico">💳</span><span id="pb-card-txt">Tarjeta</span></button>
+          <button class="pbtn" id="pb-transf" onclick="setPay('transf',this)" style="--tint:var(--cyb);--acc:var(--cy)"><span class="pico">📲</span><span id="pb-transf-txt">Transferencia</span></button>
           <button class="pbtn" id="pb-oa" onclick="openSaveOA()"><span class="pico">📖</span><span id="pb-oa-txt">Cta. Abierta</span></button>
-          <button class="pbtn" id="pb-credit" onclick="openCreditSale()" style="display:none"><span class="pico">💰</span><span id="pb-credit-txt">Crédito</span></button>
+          <button class="pbtn" id="pb-credit" onclick="openCreditSale()" style="display:none;--tint:var(--amb);--acc:var(--am)"><span class="pico">💰</span><span id="pb-credit-txt">Crédito</span></button>
         </div>
 
 
@@ -2289,6 +2351,7 @@ const T = {
     invStkNone:'Sin stock',invStkLow:'Stock bajo',invStkOk:'Ok',
     invColName:'Nombre',invColCat:'Categoría',invColBarcode:'Cód. barras',
     invColStock:'Stock',invColCost:'Costo',invColPrice:'Precio',invColActive:'Activo',
+    prodFilterTop:'Más vendidos',prodSortLbl:'Ordenar',sortPriceAsc:'Precio ↑',sortPriceDesc:'Precio ↓',
     invFooterProds:'producto',invFooterProdsP:'productos',
     invFooterCostTotal:'Costo total',invFooterSaleValue:'Valor en venta',
     // Inventario — toolbar y toggle
@@ -2816,6 +2879,7 @@ const T = {
     invStkNone:'No stock',invStkLow:'Low stock',invStkOk:'Ok',
     invColName:'Name',invColCat:'Category',invColBarcode:'Barcode',
     invColStock:'Stock',invColCost:'Cost',invColPrice:'Price',invColActive:'Active',
+    prodFilterTop:'Best sellers',prodSortLbl:'Sort',sortPriceAsc:'Price ↑',sortPriceDesc:'Price ↓',
     invFooterProds:'product',invFooterProdsP:'products',
     invFooterCostTotal:'Total cost',invFooterSaleValue:'Sale value',
     // Inventory — toolbar & toggle
@@ -3309,6 +3373,14 @@ function applyLang(){
   const _paylbl=el('pay-lbl');if(_paylbl)_paylbl.textContent=t('payMethod');
   const _pbcashtxt=el('pb-cash-txt');if(_pbcashtxt)_pbcashtxt.textContent=t('cash');
   const _pbcardtxt=el('pb-card-txt');if(_pbcardtxt)_pbcardtxt.textContent=t('card');
+  const _pbtransftxt=el('pb-transf-txt');if(_pbtransftxt)_pbtransftxt.textContent=t('payMethodTransf');
+  const _prodFilterAllTxt=el('prod-filter-all');if(_prodFilterAllTxt)_prodFilterAllTxt.textContent=t('all');
+  const _prodFilterTopTxt=el('prod-filter-top');if(_prodFilterTopTxt)_prodFilterTopTxt.textContent=t('prodFilterTop');
+  const _prodSortLbl=el('prod-sort-lbl');if(_prodSortLbl)_prodSortLbl.textContent=t('prodSortLbl');
+  const _prodSortName=el('prod-sort-name');if(_prodSortName)_prodSortName.textContent=t('invColName');
+  const _prodSortPriceAsc=el('prod-sort-price-asc');if(_prodSortPriceAsc)_prodSortPriceAsc.textContent=t('sortPriceAsc');
+  const _prodSortPriceDesc=el('prod-sort-price-desc');if(_prodSortPriceDesc)_prodSortPriceDesc.textContent=t('sortPriceDesc');
+  const _prodSortStock=el('prod-sort-stock');if(_prodSortStock)_prodSortStock.textContent=t('stock');
   // Checkout modal
   const _ckMethodLbl=el('ck-method-lbl');if(_ckMethodLbl)_ckMethodLbl.textContent=t('payMethod');
   const _ckCashTxt=el('ck-cash-txt');if(_ckCashTxt)_ckCashTxt.textContent=t('cash');
@@ -5183,10 +5255,39 @@ function renderProdList(){
     return '<div class="pli"><div class="pli-thumb">'+th+'</div><div class="pli-info"><div class="pli-name">'+p.name+'</div><div class="pli-meta">'+dolr(p.price)+' · Stock: '+(p.stock||0)+(p.bc?' · #'+p.bc:'')+marginTxt+'</div></div><div class="pli-price">'+dolr(p.price)+'</div><div style="display:flex;gap:4px"><button class="eb" onclick="editProd(\''+p.id+'\')">✏</button><button class="xb" onclick="delProd(\''+p.id+'\')">✕</button></div></div>';
   }).join('');
 }
+// "Más vendidos": suma qty vendida por producto en ventas reales de los
+// últimos N días (no cancelada/no devuelta) — mismo criterio que usa el
+// Top 5 del Dashboard, solo que acá sobre una ventana de días en vez de
+// "hoy" (si fuera "hoy" el filtro estaría casi siempre vacío gran parte
+// del día). Devuelve un Set de product ids ordenado por cantidad vendida.
+function _getBestSellingIds(days){
+  var cutoff=Date.now()-(days||30)*864e5;
+  var counts={};
+  (db.sales||[]).forEach(function(s){
+    if(s.status==='cancelled'||s.status==='returned')return;
+    if(new Date(s.date).getTime()<cutoff)return;
+    (s.items||[]).forEach(function(it){
+      if(it.isCombo)return; // combos no tienen id de producto propio
+      var key=String(it.id);
+      counts[key]=(counts[key]||0)+(it.qty||1);
+    });
+  });
+  return Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
+}
+var _prodFilterMode='all',_prodSortMode='name';
+function setProdFilter(mode,btn){
+  _prodFilterMode=mode;
+  document.querySelectorAll('.pgrid-filters button').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderProds();
+}
+function setProdSort(mode){_prodSortMode=mode;renderProds();}
 function renderProds(){
   const g=el('pgrid'),q=(el('srch')?el('srch').value||'':'').toLowerCase();
+  const toolbar=document.querySelector('.pgrid-toolbar');
   // Combos view
   if(currentCategory==='__combos__'){
+    if(toolbar)toolbar.style.display='none';
     const combos=(db.combos||[]).filter(x=>x.active&&(!q||x.name.toLowerCase().includes(q)));
     if(!combos.length){g.innerHTML='<div class="egrid-empty">'+t('noProducts')+'</div>';return;}
     const inCartCmb={};cart.forEach(function(c){if(c.isCombo)inCartCmb[c.comboId]=(inCartCmb[c.comboId]||0)+c.qty;});
@@ -5199,7 +5300,17 @@ function renderProds(){
     }).join('');
     return;
   }
-  const list=db.products.filter(p=>(!currentCategory||currentCategory==='all'||p.cat===currentCategory)&&(!q||p.name.toLowerCase().includes(q)||(p.bc||'').includes(q)));
+  if(toolbar)toolbar.style.display='';
+  let list=db.products.filter(p=>(!currentCategory||currentCategory==='all'||p.cat===currentCategory)&&(!q||p.name.toLowerCase().includes(q)||(p.bc||'').includes(q)));
+  if(_prodFilterMode==='top'){
+    const bestIds=_getBestSellingIds(30);
+    const rank={};bestIds.forEach(function(id,i){rank[id]=i;});
+    list=list.filter(function(p){return rank.hasOwnProperty(String(p.id));});
+    list.sort(function(a,b){return rank[String(a.id)]-rank[String(b.id)];});
+  }else if(_prodSortMode==='price_asc'){list=list.slice().sort(function(a,b){return (a.price||0)-(b.price||0);});}
+  else if(_prodSortMode==='price_desc'){list=list.slice().sort(function(a,b){return (b.price||0)-(a.price||0);});}
+  else if(_prodSortMode==='stock'){list=list.slice().sort(function(a,b){return (b.stock||0)-(a.stock||0);});}
+  else{list=list.slice().sort(function(a,b){return a.name.localeCompare(b.name);});}
   if(!list.length){g.innerHTML='<div class="egrid-empty">'+t('noProducts')+'</div>';return;}
   const inCart={};cart.forEach(function(c){if(!c.isCombo)inCart[c.id]=(inCart[c.id]||0)+c.qty;});
   g.innerHTML=list.map(function(p){
@@ -5210,6 +5321,7 @@ function renderProds(){
     const oc=p.stock<=0?'':'addToCart(\''+p.id+'\')';
     const minSt=p.minStock||5;
     const stkH=p.stock<=0?('<div class="pcard-stk">'+t('outOfStock')+'</div>'):('<div class="pcard-stk'+(p.stock<=minSt?' low':'')+'">'+t('stock')+': '+p.stock+'</div>');
+    const addBtn=p.stock<=0?'':'<div class="pcard-add">+</div>';
     const _sp=_getActiveSpecial(p.id);
     let spBadge='';
     if(_sp){
@@ -5217,7 +5329,7 @@ function renderProds(){
       else if(_sp.type==='bogo'){const _bq=_sp.buyQty||2,_pq=_sp.payQty||1;spBadge='<div class="spc-badge bogo">'+_bq+'\xd7'+_pq+'</div>';}
       else if(_sp.type==='qty_price')spBadge='<div class="spc-badge qty">+'+_sp.minQty+'u</div>';
     }
-    return '<div class="'+cls+'" onclick="'+oc+'">'+spBadge+imgH+'<div class="pcard-name">'+p.name+'</div><div class="pcard-bottom"><div class="pcard-price">'+dolr(p.price)+'</div>'+stkH+'</div>'+badge+'</div>';
+    return '<div class="'+cls+'" onclick="'+oc+'">'+spBadge+imgH+'<div class="pcard-name">'+p.name+'</div><div class="pcard-bottom"><div class="pcard-price">'+dolr(p.price)+'</div>'+stkH+'</div>'+badge+addBtn+'</div>';
   }).join('');
 }
 
@@ -5554,6 +5666,16 @@ function showProducts(catId){
   el('back-cat-name').textContent=name;
   renderProds();
 }
+// Color propio y estable por categoría: no hay un campo "color" guardado
+// para categorías, así que se deriva por hash del id sobre la paleta de
+// acentos ya definida (mismo criterio que el donut de categorías del
+// Dashboard) — puramente presentacional, no agrega ni cambia datos.
+function _catColorVars(id){
+  const palette=[['var(--acg)','var(--ac)'],['var(--cyb)','var(--cy)'],['var(--gnb)','var(--gn)'],['var(--amb)','var(--am)']];
+  let h=0;const s=String(id);
+  for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;
+  return palette[h%palette.length];
+}
 function renderCategories(){
   const grid=el('cat-grid');if(!grid)return;
   const srch=(el('srch')?el('srch').value:'').toLowerCase().trim();
@@ -5563,12 +5685,14 @@ function renderCategories(){
   // "Todo" card
   const allCnt=db.products.length;
   const allCard=document.createElement('div');allCard.className='cat-card';
+  allCard.style.setProperty('--tint','var(--acg)');allCard.style.setProperty('--acc','var(--ac)');
   allCard.innerHTML='<div class="cc-img" style="font-size:1.8rem">🛍️</div><div class="cc-name">'+t('all')+'</div><div class="cc-cnt">'+allCnt+' '+t('product')+'s</div>';
   allCard.onclick=()=>showProducts('all');grid.appendChild(allCard);
   // Combos card
   const _activeCombos=(db.combos||[]).filter(x=>x.active);
   if(_activeCombos.length){
     const cmbCard=document.createElement('div');cmbCard.className='cat-card';
+    cmbCard.style.setProperty('--tint','var(--amb)');cmbCard.style.setProperty('--acc','var(--am)');
     cmbCard.innerHTML='<div class="cc-img" style="font-size:1.8rem">🍱</div><div class="cc-name">'+t('combosCategory')+'</div><div class="cc-cnt">'+_activeCombos.length+' '+t('comboAvailable')+'</div>';
     cmbCard.onclick=()=>showProducts('__combos__');grid.appendChild(cmbCard);
   }
@@ -5576,6 +5700,7 @@ function renderCategories(){
   db.categories.forEach(cat=>{
     const cnt=db.products.filter(p=>p.cat===cat.id).length;
     const card=document.createElement('div');card.className='cat-card';
+    const cv=_catColorVars(cat.id);card.style.setProperty('--tint',cv[0]);card.style.setProperty('--acc',cv[1]);
     const imgHtml=cat.img?'<img class="cc-img" src="'+cat.img+'" alt="">':'<div class="cc-img">'+cat.name[0].toUpperCase()+'</div>';
     card.innerHTML=imgHtml+'<div class="cc-name">'+cat.name+'</div><div class="cc-cnt">'+cnt+' '+t('products')+'</div>';
     card.onclick=()=>showProducts(cat.id);grid.appendChild(card);
