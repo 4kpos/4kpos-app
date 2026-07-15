@@ -1793,6 +1793,32 @@ select.fi option{background:var(--s2);color:var(--tx);}
     <div class="mh"><h3 id="rc-title">Confirmación Final</h3><button class="mx" onclick="closeOv('ov-reset-confirm')">✕</button></div>
     <div class="mb">
       <div class="fg">
+        <label class="lbl" id="rc-select-what-lbl">Selecciona qué datos borrar:</label>
+        <div style="display:flex;flex-direction:column;gap:8px;background:var(--s2);border-radius:var(--rs);padding:10px 12px;margin-bottom:6px">
+          <label style="display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--tx2);cursor:pointer">
+            <input type="checkbox" id="rc-target-ventas" checked onchange="_resetValidate()" style="accent-color:var(--ac);width:16px;height:16px">
+            <span id="rc-target-ventas-lbl">Ventas e historial</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--tx2);cursor:pointer">
+            <input type="checkbox" id="rc-target-creditos" checked onchange="_resetValidate()" style="accent-color:var(--ac);width:16px;height:16px">
+            <span id="rc-target-creditos-lbl">Créditos y abonos</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--tx2);cursor:pointer">
+            <input type="checkbox" id="rc-target-productos" onchange="_resetValidate()" style="accent-color:var(--ac);width:16px;height:16px">
+            <span id="rc-target-productos-lbl">Productos y categorías</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--tx2);cursor:pointer">
+            <input type="checkbox" id="rc-target-clientes" onchange="_resetValidate()" style="accent-color:var(--ac);width:16px;height:16px">
+            <span id="rc-target-clientes-lbl">Clientes</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--tx2);cursor:pointer">
+            <input type="checkbox" id="rc-target-combos" onchange="_resetValidate()" style="accent-color:var(--ac);width:16px;height:16px">
+            <span id="rc-target-combos-lbl">Combos y especiales</span>
+          </label>
+        </div>
+        <button type="button" id="rc-select-all-btn" onclick="_resetSelectAllTargets()" style="background:none;border:none;color:var(--ac);font-size:.76rem;cursor:pointer;padding:2px 0 10px;text-align:left;text-decoration:underline">Seleccionar todo</button>
+      </div>
+      <div class="fg">
         <label class="lbl" id="rc-instruction-lbl">Para confirmar, escribe exactamente:</label>
         <div style="font-weight:800;letter-spacing:.05em;margin-bottom:6px;color:var(--rd)" id="rc-keyword-target"></div>
         <input type="text" class="fi" id="rc-keyword-input" autocomplete="off" oninput="_resetValidate()">
@@ -2172,6 +2198,11 @@ const T = {
     reset_invalid_keyword:'El texto no coincide.',reset_invalid_password:'Contraseña incorrecta.',
     reset_in_progress:'Borrando datos...',reset_success:'Todos los datos fueron eliminados correctamente.',
     reset_error:'Error al borrar los datos. No se realizó ningún cambio.',
+    reset_select_what:'Selecciona qué datos borrar:',
+    reset_target_ventas:'Ventas e historial',reset_target_creditos:'Créditos y abonos',
+    reset_target_productos:'Productos y categorías',reset_target_clientes:'Clientes',
+    reset_target_combos:'Combos y especiales',reset_select_all:'Seleccionar todo',
+    reset_nothing_selected:'Selecciona al menos una casilla.',
     deleteUserConfirm:'¿Eliminar usuario ',deleteCatConfirm:'¿Eliminar categoría?',
     noCreditsFoundFor:'No se encontraron créditos para',noPendingCreditsCheck:'Sin créditos pendientes ✓',
     cpayProductsSec:'Productos',cpayNoDetail:'Sin detalle',cpayPriorPayments:'Abonos anteriores',
@@ -2688,6 +2719,11 @@ const T = {
     reset_invalid_keyword:'The text does not match.',reset_invalid_password:'Incorrect password.',
     reset_in_progress:'Deleting data...',reset_success:'All data was deleted successfully.',
     reset_error:'Error deleting data. No changes were made.',
+    reset_select_what:'Select what data to delete:',
+    reset_target_ventas:'Sales and history',reset_target_creditos:'Credits and payments',
+    reset_target_productos:'Products and categories',reset_target_clientes:'Customers',
+    reset_target_combos:'Combos and specials',reset_select_all:'Select all',
+    reset_nothing_selected:'Select at least one option.',
     deleteUserConfirm:'Delete user ',deleteCatConfirm:'Delete category?',
     noCreditsFoundFor:'No credits found for',noPendingCreditsCheck:'No pending credits ✓',
     cpayProductsSec:'Products',cpayNoDetail:'No detail',cpayPriorPayments:'Prior payments',
@@ -3738,6 +3774,13 @@ function applyLang(){
   const _rwCancelBtn=el('rw-cancel-btn');if(_rwCancelBtn)_rwCancelBtn.textContent=t('reset_cancel');
   const _rwContinueBtn=el('rw-continue-btn');if(_rwContinueBtn)_rwContinueBtn.textContent=t('reset_continue');
   const _rcTitle=el('rc-title');if(_rcTitle)_rcTitle.textContent=t('reset_confirm_title');
+  const _rcSelWhat=el('rc-select-what-lbl');if(_rcSelWhat)_rcSelWhat.textContent=t('reset_select_what');
+  const _rcTgtVentas=el('rc-target-ventas-lbl');if(_rcTgtVentas)_rcTgtVentas.textContent=t('reset_target_ventas');
+  const _rcTgtCreditos=el('rc-target-creditos-lbl');if(_rcTgtCreditos)_rcTgtCreditos.textContent=t('reset_target_creditos');
+  const _rcTgtProductos=el('rc-target-productos-lbl');if(_rcTgtProductos)_rcTgtProductos.textContent=t('reset_target_productos');
+  const _rcTgtClientes=el('rc-target-clientes-lbl');if(_rcTgtClientes)_rcTgtClientes.textContent=t('reset_target_clientes');
+  const _rcTgtCombos=el('rc-target-combos-lbl');if(_rcTgtCombos)_rcTgtCombos.textContent=t('reset_target_combos');
+  const _rcSelAllBtn=el('rc-select-all-btn');if(_rcSelAllBtn)_rcSelAllBtn.textContent=t('reset_select_all');
   const _rcInstrLbl=el('rc-instruction-lbl');if(_rcInstrLbl)_rcInstrLbl.textContent=t('reset_confirm_instruction');
   const _rcKwTarget=el('rc-keyword-target');if(_rcKwTarget)_rcKwTarget.textContent=t('reset_confirm_keyword');
   const _rcPassLbl=el('rc-pass-lbl');if(_rcPassLbl)_rcPassLbl.textContent=t('reset_password_label');
@@ -4667,6 +4710,15 @@ function openResetWarning(){
   openOv('ov-reset-warn');
   setTimeout(function(){var b=el('rw-cancel-btn');if(b)b.focus();},50);
 }
+var RESET_TARGET_KEYS=['ventas','creditos','productos','clientes','combos'];
+var RESET_TARGET_DEFAULTS={ventas:true,creditos:true,productos:false,clientes:false,combos:false};
+function _resetSelectedTargets(){
+  return RESET_TARGET_KEYS.filter(function(k){var e2=el('rc-target-'+k);return e2&&e2.checked;});
+}
+function _resetSelectAllTargets(){
+  RESET_TARGET_KEYS.forEach(function(k){var e2=el('rc-target-'+k);if(e2)e2.checked=true;});
+  _resetValidate();
+}
 function _resetStep2(){
   closeOv('ov-reset-warn');
   if(!curUser||curUser.role!=='admin')return;
@@ -4675,6 +4727,7 @@ function _resetStep2(){
   if(passEl)passEl.value='';
   if(errEl)errEl.textContent='';
   var tgt=el('rc-keyword-target');if(tgt)tgt.textContent=t('reset_confirm_keyword');
+  RESET_TARGET_KEYS.forEach(function(k){var e2=el('rc-target-'+k);if(e2)e2.checked=!!RESET_TARGET_DEFAULTS[k];});
   _resetCountdownLeft=5;
   if(_resetCountdownTimer){clearInterval(_resetCountdownTimer);_resetCountdownTimer=null;}
   _resetCountdownTimer=setInterval(function(){
@@ -4692,7 +4745,8 @@ function _resetValidate(){
   var kwOk=!!kwEl&&kwEl.value.trim()===t('reset_confirm_keyword');
   var passOk=!!passEl&&passEl.value.length>0;
   var countdownDone=_resetCountdownLeft<=0;
-  btn.disabled=!(kwOk&&passOk&&countdownDone);
+  var hasTarget=_resetSelectedTargets().length>0;
+  btn.disabled=!(kwOk&&passOk&&countdownDone&&hasTarget);
   btn.textContent=countdownDone?t('reset_final_button'):t('reset_countdown').replace('{seconds}',_resetCountdownLeft);
 }
 async function _executeReset(){
@@ -4701,22 +4755,15 @@ async function _executeReset(){
   var kw=kwEl?kwEl.value.trim():'',pass=passEl?passEl.value:'';
   if(errEl)errEl.textContent='';
   if(_resetCountdownLeft>0)return;
+  var targets=_resetSelectedTargets();
+  if(!targets.length){if(errEl)errEl.textContent=t('reset_nothing_selected');return;}
   if(kw!==t('reset_confirm_keyword')){if(errEl)errEl.textContent=t('reset_invalid_keyword');return;}
   if(!bcrypt||!curUser.pass||!bcrypt.compareSync(pass,curUser.pass)){if(errEl)errEl.textContent=t('reset_invalid_password');return;}
   if(!db._lic){if(errEl)errEl.textContent=t('reset_error');return;}
   if(btn){btn.disabled=true;btn.textContent=t('reset_in_progress');}
-  var auditEntry={
-    id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),
-    fecha:new Date().toLocaleDateString(),
-    hora:new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
-    userId:curUser.id,userName:curUser.name,
-    accion:t('auditDataReset'),
-    detalle:'device:'+(_deviceCode||'?'),
-    antes:'',despues:''
-  };
   var _alerted=false;
   try{
-    var res=await fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'reset_data',license_key:db._lic,device_id:_deviceCode||'',audit_entry:auditEntry,user:curUser.user||curUser.name,password:pass})});
+    var res=await fetch(SUPA_URL+'/functions/v1/posapi',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'reset_data',license_key:db._lic,device_id:_deviceCode||'',targets:targets,user:curUser.user||curUser.name,password:pass})});
     var j=null;try{j=await res.json();}catch(eParse){}
     if(!j||j.ok!==true){
       // TEMPORAL — diagnóstico del error real de Supabase (quitar cuando esté resuelto)
@@ -4725,7 +4772,7 @@ async function _executeReset(){
       alert('RESET ERROR\n\nhttpStatus: '+res.status+'\nmessage: '+(j&&j.error)+'\ncode: '+(j&&j.code)+'\ndetails: '+(j&&j.details)+'\nhint: '+(j&&j.hint));
       throw new Error((j&&j.error)||('http_'+res.status));
     }
-    _applyLocalReset(auditEntry,j.reset_at);
+    _applyLocalReset(targets,j.reset_at);
     toast('✅ '+t('reset_success'));
     closeOv('ov-reset-confirm');
     setTimeout(function(){doLogout();},600);
@@ -4737,23 +4784,28 @@ async function _executeReset(){
     if(btn){btn.disabled=false;_resetValidate();}
   }
 }
-function _applyLocalReset(auditEntry,resetAt){
-  db.products=[];db.categories=[];db.sales=[];db.returns=[];db.orderNum=1;
-  db.customers=[];db.credits=[];db.combos=[];db.shifts=[];db.fundAmount=0;
-  (db.employees||[]).forEach(function(e){e.clockEvents=[];e.clockHistory=[];});
-  db.auditLog=[auditEntry];
-  if(db.cfg)db.cfg.pendingShiftNote=null;
+function _applyLocalReset(targets,resetAt){
+  logAction(t('auditDataReset'),targets.join(', '));
+  var has=function(k){return targets.indexOf(k)!==-1;};
+  if(has('ventas')){db.sales=[];db.returns=[];db.orderNum=0;}
+  if(has('creditos')){db.credits=[];}
+  if(has('productos')){db.products=[];db.categories=[];}
+  if(has('clientes')){db.customers=[];}
+  if(has('combos')){db.combos=[];db.specials=[];}
   db._lastResetAt=resetAt||new Date().toISOString();
   cart=[];
   _skipRemotePush=true;saveDB();
 }
 function _applyRemoteReset(remote){
-  db.products=remote.products||[];db.categories=remote.categories||[];db.sales=remote.sales||[];db.returns=remote.returns||[];
-  db.orderNum=remote.orderNum||1;db.customers=remote.customers||[];db.credits=remote.credits||[];db.combos=remote.combos||[];
-  db.shifts=remote.shifts||[];db.fundAmount=remote.fundAmount||0;db.auditLog=remote.auditLog||[];
-  if(remote.employees&&remote.employees.length)db.employees=remote.employees;
-  else (db.employees||[]).forEach(function(e){e.clockEvents=[];e.clockHistory=[];});
-  if(remote.cfg)db.cfg=Object.assign({},db.cfg||{},remote.cfg);
+  if(remote.products)db.products=remote.products;
+  if(remote.categories)db.categories=remote.categories;
+  if(remote.sales)db.sales=remote.sales;
+  if(remote.returns)db.returns=remote.returns;
+  if(remote.orderNum!==undefined)db.orderNum=remote.orderNum;
+  if(remote.customers)db.customers=remote.customers;
+  if(remote.credits)db.credits=remote.credits;
+  if(remote.combos)db.combos=remote.combos;
+  if(remote.specials)db.specials=remote.specials;
   db._lastResetAt=remote._resetAt;
   cart=[];
   _skipRemotePush=true;saveDB();

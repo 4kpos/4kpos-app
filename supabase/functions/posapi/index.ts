@@ -382,10 +382,13 @@ serve(async (req) => {
       return json({ ok: false, error: "invalid_credentials" }, 403);
     }
 
+    const targets = Array.isArray(body.targets) ? (body.targets as string[]) : [];
+    const executorLabel = `${(foundUser.name as string) || username} (${(foundUser.user as string) || (foundUser.id as string) || username})`;
+
     const { data: result, error: rpcErr } = await supabase.rpc("pos_reset_data", {
       p_license_key: license_key,
-      p_device_id: (body.device_id as string) || "",
-      p_audit_entry: body.audit_entry ?? null,
+      p_targets: targets,
+      p_user: executorLabel,
     });
 
     if (rpcErr) {
