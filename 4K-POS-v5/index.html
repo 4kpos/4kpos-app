@@ -4035,6 +4035,9 @@ async function loadDB(){
       if(d.combos)db.combos=d.combos;
       if(d.specials)db.specials=d.specials;
       if(d.employees)db.employees=d.employees;
+      // _lastResetAt no viajaba entre reinicios (faltaba en esta lista) — sin esto,
+      // restoreFromBackup() no tiene forma de saber que hubo un reset previo.
+      if(d._lastResetAt)db._lastResetAt=d._lastResetAt;
     }
  }catch(e){console.error(e);}
 
@@ -4784,6 +4787,14 @@ async function _executeReset(){
     if(btn){btn.disabled=false;_resetValidate();}
   }
 }
+// Marca (sin borrar) el backup automático de localStorage como "no usable para
+// auto-restore" a partir de resetAt. El backup en sí queda intacto — sigue
+// disponible para restauración manual ante un crash real (botón "Restaurar" en
+// Configuración) — solo restoreFromBackup() (el auto-restore silencioso al
+// abrir con db vacío) lo empieza a ignorar.
+function _invalidateAutoBackup(resetAt){
+  try{localStorage.setItem('4kpos_backup_stale_before',resetAt);}catch(e){}
+}
 function _applyLocalReset(targets,resetAt){
   logAction(t('auditDataReset'),targets.join(', '));
   var has=function(k){return targets.indexOf(k)!==-1;};
@@ -4793,6 +4804,7 @@ function _applyLocalReset(targets,resetAt){
   if(has('clientes')){db.customers=[];}
   if(has('combos')){db.combos=[];db.specials=[];}
   db._lastResetAt=resetAt||new Date().toISOString();
+  _invalidateAutoBackup(db._lastResetAt);
   cart=[];
   _skipRemotePush=true;saveDB();
 }
@@ -4807,6 +4819,7 @@ function _applyRemoteReset(remote){
   if(remote.combos)db.combos=remote.combos;
   if(remote.specials)db.specials=remote.specials;
   db._lastResetAt=remote._resetAt;
+  _invalidateAutoBackup(db._lastResetAt);
   cart=[];
   _skipRemotePush=true;saveDB();
   _syncRefreshActiveScreen();
@@ -6214,8 +6227,39 @@ function doQuickLock(){
 function restoreFromBackup(){
   try{
     const raw=localStorage.getItem('4kpos_backup');if(!raw)return false;
+    // Guardia anti-resurrección: un reset intencional vacía db.products/db.sales,
+    // y ESO es justo el trigger que hace que loadDB() llame a esta función. Sin
+    // esta guardia, restoreFromBackup() no puede distinguir "vacío por reset" de
+    // "vacío por instalación nueva / crash" y repone datos viejos desde el backup
+    // congelado en localStorage (doAutoBackup deja de escribir en cuanto queda
+    // vacío, así que el backup queda fijo en el último estado PRE-reset).
+    // bts = timestamp real del backup (siempre en texto plano, incluso si el
+    // backup está cifrado — ver doAutoBackup). Si el backup es igual o anterior
+    // al último reset conocido (local o de otra PC vía realtime), o si no hay
+    // bts confiable, o si hay marca explícita de invalidación posterior, no se
+    // restaura — se trata como "no hay backup utilizable" y sigue el flujo
+    // normal (p.ej. restore desde Supabase si corresponde).
+    const bts=localStorage.getItem('4kpos_backup_ts');
+    const invalidBefore=localStorage.getItem('4kpos_backup_stale_before');
+    const lastReset=db._lastResetAt||null;
+    if(!bts){_ls('restoreFromBackup SKIP sin backup_ts confiable');return false;}
+    if(lastReset&&bts<=lastReset){
+      _ls('restoreFromBackup SKIP backup('+bts+') <= lastResetAt('+lastReset+')');
+      logAction('AUTO_RESTORE_BLOCKED','Backup local ('+bts+') es anterior o igual al último reset ('+lastReset+') — no se restauró');
+      return false;
+    }
+    if(invalidBefore&&bts<=invalidBefore){
+      _ls('restoreFromBackup SKIP backup('+bts+') <= invalidBefore('+invalidBefore+')');
+      logAction('AUTO_RESTORE_BLOCKED','Backup local ('+bts+') marcado como obsoleto por reset ('+invalidBefore+') — no se restauró');
+      return false;
+    }
     const saved=JSON.parse(raw);
-    if(saved&&saved.db&&(saved.db.products||[]).length>0){Object.assign(db,saved.db);return true;}
+    if(saved&&saved.db&&(saved.db.products||[]).length>0){
+      _ls('restoreFromBackup RESTORING backup_ts='+bts+' lastResetAt='+lastReset);
+      Object.assign(db,saved.db);
+      logAction('AUTO_RESTORE_APPLIED','Se restauró backup local automático (ts='+bts+') porque no había datos en disco');
+      return true;
+    }
   }catch(e){}
   return false;
 }
