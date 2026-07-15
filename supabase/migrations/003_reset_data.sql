@@ -127,6 +127,7 @@ BEGIN
     DELETE FROM categories
     WHERE license_key = p_license_key
       AND id NOT LIKE 'shift_status_%'
+      AND id <> 'shift_status'
       AND id <> 'credit_summary';
   END IF;
 
