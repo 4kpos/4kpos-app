@@ -363,6 +363,7 @@ select.fi option{background:var(--s2);color:var(--tx);}
   --glow-cy:0 0 0 1px rgba(34,211,238,.18),0 8px 20px -8px rgba(34,211,238,.35);
   --glow-gn:0 0 0 1px rgba(52,211,153,.18),0 8px 20px -8px rgba(52,211,153,.35);
   --glow-am:0 0 0 1px rgba(251,191,36,.18),0 8px 20px -8px rgba(251,191,36,.35);
+  --glow-rd:0 0 0 1px rgba(248,113,113,.18),0 8px 20px -8px rgba(248,113,113,.35);
   --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px;
   --fs-2xs:.68rem; --fs-xs:.74rem; --fs-sm:.82rem; --fs-2xl:1.85rem;
   --fw-bold:700; --fw-black:800; --ls-label:.06em;
@@ -377,6 +378,7 @@ body.light #dashboard-screen{
   --glow-cy:0 0 0 1px rgba(14,116,144,.14),0 8px 20px -8px rgba(14,116,144,.20);
   --glow-gn:0 0 0 1px rgba(4,120,87,.14),0 8px 20px -8px rgba(4,120,87,.20);
   --glow-am:0 0 0 1px rgba(146,64,14,.14),0 8px 20px -8px rgba(146,64,14,.20);
+  --glow-rd:0 0 0 1px rgba(185,28,28,.14),0 8px 20px -8px rgba(185,28,28,.20);
 }
 .db-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
 .db-hd h2{font-size:1.1rem;font-weight:var(--fw-black);}
@@ -389,8 +391,20 @@ body.light #dashboard-screen{
 .kpi-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;background:var(--tint,var(--s2));color:var(--acc,var(--tx2));margin-bottom:4px;flex-shrink:0;}
 .kpi-lbl{font-size:var(--fs-xs);color:var(--tx3);font-weight:var(--fw-bold);text-transform:uppercase;letter-spacing:var(--ls-label);}
 .kpi-val{font-size:var(--fs-2xl);font-weight:var(--fw-black);color:var(--tx);font-family:'Consolas','Courier New',monospace;letter-spacing:-.01em;}
+.kpi-aprox{font-size:var(--fs-2xs);color:var(--tx3);font-weight:600;text-transform:none;margin-left:4px;cursor:help;border-bottom:1px dotted var(--tx3);letter-spacing:0;}
+.kpi-trend{display:inline-flex;align-items:center;gap:3px;font-size:var(--fs-2xs);font-weight:var(--fw-bold);padding:2px 7px;border-radius:var(--r-pill);margin-top:4px;width:fit-content;}
+.kpi-trend.up{color:var(--gn);background:var(--gnb);}
+.kpi-trend.down{color:var(--rd);background:var(--rdb);}
+.kpi-trend.flat{color:var(--tx3);background:var(--s2);}
 .db-row{display:grid;grid-template-columns:2fr 1fr;gap:var(--sp-3);}
 @media(max-width:900px){.db-row{grid-template-columns:1fr;}}
+.db-row3{display:grid;grid-template-columns:1.1fr 1fr 1.1fr;gap:var(--sp-3);}
+@media(max-width:1100px){.db-row3{grid-template-columns:1fr;}}
+.db-col{display:flex;flex-direction:column;gap:var(--sp-3);}
+.db-mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:2px;}
+.db-mini-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);padding:10px;}
+.db-mini-card .mn-lbl{font-size:var(--fs-2xs);color:var(--tx3);text-transform:uppercase;letter-spacing:var(--ls-label);font-weight:var(--fw-bold);margin-bottom:4px;}
+.db-mini-card .mn-val{font-size:1.05rem;font-weight:var(--fw-black);color:var(--tx);font-family:'Consolas','Courier New',monospace;}
 .db-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r-card);padding:var(--sp-4);box-shadow:var(--sh-1);}
 .db-card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .db-card-hd h4{font-size:var(--fs-sm);font-weight:var(--fw-bold);color:var(--tx2);}
@@ -599,31 +613,34 @@ body.light #dashboard-screen{
       <div class="kpi-ico">💰</div>
       <div class="kpi-lbl" id="db-kpi-lbl-ventas">Ventas hoy</div>
       <div class="kpi-val" id="db-kpi-ventas">$0.00</div>
-      <div id="kpi-spark-ventas" style="margin-top:8px;line-height:0"></div>
+      <div class="kpi-trend" id="kpi-trend-ventas" style="display:none"></div>
+      <div id="kpi-spark-ventas" style="margin-top:6px;line-height:0"></div>
     </div>
     <div class="db-kpi" style="--tint:var(--cyb);--acc:var(--cy);--glow:var(--glow-cy)">
       <div class="kpi-ico">🧾</div>
       <div class="kpi-lbl" id="db-kpi-lbl-tx">Transacciones</div>
       <div class="kpi-val" id="db-kpi-tx">0</div>
-      <div id="kpi-spark-tx" style="margin-top:8px;line-height:0"></div>
-    </div>
-    <div class="db-kpi" style="--tint:var(--amb);--acc:var(--am);--glow:var(--glow-am)">
-      <div class="kpi-ico">💳</div>
-      <div class="kpi-lbl" id="db-kpi-lbl-cred">Créditos pendientes</div>
-      <div class="kpi-val" id="db-kpi-cred">$0.00</div>
-      <div id="kpi-spark-cred" style="margin-top:8px;line-height:0"></div>
+      <div class="kpi-trend" id="kpi-trend-tx" style="display:none"></div>
+      <div id="kpi-spark-tx" style="margin-top:6px;line-height:0"></div>
     </div>
     <div class="db-kpi" style="--tint:var(--gnb);--acc:var(--gn);--glow:var(--glow-gn)">
+      <div class="kpi-ico">📈</div>
+      <div class="kpi-lbl" id="db-kpi-lbl-ganancia">Ganancia hoy <span class="kpi-aprox" id="db-ganancia-aprox">aprox.</span></div>
+      <div class="kpi-val" id="db-kpi-ganancia">$0.00</div>
+      <div id="kpi-spark-ganancia" style="margin-top:6px;line-height:0"></div>
+    </div>
+    <div class="db-kpi" style="--tint:var(--amb);--acc:var(--am);--glow:var(--glow-am)">
       <div class="kpi-ico">🎫</div>
       <div class="kpi-lbl" id="db-kpi-lbl-ticket">Ticket promedio</div>
       <div class="kpi-val" id="db-kpi-ticket">$0.00</div>
-      <div id="kpi-spark-ticket" style="margin-top:8px;line-height:0"></div>
+      <div id="kpi-spark-ticket" style="margin-top:6px;line-height:0"></div>
     </div>
-    <div class="db-kpi">
-      <div class="kpi-ico">📈</div>
-      <div class="kpi-lbl" id="db-kpi-lbl-totalsale">Venta total</div>
-      <div class="kpi-val" id="db-kpi-alltime">$0.00</div>
-      <div style="margin-top:4px;font-size:var(--fs-2xs);color:var(--tx3)" id="db-kpi-alltime-sub"></div>
+    <div class="db-kpi" style="--tint:var(--rdb);--acc:var(--rd);--glow:var(--glow-rd)">
+      <div class="kpi-ico">📦</div>
+      <div class="kpi-lbl" id="db-kpi-lbl-prodsold">Productos vendidos</div>
+      <div class="kpi-val" id="db-kpi-prodsold">0</div>
+      <div class="kpi-trend" id="kpi-trend-prodsold" style="display:none"></div>
+      <div id="kpi-spark-prodsold" style="margin-top:6px;line-height:0"></div>
     </div>
   </div>
   <div class="db-row">
@@ -638,24 +655,41 @@ body.light #dashboard-screen{
       <div class="db-chart" id="db-chart"></div>
     </div>
     <div class="db-card">
-      <div class="db-card-hd"><h4 id="db-h4-top5">Top 5 productos</h4></div>
-      <div class="db-top5" id="db-top5"></div>
-    </div>
-  </div>
-  <div class="db-row">
-    <div class="db-card">
-      <div class="db-card-hd"><h4 id="db-h4-stock">Semáforo de stock</h4></div>
-      <div class="stk-list" id="db-stock"></div>
-    </div>
-    <div class="db-card">
       <div class="db-card-hd"><h4 id="db-h4-paymethods">Métodos de pago hoy</h4></div>
       <div id="db-pay-chart"></div>
     </div>
   </div>
-  <div style="margin-top:12px">
-    <div class="db-card">
-      <div class="db-card-hd"><h4>🧾 Ventas recientes hoy</h4></div>
-      <div id="db-recent-sales"></div>
+  <div class="db-row3">
+    <div class="db-col">
+      <div class="db-card">
+        <div class="db-card-hd"><h4 id="db-inv-summary-title">Resumen de inventario</h4></div>
+        <div class="db-mini-grid">
+          <div class="db-mini-card"><div class="mn-lbl" id="db-active-prods-lbl">Productos activos</div><div class="mn-val" id="db-mini-active">0</div></div>
+          <div class="db-mini-card"><div class="mn-lbl" id="db-lowstock-mini-lbl">Stock bajo</div><div class="mn-val" id="db-mini-lowstock" style="color:var(--am)">0</div></div>
+          <div class="db-mini-card"><div class="mn-lbl" id="db-nostock-mini-lbl">Sin stock</div><div class="mn-val" id="db-mini-nostock" style="color:var(--rd)">0</div></div>
+          <div class="db-mini-card"><div class="mn-lbl" id="db-invvalue-lbl">Valor de inventario</div><div class="mn-val" id="db-mini-value">$0.00</div></div>
+        </div>
+      </div>
+      <div class="db-card">
+        <div class="db-card-hd"><h4 id="db-h4-stock">Productos con stock bajo</h4></div>
+        <div class="stk-list" id="db-stock"></div>
+      </div>
+    </div>
+    <div class="db-col">
+      <div class="db-card">
+        <div class="db-card-hd"><h4 id="db-h4-category">Ventas por categoría</h4></div>
+        <div id="db-category-chart"></div>
+      </div>
+    </div>
+    <div class="db-col">
+      <div class="db-card">
+        <div class="db-card-hd"><h4 id="db-h4-recent">Actividad reciente</h4></div>
+        <div id="db-recent-sales"></div>
+      </div>
+      <div class="db-card">
+        <div class="db-card-hd"><h4 id="db-h4-credits">Créditos pendientes</h4></div>
+        <div id="db-credits-list"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -2285,8 +2319,14 @@ const T = {
     sbLock:'Bloquear',roleAdmin:'Administrador',roleCashierShort:'Cajero',
     // Dashboard KPIs
     kpiVentasHoy:'Ventas hoy',kpiTx:'Transacciones',kpiTicket:'Ticket promedio',
+    kpiGanancia:'Ganancia hoy',kpiGananciaAprox:'aprox.',
+    kpiGananciaTooltip:'Estimado con el costo actual de cada producto — puede no incluir ventas de hoy sincronizadas desde otra PC',
+    kpiProductosVendidos:'Productos vendidos',
+    dbVsAyer:'vs ayer',dbTrendNew:'Nuevo',
     dbSalesByPeriod:'Ventas por período',dbTop5Prods:'Top 5 productos',dbStockLight:'Semáforo de stock',
     dbPeriodWeek:'7 días',dbPeriodMonth:'30 días',
+    dbInvSummary:'Resumen de inventario',dbActiveProds:'Productos activos',dbInvValue:'Valor de inventario',
+    dbLowStockTitle:'Productos con stock bajo',dbCategoryChart:'Ventas por categoría',dbRecentActivity:'Actividad reciente',
     // OA block
     oaViewAccounts:'📖 Ver cuentas',oaForceClose:'🔑 Forzar cierre',
     // Credit sale modal
@@ -2806,8 +2846,14 @@ const T = {
     sbLock:'Lock',roleAdmin:'Admin',roleCashierShort:'Cashier',
     // Dashboard KPIs
     kpiVentasHoy:'Today sales',kpiTx:'Transactions',kpiTicket:'Avg. ticket',
+    kpiGanancia:'Profit today',kpiGananciaAprox:'approx.',
+    kpiGananciaTooltip:'Estimated using each product\'s current cost — may not include sales synced today from another PC',
+    kpiProductosVendidos:'Products sold',
+    dbVsAyer:'vs yesterday',dbTrendNew:'New',
     dbSalesByPeriod:'Sales by period',dbTop5Prods:'Top 5 products',dbStockLight:'Stock status',
     dbPeriodWeek:'7 days',dbPeriodMonth:'30 days',
+    dbInvSummary:'Inventory summary',dbActiveProds:'Active products',dbInvValue:'Inventory value',
+    dbLowStockTitle:'Low stock products',dbCategoryChart:'Sales by category',dbRecentActivity:'Recent activity',
     // OA block
     oaViewAccounts:'📖 View accounts',oaForceClose:'🔑 Force close',
     // Credit sale modal
@@ -3631,13 +3677,21 @@ function applyLang(){
   // Dashboard KPIs
   const _dbKpiVentas=el('db-kpi-lbl-ventas');if(_dbKpiVentas)_dbKpiVentas.textContent=t('kpiVentasHoy');
   const _dbKpiTx=el('db-kpi-lbl-tx');if(_dbKpiTx)_dbKpiTx.textContent=t('kpiTx');
-  const _dbKpiCred=el('db-kpi-lbl-cred');if(_dbKpiCred)_dbKpiCred.textContent=t('pendingCredits');
+  const _dbKpiGanancia=el('db-kpi-lbl-ganancia');if(_dbKpiGanancia)_dbKpiGanancia.textContent=t('kpiGanancia');
   const _dbKpiTicket=el('db-kpi-lbl-ticket');if(_dbKpiTicket)_dbKpiTicket.textContent=t('kpiTicket');
+  const _dbKpiProdSold=el('db-kpi-lbl-prodsold');if(_dbKpiProdSold)_dbKpiProdSold.textContent=t('kpiProductosVendidos');
+  const _dbGananciaAprox=el('db-ganancia-aprox');if(_dbGananciaAprox){_dbGananciaAprox.textContent=t('kpiGananciaAprox');_dbGananciaAprox.title=t('kpiGananciaTooltip');}
   const _dbH4Period=el('db-h4-period');if(_dbH4Period)_dbH4Period.textContent=t('dbSalesByPeriod');
-  const _dbH4Top5=el('db-h4-top5');if(_dbH4Top5)_dbH4Top5.textContent=t('dbTop5Prods');
-  const _dbH4Stock=el('db-h4-stock');if(_dbH4Stock)_dbH4Stock.textContent=t('dbStockLight');
-  const _dbKpiTotalSale=el('db-kpi-lbl-totalsale');if(_dbKpiTotalSale)_dbKpiTotalSale.textContent=t('dbTotalSaleLbl');
+  const _dbH4Stock=el('db-h4-stock');if(_dbH4Stock)_dbH4Stock.textContent=t('dbLowStockTitle');
   const _dbH4PayMethods=el('db-h4-paymethods');if(_dbH4PayMethods)_dbH4PayMethods.textContent=t('dbPayMethodsToday');
+  const _dbInvSummaryTitle=el('db-inv-summary-title');if(_dbInvSummaryTitle)_dbInvSummaryTitle.textContent=t('dbInvSummary');
+  const _dbActiveProdsLbl=el('db-active-prods-lbl');if(_dbActiveProdsLbl)_dbActiveProdsLbl.textContent=t('dbActiveProds');
+  const _dbLowStockMiniLbl=el('db-lowstock-mini-lbl');if(_dbLowStockMiniLbl)_dbLowStockMiniLbl.textContent=t('invStkLow');
+  const _dbNoStockMiniLbl=el('db-nostock-mini-lbl');if(_dbNoStockMiniLbl)_dbNoStockMiniLbl.textContent=t('invStkNone');
+  const _dbInvValueLbl=el('db-invvalue-lbl');if(_dbInvValueLbl)_dbInvValueLbl.textContent=t('dbInvValue');
+  const _dbH4Category=el('db-h4-category');if(_dbH4Category)_dbH4Category.textContent=t('dbCategoryChart');
+  const _dbH4Recent=el('db-h4-recent');if(_dbH4Recent)_dbH4Recent.textContent=t('dbRecentActivity');
+  const _dbH4Credits=el('db-h4-credits');if(_dbH4Credits)_dbH4Credits.textContent=t('pendingCredits');
   // Overlays de error de licencia (solo default estático — _showLicError() sobreescribe con el mensaje real)
   const _licErrTitle=el('lic-err-title');if(_licErrTitle&&_licErrTitle.textContent==='Error de licencia')_licErrTitle.textContent=t('licErrorTitle');
   const _licErrMsg=el('lic-err-msg');if(_licErrMsg&&_licErrMsg.textContent==='Contacta a soporte.')_licErrMsg.textContent=t('licContactSupport');
@@ -9452,39 +9506,86 @@ function refreshDashboard(){
   var dateEl=el('db-date');
   if(dateEl)dateEl.textContent=new Date().toLocaleDateString(lang,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   var today=new Date().toDateString();
+  var _yestD=new Date();_yestD.setDate(_yestD.getDate()-1);var yesterday=_yestD.toDateString();
   var sales=db.sales||[];
-  var todaySales=sales.filter(function(s){return s.status!=='cancelled'&&s.status!=='returned'&&new Date(s.date).toDateString()===today;});
+  var _validSale=function(s){return s.status!=='cancelled'&&s.status!=='returned';};
+  var todaySales=sales.filter(function(s){return _validSale(s)&&new Date(s.date).toDateString()===today;});
+  var ySales=sales.filter(function(s){return _validSale(s)&&new Date(s.date).toDateString()===yesterday;});
   var ventasHoy=todaySales.reduce(function(sum,s){return sum+(s.total||0);},0);
+  var ventasAyer=ySales.reduce(function(sum,s){return sum+(s.total||0);},0);
   var txCount=todaySales.length;
-  var pendingCred=sales.filter(function(s){return s.payMethod==='credit'&&s.creditStatus!=='paid'&&(s.total-(s.creditPaid||0))>0;});
-  var legacyCreds=(db.credits||[]).filter(function(c){return (c.total||0)-(c.paid||0)>0;});
-  var totalCred=pendingCred.reduce(function(sum,s){return sum+((s.total||0)-(s.creditPaid||0));},0)
-    +legacyCreds.reduce(function(sum,c){return sum+((c.total||0)-(c.paid||0));},0);
-  var nowMs=Date.now();
-  var overdueCount=pendingCred.filter(function(s){return s.dueDate&&new Date(s.dueDate).getTime()<nowMs;}).length
-    +legacyCreds.filter(function(c){return c.dueDate&&new Date(c.dueDate).getTime()<nowMs;}).length;
+  var txAyer=ySales.length;
+  var prodVendidosHoy=_dbSumQty(todaySales);
+  var prodVendidosAyer=_dbSumQty(ySales);
   var ticketProm=txCount>0?ventasHoy/txCount:0;
+  var gananciaHoy=_dbCalcProfit(todaySales);
   setEl('db-kpi-ventas',dolr(ventasHoy));
   setEl('db-kpi-tx',txCount.toString());
-  setEl('db-kpi-cred',dolr(totalCred));
-  var credKpiEl=el('db-kpi-cred');
-  if(credKpiEl){
-    var credSub=credKpiEl.nextElementSibling;
-    if(!credSub||!credSub.dataset.credSub){credSub=document.createElement('div');credSub.dataset.credSub='1';credKpiEl.parentNode.insertBefore(credSub,credKpiEl.nextSibling);}
-    credSub.textContent=overdueCount>0?('⚠ '+overdueCount+' vencido'+(overdueCount>1?'s':'')):'';
-    credSub.style.cssText=overdueCount>0?'font-size:var(--fs-2xs,.65rem);color:var(--rd);margin-top:2px':'';
-  }
+  setEl('db-kpi-ganancia',dolr(gananciaHoy));
   setEl('db-kpi-ticket',dolr(ticketProm));
-  var allTimeTotal=sales.filter(function(s){return s.status!=='cancelled'&&s.status!=='returned';}).reduce(function(sum,s){return sum+(s.total||0);},0);
-  var allTimeTx=sales.filter(function(s){return s.status!=='cancelled'&&s.status!=='returned';}).length;
-  setEl('db-kpi-alltime',dolr(allTimeTotal));
-  setEl('db-kpi-alltime-sub',allTimeTx+' venta'+(allTimeTx!==1?'s':'')+' totales');
+  setEl('db-kpi-prodsold',prodVendidosHoy.toString());
+  // Tendencia ▲/▼ vs ayer: solo en las 3 métricas con dato 100% confiable
+  // (Ganancia es aproximada, Ticket promedio no la pidió el usuario).
+  _dbSetTrend('kpi-trend-ventas',ventasHoy,ventasAyer);
+  _dbSetTrend('kpi-trend-tx',txCount,txAyer);
+  _dbSetTrend('kpi-trend-prodsold',prodVendidosHoy,prodVendidosAyer);
   _renderDbChart();
-  _renderDbTop5();
   _renderDbStock();
   _renderDbPayMethods();
+  _renderDbCategoryChart();
   _renderDbRecentSales();
+  _renderDbCredits();
+  _renderDbInvSummary();
   _renderDbSparklines();
+}
+// Suma de unidades vendidas (item.qty) en un conjunto de ventas ya filtrado
+// por estado válido (no cancelada/no devuelta) — usado para "Productos
+// vendidos" hoy/ayer.
+function _dbSumQty(salesArr){
+  var n=0;
+  (salesArr||[]).forEach(function(s){(s.items||[]).forEach(function(it){n+=(it.qty||1);});});
+  return n;
+}
+// Ganancia aproximada: usa el costo ACTUAL de cada producto (db.products),
+// no el costo al momento de la venta (no se guarda un snapshot histórico).
+// Solo funciona con datos LOCALES — una venta sincronizada desde otra PC
+// pierde su id/costo en el camino (_buildSlim no los manda), así que esos
+// ítems simplemente no suman a la ganancia (ver auditoría previa a este
+// commit). Ítems de producto sin costo cargado (p.cost==null) tampoco
+// suman — no hay con qué calcular su margen.
+function _dbCalcProfit(salesArr){
+  var profit=0;
+  var pmap={};(db.products||[]).forEach(function(p){pmap[String(p.id)]=p;});
+  (salesArr||[]).forEach(function(s){
+    (s.items||[]).forEach(function(it){
+      if(it.isCombo&&it.comboItems&&it.comboItems.length){
+        var comboCost=0,resolved=false;
+        it.comboItems.forEach(function(ci){
+          var sp=pmap[String(ci.productId)];
+          if(sp&&sp.cost!=null){comboCost+=(sp.cost||0)*(ci.qty||1);resolved=true;}
+        });
+        if(resolved)profit+=((it.price||0)-comboCost)*(it.qty||1);
+      }else{
+        var p=pmap[String(it.id)];
+        if(p&&p.cost!=null)profit+=((it.price||0)-(p.cost||0))*(it.qty||1);
+      }
+    });
+  });
+  return profit;
+}
+// Pill de tendencia ▲/▼ % — color SIEMPRE semántico (verde=sube,
+// rojo=baja), independiente del acento propio de cada KPI card.
+function _dbTrendHtml(curr,prev){
+  if(prev<=0)return curr>0?('<span class="kpi-trend up">▲ '+t('dbTrendNew')+'</span>'):null;
+  var pct=((curr-prev)/prev)*100;
+  var dir=pct>0.5?'up':(pct<-0.5?'down':'flat');
+  var arrow=dir==='up'?'▲':(dir==='down'?'▼':'—');
+  return '<span class="kpi-trend '+dir+'">'+arrow+' '+Math.abs(pct).toFixed(0)+'% '+t('dbVsAyer')+'</span>';
+}
+function _dbSetTrend(id,curr,prev){
+  var e=el(id);if(!e)return;
+  var html=_dbTrendHtml(curr,prev);
+  if(html){e.innerHTML=html;e.style.display='';}else{e.style.display='none';}
 }
 function _shortNum(n){
   if(n>=1000000)return '$'+(n/1000000).toFixed(1)+'M';
@@ -9629,27 +9730,25 @@ function _renderDbTop5(){
 }
 function _renderDbCredits(){
   var el6=el('db-credits-list');if(!el6)return;
-  var credits=(db.credits||[]).filter(function(c){return (c.total||0)-(c.paid||0)>0.005;});
-  if(!credits.length){el6.innerHTML='<p style="font-size:.75rem;color:var(--gn);padding:6px 0">✓ Sin créditos pendientes</p>';return;}
-  var sorted=credits.slice().sort(function(a,b){
-    var da=a.creditDueDate?new Date(a.creditDueDate):new Date(a.date);
-    var db2=b.creditDueDate?new Date(b.creditDueDate):new Date(b.date);
+  // Antes esta función solo miraba db.credits (créditos legacy) e ignoraba
+  // las ventas a crédito (db.sales con payMethod='credit') — nunca se
+  // notó porque el elemento #db-credits-list no existía en ningún HTML
+  // hasta este commit. _getPendingCredits() ya mergea ambas fuentes sin
+  // duplicar (es la misma función que usa el panel de Créditos real).
+  var sorted=_getPendingCredits().slice().sort(function(a,b){
+    var da=a.dueDate?new Date(a.dueDate):new Date(a.date);
+    var db2=b.dueDate?new Date(b.dueDate):new Date(b.date);
     return da-db2;
   }).slice(0,8);
+  if(!sorted.length){el6.innerHTML='<p style="font-size:.75rem;color:var(--gn);padding:6px 0">✓ '+t('noPendingCredits')+'</p>';return;}
   el6.innerHTML='<div style="display:flex;flex-direction:column;gap:5px">'
     +sorted.map(function(c){
       var pending=(c.total||0)-(c.paid||0);
-      var due=c.creditDueDate?new Date(c.creditDueDate):null;
-      var daysLeft=due?Math.ceil((due-Date.now())/864e5):null;
-      var dueStr=daysLeft!=null?(daysLeft<0?'<span style="color:#ef4444;font-weight:700">Vencido '+Math.abs(daysLeft)+'d</span>'
-        :(daysLeft===0?'<span style="color:#f59e0b;font-weight:700">Vence hoy</span>'
-        :(daysLeft<=3?'<span style="color:#f59e0b">'+daysLeft+'d</span>'
-        :'<span style="color:var(--tx3)">'+daysLeft+'d</span>'))):'';
       return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--b1)">'
-        +'<div><div style="font-size:.78rem;font-weight:600;color:var(--tx);overflow:hidden;white-space:nowrap;max-width:100px;text-overflow:ellipsis">'+escHtml(c.client||'—')+'</div>'
-        +(dueStr?'<div style="font-size:.68rem;margin-top:1px">'+dueStr+'</div>':'')
+        +'<div><div style="font-size:.78rem;font-weight:600;color:var(--tx);overflow:hidden;white-space:nowrap;max-width:120px;text-overflow:ellipsis">'+escHtml(c.client||'—')+'</div>'
+        +(c.dueDate?'<div style="margin-top:2px">'+_dueBadge(c.dueDate)+'</div>':'')
         +'</div>'
-        +'<span style="font-size:.8rem;font-family:monospace;font-weight:700;color:#ef4444">'+dolr(pending)+'</span>'
+        +'<span style="font-size:.8rem;font-family:monospace;font-weight:700;color:var(--rd)">'+dolr(pending)+'</span>'
         +'</div>';
     }).join('')+'</div>';
 }
@@ -9731,24 +9830,36 @@ function _renderDbSparklines(){
       +'<polyline points="'+points+'" fill="none" style="stroke:'+color+'" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>'
       +'</svg>';
   }
-  function dayTotals(ds){return sales.filter(function(s){return s.status!=='cancelled'&&s.status!=='returned'&&new Date(s.date).toDateString()===ds;}).reduce(function(a,s){return a+(s.total||0);},0);}
-  function dayCount(ds){return sales.filter(function(s){return s.status!=='cancelled'&&s.status!=='returned'&&new Date(s.date).toDateString()===ds;}).length;}
-  function dayTicket(ds){var ss=sales.filter(function(s){return s.status!=='cancelled'&&s.status!=='returned'&&new Date(s.date).toDateString()===ds;});return ss.length?ss.reduce(function(a,s){return a+(s.total||0);},0)/ss.length:0;}
+  function daySales(ds){return sales.filter(function(s){return s.status!=='cancelled'&&s.status!=='returned'&&new Date(s.date).toDateString()===ds;});}
+  function dayTotals(ds){return daySales(ds).reduce(function(a,s){return a+(s.total||0);},0);}
+  function dayCount(ds){return daySales(ds).length;}
+  function dayTicket(ds){var ss=daySales(ds);return ss.length?ss.reduce(function(a,s){return a+(s.total||0);},0)/ss.length:0;}
   var vV=ddays.map(dayTotals);
   var vT=ddays.map(dayCount);
   var vTk=ddays.map(dayTicket);
+  // _dbCalcProfit/_dbSumQty se reutilizan tal cual (mismas funciones que
+  // arma refreshDashboard() para "hoy") — no se duplica la lógica.
+  var vG=ddays.map(function(ds){return _dbCalcProfit(daySales(ds));});
+  var vP=ddays.map(function(ds){return _dbSumQty(daySales(ds));});
   // Cada sparkline usa el mismo acento que su KPI card (ver #dashboard-screen
-  // en el <style>: Ventas=--ac, Transacciones=--cy, Créditos=--am, Ticket=--gn).
+  // en el <style>: Ventas=--ac, Transacciones=--cy, Ganancia=--gn,
+  // Ticket=--am, Productos vendidos=--rd).
   var elV=el('kpi-spark-ventas');if(elV)elV.innerHTML=makeSpark(vV,'var(--ac)');
   var elT=el('kpi-spark-tx');if(elT)elT.innerHTML=makeSpark(vT,'var(--cy)');
-  var elC=el('kpi-spark-cred');if(elC)elC.innerHTML=makeSpark(vV,'var(--am)');
-  var elTk=el('kpi-spark-ticket');if(elTk)elTk.innerHTML=makeSpark(vTk,'var(--gn)');
+  var elG=el('kpi-spark-ganancia');if(elG)elG.innerHTML=makeSpark(vG,'var(--gn)');
+  var elTk=el('kpi-spark-ticket');if(elTk)elTk.innerHTML=makeSpark(vTk,'var(--am)');
+  var elP=el('kpi-spark-prodsold');if(elP)elP.innerHTML=makeSpark(vP,'var(--rd)');
 }
 function _renderDbStock(){
   var stkEl=el('db-stock');if(!stkEl)return;
   var prods=db.products||[];
   if(!prods.length){stkEl.innerHTML='<p style="font-size:.75rem;color:var(--tx3);padding:8px">'+t('noProducts')+'</p>';return;}
-  var sorted=prods.slice().sort(function(a,b){return (a.stock||0)-(b.stock||0);}).slice(0,14);
+  // Filtrado a stock REALMENTE bajo (amarillo+rojo del semáforo), no los 14
+  // con menos stock sin importar si están sanos — así matchea el título
+  // "Productos con stock bajo" en vez de ser una lista arbitraria de 14.
+  var low=prods.filter(function(p){var stk=p.stock||0;var min=p.minStock||5;return stk<=min;});
+  if(!low.length){stkEl.innerHTML='<p style="font-size:.75rem;color:var(--gn);padding:8px">✓ '+t('invStkOk')+'</p>';return;}
+  var sorted=low.slice().sort(function(a,b){return (a.stock||0)-(b.stock||0);}).slice(0,30);
   var rows=sorted.map(function(p){
     var stk=p.stock||0;var min=p.minStock||5;
     var clr=stk<=0?'#EF4444':(stk<=min?'#F59E0B':'#22C55E');
@@ -9756,6 +9867,76 @@ function _renderDbStock(){
     return '<tr><td><span class="stk-dot" style="background:'+clr+'"></span>'+name+'</td><td style="color:'+clr+'">'+stk+'</td></tr>';
   }).join('');
   stkEl.innerHTML='<table><thead><tr><th>'+t('thProducto')+'</th><th style="text-align:right">'+t('thStock')+'</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+// Reusa exactamente las mismas fórmulas que renderInv() (pantalla de
+// Inventario) para los 4 mini-stats — no inventa un cálculo nuevo.
+function _renderDbInvSummary(){
+  var prods=db.products||[];
+  var active=0,low=0,none=0,val=0;
+  prods.forEach(function(p){
+    var stk=p.stock||0,min=p.minStock||5;
+    if(p.active!==false)active++;
+    if(stk<=0)none++;else if(stk<=min)low++;
+    val+=(p.price||0)*stk;
+  });
+  setEl('db-mini-active',active.toString());
+  setEl('db-mini-lowstock',low.toString());
+  setEl('db-mini-nostock',none.toString());
+  setEl('db-mini-value',dolr(val));
+}
+// Ventas por categoría: une item.id→db.products.cat→db.categories.name.
+// Solo funciona con datos LOCALES (mismo límite que _dbCalcProfit — el
+// sync no manda id). Productos borrados quedan en "Sin categoría"; los
+// combos se cuentan aparte (no hay precio por sub-ítem para repartir su
+// ingreso entre categorías reales sin inventar un criterio).
+function _renderDbCategoryChart(){
+  var catEl=el('db-category-chart');if(!catEl)return;
+  var today=new Date().toDateString();
+  var sales=(db.sales||[]).filter(function(s){return s.status!=='cancelled'&&s.status!=='returned'&&new Date(s.date).toDateString()===today;});
+  if(!sales.length){catEl.innerHTML='<p style="font-size:.75rem;color:var(--tx3);padding:6px 0">'+t('noSalesToday')+'</p>';return;}
+  var pmap={};(db.products||[]).forEach(function(p){pmap[String(p.id)]=p;});
+  var cmap={};(db.categories||[]).forEach(function(c){cmap[String(c.id)]=c.name;});
+  var totals={};
+  var addTo=function(name,amt){totals[name]=(totals[name]||0)+amt;};
+  sales.forEach(function(s){
+    (s.items||[]).forEach(function(it){
+      var amt=(it.price||0)*(it.qty||1);
+      if(it.isCombo){addTo(t('combosCategory'),amt);return;}
+      var p=pmap[String(it.id)];
+      var catName=p&&p.cat&&cmap[String(p.cat)]?cmap[String(p.cat)]:t('noCategory');
+      addTo(catName,amt);
+    });
+  });
+  var entries=Object.keys(totals).map(function(k){return {name:k,val:totals[k]};}).sort(function(a,b){return b.val-a.val;});
+  var total=entries.reduce(function(s,e){return s+e.val;},0);
+  if(!total){catEl.innerHTML='<p style="font-size:.75rem;color:var(--tx3);padding:6px 0">'+t('noSalesToday')+'</p>';return;}
+  var palette=['var(--ac)','var(--cy)','var(--gn)','var(--am)','var(--rd)','var(--tx3)'];
+  var stops='',acc=0;
+  entries.forEach(function(e,i){
+    var pct=e.val/total*100;var clr=palette[i%palette.length];
+    stops+=clr+' '+acc.toFixed(1)+'% '+(acc+pct).toFixed(1)+'%,';
+    acc+=pct;
+  });
+  stops=stops.slice(0,-1);
+  var legend=entries.slice(0,6).map(function(e,i){
+    var pct=Math.round(e.val/total*100);var clr=palette[i%palette.length];
+    return '<div style="display:flex;align-items:center;gap:6px;font-size:.74rem;margin-bottom:6px">'
+      +'<div style="width:9px;height:9px;border-radius:50%;background:'+clr+';flex-shrink:0"></div>'
+      +'<span style="color:var(--tx2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(e.name)+'</span>'
+      +'<span style="font-weight:700;color:var(--tx)">'+pct+'%</span>'
+      +'<span style="font-size:.68rem;color:var(--tx3);margin-left:4px">'+dolr(e.val)+'</span>'
+      +'</div>';
+  }).join('');
+  catEl.innerHTML='<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">'
+    +'<div style="flex-shrink:0;position:relative;width:140px;height:140px">'
+    +'<div style="width:140px;height:140px;border-radius:50%;background:conic-gradient('+stops+');box-shadow:var(--glow-ac)"></div>'
+    +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">'
+    +'<div style="width:84px;height:84px;border-radius:50%;background:var(--s2);display:flex;flex-direction:column;align-items:center;justify-content:center">'
+    +'<div style="font-size:.6rem;color:var(--tx3);font-weight:600;letter-spacing:.4px">TOTAL</div>'
+    +'<div style="font-size:.88rem;font-weight:800;color:var(--tx)">'+dolr(total)+'</div>'
+    +'</div></div></div>'
+    +'<div style="flex:1;min-width:120px">'+legend+'</div>'
+    +'</div>';
 }
 
 // ── INVENTORY VIEW TOGGLE ─────────────────────────────────────────────────────
