@@ -101,12 +101,14 @@ body.sb-collapsed .sb-ico{width:auto;}
 .logo-txt{font-weight:800;font-size:.98rem;}
 .top-mid{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;}
 .clk{font-family:Courier New,monospace;font-size:1rem;color:var(--tx2);background:var(--s2);padding:4px 10px;border-radius:var(--rs);border:1.5px solid var(--b1);}
+#clk-date::before{content:"📅 ";font-family:initial;}
+#clk::before{content:"🕐 ";font-family:initial;}
 .lic-badge{font-size:.72rem;padding:3px 9px;border-radius:var(--rs);font-weight:600;border:1.5px solid;}
 .lic-ok{background:var(--gnb);border-color:var(--gn);color:var(--gn);}
 .lic-warn{background:var(--amb);border-color:var(--am);color:var(--am);}
 .lic-err{background:var(--rdb);border-color:var(--rd);color:var(--rd);}
-#refresh-btn,#calc-btn{background:none;border:none;cursor:pointer;font-size:1.05rem;padding:4px 5px;position:relative;color:var(--tx2);line-height:1;border-radius:8px;display:flex;align-items:center;}
-#refresh-btn:hover,#calc-btn:hover{background:var(--s2);}
+#refresh-btn,#calc-btn,#notif-btn{background:none;border:none;cursor:pointer;font-size:1.05rem;padding:4px 5px;position:relative;color:var(--tx2);line-height:1;border-radius:8px;display:flex;align-items:center;}
+#refresh-btn:hover,#calc-btn:hover,#notif-btn:hover{background:var(--s2);}
 #notif-btn,#note-btn{position:relative;}
 #notif-badge,#note-badge{display:none;position:static;margin-left:auto;background:#ef4444;color:#fff;border-radius:50%;font-size:.64rem;font-weight:800;min-width:17px;height:17px;align-items:center;justify-content:center;padding:0 3px;line-height:1;flex-shrink:0;}
 #notif-panel{display:none;position:fixed;top:60px;right:10px;width:320px;max-height:440px;overflow-y:auto;background:var(--s1);border:1.5px solid var(--b2);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.45);z-index:8501;}
@@ -128,6 +130,8 @@ body.sb-collapsed .sb-ico{width:auto;}
   --bg:#0a0e1a; --s1:#111729; --s2:#1a2036; --s3:#232a45;
   --tx3:#a6acc9;
   --cy:#22d3ee; --cyb:rgba(34,211,238,.14);
+  --ac2:#2563eb;
+  --tl:#14b8a6; --tlb:rgba(20,184,166,.14);
   --r-card:18px; --r-pill:999px;
   --sh-1:0 1px 2px rgba(0,0,0,.35);
   --sh-2:0 8px 24px -10px rgba(0,0,0,.55);
@@ -136,6 +140,7 @@ body.sb-collapsed .sb-ico{width:auto;}
   --glow-gn:0 0 0 1px rgba(52,211,153,.18),0 8px 20px -8px rgba(52,211,153,.35);
   --glow-am:0 0 0 1px rgba(251,191,36,.18),0 8px 20px -8px rgba(251,191,36,.35);
   --glow-rd:0 0 0 1px rgba(248,113,113,.18),0 8px 20px -8px rgba(248,113,113,.35);
+  --glow-tl:0 0 0 1px rgba(20,184,166,.18),0 8px 20px -8px rgba(20,184,166,.35);
   --sp-2:8px; --sp-3:12px; --sp-4:16px;
   --fs-2xs:.68rem; --fs-xs:.74rem; --fs-sm:.82rem;
   --fw-bold:700; --fw-black:800; --ls-label:.06em;
@@ -144,12 +149,15 @@ body.light #app-main{
   --bg:#eef1f8; --s1:#ffffff; --s2:#e7ebf5; --s3:#dbe0f0;
   --tx3:#565f8c;
   --cy:#0e7490; --cyb:rgba(14,116,144,.10);
+  --ac2:#1d4ed8;
+  --tl:#0d9488; --tlb:rgba(13,148,136,.10);
   --sh-1:0 1px 2px rgba(20,25,60,.08); --sh-2:0 8px 24px -10px rgba(20,25,60,.18);
   --glow-ac:0 0 0 1px rgba(30,58,138,.14),0 8px 20px -8px rgba(30,58,138,.20);
   --glow-cy:0 0 0 1px rgba(14,116,144,.14),0 8px 20px -8px rgba(14,116,144,.20);
   --glow-gn:0 0 0 1px rgba(4,120,87,.14),0 8px 20px -8px rgba(4,120,87,.20);
   --glow-am:0 0 0 1px rgba(146,64,14,.14),0 8px 20px -8px rgba(146,64,14,.20);
   --glow-rd:0 0 0 1px rgba(185,28,28,.14),0 8px 20px -8px rgba(185,28,28,.20);
+  --glow-tl:0 0 0 1px rgba(13,148,136,.14),0 8px 20px -8px rgba(13,148,136,.20);
 }
 .app{display:flex;flex:1;overflow:hidden;background:var(--bg);}
 .ppanel{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:2px solid var(--b1);}
@@ -217,18 +225,17 @@ body.light #app-main{
 .pbtn.hidden{display:none!important;}
 body.light .pbtn{color:#1a1a1a;border-color:#cccccc;background:#f4f4f8;font-weight:700;}
 body.light .pbtn.on{color:#ffffff;border-color:#1e3a8a;background:#1e3a8a;}
-/* Métodos de pago del panel de orden (NO el modal de cobro/descuento, que
-   reusa .pbtn pero es otra pantalla — se deja sin tocar): cada botón lleva
-   su propio --tint/--acc (mismo patrón que las KPI cards del Dashboard).
-   Reposo = tinte suave del color propio; seleccionado = color sólido. */
-#app-main .pbtn,body.light #app-main .pbtn{background:var(--tint,var(--s2));color:var(--acc,var(--tx2));border-color:var(--b1);}
-#app-main .pbtn.on,body.light #app-main .pbtn.on{background:var(--acc,var(--ac));border-color:var(--acc,var(--ac));color:#fff;}
+/* Métodos de pago del panel de orden y del modal de cobro: cada botón
+   lleva su propio --acc/--glow (mismo patrón que las KPI cards del
+   Dashboard). Sólido + brillo siempre (no solo al seleccionar); el
+   seleccionado se distingue con un anillo blanco además del glow. */
+#app-main .pbtn,#ov-checkout .pbtn,body.light #app-main .pbtn,body.light #ov-checkout .pbtn{background:var(--acc,var(--s2));color:var(--acc-fg,#fff);border-color:transparent;box-shadow:var(--glow,none);}
+#app-main .pbtn.on,#ov-checkout .pbtn.on,body.light #app-main .pbtn.on,body.light #ov-checkout .pbtn.on{box-shadow:var(--glow,none),inset 0 0 0 2px rgba(255,255,255,.85);}
 /* Transferencia en el modal de cobro: mismo cyan que el botón del panel
    principal. #ov-checkout no hereda --cy de #app-main (es un overlay
    aparte), así que se define acá también. */
-#ov-checkout{--cy:#22d3ee;}
-body.light #ov-checkout{--cy:#0e7490;}
-#ck-transf.on{background:var(--cy);border-color:var(--cy);}
+#ov-checkout{--cy:#22d3ee;--ac2:#2563eb;}
+body.light #ov-checkout{--cy:#0e7490;--ac2:#1d4ed8;}
 /* ── Light mode: contraste, tamaño y pesos ── */
 body.light .lbl,body.light .slbl,body.light .plbl,body.light .sclbl{color:#333344;font-weight:700;}
 body.light .ci-name{font-size:14px;font-weight:600;color:var(--tx);}
@@ -703,11 +710,11 @@ body.light #dashboard-screen{
       <div>
         <div class="plbl" style="margin-bottom:5px" id="pay-lbl">Método de pago</div>
         <div class="pbtns">
-          <button class="pbtn on" id="pb-cash" onclick="setPay('cash',this)" style="--tint:var(--gnb);--acc:var(--gn)"><span class="pico">💵</span><span id="pb-cash-txt">Efectivo</span></button>
-          <button class="pbtn" id="pb-card" onclick="setPay('card',this)" style="--tint:var(--acg);--acc:var(--ac)"><span class="pico">💳</span><span id="pb-card-txt">Tarjeta</span></button>
-          <button class="pbtn" id="pb-transf" onclick="setPay('transf',this)" style="--tint:var(--cyb);--acc:var(--cy)"><span class="pico">📲</span><span id="pb-transf-txt">Transferencia</span></button>
-          <button class="pbtn" id="pb-oa" onclick="openSaveOA()"><span class="pico">📖</span><span id="pb-oa-txt">Cta. Abierta</span></button>
-          <button class="pbtn" id="pb-credit" onclick="openCreditSale()" style="display:none;--tint:var(--amb);--acc:var(--am)"><span class="pico">💰</span><span id="pb-credit-txt">Crédito</span></button>
+          <button class="pbtn on" id="pb-cash" onclick="setPay('cash',this)" style="--acc:var(--gn);--glow:var(--glow-gn)"><span class="pico">💵</span><span id="pb-cash-txt">Efectivo</span></button>
+          <button class="pbtn" id="pb-card" onclick="setPay('card',this)" style="--acc:var(--ac2);--glow:var(--glow-ac)"><span class="pico">💳</span><span id="pb-card-txt">Tarjeta</span></button>
+          <button class="pbtn" id="pb-transf" onclick="setPay('transf',this)" style="--acc:var(--cy);--glow:var(--glow-cy)"><span class="pico">📲</span><span id="pb-transf-txt">Transferencia</span></button>
+          <button class="pbtn" id="pb-oa" onclick="openSaveOA()" style="--acc:var(--tl);--glow:var(--glow-tl)"><span class="pico">📖</span><span id="pb-oa-txt">Cta. Abierta</span></button>
+          <button class="pbtn" id="pb-credit" onclick="openCreditSale()" style="display:none;--acc:var(--am);--acc-fg:#1e293b;--glow:var(--glow-am)"><span class="pico">💰</span><span id="pb-credit-txt">Crédito</span></button>
         </div>
 
 
@@ -1737,9 +1744,9 @@ body.light #dashboard-screen{
     <div class="mb">
       <div class="slbl" style="margin-bottom:8px" id="ck-method-lbl">Método de pago</div>
       <div class="pbtns" style="margin-bottom:14px">
-        <button class="pbtn on" id="ck-cash" onclick="ckSetPay('cash',this)"><span id="ck-cash-ico">💵</span> <span id="ck-cash-txt">Efectivo</span></button>
-        <button class="pbtn" id="ck-card" onclick="ckSetPay('card',this)"><span id="ck-card-ico">💳</span> <span id="ck-card-txt">Tarjeta</span></button>
-        <button class="pbtn" id="ck-transf" onclick="ckSetPay('transf',this)"><span id="ck-transf-ico">📲</span> <span id="ck-transf-txt">Transferencia</span></button>
+        <button class="pbtn on" id="ck-cash" onclick="ckSetPay('cash',this)" style="--acc:var(--gn);--glow:var(--glow-gn)"><span id="ck-cash-ico">💵</span> <span id="ck-cash-txt">Efectivo</span></button>
+        <button class="pbtn" id="ck-card" onclick="ckSetPay('card',this)" style="--acc:var(--ac2);--glow:var(--glow-ac)"><span id="ck-card-ico">💳</span> <span id="ck-card-txt">Tarjeta</span></button>
+        <button class="pbtn" id="ck-transf" onclick="ckSetPay('transf',this)" style="--acc:var(--cy);--glow:var(--glow-cy)"><span id="ck-transf-ico">📲</span> <span id="ck-transf-txt">Transferencia</span></button>
         <button class="pbtn" id="ck-split" onclick="ckSetPay('split',this)">⚡ <span id="ck-split-txt">Dividir</span></button>
       </div>
       <div id="ck-split-section" style="display:none;margin-bottom:10px">
