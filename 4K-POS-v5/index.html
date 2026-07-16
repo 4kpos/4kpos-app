@@ -131,21 +131,23 @@ body.sb-collapsed .sb-ico{width:auto;}
   --tx3:#a6acc9;
   --cy:#22d3ee; --cyb:rgba(34,211,238,.14);
   --ac2:#1d4ed8;
-  --gn2:#22c55e;
-  --gld:#eab308;
-  --tl:#14b8a6;
+  --gn2:#16a34a;
+  --cy2:#1596ab;
+  --gld:#ca9a1f;
+  --tl:#128173;
   --r-card:18px; --r-pill:999px;
   --sh-1:0 1px 2px rgba(0,0,0,.35);
   --sh-2:0 8px 24px -10px rgba(0,0,0,.55);
   --glow-ac:0 0 0 1px rgba(59,130,246,.18),0 8px 20px -8px rgba(59,130,246,.35);
   --glow-ac2:0 0 0 1px rgba(29,78,216,.25),0 8px 22px -6px rgba(29,78,216,.5);
   --glow-cy:0 0 0 1px rgba(34,211,238,.25),0 8px 22px -6px rgba(34,211,238,.5);
+  --glow-cy2:0 0 0 1px rgba(21,150,171,.25),0 8px 22px -6px rgba(21,150,171,.5);
   --glow-gn:0 0 0 1px rgba(52,211,153,.18),0 8px 20px -8px rgba(52,211,153,.35);
-  --glow-gn2:0 0 0 1px rgba(34,197,94,.25),0 8px 22px -6px rgba(34,197,94,.5);
+  --glow-gn2:0 0 0 1px rgba(22,163,74,.25),0 8px 22px -6px rgba(22,163,74,.5);
   --glow-am:0 0 0 1px rgba(251,191,36,.18),0 8px 20px -8px rgba(251,191,36,.35);
-  --glow-gld:0 0 0 1px rgba(234,179,8,.25),0 8px 22px -6px rgba(234,179,8,.5);
+  --glow-gld:0 0 0 1px rgba(202,154,31,.25),0 8px 22px -6px rgba(202,154,31,.5);
   --glow-rd:0 0 0 1px rgba(248,113,113,.18),0 8px 20px -8px rgba(248,113,113,.35);
-  --glow-tl:0 0 0 1px rgba(20,184,166,.25),0 8px 22px -6px rgba(20,184,166,.5);
+  --glow-tl:0 0 0 1px rgba(18,129,115,.25),0 8px 22px -6px rgba(18,129,115,.5);
   --sp-2:8px; --sp-3:12px; --sp-4:16px;
   --fs-2xs:.68rem; --fs-xs:.74rem; --fs-sm:.82rem;
   --fw-bold:700; --fw-black:800; --ls-label:.06em;
@@ -244,13 +246,17 @@ body.light .pbtn.on{color:#ffffff;border-color:#1e3a8a;background:#1e3a8a;}
 #app-main .pbtn:hover,#ov-checkout .pbtn:hover,body.light #app-main .pbtn:hover,body.light #ov-checkout .pbtn:hover{box-shadow:var(--glow,none);}
 #app-main .pbtn.on,#ov-checkout .pbtn.on,body.light #app-main .pbtn.on,body.light #ov-checkout .pbtn.on{box-shadow:inset 0 0 0 2px rgba(255,255,255,.85);}
 #app-main .pbtn.on:hover,#ov-checkout .pbtn.on:hover,body.light #app-main .pbtn.on:hover,body.light #ov-checkout .pbtn.on:hover{box-shadow:var(--glow,none),inset 0 0 0 2px rgba(255,255,255,.85);}
+/* Dcto no es un método de pago — no sigue la paleta sólida de arriba,
+   así que necesita su propio contraste (el fallback --acc-fg:#fff se veía
+   invisible en tema claro sobre --s2 casi blanco). */
+#app-main #disc-btn,body.light #app-main #disc-btn{background:var(--s3);color:var(--tx2);border:1.5px solid var(--b2);}
 /* Transferencia en el modal de cobro: mismo cyan que el botón del panel
    principal. #ov-checkout no hereda --cy de #app-main (es un overlay
    aparte), así que se define acá también. */
-#ov-checkout{--cy:#22d3ee;--ac2:#1d4ed8;--gn2:#22c55e;
+#ov-checkout{--cy:#22d3ee;--ac2:#1d4ed8;--gn2:#16a34a;--cy2:#1596ab;
   --glow-ac2:0 0 0 1px rgba(29,78,216,.25),0 8px 22px -6px rgba(29,78,216,.5);
-  --glow-gn2:0 0 0 1px rgba(34,197,94,.25),0 8px 22px -6px rgba(34,197,94,.5);
-  --glow-cy:0 0 0 1px rgba(34,211,238,.25),0 8px 22px -6px rgba(34,211,238,.5);}
+  --glow-gn2:0 0 0 1px rgba(22,163,74,.25),0 8px 22px -6px rgba(22,163,74,.5);
+  --glow-cy2:0 0 0 1px rgba(21,150,171,.25),0 8px 22px -6px rgba(21,150,171,.5);}
 body.light #ov-checkout{--cy:#0e7490;--ac2:#1e40af;--gn2:#16a34a;
   --glow-ac2:0 0 0 1px rgba(30,64,175,.2),0 8px 20px -6px rgba(30,64,175,.32);
   --glow-gn2:0 0 0 1px rgba(22,163,74,.2),0 8px 20px -6px rgba(22,163,74,.32);
@@ -731,7 +737,7 @@ body.light #dashboard-screen{
         <div class="pbtns">
           <button class="pbtn on" id="pb-cash" onclick="setPay('cash',this)" style="--acc:var(--gn2);--glow:var(--glow-gn2)"><span class="pico">💵</span><span id="pb-cash-txt">Efectivo</span></button>
           <button class="pbtn" id="pb-card" onclick="setPay('card',this)" style="--acc:var(--ac2);--glow:var(--glow-ac2)"><span class="pico">💳</span><span id="pb-card-txt">Tarjeta</span></button>
-          <button class="pbtn" id="pb-transf" onclick="setPay('transf',this)" style="--acc:var(--cy);--glow:var(--glow-cy)"><span class="pico">📲</span><span id="pb-transf-txt">Transferencia</span></button>
+          <button class="pbtn" id="pb-transf" onclick="setPay('transf',this)" style="--acc:var(--cy2,var(--cy));--glow:var(--glow-cy2,var(--glow-cy))"><span class="pico">📲</span><span id="pb-transf-txt">Transferencia</span></button>
           <button class="pbtn" id="pb-oa" onclick="openSaveOA()" style="--acc:var(--tl);--glow:var(--glow-tl)"><span class="pico">📖</span><span id="pb-oa-txt">Cta. Abierta</span></button>
           <button class="pbtn" id="pb-credit" onclick="openCreditSale()" style="display:none;--acc:var(--gld);--acc-fg:#1e293b;--glow:var(--glow-gld)"><span class="pico">💰</span><span id="pb-credit-txt">Crédito</span></button>
         </div>
@@ -1767,7 +1773,7 @@ body.light #dashboard-screen{
       <div class="pbtns" style="margin-bottom:14px">
         <button class="pbtn on" id="ck-cash" onclick="ckSetPay('cash',this)" style="--acc:var(--gn2);--glow:var(--glow-gn2)"><span id="ck-cash-ico">💵</span> <span id="ck-cash-txt">Efectivo</span></button>
         <button class="pbtn" id="ck-card" onclick="ckSetPay('card',this)" style="--acc:var(--ac2);--glow:var(--glow-ac2)"><span id="ck-card-ico">💳</span> <span id="ck-card-txt">Tarjeta</span></button>
-        <button class="pbtn" id="ck-transf" onclick="ckSetPay('transf',this)" style="--acc:var(--cy);--glow:var(--glow-cy)"><span id="ck-transf-ico">📲</span> <span id="ck-transf-txt">Transferencia</span></button>
+        <button class="pbtn" id="ck-transf" onclick="ckSetPay('transf',this)" style="--acc:var(--cy2,var(--cy));--glow:var(--glow-cy2,var(--glow-cy))"><span id="ck-transf-ico">📲</span> <span id="ck-transf-txt">Transferencia</span></button>
         <button class="pbtn" id="ck-split" onclick="ckSetPay('split',this)">⚡ <span id="ck-split-txt">Dividir</span></button>
       </div>
       <div id="ck-split-section" style="display:none;margin-bottom:10px">
