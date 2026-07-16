@@ -49,8 +49,10 @@ body.sb-collapsed #sb-toggle-btn{right:auto;left:50%;top:52px;transform:translat
 .sb-item.active{background:var(--acg);color:var(--ac);font-weight:var(--fw-bold);}
 .sb-ico{font-size:1.05rem;line-height:1;flex-shrink:0;width:20px;text-align:center;}
 .sb-lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-body.sb-collapsed .sb-lbl,body.sb-collapsed .sb-subrow,body.sb-collapsed .sb-brand-txt,body.sb-collapsed .sb-footer{display:none;}
+body.sb-collapsed .sb-lbl,body.sb-collapsed .sb-subrow,body.sb-collapsed .sb-brand-txt,body.sb-collapsed .sb-caja-card,body.sb-collapsed .sb-status,body.sb-collapsed .sb-credits-card,body.sb-collapsed .sb-user-name{display:none;}
 body.sb-collapsed .sb-item{justify-content:center;padding:9px 4px;}
+body.sb-collapsed .sb-footer{padding:10px 4px;}
+body.sb-collapsed .sb-user-card{justify-content:center;padding:8px 4px;gap:0;}
 body.sb-collapsed .sb-ico{width:auto;}
 .sb-subrow{display:flex;flex-direction:column;padding:0 10px 4px 38px;gap:1px;}
 .sb-sublink{background:none;border:none;color:var(--tx3);font-size:var(--fs-2xs);font-weight:600;text-align:left;cursor:pointer;padding:3px 0;}
@@ -4532,7 +4534,7 @@ function _syncRefreshActiveScreen(){
     curUser=found;
     el('login-screen').style.display='none';
     const _usrLblEl=el('usr-lbl');if(_usrLblEl){const _uln=found.name.replace(/</g,'&lt;');_usrLblEl.innerHTML='<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#1e3a8a;color:#fff;font-size:9px;font-weight:800;vertical-align:middle">'+found.name.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('')+'</span> '+_uln;}
-    const tbu=el('tb-user');if(tbu){const sn=found.name.replace(/</g,'&lt;');const ini=found.name.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('');tbu.innerHTML='<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#1e3a8a;border:1.5px solid rgba(255,255,255,.4);font-size:10px;font-weight:800;flex-shrink:0;vertical-align:middle;color:#fff">'+ini+'</span> '+sn;tbu.style.display='';};
+    const tbu=el('tb-user');if(tbu){const sn=found.name.replace(/</g,'&lt;');const ini=found.name.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('');tbu.innerHTML='<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#1e3a8a;border:1.5px solid rgba(255,255,255,.4);font-size:10px;font-weight:800;flex-shrink:0;vertical-align:middle;color:#fff">'+ini+'</span> <span class="sb-user-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+sn+'</span>';tbu.style.display='';};
     applyUserPerms();
 
     if(found.tempPassword){
