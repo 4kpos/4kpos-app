@@ -223,6 +223,12 @@ body.light .pbtn.on{color:#ffffff;border-color:#1e3a8a;background:#1e3a8a;}
    Reposo = tinte suave del color propio; seleccionado = color sólido. */
 #app-main .pbtn,body.light #app-main .pbtn{background:var(--tint,var(--s2));color:var(--acc,var(--tx2));border-color:var(--b1);}
 #app-main .pbtn.on,body.light #app-main .pbtn.on{background:var(--acc,var(--ac));border-color:var(--acc,var(--ac));color:#fff;}
+/* Transferencia en el modal de cobro: mismo cyan que el botón del panel
+   principal. #ov-checkout no hereda --cy de #app-main (es un overlay
+   aparte), así que se define acá también. */
+#ov-checkout{--cy:#22d3ee;}
+body.light #ov-checkout{--cy:#0e7490;}
+#ck-transf.on{background:var(--cy);border-color:var(--cy);}
 /* ── Light mode: contraste, tamaño y pesos ── */
 body.light .lbl,body.light .slbl,body.light .plbl,body.light .sclbl{color:#333344;font-weight:700;}
 body.light .ci-name{font-size:14px;font-weight:600;color:var(--tx);}
@@ -1733,6 +1739,7 @@ body.light #dashboard-screen{
       <div class="pbtns" style="margin-bottom:14px">
         <button class="pbtn on" id="ck-cash" onclick="ckSetPay('cash',this)"><span id="ck-cash-ico">💵</span> <span id="ck-cash-txt">Efectivo</span></button>
         <button class="pbtn" id="ck-card" onclick="ckSetPay('card',this)"><span id="ck-card-ico">💳</span> <span id="ck-card-txt">Tarjeta</span></button>
+        <button class="pbtn" id="ck-transf" onclick="ckSetPay('transf',this)"><span id="ck-transf-ico">📲</span> <span id="ck-transf-txt">Transferencia</span></button>
         <button class="pbtn" id="ck-split" onclick="ckSetPay('split',this)">⚡ <span id="ck-split-txt">Dividir</span></button>
       </div>
       <div id="ck-split-section" style="display:none;margin-bottom:10px">
@@ -3435,6 +3442,7 @@ function applyLang(){
   const _pbcashtxt=el('pb-cash-txt');if(_pbcashtxt)_pbcashtxt.textContent=t('cash');
   const _pbcardtxt=el('pb-card-txt');if(_pbcardtxt)_pbcardtxt.textContent=t('card');
   const _pbtransftxt=el('pb-transf-txt');if(_pbtransftxt)_pbtransftxt.textContent=t('payMethodTransf');
+  const _cktransftxt=el('ck-transf-txt');if(_cktransftxt)_cktransftxt.textContent=t('payMethodTransf');
   const _prodFilterAllTxt=el('prod-filter-all');if(_prodFilterAllTxt)_prodFilterAllTxt.textContent=t('all');
   const _prodFilterTopTxt=el('prod-filter-top');if(_prodFilterTopTxt)_prodFilterTopTxt.textContent=t('prodFilterTop');
   const _prodSortLbl=el('prod-sort-lbl');if(_prodSortLbl)_prodSortLbl.textContent=t('prodSortLbl');
@@ -5801,9 +5809,10 @@ function applyPayMethods(){
   const card=el('pb-card'),transf=el('pb-transf');
   if(card) card.style.display=cardOn?'flex':'none';
   if(transf) transf.style.display=transfOn?'flex':'none';
-  const ckCard=el('ck-card'),ckSplit=el('ck-split');
+  const ckCard=el('ck-card'),ckSplit=el('ck-split'),ckTransf=el('ck-transf');
   if(ckCard) ckCard.style.display=cardOn?'':'none';
   if(ckSplit) ckSplit.style.display=cardOn?'':'none';
+  if(ckTransf) ckTransf.style.display=transfOn?'':'none';
   const pbOa=el('pb-oa');
   if(pbOa) pbOa.style.display=oaOn?'':'none';
   if(!oaOn){const oaBtn=el('oa-counter-btn');if(oaBtn)oaBtn.style.display='none';}
@@ -5866,7 +5875,9 @@ function openCheckoutModal(){
   }else{discRow.style.display='none';}
   // Sync pay method buttons
   document.querySelectorAll('#ov-checkout .pbtn').forEach(b=>b.classList.remove('on'));
-  el(payMethod==='card'?'ck-card':'ck-cash').classList.add('on');
+  var _ckBtnMap={cash:'ck-cash',card:'ck-card',transf:'ck-transf',split:'ck-split'};
+  var _ckBtn=el(_ckBtnMap[payMethod]||'ck-cash');
+  if(_ckBtn)_ckBtn.classList.add('on');
   el('ck-cash-section').style.display=payMethod==='cash'?'':'none';
   calcChange();openOv('ov-checkout');
 }
