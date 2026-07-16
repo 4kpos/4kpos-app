@@ -49,10 +49,9 @@ body.sb-collapsed #sb-toggle-btn{right:auto;left:50%;top:52px;transform:translat
 .sb-item.active{background:var(--acg);color:var(--ac);font-weight:var(--fw-bold);}
 .sb-ico{font-size:1.05rem;line-height:1;flex-shrink:0;width:20px;text-align:center;}
 .sb-lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-body.sb-collapsed .sb-lbl,body.sb-collapsed .sb-subrow,body.sb-collapsed .sb-brand-txt,body.sb-collapsed .sb-caja-card,body.sb-collapsed .sb-status,body.sb-collapsed .sb-credits-card,body.sb-collapsed .sb-user-name{display:none;}
+body.sb-collapsed .sb-lbl,body.sb-collapsed .sb-subrow,body.sb-collapsed .sb-brand-txt,body.sb-collapsed .sb-caja-card,body.sb-collapsed .sb-status,body.sb-collapsed .sb-credits-card{display:none;}
 body.sb-collapsed .sb-item{justify-content:center;padding:9px 4px;}
 body.sb-collapsed .sb-footer{padding:10px 4px;}
-body.sb-collapsed .sb-user-card{justify-content:center;padding:8px 4px;gap:0;}
 body.sb-collapsed .sb-ico{width:auto;}
 .sb-subrow{display:flex;flex-direction:column;padding:0 10px 4px 38px;gap:1px;}
 .sb-sublink{background:none;border:none;color:var(--tx3);font-size:var(--fs-2xs);font-weight:600;text-align:left;cursor:pointer;padding:3px 0;}
@@ -69,8 +68,8 @@ body.sb-collapsed .sb-ico{width:auto;}
 .sb-credits-card{display:flex;align-items:center;justify-content:space-between;background:var(--amb);border:1px solid var(--am);border-radius:var(--r-card);padding:9px 10px;cursor:pointer;font-size:var(--fs-xs);font-weight:700;color:var(--am);width:100%;}
 .sb-credits-card:hover{box-shadow:var(--glow-ac);}
 .sb-credits-amt{font-family:'Consolas','Courier New',monospace;}
-.sb-user-card{display:flex;align-items:center;gap:4px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r-card);padding:8px 10px;cursor:pointer;width:100%;text-align:left;font-size:var(--fs-xs);font-weight:700;color:var(--tx);}
-.sb-user-card:hover{border-color:var(--ac);}
+.sb-nav-sep{height:1px;background:var(--b1);margin:8px 10px;flex-shrink:0;}
+.sb-version{font-size:var(--fs-2xs);color:var(--tx3);text-align:center;padding:6px 10px 2px;letter-spacing:.3px;}
 ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:var(--s2);}::-webkit-scrollbar-thumb{background:var(--ac);border-radius:3px;}
 #lang-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:none;align-items:center;justify-content:center;}
 .lsbox{background:var(--s1);border:1.5px solid var(--b2);border-radius:16px;padding:36px 40px;width:360px;text-align:center;}
@@ -609,12 +608,20 @@ body.light #dashboard-screen{
     <button class="sb-item" id="sbi-adm" onclick="sbNav('adm')"><span class="sb-ico">🔐</span><span class="sb-lbl" id="sbi-adm-lbl">Administración</span></button>
     <button class="sb-item" id="sbi-conta" onclick="sbNav('conta')"><span class="sb-ico">📒</span><span class="sb-lbl" id="sbi-conta-lbl">Contabilidad</span></button>
     <button class="sb-item" id="sbi-cfg" onclick="sbNav('cfg')"><span class="sb-ico">⚙️</span><span class="sb-lbl" id="sbi-cfg-lbl">Configuración</span></button>
+    <div class="sb-nav-sep"></div>
     <button class="sb-item" id="sbi-clock" onclick="sbNav('clock')" style="display:none"><span class="sb-ico">⏱</span><span class="sb-lbl" id="sbi-clock-lbl">Clock In/Out</span></button>
+    <button class="sb-item" id="sbi-logout" onclick="openLogout()"><span class="sb-ico">🚪</span><span class="sb-lbl" id="um-logout-txt">Cerrar turno</span></button>
+    <button class="sb-item" id="note-btn" onclick="openWriteNote()" title="Nota para el próximo turno"><span class="sb-ico">📬</span><span class="sb-lbl" id="um-note-txt">Nota para el próximo turno</span><span id="note-badge">1</span></button>
+    <button class="sb-item" onclick="openDrawer()"><span class="sb-ico">🗃️</span><span class="sb-lbl" id="um-drawer-txt">Registradora</span></button>
+    <button class="sb-item" onclick="_hamOpenDashMobile()"><span class="sb-ico">📱</span><span class="sb-lbl" id="um-dashmobile-txt">Dashboard Móvil</span></button>
+    <div class="sb-nav-sep"></div>
+    <button class="sb-item" id="lang-toggle-btn" onclick="switchLang()" title="Cambiar idioma / Switch language"><span class="sb-ico">🌐</span><span class="sb-lbl" id="um-idioma-txt">Idioma</span></button>
+    <button class="sb-item" id="tbtn-theme" onclick="toggleTheme()"><span class="sb-ico" id="tbtn-theme-icon">🌙</span><span class="sb-lbl" id="um-tema-txt">Tema</span></button>
+    <button class="sb-item" id="um-upd-btn" onclick="checkUpdates()"><span class="sb-ico">🔄</span><span class="sb-lbl" id="um-upd-txt">Buscar actualizaciones</span></button>
+    <div class="sb-version" id="hm-ver"></div>
   </nav>
   <div class="sb-footer">
     <div class="sb-caja-card">
-      <div class="sb-caja-lbl" id="sb-caja-lbl">Caja actual</div>
-      <div class="sb-caja-amt" id="sb-caja-amt">$0.00</div>
       <div class="sb-caja-time" id="sb-caja-time">—</div>
     </div>
     <div class="sb-status" id="sb-status"><span class="sb-status-dot" id="sb-status-dot"></span><span id="sb-status-txt">En línea</span></div>
@@ -622,23 +629,6 @@ body.light #dashboard-screen{
       <span id="sb-credits-lbl">Créditos</span>
       <span class="sb-credits-amt" id="sb-credits-amt">$0.00</span>
     </button>
-    <div style="position:relative">
-      <button class="sb-user-card" id="tb-user" onclick="toggleUserMenu(event)" style="display:none"></button>
-      <div id="user-menu" class="dropdown-menu">
-        <button class="ham-item" onclick="closeUserMenu();_hamOpenDashMobile()">📱 <span id="um-dashmobile-txt">Dashboard Móvil</span></button>
-        <button class="ham-item" id="note-btn" onclick="closeUserMenu();openWriteNote()" title="Nota para el próximo turno">📬 <span style="flex:1" id="um-note-txt">Nota para el próximo turno</span><span id="note-badge">1</span></button>
-        <div class="ham-sep"></div>
-        <button class="ham-item" id="lang-toggle-btn" onclick="closeUserMenu();switchLang()" title="Cambiar idioma / Switch language">🌐 <span id="um-idioma-txt">Idioma</span></button>
-        <button class="ham-item" id="tbtn-theme" onclick="closeUserMenu();toggleTheme()"><span id="tbtn-theme-icon">🌙</span> <span id="um-tema-txt">Tema</span></button>
-        <button class="ham-item" onclick="closeUserMenu();openDrawer()">🗃️ <span id="um-drawer-txt">Registradora</span></button>
-        <button class="ham-item" id="um-clock-item" style="display:none;color:#10b981" onclick="closeUserMenu();openClockQuick()">⏱ <span id="um-clock-txt">Clock In/Out</span></button>
-        <div class="ham-sep"></div>
-        <button class="ham-item" onclick="closeUserMenu();openLogout()" style="color:var(--rd)">🚪 <span id="um-logout-txt">Cerrar turno</span></button>
-        <div class="ham-sep" style="margin-top:2px"></div>
-        <button class="ham-item" id="um-upd-btn" onclick="checkUpdates()" style="color:var(--ac)">🔄 <span id="um-upd-txt">Buscar actualizaciones</span></button>
-        <div id="hm-ver" style="font-size:.7rem;color:var(--tx3);padding:2px 12px 6px;letter-spacing:.3px;text-align:center"></div>
-      </div>
-    </div>
   </div>
 </div>
 <div id="main-shell">
@@ -656,6 +646,7 @@ body.light #dashboard-screen{
     <button class="tbtn" id="calc-btn" onclick="toggleCalc()" title="Calculadora">🧮</button>
     <!-- Notificaciones: ícono propio en el topbar (antes vivía adentro del hamburgueso) -->
     <button class="tbtn" id="notif-btn" onclick="toggleNotifPanel()" title="Notificaciones" style="position:relative">🔔<span id="notif-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border-radius:50%;font-size:.62rem;font-weight:800;min-width:16px;height:16px;align-items:center;justify-content:center;padding:0 3px;line-height:1;box-shadow:0 0 0 2px var(--bg)">0</span></button>
+    <div id="tb-user" style="display:none;padding:4px 8px;border-radius:var(--rs);font-size:.82rem;font-weight:700;color:var(--tx2);white-space:nowrap"></div>
   </div>
 </div>
 
@@ -1004,6 +995,7 @@ body.light #dashboard-screen{
         <div style="background:var(--s2);border-radius:var(--rs);padding:12px;margin-bottom:10px">
           <div class="tog"><span class="tog-label" id="cfg-cash-lbl">💵 Efectivo</span><label class="tog-sw"><input type="checkbox" id="cfg-cash" checked disabled><span class="slider"></span></label></div>
           <div class="tog"><span class="tog-label" id="cfg-card-lbl">💳 Tarjeta</span><label class="tog-sw"><input type="checkbox" id="cfg-card" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label" id="cfg-transf-lbl">📲 Transferencia</span><label class="tog-sw"><input type="checkbox" id="cfg-transf" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
           <div class="tog"><span class="tog-label" id="cfg-oa-lbl">📋 Cuentas Abiertas</span><label class="tog-sw"><input type="checkbox" id="cfg-oa" checked onchange="savePayMethods()"><span class="slider"></span></label></div>
           <div class="tog"><span class="tog-label" id="cfg-credit-lbl">🏷️ Crédito</span><label class="tog-sw"><input type="checkbox" id="cfg-credit" onchange="savePayMethods()"><span class="slider"></span></label></div>
         </div>
@@ -3723,6 +3715,7 @@ function applyLang(){
   const _cfgPM=el('cfg-pay-methods-lbl');if(_cfgPM)_cfgPM.textContent=t('cfgPayMethods');
   const _cfgCash=el('cfg-cash-lbl');if(_cfgCash)_cfgCash.textContent='💵 '+t('cash');
   const _cfgCard=el('cfg-card-lbl');if(_cfgCard)_cfgCard.textContent='💳 '+t('card');
+  const _cfgTransf=el('cfg-transf-lbl');if(_cfgTransf)_cfgTransf.textContent='📲 '+t('transfer');
   const _cfgOA=el('cfg-oa-lbl');if(_cfgOA)_cfgOA.textContent=t('cfgOpenAccounts');
   const _cfgCred=el('cfg-credit-lbl');if(_cfgCred)_cfgCred.textContent='🏷️ '+t('credit');
   const _cfgCO=el('cfg-credit-opts-lbl');if(_cfgCO)_cfgCO.textContent=t('cfgCreditOpts');
@@ -10062,26 +10055,27 @@ function _renderDbPayMethods(){
     return s.status!=='cancelled'&&s.status!=='returned'&&new Date(s.date).toDateString()===today;
   });
   if(!sales.length){payEl.innerHTML='<p style="font-size:.75rem;color:var(--tx3);padding:6px 0">Sin ventas hoy</p>';return;}
-  var cats={Efectivo:0,Tarjeta:0,Crédito:0};
+  var cats={cash:0,card:0,transf:0,credit:0};
   sales.forEach(function(s){
     var m=s.payMethod||'';
-    if(m==='cash')cats.Efectivo+=(s.total||0);
-    else if(m==='card'||m==='transf')cats.Tarjeta+=(s.total||0);
-    else if(m==='credit')cats.Crédito+=(s.total||0);
-    else cats.Efectivo+=(s.total||0);
+    if(m==='cash')cats.cash+=(s.total||0);
+    else if(m==='card')cats.card+=(s.total||0);
+    else if(m==='transf')cats.transf+=(s.total||0);
+    else if(m==='credit')cats.credit+=(s.total||0);
+    else cats.cash+=(s.total||0);
   });
-  var total=cats.Efectivo+cats.Tarjeta+cats.Crédito;
+  var total=cats.cash+cats.card+cats.transf+cats.credit;
   if(!total){payEl.innerHTML='<p style="font-size:.75rem;color:var(--tx3);padding:6px 0">Sin ventas hoy</p>';return;}
-  var pEf=cats.Efectivo/total*100,pTj=cats.Tarjeta/total*100,pCr=cats.Crédito/total*100;
-  var cg='conic-gradient(var(--gn) 0% '+pEf.toFixed(1)+'%,var(--ac) '+pEf.toFixed(1)+'% '+(pEf+pTj).toFixed(1)+'%,var(--am) '+(pEf+pTj).toFixed(1)+'% 100%)';
-  var clrs={Efectivo:'var(--gn)',Tarjeta:'var(--ac)',Crédito:'var(--am)'};
-  var legend=Object.keys(cats).map(function(k){
-    var pct=Math.round(cats[k]/total*100);
+  var pEf=cats.cash/total*100,pTj=cats.card/total*100,pTr=cats.transf/total*100,pCr=cats.credit/total*100;
+  var cg='conic-gradient(var(--gn) 0% '+pEf.toFixed(1)+'%,var(--ac) '+pEf.toFixed(1)+'% '+(pEf+pTj).toFixed(1)+'%,var(--cy) '+(pEf+pTj).toFixed(1)+'% '+(pEf+pTj+pTr).toFixed(1)+'%,var(--am) '+(pEf+pTj+pTr).toFixed(1)+'% 100%)';
+  var order=[['cash','var(--gn)','payMethodCash'],['card','var(--ac)','payMethodCard'],['transf','var(--cy)','payMethodTransf'],['credit','var(--am)','payMethodCredit']];
+  var legend=order.map(function(o){
+    var pct=Math.round(cats[o[0]]/total*100);
     return '<div style="display:flex;align-items:center;gap:6px;font-size:.74rem;margin-bottom:6px">'
-      +'<div style="width:9px;height:9px;border-radius:50%;background:'+clrs[k]+';flex-shrink:0"></div>'
-      +'<span style="color:var(--tx2);flex:1">'+k+'</span>'
+      +'<div style="width:9px;height:9px;border-radius:50%;background:'+o[1]+';flex-shrink:0"></div>'
+      +'<span style="color:var(--tx2);flex:1">'+t(o[2])+'</span>'
       +'<span style="font-weight:700;color:var(--tx)">'+pct+'%</span>'
-      +'<span style="font-size:.68rem;color:var(--tx3);margin-left:4px">'+dolr(cats[k])+'</span>'
+      +'<span style="font-size:.68rem;color:var(--tx3);margin-left:4px">'+dolr(cats[o[0]])+'</span>'
       +'</div>';
   }).join('');
   payEl.innerHTML='<div style="display:flex;align-items:center;gap:20px">'
