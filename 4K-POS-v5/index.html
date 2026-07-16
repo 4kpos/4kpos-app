@@ -602,11 +602,11 @@ body.light #dashboard-screen{
     </div>
     <button class="sb-item" id="sbi-prods" onclick="sbNav('prods')"><span class="sb-ico">📦</span><span class="sb-lbl" id="sbi-prods-lbl">Productos</span></button>
     <button class="sb-item" id="sbi-cust" onclick="sbNav('cust')"><span class="sb-ico">👥</span><span class="sb-lbl" id="sbi-cust-lbl">Clientes</span></button>
-    <button class="sb-item" id="sbi-inv" onclick="sbNav('inv')"><span class="sb-ico">📋</span><span class="sb-lbl" id="sbi-inv-lbl">Inventario</span></button>
-    <button class="sb-item" id="sbi-compras" onclick="sbNav('compras')"><span class="sb-ico">🧾</span><span class="sb-lbl" id="sbi-compras-lbl">Compras</span></button>
-    <button class="sb-item" id="sbi-gastos" onclick="sbNav('gastos')"><span class="sb-ico">💸</span><span class="sb-lbl" id="sbi-gastos-lbl">Gastos</span></button>
     <button class="sb-item" id="sbi-reportes" onclick="sbNav('reportes')"><span class="sb-ico">📈</span><span class="sb-lbl" id="sbi-reportes-lbl">Reportes</span></button>
+    <button class="sb-item" id="sbi-adm" onclick="sbNav('adm')"><span class="sb-ico">🔐</span><span class="sb-lbl" id="sbi-adm-lbl">Administración</span></button>
+    <button class="sb-item" id="sbi-conta" onclick="sbNav('conta')"><span class="sb-ico">📒</span><span class="sb-lbl" id="sbi-conta-lbl">Contabilidad</span></button>
     <button class="sb-item" id="sbi-cfg" onclick="sbNav('cfg')"><span class="sb-ico">⚙️</span><span class="sb-lbl" id="sbi-cfg-lbl">Configuración</span></button>
+    <button class="sb-item" id="sbi-clock" onclick="sbNav('clock')" style="display:none"><span class="sb-ico">⏱</span><span class="sb-lbl" id="sbi-clock-lbl">Clock In/Out</span></button>
   </nav>
   <div class="sb-footer">
     <div class="sb-caja-card">
@@ -3575,9 +3575,9 @@ function applyLang(){
   // Sidebar (shell global)
   var _sbLbl=function(id,key){var e=el(id);if(e)e.textContent=t(key);};
   _sbLbl('sbi-dash-lbl','hmDashboard');_sbLbl('sbi-pos-lbl','sbSell');
-  _sbLbl('sbi-prods-lbl','tabProds');_sbLbl('sbi-cust-lbl','tabCust');_sbLbl('sbi-inv-lbl','tabInv');
-  _sbLbl('sbi-compras-lbl','tabPurchases');_sbLbl('sbi-gastos-lbl','tabExpenses');
-  _sbLbl('sbi-reportes-lbl','sbReportes');_sbLbl('sbi-cfg-lbl','sbConfig');
+  _sbLbl('sbi-prods-lbl','tabProds');_sbLbl('sbi-cust-lbl','tabCust');
+  _sbLbl('sbi-reportes-lbl','sbReportes');_sbLbl('sbi-adm-lbl','adm');_sbLbl('sbi-conta-lbl','conta');
+  _sbLbl('sbi-cfg-lbl','sbConfig');_sbLbl('sbi-clock-lbl','hmClockTxt');
   _sbLbl('sbi-ventasdia-lbl','sal');_sbLbl('sbi-devol-lbl','returns');
   _sbLbl('sb-caja-lbl','sbCajaActual');_sbLbl('sb-credits-lbl','tabCredits');
   // Menú de usuario del topbar (reemplaza al hamburgueso para acciones sueltas)
@@ -6217,7 +6217,7 @@ function updateClockQuickBtn(){
   const hasClock=(db.employees||[]).some(function(e){return e.useClockInOut;});
   const show=(enabled&&hasClock)?'block':'none';
   const hmClock=el('hm-clock');if(hmClock)hmClock.style.display=show;
-  const sbiClock=el('sbi-clock');if(sbiClock)sbiClock.style.display=show;
+  const sbiClock=el('sbi-clock');if(sbiClock)sbiClock.style.display=(enabled&&hasClock)?'flex':'none';
   const cb=el('uni-clock-btn');if(cb)cb.style.display=(enabled&&hasClock)?'':'none';
   const umClock=el('um-clock-item');if(umClock)umClock.style.display=(enabled&&hasClock)?'':'none';
 }
@@ -9720,10 +9720,9 @@ function _sbUpdatePerms(){
   var show=function(id,v){var e=el(id);if(e)e.style.display=v?'flex':'none';};
   show('sbi-prods',(isAdm||pm.adm));
   show('sbi-cust',(isAdm||pm.adm));
-  show('sbi-inv',(isAdm||pm.adm));
-  show('sbi-compras',(isAdm||pm.conta));
-  show('sbi-gastos',(isAdm||pm.conta));
   show('sbi-reportes',(isAdm||pm.conta));
+  show('sbi-adm',(isAdm||pm.adm));
+  show('sbi-conta',(isAdm||pm.conta));
   show('sbi-cfg',isAdm);
   var showBtn=function(id,v){var e=el(id);if(e)e.style.display=v?'':'none';};
   showBtn('sbi-ventasdia-lbl',(isAdm||pm.sal));
@@ -9741,6 +9740,8 @@ function sbNav(screen){
     if(dashEl)dashEl.style.display='flex';
     refreshDashboard();
   }else if(screen==='prods'){_sbNextAdmTab='t-prods';reqPin('admin');}
+  else if(screen==='adm'){reqPin('admin');}
+  else if(screen==='clock'){openClockQuick();}
   else if(screen==='inv'){_sbNextAdmTab='t-inv';reqPin('admin');}
   else if(screen==='cfg'){_sbNextUniSection='uni-ajustes';reqPin('admin');}
   else if(screen==='combos'){_sbNextAdmTab='t-combos';reqPin('admin');}
