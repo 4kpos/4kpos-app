@@ -2696,6 +2696,7 @@ const T = {
     empSaved:'✓ Empleado guardado',empDelConfirm:'¿Eliminar empleado?',empDeleted:'🗑 Empleado eliminado',
     empNameRequired:'⚠ Nombre requerido',empAmountRequired:'⚠ Monto o tarifa requerida',
     empNextPayment:'Próximo pago est.',empHoursWorked:'Horas este mes',empCurrentlyIn:'● Trabajando',
+    empHoursToday:'Horas hoy',empHoursWeek:'Horas esta semana',
     empNoEmployees:'Sin empleados registrados.',
     empClockedIn:'Entrada registrada ✓',empClockedOut:'Salida registrada ✓',empNotClockedIn:'No está trabajando.',
     empHistoryTitle:'Historial de horas',empNoHistory:'Sin registros.',
@@ -2733,6 +2734,8 @@ const T = {
     toastExitAfterEntry:'La salida debe ser después de la entrada',toastFullRecord:'Registro completo: ',
     toastManualEntry:'Entrada manual: ',toastNoActiveEntry:'Sin entrada activa para ',toastManualExit:'Salida manual: ',
     toastAdminOnlyEdit:'Solo el admin puede editar',toastTimeUpdated:'Hora actualizada',
+    toastHourAdjSaved:'✓ Ajuste de horas guardado',hourAdjEditTitle:'Editar total de horas (admin)',
+    clockAuto24Tag:'Auto 24h',clockAutoClosedTitle:'Cerrado automáticamente al cumplir 24 horas sin marcar salida',
     toastDataExportedEnc:'🔐 Datos exportados y cifrados',toastDataExported:'✅ Datos exportados',
     toastInvalidFile:'⚠ Archivo inválido',toastFileReadError:'⚠ Error al leer archivo',
     toastNameRequired:'⚠ Nombre requerido',toastIdRequired:'⚠ Cédula requerida',toastDuplicateId:'⚠ Ya existe un cliente con esa cédula',
@@ -3227,6 +3230,7 @@ const T = {
     empSaved:'✓ Employee saved',empDelConfirm:'Delete employee?',empDeleted:'🗑 Employee deleted',
     empNameRequired:'⚠ Name required',empAmountRequired:'⚠ Amount or rate required',
     empNextPayment:'Next est. payment',empHoursWorked:'Hours this month',empCurrentlyIn:'● Working',
+    empHoursToday:'Hours today',empHoursWeek:'Hours this week',
     empNoEmployees:'No employees registered.',
     empClockedIn:'Clock-in recorded ✓',empClockedOut:'Clock-out recorded ✓',empNotClockedIn:'Not working.',
     empHistoryTitle:'Hours history',empNoHistory:'No records.',
@@ -3264,6 +3268,8 @@ const T = {
     toastExitAfterEntry:'Exit time must be after entry time',toastFullRecord:'Complete record: ',
     toastManualEntry:'Manual entry: ',toastNoActiveEntry:'No active entry for ',toastManualExit:'Manual exit: ',
     toastAdminOnlyEdit:'Only admin can edit',toastTimeUpdated:'Time updated',
+    toastHourAdjSaved:'✓ Hour adjustment saved',hourAdjEditTitle:'Edit hour total (admin)',
+    clockAuto24Tag:'Auto 24h',clockAutoClosedTitle:'Automatically closed after 24 hours without clocking out',
     toastDataExportedEnc:'🔐 Data exported and encrypted',toastDataExported:'✅ Data exported',
     toastInvalidFile:'⚠ Invalid file',toastFileReadError:'⚠ Error reading file',
     toastNameRequired:'⚠ Name is required',toastIdRequired:'⚠ ID is required',toastDuplicateId:'⚠ A customer with that ID already exists',
@@ -4357,6 +4363,8 @@ async function loadDB(){
     }catch(e){console.warn('[4KPOS] Error en restore Supabase:',e);}
   }
   // ── Fin restore ───────────────────────────────────────────────────────────
+
+  _autoCloseStaleClockEvents();
 
   ipcRenderer.invoke('get-device-code').then(function(code){
     if(code){_shiftStatusId='shift_status_'+code;_deviceCode=code;}
@@ -6224,6 +6232,7 @@ function doAutoBackup(){
   }catch(e){}
 }
 setInterval(doAutoBackup,5*60*1000);
+setInterval(_autoCloseStaleClockEvents,5*60*1000);
 
 // ── SYNC ENTRE PCs ──────────────────────────────
 var _deviceCode=null;
@@ -6478,7 +6487,7 @@ function _renderCqHist(){
     (emp.clockEvents||[]).forEach(function(ev){
       if(ev.in&&new Date(ev.in).toDateString()===today){
         var hrs=ev.out?((new Date(ev.out)-new Date(ev.in))/3600000):null;
-        rows.push({empId:emp.id,evId:ev.id,name:emp.name,in:ev.in,out:ev.out||null,hrs:hrs,manual:!!(ev.manual||ev.manualOut)});
+        rows.push({empId:emp.id,evId:ev.id,name:emp.name,in:ev.in,out:ev.out||null,hrs:hrs,manual:!!(ev.manual||ev.manualOut),auto24:!!ev.autoClosed24h});
       }
     });
   });
@@ -6497,7 +6506,7 @@ function _renderCqHist(){
       var inCell='<span id="cqt-'+r.evId+'-in" '+editTip+' '+editFn(r,'in')+'>'+fmtTime(r.in)+'</span>';
       var outCell=r.out?('<span id="cqt-'+r.evId+'-out" '+editTip+' '+editFn(r,'out')+'>'+fmtTime(r.out)+'</span>'):'<span style="color:var(--tx3)">—</span>';
       return '<tr style="border-top:1px solid var(--b1)">'
-        +'<td style="padding:6px 4px;font-weight:600">'+escHtml(r.name)+(r.manual?' <span style="font-size:.6rem;color:var(--tx3)">(M)</span>':'')+'</td>'
+        +'<td style="padding:6px 4px;font-weight:600">'+escHtml(r.name)+(r.manual?' <span style="font-size:.6rem;color:var(--tx3)">(M)</span>':'')+(r.auto24?' <span style="font-size:.6rem;color:#f59e0b" title="'+t('clockAutoClosedTitle')+'">('+t('clockAuto24Tag')+')</span>':'')+'</td>'
         +'<td style="padding:6px 4px;text-align:center;color:#22c55e;font-family:monospace">'+inCell+'</td>'
         +'<td style="padding:6px 4px;text-align:center;font-family:monospace;color:'+(r.out?'#ef4444':'var(--tx3)')+'">'+outCell+'</td>'
         +'<td style="padding:6px 4px;text-align:center;font-weight:700;color:var(--tx)">'+(r.hrs!=null?(r.hrs>=1?r.hrs.toFixed(1)+'h':(Math.round(r.hrs*60)+'m')):'⏳')+'</td>'
@@ -8515,17 +8524,114 @@ function clockOut(id){
   active.out=new Date().toISOString();
   saveDB();renderEmployeeList();toast(t('empClockedOut'));
 }
-function _empHoursInMonth(emp,year,month){
-  if(!emp.clockEvents||!emp.clockEvents.length)return 0;
-  return emp.clockEvents.reduce(function(total,ev){
+function _autoCloseStaleClockEvents(){
+  if(!db.employees||!db.employees.length)return;
+  var now=Date.now(),changed=false;
+  db.employees.forEach(function(emp){
+    (emp.clockEvents||[]).forEach(function(ev){
+      if(ev.in&&!ev.out){
+        var inMs=new Date(ev.in).getTime();
+        if(now-inMs>=24*3600000){
+          ev.out=new Date(inMs+24*3600000).toISOString();
+          ev.autoClosed24h=true;
+          changed=true;
+        }
+      }
+    });
+  });
+  if(changed){
+    saveDB();
+    renderEmployeeList();
+    renderClockQuickList();
+    _renderCqHist();
+  }
+}
+function _dateKeyLocal(d){
+  d=d?new Date(d):new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function _weekStartKeyLocal(d){
+  d=d?new Date(d):new Date();
+  var day=d.getDay();
+  var diffToMonday=(day===0?-6:1-day);
+  var mon=new Date(d.getFullYear(),d.getMonth(),d.getDate()+diffToMonday);
+  return _dateKeyLocal(mon);
+}
+function _empRealHoursInDay(emp,dateKey){
+  return (emp.clockEvents||[]).reduce(function(total,ev){
+    if(!ev.in||!ev.out||_dateKeyLocal(ev.in)!==dateKey)return total;
+    const hrs=(new Date(ev.out)-new Date(ev.in))/3600000;
+    return total+(hrs>0?hrs:0);
+  },0);
+}
+function _empRealHoursInWeek(emp,weekStartKey){
+  var start=new Date(weekStartKey+'T00:00:00'),end=new Date(start.getTime()+7*24*3600000);
+  return (emp.clockEvents||[]).reduce(function(total,ev){
     if(!ev.in||!ev.out)return total;
+    var inDate=new Date(ev.in);
+    if(inDate<start||inDate>=end)return total;
+    const hrs=(new Date(ev.out)-inDate)/3600000;
+    return total+(hrs>0?hrs:0);
+  },0);
+}
+function _empAdjHours(emp,scope,dateKey){
+  return (emp.hourAdjustments||[]).filter(function(a){return a.scope===scope&&a.date===dateKey;})
+    .reduce(function(s,a){return s+(a.deltaHours||0);},0);
+}
+function _empHoursInDay(emp,dateKey){
+  return _empRealHoursInDay(emp,dateKey)+_empAdjHours(emp,'day',dateKey);
+}
+function _empHoursInWeek(emp,weekStartKey){
+  return _empRealHoursInWeek(emp,weekStartKey)+_empAdjHours(emp,'week',weekStartKey);
+}
+function _empSetHourAdjustment(empId,scope,dateKey,desiredTotal){
+  var emp=(db.employees||[]).find(function(e){return e.id===empId;});if(!emp)return;
+  if(!emp.hourAdjustments)emp.hourAdjustments=[];
+  var real=scope==='day'?_empRealHoursInDay(emp,dateKey):_empRealHoursInWeek(emp,dateKey);
+  var delta=desiredTotal-real;
+  var idx=emp.hourAdjustments.findIndex(function(a){return a.scope===scope&&a.date===dateKey;});
+  if(Math.abs(delta)<0.01){
+    if(idx>=0)emp.hourAdjustments.splice(idx,1);
+  }else{
+    var adj={id:(idx>=0?emp.hourAdjustments[idx].id:'hadj_'+Date.now()),scope:scope,date:dateKey,deltaHours:delta,byUser:(curUser?curUser.name:''),at:new Date().toISOString()};
+    if(idx>=0)emp.hourAdjustments[idx]=adj;else emp.hourAdjustments.push(adj);
+  }
+  saveDB();renderEmployeeList();toast(t('toastHourAdjSaved'));
+}
+function nomEditHourTotal(empId,scope,dateKey){
+  requireAdminCode(t('hourAdjEditTitle'),function(){
+    var spanId='nomhr_'+scope+'_'+empId;
+    var span=el(spanId);if(!span)return;
+    var emp=(db.employees||[]).find(function(e){return e.id===empId;});if(!emp)return;
+    var current=scope==='day'?_empHoursInDay(emp,dateKey):_empHoursInWeek(emp,dateKey);
+    var inp=document.createElement('input');
+    inp.type='number';inp.step='0.1';inp.min='0';inp.value=current.toFixed(1);
+    inp.style.cssText='font-size:.72rem;font-family:monospace;border:1px solid #3b82f6;background:var(--s1);color:var(--tx);border-radius:4px;padding:1px 4px;width:56px;outline:none;';
+    span.replaceWith(inp);inp.focus();inp.select();
+    function _save(){
+      var val=parseFloat(inp.value);
+      if(isNaN(val)||val<0){renderEmployeeList();return;}
+      _empSetHourAdjustment(empId,scope,dateKey,val);
+    }
+    inp.addEventListener('blur',_save);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')inp.blur();if(e.key==='Escape')renderEmployeeList();});
+  });
+}
+function _empHoursInMonth(emp,year,month){
+  var total=0;
+  (emp.clockEvents||[]).forEach(function(ev){
+    if(!ev.in||!ev.out)return;
     const inDate=new Date(ev.in);
     if(inDate.getFullYear()===year&&inDate.getMonth()===month){
       const hrs=(new Date(ev.out)-inDate)/3600000;
-      return total+(hrs>0?hrs:0);
+      total+=(hrs>0?hrs:0);
     }
-    return total;
-  },0);
+  });
+  (emp.hourAdjustments||[]).forEach(function(a){
+    const d=new Date(a.date+'T00:00:00');
+    if(d.getFullYear()===year&&d.getMonth()===month)total+=(a.deltaHours||0);
+  });
+  return total;
 }
 function _empMonthlyPay(emp,year,month){
   if(!emp.useClockInOut){
@@ -8573,7 +8679,18 @@ function renderEmployeeList(){
       ?('<button class="btn '+(isIn?'btn-d':'btn-p')+' btn-s" style="font-size:.76rem;padding:4px 12px" onclick="'+(isIn?'clockOut':'clockIn')+'(\''+emp.id+'\')">'+(isIn?t('empClockOut'):t('empClockIn'))+'</button>')
       :'';
     const statusBadge=emp.useClockInOut&&isIn?('<span style="font-size:.72rem;color:var(--gn);font-weight:700;margin-left:6px">'+t('empCurrentlyIn')+'</span>'):'';
-    const hoursInfo=emp.useClockInOut?('<div style="font-size:.76rem;color:var(--tx3);margin-top:2px">'+t('empHoursWorked')+': <b style="color:var(--am)">'+hrs.toFixed(1)+'h</b></div>'):'';
+    const todayKey=_dateKeyLocal(now);
+    const weekKey=_weekStartKeyLocal(now);
+    const hrsToday=emp.useClockInOut?_empHoursInDay(emp,todayKey):0;
+    const hrsWeek=emp.useClockInOut?_empHoursInWeek(emp,weekKey):0;
+    const hourEditBtn=function(scope,dateKey){return isAdm?(' <span style="cursor:pointer;font-size:.68rem" title="'+t('hourAdjEditTitle')+'" onclick="nomEditHourTotal(\''+emp.id+'\',\''+scope+'\',\''+dateKey+'\')">✏️</span>'):'';};
+    const hoursInfo=emp.useClockInOut?(
+      '<div style="font-size:.76rem;color:var(--tx3);margin-top:2px;display:flex;gap:12px;flex-wrap:wrap">'
+      +'<span>'+t('empHoursToday')+': <b id="nomhr_day_'+emp.id+'" style="color:var(--am)">'+hrsToday.toFixed(1)+'h</b>'+hourEditBtn('day',todayKey)+'</span>'
+      +'<span>'+t('empHoursWeek')+': <b id="nomhr_week_'+emp.id+'" style="color:var(--am)">'+hrsWeek.toFixed(1)+'h</b>'+hourEditBtn('week',weekKey)+'</span>'
+      +'<span>'+t('empHoursWorked')+': <b style="color:var(--am)">'+hrs.toFixed(1)+'h</b></span>'
+      +'</div>'
+    ):'';
     const payLabel=emp.useClockInOut?(''+dolr(nextPay)):(''+dolr(nextPay)+' / '+payTypeLabel[emp.payType||'monthly']);
     /* Clock events history (last 6, newest first) */
     var clockSection='';
@@ -8584,7 +8701,7 @@ function renderEmployeeList(){
         var dayStr=new Date(ev.in).toLocaleDateString(lang||'es',{day:'numeric',month:'short'});
         var inSpan='<span id="nomce_'+ev.id+'_in"'+editTip+(isAdm?' onclick="nomEditClock(\''+emp.id+'\',\''+ev.id+'\',\'in\')"':'')+'>'+fmtTime(ev.in)+'</span>';
         var outSpan=ev.out
-          ?('<span id="nomce_'+ev.id+'_out"'+editTip+(isAdm?' onclick="nomEditClock(\''+emp.id+'\',\''+ev.id+'\',\'out\')"':'')+'>'+fmtTime(ev.out)+'</span>')
+          ?('<span id="nomce_'+ev.id+'_out"'+editTip+(isAdm?' onclick="nomEditClock(\''+emp.id+'\',\''+ev.id+'\',\'out\')"':'')+'>'+fmtTime(ev.out)+'</span>'+(ev.autoClosed24h?' <span style="font-size:.62rem;color:#f59e0b" title="'+t('clockAutoClosedTitle')+'">('+t('clockAuto24Tag')+')</span>':''))
           :('<span style="color:#f59e0b;font-weight:700">⏳ Activo'+(isAdm?' · <span style="cursor:pointer;color:#3b82f6;font-size:.7rem;text-decoration:underline" onclick="nomEditClock(\''+emp.id+'\',\''+ev.id+'\',\'out\')">Cerrar</span>':'')+'</span>');
         var hrsStr=ev.out?((new Date(ev.out)-new Date(ev.in))/3600000).toFixed(1)+'h':'—';
         return '<tr style="border-top:1px solid rgba(255,255,255,.06)">'
