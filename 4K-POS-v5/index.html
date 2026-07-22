@@ -6527,20 +6527,22 @@ function cqEditClockTime(empId,evId,field){
   var current=field==='in'?ev.in:ev.out;
   var spanId='cqt-'+evId+'-'+field;
   var span=el(spanId);if(!span)return;
-  var currentTime=current?new Date(current).toTimeString().slice(0,5):'';
-  /* Replace span with inline time input */
+  /* Replace span with inline date+time input — fecha Y hora, no solo hora */
   var inp=document.createElement('input');
-  inp.type='time';inp.value=currentTime;
-  inp.style.cssText='font-size:.76rem;font-family:monospace;border:1px solid #3b82f6;background:var(--s1);color:var(--tx);border-radius:4px;padding:1px 4px;width:72px;outline:none;';
+  inp.type='datetime-local';inp.value=_localDatetimeValue(current);
+  inp.style.cssText='font-size:.76rem;font-family:monospace;border:1px solid #3b82f6;background:var(--s1);color:var(--tx);border-radius:4px;padding:1px 4px;width:168px;outline:none;';
   span.replaceWith(inp);inp.focus();inp.select();
   function _save(){
     var val=inp.value;
     if(!val){_renderCqHist();return;}
-    var base=new Date(current||new Date());
-    var parts=val.split(':');
-    base.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
-    if(field==='in')ev.in=base.toISOString();
-    else{ev.out=base.toISOString();ev.manualOut=true;}
+    var newDate=new Date(val);
+    if(field==='in'){
+      if(ev.out&&newDate>=new Date(ev.out)){toast(t('toastExitAfterEntry'));_renderCqHist();return;}
+      ev.in=newDate.toISOString();
+    }else{
+      if(newDate<=new Date(ev.in)){toast(t('toastExitAfterEntry'));_renderCqHist();return;}
+      ev.out=newDate.toISOString();ev.manualOut=true;
+    }
     saveDB();renderEmployeeList();_renderCqHist();toast(t('toastTimeUpdated'));
   }
   inp.addEventListener('blur',_save);
@@ -8554,6 +8556,14 @@ function _dateKeyLocal(d){
   d=d?new Date(d):new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
+/* Valor para <input type="datetime-local"> en hora LOCAL (no UTC) a partir
+   de un ISO string — evita el bug de editar solo la hora y perder la fecha
+   real cuando un turno cruza la medianoche. */
+function _localDatetimeValue(iso){
+  var d=iso?new Date(iso):new Date();
+  var pad=function(n){return String(n).padStart(2,'0');};
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+}
 function _weekStartKeyLocal(d){
   d=d?new Date(d):new Date();
   var day=d.getDay();
@@ -8714,17 +8724,20 @@ function nomEditClock(empId,evId,field){
   var current=field==='in'?ev.in:ev.out;
   var spanId='nomce_'+evId+'_'+field;
   var span=el(spanId);if(!span)return;
-  var currentTime=current?new Date(current).toTimeString().slice(0,5):new Date().toTimeString().slice(0,5);
   var inp=document.createElement('input');
-  inp.type='time';inp.value=currentTime;
-  inp.style.cssText='font-size:.72rem;font-family:monospace;border:1px solid #3b82f6;background:var(--s1);color:var(--tx);border-radius:4px;padding:1px 4px;width:68px;outline:none;';
+  inp.type='datetime-local';inp.value=_localDatetimeValue(current);
+  inp.style.cssText='font-size:.72rem;font-family:monospace;border:1px solid #3b82f6;background:var(--s1);color:var(--tx);border-radius:4px;padding:1px 4px;width:158px;outline:none;';
   span.replaceWith(inp);inp.focus();inp.select();
   function _save(){
     var val=inp.value;if(!val){renderEmployeeList();return;}
-    var base=new Date(current||new Date());
-    var parts=val.split(':');base.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
-    if(field==='in')ev.in=base.toISOString();
-    else{ev.out=base.toISOString();ev.manualOut=true;}
+    var newDate=new Date(val);
+    if(field==='in'){
+      if(ev.out&&newDate>=new Date(ev.out)){toast(t('toastExitAfterEntry'));renderEmployeeList();return;}
+      ev.in=newDate.toISOString();
+    }else{
+      if(newDate<=new Date(ev.in)){toast(t('toastExitAfterEntry'));renderEmployeeList();return;}
+      ev.out=newDate.toISOString();ev.manualOut=true;
+    }
     saveDB();renderEmployeeList();_renderCqHist();toast(t('toastTimeUpdated'));
   }
   inp.addEventListener('blur',_save);
