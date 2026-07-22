@@ -2740,6 +2740,8 @@ const T = {
     toastAdminOnlyEdit:'Solo el admin puede editar',toastTimeUpdated:'Hora actualizada',
     toastHourAdjSaved:'✓ Ajuste de horas guardado',hourAdjEditTitle:'Editar total de horas (admin)',
     clockAuto24Tag:'Auto 24h',clockAutoClosedTitle:'Cerrado automáticamente al cumplir 24 horas sin marcar salida',
+    delClockEventTitle:'Eliminar registro de asistencia',delClockEventConfirm:'¿Eliminar este registro de asistencia? ',
+    auditClockEventDel:'Registro de asistencia eliminado',toastClockEventDeleted:'🗑 Registro eliminado',
     toastDataExportedEnc:'🔐 Datos exportados y cifrados',toastDataExported:'✅ Datos exportados',
     toastInvalidFile:'⚠ Archivo inválido',toastFileReadError:'⚠ Error al leer archivo',
     toastNameRequired:'⚠ Nombre requerido',toastIdRequired:'⚠ Cédula requerida',toastDuplicateId:'⚠ Ya existe un cliente con esa cédula',
@@ -3274,6 +3276,8 @@ const T = {
     toastAdminOnlyEdit:'Only admin can edit',toastTimeUpdated:'Time updated',
     toastHourAdjSaved:'✓ Hour adjustment saved',hourAdjEditTitle:'Edit hour total (admin)',
     clockAuto24Tag:'Auto 24h',clockAutoClosedTitle:'Automatically closed after 24 hours without clocking out',
+    delClockEventTitle:'Delete attendance record',delClockEventConfirm:'Delete this attendance record? ',
+    auditClockEventDel:'Attendance record deleted',toastClockEventDeleted:'🗑 Record deleted',
     toastDataExportedEnc:'🔐 Data exported and encrypted',toastDataExported:'✅ Data exported',
     toastInvalidFile:'⚠ Invalid file',toastFileReadError:'⚠ Error reading file',
     toastNameRequired:'⚠ Name is required',toastIdRequired:'⚠ ID is required',toastDuplicateId:'⚠ A customer with that ID already exists',
@@ -6505,15 +6509,17 @@ function _renderCqHist(){
     +'<tr style="color:var(--tx3)"><th style="text-align:left;padding:5px 4px">'+t('thEmployee')+'</th>'
     +'<th style="padding:5px 4px;text-align:center">'+t('clockEntrada')+'</th>'
     +'<th style="padding:5px 4px;text-align:center">'+t('clockSalida')+'</th>'
-    +'<th style="padding:5px 4px;text-align:center">'+t('thHoras')+'</th></tr>'
+    +'<th style="padding:5px 4px;text-align:center">'+t('thHoras')+'</th>'+(isAdm?'<th></th>':'')+'</tr>'
     +rows.map(function(r){
       var inCell='<span id="cqt-'+r.evId+'-in" '+editTip+' '+editFn(r,'in')+'>'+fmtTime(r.in)+'</span>';
       var outCell=r.out?('<span id="cqt-'+r.evId+'-out" '+editTip+' '+editFn(r,'out')+'>'+fmtTime(r.out)+'</span>'):'<span style="color:var(--tx3)">—</span>';
+      var delCell=isAdm?('<td style="padding:6px 2px;text-align:center"><span style="cursor:pointer" title="'+t('delClockEventTitle')+'" onclick="deleteClockEvent(\''+r.empId+'\',\''+r.evId+'\')">🗑️</span></td>'):'';
       return '<tr style="border-top:1px solid var(--b1)">'
         +'<td style="padding:6px 4px;font-weight:600">'+escHtml(r.name)+(r.manual?' <span style="font-size:.6rem;color:var(--tx3)">(M)</span>':'')+(r.auto24?' <span style="font-size:.6rem;color:#f59e0b" title="'+t('clockAutoClosedTitle')+'">('+t('clockAuto24Tag')+')</span>':'')+'</td>'
         +'<td style="padding:6px 4px;text-align:center;color:#22c55e;font-family:monospace">'+inCell+'</td>'
         +'<td style="padding:6px 4px;text-align:center;font-family:monospace;color:'+(r.out?'#ef4444':'var(--tx3)')+'">'+outCell+'</td>'
         +'<td style="padding:6px 4px;text-align:center;font-weight:700;color:var(--tx)">'+(r.hrs!=null?('<span id="cqhrev_'+r.evId+'"'+(isAdm?' style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,.3)" title="'+t('hourAdjEditTitle')+'" onclick="cqEditEventHours(\''+r.empId+'\',\''+r.evId+'\')"':'')+'>'+(r.hrs>=1?r.hrs.toFixed(1)+'h':(Math.round(r.hrs*60)+'m'))+'</span>'):'⏳')+'</td>'
+        +delCell
         +'</tr>';
     }).join('')
     +'</table></div>'
@@ -8709,6 +8715,21 @@ function cqEditEventHours(empId,evId){
     inp.addEventListener('keydown',function(e){if(e.key==='Enter')inp.blur();if(e.key==='Escape')_renderCqHist();});
   });
 }
+function deleteClockEvent(empId,evId){
+  var emp=(db.employees||[]).find(function(e){return e.id===empId;});if(!emp)return;
+  var ev=(emp.clockEvents||[]).find(function(e){return e.id===evId;});if(!ev)return;
+  var detail=emp.name+' · '+fmtTime(ev.in)+(ev.out?(' → '+fmtTime(ev.out)):' ('+t('empCurrentlyIn')+')');
+  requireAdminCode(t('delClockEventTitle')+' — '+detail,function(){
+    confirm2(t('delClockEventConfirm')+detail+'?',function(){
+      logAction(t('auditClockEventDel'),detail);
+      emp.clockEvents=(emp.clockEvents||[]).filter(function(e){return e.id!==evId;});
+      if(emp.hourAdjustments&&emp.hourAdjustments.length){
+        emp.hourAdjustments=emp.hourAdjustments.filter(function(a){return !(a.scope==='event'&&a.date===evId);});
+      }
+      saveDB();renderEmployeeList();renderClockQuickList();_renderCqHist();toast(t('toastClockEventDeleted'));
+    });
+  });
+}
 function _empMonthlyPay(emp,year,month){
   if(!emp.useClockInOut){
     const periodsPerMonth={weekly:4.33,biweekly:2,monthly:1};
@@ -8786,17 +8807,19 @@ function renderEmployeeList(){
         var hrsStr=ev.out
           ?('<span id="nomhrev_'+ev.id+'"'+(isAdm?' style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,.25)" title="'+t('hourAdjEditTitle')+'" onclick="nomEditEventHours(\''+emp.id+'\',\''+ev.id+'\')"':'')+'>'+_empEventHours(emp,ev).toFixed(1)+'h</span>')
           :'—';
+        var delCell=isAdm?('<td style="padding:4px 2px;text-align:center"><span style="cursor:pointer;font-size:.72rem" title="'+t('delClockEventTitle')+'" onclick="deleteClockEvent(\''+emp.id+'\',\''+ev.id+'\')">🗑️</span></td>'):'';
         return '<tr style="border-top:1px solid rgba(255,255,255,.06)">'
           +'<td style="padding:4px 5px;color:var(--tx3);white-space:nowrap">'+dayStr+'</td>'
           +'<td style="padding:4px 5px;text-align:center;color:#22c55e;font-family:monospace;font-size:.72rem">'+inSpan+'</td>'
           +'<td style="padding:4px 5px;text-align:center;font-family:monospace;font-size:.72rem;color:'+(ev.out?'#f87171':'var(--tx3)')+'">'+outSpan+'</td>'
           +'<td style="padding:4px 5px;text-align:right;color:var(--tx3);font-size:.7rem">'+hrsStr+'</td>'
+          +delCell
           +'</tr>';
       }).join('');
       clockSection='<div style="margin-top:8px;border-top:1px solid var(--b1);padding-top:7px">'
         +'<div style="font-size:.65rem;font-weight:700;color:var(--tx3);letter-spacing:.6px;margin-bottom:5px">'+t('recordsLabel')+(isAdm?' · <span style="font-weight:400;opacity:.7">'+t('clickHourToEdit')+'</span>':'')+'</div>'
         +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.73rem">'
-        +'<tr style="color:var(--tx3);font-size:.66rem"><th style="text-align:left;padding:3px 5px">'+t('thFecha')+'</th><th style="padding:3px 5px">'+t('clockEntrada')+'</th><th style="padding:3px 5px">'+t('clockSalida')+'</th><th style="text-align:right;padding:3px 5px">'+t('thHrs')+'</th></tr>'
+        +'<tr style="color:var(--tx3);font-size:.66rem"><th style="text-align:left;padding:3px 5px">'+t('thFecha')+'</th><th style="padding:3px 5px">'+t('clockEntrada')+'</th><th style="padding:3px 5px">'+t('clockSalida')+'</th><th style="text-align:right;padding:3px 5px">'+t('thHrs')+'</th>'+(isAdm?'<th></th>':'')+'</tr>'
         +rows+'</table></div></div>';
     }
     return '<div style="background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--rs);padding:10px 13px;margin-bottom:7px">'
