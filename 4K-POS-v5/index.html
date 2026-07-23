@@ -660,6 +660,7 @@ body.light #dashboard-screen{
     <button class="sb-item" id="lang-toggle-btn" onclick="switchLang()" title="Cambiar idioma / Switch language"><span class="sb-ico">🌐</span><span class="sb-lbl" id="um-idioma-txt">Idioma</span></button>
     <button class="sb-item" id="tbtn-theme" onclick="toggleTheme()"><span class="sb-ico" id="tbtn-theme-icon">🌙</span><span class="sb-lbl" id="um-tema-txt">Tema</span></button>
     <button class="sb-item" id="um-upd-btn" onclick="checkUpdates()"><span class="sb-ico">🔄</span><span class="sb-lbl" id="um-upd-txt">Buscar actualizaciones</span></button>
+    <button class="sb-item" id="um-support-btn" onclick="openSupport()"><span class="sb-ico">🎧</span><span class="sb-lbl" id="um-support-txt">Soporte</span></button>
     <div class="sb-version" id="hm-ver"></div>
   </nav>
   <div class="sb-footer">
@@ -1489,6 +1490,28 @@ body.light #dashboard-screen{
     <div style="padding:10px 16px 14px;border-top:1.5px solid var(--b1);background:var(--s1);display:flex;gap:8px;flex-shrink:0">
       <button class="btn" style="flex:1;background:var(--s2);border:1.5px solid var(--b1);color:var(--tx2);padding:11px" id="wn-skip-btn" onclick="skipWriteNote()">Omitir</button>
       <button class="btn btn-p" style="flex:2;padding:11px" id="wn-save-btn" onclick="saveWriteNote()">💾 Guardar nota</button>
+    </div>
+  </div>
+</div>
+
+<!-- SOPORTE -->
+<div class="ov" id="ov-support">
+  <div class="modal mnarrow">
+    <div class="mh"><h3 id="sup-title">🎧 Soporte</h3><button class="mx" onclick="closeOv('ov-support')">✕</button></div>
+    <div class="mb">
+      <div style="font-size:.82rem;color:var(--tx3);margin-bottom:14px" id="sup-desc">¿Tenés un problema o una pregunta? Escribinos.</div>
+      <div style="background:var(--s2);border-radius:var(--rs);padding:14px;text-align:center;margin-bottom:12px">
+        <div style="font-size:.68rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px" id="sup-email-lbl">Email de soporte</div>
+        <div id="sup-email" style="font-size:1.02rem;font-weight:700;color:var(--tx);font-family:monospace;word-break:break-all">get4ksupport@gmail.com</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="btn btn-s" style="flex:1" id="sup-copy-btn" onclick="copySupportEmail()">📋 Copiar email</button>
+        <button class="btn btn-p" style="flex:1" id="sup-send-btn" onclick="sendSupportEmail()">✉️ Enviar email</button>
+      </div>
+      <div class="sep-line"></div>
+      <div style="font-size:.7rem;color:var(--tx3);margin-bottom:6px" id="sup-ctx-lbl">Incluí estos datos si reportás un problema:</div>
+      <div style="font-size:.78rem;color:var(--tx2);margin-bottom:3px"><span id="sup-version-lbl">Versión</span>: <b id="sup-version-val" style="font-family:monospace">—</b></div>
+      <div style="font-size:.78rem;color:var(--tx2)"><span id="sup-lic-lbl">Licencia</span>: <b id="sup-lic-val" style="font-family:monospace;word-break:break-all">—</b></div>
     </div>
   </div>
 </div>
@@ -2722,7 +2745,10 @@ const T = {
     // Menú hamburguesa — antes hardcodeado, ahora traducido
     hmSecPrincipal:'PRINCIPAL',hmSecAcciones:'ACCIONES',hmDashboard:'Dashboard',hmDashMobile:'Dashboard Móvil',
     hmNotifications:'Notificaciones',hmVentasInv:'Ventas e Inventario',hmAdmCfg:'Administración y Configuración',
-    hmConfigAjustes:'Config / Ajustes',hmIdioma:'Idioma',hmTema:'Tema',hmDrawer:'Registradora',
+    hmConfigAjustes:'Config / Ajustes',hmIdioma:'Idioma',hmTema:'Tema',hmDrawer:'Registradora',hmSupport:'Soporte',
+    supportTitle:'🎧 Soporte',supportDesc:'¿Tenés un problema o una pregunta? Escribinos.',supportEmailLbl:'Email de soporte',
+    supportCopyBtn:'📋 Copiar email',supportSendBtn:'✉️ Enviar email',supportCtxLbl:'Incluí estos datos si reportás un problema:',
+    supportVersionLbl:'Versión',supportLicenseLbl:'Licencia',supportEmailSubject:'Soporte 4K POS',toastEmailCopied:'✓ Email copiado',
     tabLabels:'Etiquetas',tabAudit:'Auditoría',tabShiftNote:'Nota de turno',tabUpdates:'Actualizaciones',
     // Diálogo de confirmación global
     confirmDefaultMsg:'¿Confirmar?',confirmCancelBtn:'Cancelar',confirmYesBtn:'Confirmar',
@@ -3258,7 +3284,10 @@ const T = {
     // Hamburger menu — previously hardcoded, now translated
     hmSecPrincipal:'MAIN',hmSecAcciones:'ACTIONS',hmDashboard:'Dashboard',hmDashMobile:'Mobile Dashboard',
     hmNotifications:'Notifications',hmVentasInv:'Sales & Inventory',hmAdmCfg:'Administration & Settings',
-    hmConfigAjustes:'Config / Settings',hmIdioma:'Language',hmTema:'Theme',hmDrawer:'Cash Drawer',
+    hmConfigAjustes:'Config / Settings',hmIdioma:'Language',hmTema:'Theme',hmDrawer:'Cash Drawer',hmSupport:'Support',
+    supportTitle:'🎧 Support',supportDesc:'Have an issue or a question? Reach out to us.',supportEmailLbl:'Support email',
+    supportCopyBtn:'📋 Copy email',supportSendBtn:'✉️ Send email',supportCtxLbl:'Include this info when reporting an issue:',
+    supportVersionLbl:'Version',supportLicenseLbl:'License',supportEmailSubject:'4K POS Support',toastEmailCopied:'✓ Email copied',
     tabLabels:'Labels',tabAudit:'Audit',tabShiftNote:'Shift Note',tabUpdates:'Updates',
     // Global confirm dialog
     confirmDefaultMsg:'Confirm?',confirmCancelBtn:'Cancel',confirmYesBtn:'Confirm',
@@ -3636,6 +3665,15 @@ function applyLang(){
   _sbLbl('um-dashmobile-txt','hmDashMobile');_sbLbl('um-note-txt','writeNoteMenu');
   _sbLbl('um-idioma-txt','hmIdioma');_sbLbl('um-tema-txt','hmTema');_sbLbl('um-drawer-txt','hmDrawer');
   _sbLbl('um-clock-txt','hmClockTxt');_sbLbl('um-logout-txt','logoutTitle');_sbLbl('um-upd-txt','checkUpdates');
+  _sbLbl('um-support-txt','hmSupport');
+  const _supTitle=el('sup-title');if(_supTitle)_supTitle.textContent=t('supportTitle');
+  const _supDesc=el('sup-desc');if(_supDesc)_supDesc.textContent=t('supportDesc');
+  const _supEmailLbl=el('sup-email-lbl');if(_supEmailLbl)_supEmailLbl.textContent=t('supportEmailLbl');
+  const _supCopyBtn=el('sup-copy-btn');if(_supCopyBtn)_supCopyBtn.textContent=t('supportCopyBtn');
+  const _supSendBtn=el('sup-send-btn');if(_supSendBtn)_supSendBtn.textContent=t('supportSendBtn');
+  const _supCtxLbl=el('sup-ctx-lbl');if(_supCtxLbl)_supCtxLbl.textContent=t('supportCtxLbl');
+  const _supVerLbl=el('sup-version-lbl');if(_supVerLbl)_supVerLbl.textContent=t('supportVersionLbl');
+  const _supLicLbl=el('sup-lic-lbl');if(_supLicLbl)_supLicLbl.textContent=t('supportLicenseLbl');
   if(typeof _sbUpdateCaja==='function')_sbUpdateCaja();
   if(typeof _sbUpdateStatus==='function')_sbUpdateStatus();
   const _tabSpecials=el('tab-specials-txt');if(_tabSpecials)_tabSpecials.textContent=t('tabSpecials');
@@ -4238,6 +4276,31 @@ function _openRenewalWA(){
   }
   if(key){_doOpen(key);return;}
   ipcRenderer.invoke('get-license-info').then(function(li){_doOpen(li&&li.key||'');}).catch(function(){_doOpen('');});
+}
+function _supportLicKey(){return (db.license&&db.license.key)||db._licKeyLocal||db._lic||'';}
+function openSupport(){
+  function _fill(){
+    var v=el('sup-version-val');if(v)v.textContent=APP_VERSION?('v'+APP_VERSION):'—';
+    var lv=el('sup-lic-val');if(lv)lv.textContent=_supportLicKey()||'—';
+  }
+  _fill();
+  openOv('ov-support');
+  try{ipcRenderer.invoke('get-license-info').then(function(li){if(li&&li.key)db._licKeyLocal=li.key;_fill();}).catch(function(){});}catch(e){}
+}
+function copySupportEmail(){
+  var email='get4ksupport@gmail.com';
+  try{
+    require('electron').clipboard.writeText(email);
+    toast(t('toastEmailCopied'));
+  }catch(e){
+    try{navigator.clipboard.writeText(email).then(function(){toast(t('toastEmailCopied'));});}
+    catch(e2){toast(t('toastEmailCopied'));}
+  }
+}
+function sendSupportEmail(){
+  var subject=t('supportEmailSubject')+' — '+(_supportLicKey()||'(sin licencia)');
+  var url='mailto:get4ksupport@gmail.com?subject='+encodeURIComponent(subject);
+  try{require('electron').shell.openExternal(url);}catch(e){window.open(url,'_blank');}
 }
 function refreshLicenseInfo(){
   /* Use available in-memory data first (instant), then update with IPC */
