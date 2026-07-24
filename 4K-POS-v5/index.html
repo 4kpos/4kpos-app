@@ -730,10 +730,10 @@ body.light #dashboard-screen{
   </div>
   <div class="cart">
     <div class="cart-hd">
-      <div class="cart-ttl">🛒 <span id="cart-ttl-txt">Orden</span>&nbsp;<span id="ord-lbl" style="font-size:18px;font-weight:800;color:var(--tx)">#1</span>&nbsp;<span class="ccnt" id="ccnt">0</span></div>
+      <div class="cart-ttl" ondblclick="tryQuickCheckout()" title="Doble click para cobrar">🛒 <span id="cart-ttl-txt">Orden</span>&nbsp;<span id="ord-lbl" style="font-size:18px;font-weight:800;color:var(--tx)">#1</span>&nbsp;<span class="ccnt" id="ccnt">0</span></div>
       <button class="clrbtn" id="clr-btn" onclick="clearCart()">Limpiar</button>
     </div>
-    <div class="clist" id="clist">
+    <div class="clist" id="clist" ondblclick="tryQuickCheckout()">
       <div class="cempty" id="cempty"><div class="cem-ico">🛍️</div><span id="empty-txt">Agrega productos</span></div>
     </div>
     <div class="cfoot">
@@ -3368,6 +3368,7 @@ let db={products:[],categories:[],sales:[],returns:[],orderNum:1,adminCode:'1234
   facturas:[],gastos_conta:[],openAccounts:[],discountEnabled:true,shifts:[],auditLog:[],combos:[],specials:[],employees:[],
   settings:{inactivityLockEnabled:true,inactivityMinutes:10,backupPassHash:null,backupKeySalt:null,adminExemptFromConfirm:true,lowStockThreshold:5,clockQuickEnabled:false}};
 let cart=[],payMethod='cash',cashIn='',discount={type:'pct',value:0,active:false};
+let _lastQuickCheckoutEnterAt=0;
 let currentView='categories',currentCategory=null;
 let editingAccountId=null;
 let curUser=null,curCat='all',pinTarget=null,pinVal='';
@@ -6014,6 +6015,14 @@ function openCheckoutModal(){
   if(_ckBtn)_ckBtn.classList.add('on');
   el('ck-cash-section').style.display=payMethod==='cash'?'':'none';
   calcChange();openOv('ov-checkout');
+}
+/* Cobro rapido: doble click sobre el carrito, o Enter dos veces seguidas
+   (ver guardas de falso disparo junto al listener de keydown mas abajo).
+   openCheckoutModal() ya no hace nada si el carrito esta vacio, asi que no
+   hace falta duplicar esa validacion aca. */
+function tryQuickCheckout(){
+  if(document.querySelector('.ov.open'))return;
+  openCheckoutModal();
 }
 function ckSetPay(m,btn){
   payMethod=m;cashIn='';
@@ -9125,6 +9134,27 @@ document.addEventListener('keydown',function(e){
     const first=db.products.find(p=>p.name.toLowerCase().includes((el('srch').value||'').toLowerCase()));
     if(first)addToCart(first.id);
     return;
+  }
+  // Cobro rapido: Enter dos veces seguidas fuera del buscador abre "Cobrar Orden".
+  // Antifalso-disparo con el escaneo de codigo de barras (que tambien usa Enter,
+  // dentro de #srch): esta rama solo corre si NO se cayo ya en el "return" del
+  // bloque de arriba, es decir, nunca si el foco esta en #srch — un doble scan
+  // seguido jamas puede llegar hasta aca. Ademas exige que no haya ningun input/
+  // textarea/select enfocado en ningun otro lado, que no haya ningun modal (.ov)
+  // abierto, y una ventana de 600ms entre los dos Enter.
+  if(key==='Enter'&&el('app-main')&&el('app-main').style.display!=='none'&&!document.querySelector('.ov.open')){
+    const ae=document.activeElement;
+    const isTyping=ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT'||ae.isContentEditable);
+    if(!isTyping){
+      const now=Date.now();
+      if(now-_lastQuickCheckoutEnterAt<600){
+        e.preventDefault();
+        _lastQuickCheckoutEnterAt=0;
+        tryQuickCheckout();
+      }else{
+        _lastQuickCheckoutEnterAt=now;
+      }
+    }
   }
 });
 
