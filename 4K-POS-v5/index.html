@@ -2783,6 +2783,7 @@ const T = {
     clockAuto24Tag:'Auto 24h',clockAutoClosedTitle:'Cerrado automáticamente al cumplir 24 horas sin marcar salida',
     delClockEventTitle:'Eliminar registro de asistencia',delClockEventConfirm:'¿Eliminar este registro de asistencia? ',
     auditClockEventDel:'Registro de asistencia eliminado',toastClockEventDeleted:'🗑 Registro eliminado',
+    auditHourAdj:'Ajuste de horas',auditHourAdjRemoved:'Ajuste de horas removido',
     toastDataExportedEnc:'🔐 Datos exportados y cifrados',toastDataExported:'✅ Datos exportados',
     toastInvalidFile:'⚠ Archivo inválido',toastFileReadError:'⚠ Error al leer archivo',
     toastNameRequired:'⚠ Nombre requerido',toastIdRequired:'⚠ Cédula requerida',toastDuplicateId:'⚠ Ya existe un cliente con esa cédula',
@@ -3323,6 +3324,7 @@ const T = {
     clockAuto24Tag:'Auto 24h',clockAutoClosedTitle:'Automatically closed after 24 hours without clocking out',
     delClockEventTitle:'Delete attendance record',delClockEventConfirm:'Delete this attendance record? ',
     auditClockEventDel:'Attendance record deleted',toastClockEventDeleted:'🗑 Record deleted',
+    auditHourAdj:'Hour adjustment',auditHourAdjRemoved:'Hour adjustment removed',
     toastDataExportedEnc:'🔐 Data exported and encrypted',toastDataExported:'✅ Data exported',
     toastInvalidFile:'⚠ Invalid file',toastFileReadError:'⚠ Error reading file',
     toastNameRequired:'⚠ Name is required',toastIdRequired:'⚠ ID is required',toastDuplicateId:'⚠ A customer with that ID already exists',
@@ -8724,11 +8726,13 @@ function _empSetHourAdjustment(empId,scope,dateKey,desiredTotal){
   }else return;
   var delta=desiredTotal-real;
   var idx=emp.hourAdjustments.findIndex(function(a){return a.scope===scope&&a.date===dateKey;});
+  var detail=emp.name+' · '+scope+' '+dateKey+' · '+real.toFixed(1)+'h → '+desiredTotal.toFixed(1)+'h ('+(delta>=0?'+':'')+delta.toFixed(1)+'h)';
   if(Math.abs(delta)<0.01){
-    if(idx>=0)emp.hourAdjustments.splice(idx,1);
+    if(idx>=0){emp.hourAdjustments.splice(idx,1);logAction(t('auditHourAdjRemoved'),detail);}
   }else{
     var adj={id:(idx>=0?emp.hourAdjustments[idx].id:'hadj_'+Date.now()),scope:scope,date:dateKey,deltaHours:delta,byUser:(curUser?curUser.name:''),at:new Date().toISOString()};
     if(idx>=0)emp.hourAdjustments[idx]=adj;else emp.hourAdjustments.push(adj);
+    logAction(t('auditHourAdj'),detail,real.toFixed(1)+'h',desiredTotal.toFixed(1)+'h');
   }
   saveDB();renderEmployeeList();_renderCqHist();toast(t('toastHourAdjSaved'));
 }
