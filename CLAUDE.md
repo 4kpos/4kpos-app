@@ -22,3 +22,8 @@ Si el dashboard muestra negro o vacío, el problema es timing — db puede no es
 - Verde vivo: #22C55E (stock ok)
 - Amarillo vivo: #F59E0B (stock bajo)
 - Rojo vivo: #EF4444 (stock cero)
+
+## Referencias visuales
+Las imágenes de referencia de UI (mockups, diseños objetivo) viven en
+`docs/referencias/`. Antes de pedir que le pegue una imagen de nuevo,
+revisar esa carpeta — puede que ya esté ahí.
