@@ -253,7 +253,7 @@ body.light .pbtn.on{color:#ffffff;border-color:#1e3a8a;background:#1e3a8a;}
 /* Dcto no es un método de pago — no sigue la paleta sólida de arriba,
    así que necesita su propio contraste (el fallback --acc-fg:#fff se veía
    invisible en tema claro sobre --s2 casi blanco). */
-#app-main #disc-btn,body.light #app-main #disc-btn{background:var(--s3);color:var(--tx2);border:1.5px solid var(--b2);font-size:12px;gap:3px;overflow:hidden;}
+#app-main #disc-btn,body.light #app-main #disc-btn{background:var(--s3);color:var(--tx2);border:1.5px solid var(--b2);overflow:hidden;}
 /* Transferencia en el modal de cobro: mismo cyan que el botón del panel
    principal. #ov-checkout no hereda --cy de #app-main (es un overlay
    aparte), así que se define acá también. */
@@ -754,7 +754,7 @@ body.light #dashboard-screen{
         </div>
 
       <div style="display:flex;gap:8px;align-items:stretch">
-        <button class="pbtn" id="disc-btn" onclick="openDiscountModal()" style="display:none;flex:0 0 29%;min-width:62px;max-width:90px"><span class="pico"><i class="ti ti-percentage"></i></span><span id="disc-btn-txt">Dcto</span></button>
+        <button class="pbtn" id="disc-btn" onclick="openDiscountModal()" style="display:none;flex:0 0 29%;min-width:62px;max-width:90px;flex-direction:column;gap:1px"><span id="disc-btn-txt" style="font-size:9px;letter-spacing:.4px">Descuento</span><span style="font-size:1.15rem;font-weight:800;line-height:1">%</span></button>
         <button class="cobrar" id="cobrar" onclick="openCheckoutModal()" disabled style="flex:1;width:auto;min-width:0">✓ COBRAR $0.00</button>
       </div>
     </div>
