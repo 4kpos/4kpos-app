@@ -4154,6 +4154,22 @@ function applyLang(){
   // Month names in selector
   (function(){const ms=t('monthlyMonths').split(',');ms.forEach(function(name,i){const o=el('mth-'+i);if(o)o.textContent=name;});})();
   updateCobrar(); renderCats(); renderProds(); updatePCat();
+  /* Re-renderizar TODAS las pantallas dinámicas al cambiar de idioma —
+     antes solo se re-renderizaban renderCats()/renderProds(), así que
+     cualquier pantalla ya renderizada (Inventario, Nómina, Auditoría,
+     Dashboard, etc.) quedaba en el idioma viejo hasta que el usuario
+     navegaba a otro lado y volvía. A diferencia del primer intento, esta
+     vez CADA una de estas 21 funciones fue re-auditada y se le agregó
+     (o confirmó que ya tenía) un guard que retorna si su contenedor
+     principal no existe en el DOM — algunas, como renderFacList()
+     (apunta a #fac-list, que ya no existe en el HTML actual), realmente
+     no tenían ningún guard y crasheaban la app al arrancar. Ninguna hace
+     llamadas de red. */
+  renderCatList();renderProdList();renderInv();renderCustList();renderUserList();
+  renderEmployeeList();renderAuditTable();renderConta();renderCompList();
+  renderComboList();renderSpecialList();renderSales();renderVentasList();
+  renderMonthlyResumen();renderCreditsPanel();renderAdmCredits();renderContaCredits();
+  refreshDashboard();renderGraf();renderClockQuickList();_renderCqHist();
 }
 function switchLang(){
   setLang(lang==='es'?'en':'es');
@@ -4848,8 +4864,8 @@ function renderAuditTable(){
   if(dFrom){const f=new Date(dFrom);entries=entries.filter(function(e){const ts=parseInt(e.id,36);return isNaN(ts)||new Date(ts)>=f;});}
   if(dTo){const t2=new Date(dTo);t2.setHours(23,59,59,999);entries=entries.filter(function(e){const ts=parseInt(e.id,36);return isNaN(ts)||new Date(ts)<=t2;});}
   const acColors={'Venta anulada':'#ef4444','Login fallido':'#f97316','Usuario eliminado':'#f97316','Contraseña reseteada':'#f59e0b','Descuento aplicado':'#8b5cf6','Producto eliminado':'#ef4444','Usuario creado':'#10b981','Usuario editado':'#3b82f6','Abono de crédito':'#10b981','Cierre de turno':'#6366f1','Precio editado':'#f59e0b'};
-  const tbody=el('aud-tbody');
-  if(!entries.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--tx3)">'+t('auditNoRecords')+'</td></tr>';el('aud-count').textContent='';return;}
+  const tbody=el('aud-tbody');if(!tbody)return;
+  if(!entries.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--tx3)">'+t('auditNoRecords')+'</td></tr>';const cnt0=el('aud-count');if(cnt0)cnt0.textContent='';return;}
   tbody.innerHTML=entries.map(function(e){
     const col=acColors[e.accion]||'var(--tx2)';
     return '<tr style="border-bottom:1px solid var(--b1)">'
@@ -4862,7 +4878,7 @@ function renderAuditTable(){
       +'<td style="padding:5px 8px;font-size:.72rem;color:var(--tx3)">'+escHtml(e.despues||'')+'</td>'
       +'</tr>';
   }).join('');
-  el('aud-count').textContent=entries.length+t('auditRecordsSuffix')+(db.auditLog.length>entries.length?' (de '+db.auditLog.length+' totales)':'');
+  const cnt=el('aud-count');if(cnt)cnt.textContent=entries.length+t('auditRecordsSuffix')+(db.auditLog.length>entries.length?' (de '+db.auditLog.length+' totales)':'');
 }
 function exportAuditCSV(){
   if(!db.auditLog||!db.auditLog.length){toast(t('auditNoRecordsExport'));return;}
@@ -5414,7 +5430,7 @@ function syncDeleteCategory(id){
   }).catch(function(){});
 }
 function renderCatList(){
-  const e2=el('cat-list');
+  const e2=el('cat-list');if(!e2)return;
   if(!db.categories.length){e2.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('noCats')+'</div>';return;}
   e2.innerHTML=db.categories.map(c=>{
     const th=c.img?('<img src="'+c.img+'" style="width:100%;height:100%;object-fit:cover;border-radius:7px">'):c.name[0];
@@ -5472,7 +5488,7 @@ function delProd(id){
 }
 function clearProd(){['p-eid','p-name','p-price','p-cost','p-stock','p-minstock','p-bc'].forEach(id=>el(id).value='');el('p-cat').value='';const mr=el('p-margin-row');if(mr)mr.style.display='none';imgClear('p-prev','p-data','p-file');}
 function renderProdList(){
-  const e2=el('prod-list');
+  const e2=el('prod-list');if(!e2)return;
   if(!db.products.length){e2.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('noProducts')+'</div>';return;}
   e2.innerHTML=db.products.map(p=>{
     const th=p.img?('<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;border-radius:7px">'):p.name[0];
@@ -5561,7 +5577,8 @@ function renderProds(){
 // INVENTORY
 function setInvCat(id){invCatFilter=id;renderInv();}
 function renderInv(){
-  const q=(el('inv-srch').value||'').toLowerCase();
+  const srchEl=el('inv-srch');if(!srchEl||!el('inv-list'))return;
+  const q=(srchEl.value||'').toLowerCase();
   const chips=el('inv-cat-chips');
   if(chips){
     const cats=db.categories||[];
@@ -5826,7 +5843,7 @@ function editCust(id){
 function clearCust(){['cust-eid','cust-name','cust-cedula','cust-phone','cust-email','cust-notes'].forEach(id=>el(id)&&(el(id).value=''));}
 function delCust(id){confirm2(t('delCustConfirm'),()=>{db.customers=db.customers.filter(c=>c.id!==id);saveDB();renderCustList();});}
 function renderCustList(){
-  const e2=el('cust-list');
+  const e2=el('cust-list');if(!e2)return;
   if(!db.customers.length){e2.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('noCustomers')+'</div>';return;}
   e2.innerHTML=db.customers.map(c=>'<div class="pli"><div class="pli-thumb" style="background:var(--acg);color:var(--ac)">'+c.name[0]+'</div>'
     +'<div class="pli-info"><div class="pli-name">'+c.name+'</div>'
@@ -7584,7 +7601,8 @@ function renderSales(){
       ?'<div class="sc am"><div class="sclbl">🏷️ '+t('creditDebtCard')+'</div><div class="scval">'+dolr(creditAmt)+'</div></div>'
       :'<div class="sc am"><div class="sclbl">'+t('avgTicketLbl')+'</div><div class="scval">'+(cobradas.length?dolr(inc/cobradas.length):'$0.00')+'</div></div>'
     )+'</div>';
-  el('sales-body').innerHTML=statsHtml+(can||ret?'<div style="display:flex;gap:7px;margin-bottom:9px">'+(can?'<span style="background:var(--rdb);border:1.5px solid rgba(248,113,113,.2);border-radius:8px;padding:4px 9px;font-size:.75rem;color:var(--rd)">'+t('cancelledCount')+can+'</span>':'')+(ret?'<span style="background:var(--amb);border:1.5px solid rgba(251,191,36,.2);border-radius:8px;padding:4px 9px;font-size:.75rem;color:var(--am)">'+t('returnedCount')+ret+'</span>':'')+'</div>':'')+rows;
+  const salesBody=el('sales-body');if(!salesBody)return;
+  salesBody.innerHTML=statsHtml+(can||ret?'<div style="display:flex;gap:7px;margin-bottom:9px">'+(can?'<span style="background:var(--rdb);border:1.5px solid rgba(248,113,113,.2);border-radius:8px;padding:4px 9px;font-size:.75rem;color:var(--rd)">'+t('cancelledCount')+can+'</span>':'')+(ret?'<span style="background:var(--amb);border:1.5px solid rgba(251,191,36,.2);border-radius:8px;padding:4px 9px;font-size:.75rem;color:var(--am)">'+t('returnedCount')+ret+'</span>':'')+'</div>':'')+rows;
 }
 function viewSaleReceipt(id){
   const sale=(db.sales||[]).find(function(s){return String(s.id)===String(id);});
@@ -7841,7 +7859,8 @@ function clearUser(){
   el('ulimit-warn').style.display='none';
 }
 function renderUserList(){
-  el('user-list').innerHTML=db.users.map(u=>
+  const _ul=el('user-list');if(!_ul)return;
+  _ul.innerHTML=db.users.map(u=>
     '<div class="pli">'+
       '<div class="pli-thumb" style="background:var(--acg);color:var(--ac)">'+u.name[0]+'</div>'+
       '<div class="pli-info">'+
@@ -8157,7 +8176,7 @@ function clearFactura(){['fac-qty','fac-cost','fac-prov','fac-num','fac-notes'].
 function delFactura(id){confirm2(t('delFacConfirm'),()=>{db.facturas=db.facturas.filter(f=>f.id!==id);saveDB();renderFacList();});}
 function loadFacProds(){el('fac-prod').innerHTML='<option value="">'+t('facSelectProduct')+'</option>'+db.products.map(p=>'<option value="'+p.id+'">'+p.name+' ('+t('stock')+': '+(p.stock||0)+')</option>').join('');}
 function renderFacList(){
-  const list=el('fac-list');
+  const list=el('fac-list');if(!list)return;
   if(!db.facturas.length){list.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('facNoInvoices')+'</div>';return;}
   list.innerHTML=db.facturas.slice().reverse().map(f=>'<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1.5px solid var(--b1)"><div style="flex:1"><div style="font-weight:600;font-size:.83rem;color:var(--tx)">'+f.prodName+' — <span style="color:var(--gn)">+'+f.qty+' u</span></div><div style="font-size:.72rem;color:var(--tx3)">'+new Date(f.date).toLocaleDateString()+(f.proveedor?' · '+f.proveedor:'')+(f.numFac?' · #'+f.numFac:'')+'</div></div><div style="font-family:monospace;color:var(--am);font-size:.85rem;font-weight:700">'+dolr(f.cost)+'</div><button class="xb" onclick="delFactura(\''+f.id+'\')">✕</button></div>').join('');
 }
@@ -8170,7 +8189,7 @@ function saveGasto(){
 function clearGasto(){['gst-concepto','gst-monto','gst-notes'].forEach(id=>el(id).value='');el('gst-cat').value='operativo';}
 function delGasto(id){confirm2(t('delGstConfirm'),()=>{db.gastos_conta=db.gastos_conta.filter(g=>g.id!==id);saveDB();renderGstList();});}
 function renderGstList(){
-  const list=el('gst-list');
+  const list=el('gst-list');if(!list)return;
   const period=(el('ct-period')||{value:'todo'}).value;
   const range=getDateRange(period);
   const all=(db.gastos_conta||[]).filter(function(g){const d=new Date(g.date);return d>=range.start&&d<=range.end;});
@@ -8220,8 +8239,10 @@ function _showGrafTip(e,canvas){
 function _hideGrafTip(){const t=document.getElementById('graf-tip');if(t)t.style.display='none';}
 
 function renderGraf(){
-  const type=el('graf-type').value,days=parseInt(el('graf-period').value)||30;
-  const canvas=el('graf-canvas');const ctx=canvas.getContext('2d');
+  const typeEl=el('graf-type'),periodEl=el('graf-period'),canvas=el('graf-canvas');
+  if(!typeEl||!periodEl||!canvas)return;
+  const type=typeEl.value,days=parseInt(periodEl.value)||30;
+  const ctx=canvas.getContext('2d');
   const dpr=window.devicePixelRatio||1;
   const cssW=canvas.offsetWidth||600,cssH=290;
   canvas.width=cssW*dpr;canvas.height=cssH*dpr;
