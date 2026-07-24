@@ -231,7 +231,7 @@ body.light #app-main{
 .sep{height:1px;background:var(--b1);}
 .plbl{font-size:.7rem;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;}
 .pbtns{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-.pbtn{padding:10px 6px;border-radius:var(--rs);border:1.5px solid var(--b1);background:var(--s2);color:#fff;cursor:pointer;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1;white-space:nowrap;width:100%;box-sizing:border-box;}
+.pbtn{padding:10px 6px;border-radius:var(--rs);border:1.5px solid var(--b1);background:var(--s2);color:#fff;cursor:pointer;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1;white-space:nowrap;width:100%;box-sizing:border-box;overflow:hidden;text-overflow:ellipsis;}
 .pbtn .pico{font-size:1.08rem;line-height:1;flex-shrink:0;display:inline-flex;align-items:center;}
 .pbtn.on{background:var(--ac);border-color:var(--ac);color:#fff;}
 .pbtn.hidden{display:none!important;}
@@ -253,7 +253,7 @@ body.light .pbtn.on{color:#ffffff;border-color:#1e3a8a;background:#1e3a8a;}
 /* Dcto no es un método de pago — no sigue la paleta sólida de arriba,
    así que necesita su propio contraste (el fallback --acc-fg:#fff se veía
    invisible en tema claro sobre --s2 casi blanco). */
-#app-main #disc-btn,body.light #app-main #disc-btn{background:var(--s3);color:var(--tx2);border:1.5px solid var(--b2);}
+#app-main #disc-btn,body.light #app-main #disc-btn{background:var(--s3);color:var(--tx2);border:1.5px solid var(--b2);font-size:12px;gap:3px;overflow:hidden;}
 /* Transferencia en el modal de cobro: mismo cyan que el botón del panel
    principal. #ov-checkout no hereda --cy de #app-main (es un overlay
    aparte), así que se define acá también. */
@@ -390,7 +390,13 @@ select.fi option{background:var(--s2);color:var(--tx);}
 .btn-g{background:var(--gnb);border:1.5px solid var(--gn);color:var(--gn);}
 .slbl{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);margin:12px 0 8px;}
 .sep-line{height:1px;background:var(--b1);margin:12px 0;}
-.adm-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px;}
+.adm-tabs{display:flex;flex-direction:column;margin-bottom:10px;}
+.uni-sec-title{font-size:.68rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 7px;}
+.uni-sec-title:first-child{margin-top:0;}
+.uni-sec-row{display:flex;gap:6px;flex-wrap:wrap;}
+#adm-tabs .btn,#uni-top-tabs .btn{display:inline-flex;align-items:center;gap:6px;}
+#adm-tabs .btn i,#uni-top-tabs .btn i{font-size:1.02rem;line-height:1;}
+#adm-tabs .btn-p,#uni-top-tabs .btn-p{background:var(--ac);}
 .tog{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
 .tog-label{font-size:.82rem;color:var(--tx2);flex:1;}
 .tog-sw{position:relative;width:36px;height:20px;flex-shrink:0;}
@@ -740,11 +746,11 @@ body.light #dashboard-screen{
       <div>
         <div class="plbl" style="margin-bottom:5px" id="pay-lbl">Método de pago</div>
         <div class="pbtns">
-          <button class="pbtn on" id="pb-cash" onclick="setPay('cash',this)" style="--acc:var(--gn2);--glow:var(--glow-gn2)"><span class="pico"><i class="ti ti-cash"></i></span><span id="pb-cash-txt">Efectivo</span></button>
+          <button class="pbtn on" id="pb-cash" onclick="setPay('cash',this)" style="grid-column:1/-1;--acc:var(--gn2);--glow:var(--glow-gn2)"><span class="pico"><i class="ti ti-cash"></i></span><span id="pb-cash-txt">Efectivo</span></button>
           <button class="pbtn" id="pb-card" onclick="setPay('card',this)" style="--acc:var(--ac2);--glow:var(--glow-ac2)"><span class="pico"><i class="ti ti-credit-card"></i></span><span id="pb-card-txt">Tarjeta</span></button>
           <button class="pbtn" id="pb-transf" onclick="setPay('transf',this)" style="--acc:var(--cy2,var(--cy));--glow:var(--glow-cy2,var(--glow-cy))"><span class="pico"><i class="ti ti-building-bank"></i></span><span id="pb-transf-txt">Transferencia</span></button>
           <button class="pbtn" id="pb-oa" onclick="openSaveOA()" style="--acc:var(--tl);--glow:var(--glow-tl)"><span class="pico"><i class="ti ti-notebook"></i></span><span id="pb-oa-txt">Cta. Abierta</span></button>
-          <button class="pbtn" id="pb-credit" onclick="openCreditSale()" style="display:none;grid-column:1/-1;--acc:var(--gld);--acc-fg:#1e293b;--glow:var(--glow-gld)"><span class="pico"><i class="ti ti-wallet"></i></span><span id="pb-credit-txt">Crédito</span></button>
+          <button class="pbtn" id="pb-credit" onclick="openCreditSale()" style="display:none;--acc:var(--gld);--acc-fg:#1e293b;--glow:var(--glow-gld)"><span class="pico"><i class="ti ti-wallet"></i></span><span id="pb-credit-txt">Crédito</span></button>
         </div>
 
       <div style="display:flex;gap:8px;align-items:stretch">
@@ -922,28 +928,37 @@ body.light #dashboard-screen{
     <div class="mh"><h3>≡ <span id="uni-modal-title">Menú</span></h3><button class="mx" onclick="closeOv('ov-unified')">✕</button></div>
     <div class="mb" style="padding-top:0">
       <div id="uni-top-tabs" style="display:flex;gap:6px;padding:12px 0 10px;border-bottom:2px solid var(--b1);margin-bottom:14px;flex-wrap:wrap;align-items:center">
-        <button class="btn btn-p" id="uni-btn-adm" onclick="uniTab('uni-adm',this)">🔐 <span id="uni-lbl-adm">Administración</span></button>
-        <button class="btn btn-s" id="uni-btn-conta" onclick="uniTab('uni-conta',this)">📒 <span id="uni-lbl-conta">Contabilidad</span></button>
-        <button class="btn btn-s" id="uni-btn-ajustes" onclick="uniTab('uni-ajustes',this)">⚙️ <span id="uni-lbl-ajustes">Ajustes</span></button>
-        <div id="uni-clock-btn" style="margin-left:auto;display:none"><button class="btn btn-s" style="color:#10b981" onclick="closeOv('ov-unified');setTimeout(openClockQuick,80)">⏱ <span id="uni-lbl-clock">Clock</span></button></div>
+        <button class="btn btn-p" id="uni-btn-adm" onclick="uniTab('uni-adm',this)"><i class="ti ti-shield-lock"></i> <span id="uni-lbl-adm">Administración</span></button>
+        <button class="btn btn-s" id="uni-btn-conta" onclick="uniTab('uni-conta',this)"><i class="ti ti-report-money"></i> <span id="uni-lbl-conta">Contabilidad</span></button>
+        <button class="btn btn-s" id="uni-btn-ajustes" onclick="uniTab('uni-ajustes',this)"><i class="ti ti-settings"></i> <span id="uni-lbl-ajustes">Ajustes</span></button>
+        <div id="uni-clock-btn" style="margin-left:auto;display:none"><button class="btn btn-s" style="color:#10b981" onclick="closeOv('ov-unified');setTimeout(openClockQuick,80)"><i class="ti ti-clock"></i> <span id="uni-lbl-clock">Clock In/Out</span></button></div>
       </div>
       <div id="uni-adm">
       <div class="adm-tabs" id="adm-tabs">
-        <button class="btn btn-p" onclick="admTab('t-prods',this)">📦 <span id="tab-prods-txt">Productos</span></button>
-        <button class="btn btn-s" onclick="admTab('t-cats',this)">🏷️ <span id="tab-cats-txt">Categorías</span></button>
-        <button class="btn btn-s" onclick="admTab('t-users',this)">👤 <span id="tab-users-txt">Usuarios</span></button>
-        <button class="btn btn-s" onclick="admTab('t-cfg',this)">⚙️ <span id="tab-cfg-txt">Config</span></button>
-        <button class="btn btn-s" onclick="admTab('t-inv',this)">📋 <span id="tab-inv-txt">Inventario</span></button>
-        <button class="btn btn-s" onclick="admTab('t-cust',this)">👥 <span id="tab-cust-txt">Clientes</span></button>
-        <button class="btn btn-s" onclick="admTab('t-combos',this)">🍱 <span id="tab-combos-txt">Combos</span></button>
-        <button class="btn btn-s" onclick="admTab('t-specials',this)">⭐ <span id="tab-specials-txt">Especiales</span></button>
-        <button class="btn btn-s" onclick="admTab('t-nomina',this)">👷 <span id="tab-nomina-txt">Nómina</span></button>
-        <button class="btn btn-s" onclick="closeOv('ov-unified');setTimeout(function(){sbNav('dash');},80)">📊 <span id="tab-dashboard-txt">Dashboard</span></button>
-        <button class="btn btn-s" id="tab-dash-mobile-btn" onclick="admTab('t-dash-mobile',this);updateTabDashMobile()">📱 <span id="tab-dash-mobile-txt">Dashboard Móvil</span></button>
-        <button class="btn btn-s" onclick="admTab('t-labels',this)">🏷️ <span id="tab-labels-txt">Etiquetas</span></button>
-        <button class="btn btn-s" onclick="admTab('t-audit',this)">📋 <span id="tab-audit-txt">Auditoría</span></button>
-        <button class="btn btn-s" onclick="admTab('t-shiftnote',this)">📝 <span id="tab-shiftnote-txt">Nota de turno</span></button>
-        <button class="btn btn-s" onclick="admTab('t-updates',this)">⬆️ <span id="tab-updates-txt">Actualizaciones</span></button>
+        <div class="uni-sec-title" id="uni-sec-ventas-lbl">Productos y Ventas</div>
+        <div class="uni-sec-row">
+          <button class="btn btn-p" onclick="admTab('t-prods',this)"><i class="ti ti-box"></i> <span id="tab-prods-txt">Productos</span></button>
+          <button class="btn btn-s" onclick="admTab('t-cats',this)"><i class="ti ti-tag"></i> <span id="tab-cats-txt">Categorías</span></button>
+          <button class="btn btn-s" onclick="admTab('t-inv',this)"><i class="ti ti-clipboard-list"></i> <span id="tab-inv-txt">Inventario</span></button>
+          <button class="btn btn-s" onclick="admTab('t-combos',this)"><i class="ti ti-package"></i> <span id="tab-combos-txt">Combos</span></button>
+          <button class="btn btn-s" onclick="admTab('t-specials',this)"><i class="ti ti-star"></i> <span id="tab-specials-txt">Especiales</span></button>
+          <button class="btn btn-s" onclick="admTab('t-labels',this)"><i class="ti ti-tags"></i> <span id="tab-labels-txt">Etiquetas</span></button>
+          <button class="btn btn-s" onclick="admTab('t-cust',this)"><i class="ti ti-users"></i> <span id="tab-cust-txt">Clientes</span></button>
+        </div>
+        <div class="uni-sec-title" id="uni-sec-admin-lbl">Administración</div>
+        <div class="uni-sec-row">
+          <button class="btn btn-s" onclick="admTab('t-users',this)"><i class="ti ti-user-cog"></i> <span id="tab-users-txt">Usuarios</span></button>
+          <button class="btn btn-s" onclick="admTab('t-cfg',this)"><i class="ti ti-settings"></i> <span id="tab-cfg-txt">Config</span></button>
+          <button class="btn btn-s" onclick="admTab('t-nomina',this)"><i class="ti ti-briefcase"></i> <span id="tab-nomina-txt">Nómina</span></button>
+          <button class="btn btn-s" onclick="admTab('t-audit',this)"><i class="ti ti-clipboard-check"></i> <span id="tab-audit-txt">Auditoría</span></button>
+        </div>
+        <div class="uni-sec-title" id="uni-sec-sistema-lbl">Sistema</div>
+        <div class="uni-sec-row">
+          <button class="btn btn-s" onclick="closeOv('ov-unified');setTimeout(function(){sbNav('dash');},80)"><i class="ti ti-layout-dashboard"></i> <span id="tab-dashboard-txt">Dashboard</span></button>
+          <button class="btn btn-s" id="tab-dash-mobile-btn" onclick="admTab('t-dash-mobile',this);updateTabDashMobile()"><i class="ti ti-device-mobile"></i> <span id="tab-dash-mobile-txt">Dashboard Móvil</span></button>
+          <button class="btn btn-s" onclick="admTab('t-shiftnote',this)"><i class="ti ti-notes"></i> <span id="tab-shiftnote-txt">Nota de turno</span></button>
+          <button class="btn btn-s" onclick="admTab('t-updates',this)"><i class="ti ti-refresh"></i> <span id="tab-updates-txt">Actualizaciones</span></button>
+        </div>
       </div>
       <!-- PRODUCTS -->
       <div id="t-prods">
@@ -2739,7 +2754,8 @@ const T = {
     hmClockTxt:'Clock In/Out',clockQuickTitle:'Clock In/Out',clockQuickSaved:'✅ Opción guardada',
     clockQuickNoEmployees:'Sin empleados con Clock In/Out activado.',
     // Menú unificado
-    uniModalTitle:'Menú',uniTabAdm:'Administración',uniTabConta:'Contabilidad',uniTabAjustes:'Ajustes',uniTabClock:'Clock',
+    uniModalTitle:'Menú',uniTabAdm:'Administración',uniTabConta:'Contabilidad',uniTabAjustes:'Ajustes',uniTabClock:'Clock In/Out',
+    uniSecVentas:'Productos y Ventas',uniSecAdmin:'Administración',uniSecSistema:'Sistema',
     sbiMenu:'Menú',sbiClock:'Clock',
     // Menú hamburguesa — antes hardcodeado, ahora traducido
     hmSecPrincipal:'PRINCIPAL',hmSecAcciones:'ACCIONES',hmDashboard:'Dashboard',hmDashMobile:'Dashboard Móvil',
@@ -3278,7 +3294,8 @@ const T = {
     hmClockTxt:'Clock In/Out',clockQuickTitle:'Clock In/Out',clockQuickSaved:'✅ Option saved',
     clockQuickNoEmployees:'No employees with Clock In/Out enabled.',
     // Unified menu
-    uniModalTitle:'Menu',uniTabAdm:'Administration',uniTabConta:'Accounting',uniTabAjustes:'Settings',uniTabClock:'Clock',
+    uniModalTitle:'Menu',uniTabAdm:'Administration',uniTabConta:'Accounting',uniTabAjustes:'Settings',uniTabClock:'Clock In/Out',
+    uniSecVentas:'Products & Sales',uniSecAdmin:'Administration',uniSecSistema:'System',
     sbiMenu:'Menu',sbiClock:'Clock',
     // Hamburger menu — previously hardcoded, now translated
     hmSecPrincipal:'MAIN',hmSecAcciones:'ACTIONS',hmDashboard:'Dashboard',hmDashMobile:'Mobile Dashboard',
@@ -4116,15 +4133,15 @@ function applyLang(){
   const _rcPassLbl=el('rc-pass-lbl');if(_rcPassLbl)_rcPassLbl.textContent=t('reset_password_label');
   const _rcCancelBtn=el('rc-cancel-btn');if(_rcCancelBtn)_rcCancelBtn.textContent=t('reset_cancel');
   _resetValidate();
-  // Sidebar simplificado
-  const _sbiMenuLbl=el('sbi-menu-lbl');if(_sbiMenuLbl)_sbiMenuLbl.textContent=t('sbiMenu');
-  const _sbiClockLbl=el('sbi-clock-lbl');if(_sbiClockLbl)_sbiClockLbl.textContent=t('sbiClock');
   // Unified menu
   const _uniTitle=el('uni-modal-title');if(_uniTitle)_uniTitle.textContent=t('uniModalTitle');
   const _uniAdm=el('uni-lbl-adm');if(_uniAdm)_uniAdm.textContent=t('uniTabAdm');
   const _uniConta=el('uni-lbl-conta');if(_uniConta)_uniConta.textContent=t('uniTabConta');
   const _uniAjustes=el('uni-lbl-ajustes');if(_uniAjustes)_uniAjustes.textContent=t('uniTabAjustes');
   const _uniClock=el('uni-lbl-clock');if(_uniClock)_uniClock.textContent=t('uniTabClock');
+  const _uniSecVentas=el('uni-sec-ventas-lbl');if(_uniSecVentas)_uniSecVentas.textContent=t('uniSecVentas');
+  const _uniSecAdmin=el('uni-sec-admin-lbl');if(_uniSecAdmin)_uniSecAdmin.textContent=t('uniSecAdmin');
+  const _uniSecSistema=el('uni-sec-sistema-lbl');if(_uniSecSistema)_uniSecSistema.textContent=t('uniSecSistema');
   const _hamAdm=el('ham-lbl-adm');if(_hamAdm)_hamAdm.textContent=t('uniTabAdm');
   const _hamConta=el('ham-lbl-conta');if(_hamConta)_hamConta.textContent=t('uniTabConta');
   const _hamAjustes=el('ham-lbl-ajustes');if(_hamAjustes)_hamAjustes.textContent=t('uniTabAjustes');
