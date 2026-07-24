@@ -4154,18 +4154,6 @@ function applyLang(){
   // Month names in selector
   (function(){const ms=t('monthlyMonths').split(',');ms.forEach(function(name,i){const o=el('mth-'+i);if(o)o.textContent=name;});})();
   updateCobrar(); renderCats(); renderProds(); updatePCat();
-  /* Re-renderizar TODAS las pantallas dinámicas al cambiar de idioma —
-     antes solo se re-renderizaban renderCats()/renderProds(), así que
-     cualquier pantalla ya renderizada (Inventario, Nómina, Auditoría,
-     Dashboard, etc.) quedaba en el idioma viejo hasta que el usuario
-     navegaba a otro lado y volvía. Todas estas funciones ya son seguras
-     de llamar sin que esa pantalla esté visible (sus contenedores están
-     siempre en el DOM, solo ocultos por CSS) y no hacen llamadas de red. */
-  renderCatList();renderProdList();renderInv();renderCustList();renderUserList();
-  renderEmployeeList();renderAuditTable();renderConta();renderCompList();
-  renderComboList();renderSpecialList();renderSales();renderVentasList();
-  renderMonthlyResumen();renderCreditsPanel();renderAdmCredits();renderContaCredits();
-  refreshDashboard();renderGraf();renderClockQuickList();_renderCqHist();
 }
 function switchLang(){
   setLang(lang==='es'?'en':'es');
