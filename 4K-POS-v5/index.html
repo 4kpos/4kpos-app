@@ -4664,7 +4664,7 @@ function _syncRefreshActiveScreen(){
   // Check lock before validating password
   if(candidate&&candidate.lockedUntil&&new Date(candidate.lockedUntil)>new Date()){
     const minsLeft=Math.max(1,Math.ceil((new Date(candidate.lockedUntil)-Date.now())/60000));
-    logAction(t('auditLoginFail'),'Cuenta bloqueada · '+u+' · '+minsLeft+' min restantes');
+    logAction('auditLoginFail','Cuenta bloqueada · '+u+' · '+minsLeft+' min restantes');
     el('lerr').textContent=t('accountLockedPrefix')+minsLeft+t('accountLockedSuffix');
     el('lerr').style.display='block';
     el('lp').value='';
@@ -4704,17 +4704,17 @@ function _syncRefreshActiveScreen(){
       if(candidate.failedAttempts>=5){
         candidate.lockedUntil=new Date(Date.now()+5*60*1000).toISOString();
         candidate.failedAttempts=0;
-        logAction(t('auditLoginFail'),'BLOQUEADO tras 5 intentos · '+u);
+        logAction('auditLoginFail','BLOQUEADO tras 5 intentos · '+u);
         el('lerr').textContent=t('tooManyAttempts');
         setTimeout(()=>{el('lerr').style.display='none';el('lerr').textContent=t('loginErr');},4000);
       }else{
-        logAction(t('auditLoginFail'),'Contraseña incorrecta · '+u+' ('+candidate.failedAttempts+'/5)');
+        logAction('auditLoginFail','Contraseña incorrecta · '+u+' ('+candidate.failedAttempts+'/5)');
         el('lerr').textContent=t('wrongPassPrefix')+candidate.failedAttempts+t('wrongPassSuffix');
         setTimeout(()=>{el('lerr').style.display='none';el('lerr').textContent=t('loginErr');},2500);
       }
       saveDB();
     }else{
-      logAction(t('auditLoginFail'),'Usuario no existe: '+u);
+      logAction('auditLoginFail','Usuario no existe: '+u);
       el('lerr').textContent=t('loginErr');
       setTimeout(()=>el('lerr').style.display='none',2500);
     }
@@ -4789,7 +4789,7 @@ function resetUserPass(id){
     for(var i=0;i<6;i++)tmp+=chars[Math.floor(Math.random()*chars.length)];
     u.pass=bcrypt?bcrypt.hashSync(tmp,10):tmp;
     u.tempPassword=true;
-    logAction(t('auditPassReset'),u.name+' ('+u.user+')');
+    logAction('auditPassReset',u.name+' ('+u.user+')');
     saveDB();
     el('rp-uname').textContent=u.name;
     el('rp-code').textContent=tmp;
@@ -4812,6 +4812,14 @@ function doForceChPass(){
   _continueAfterLogin(curUser);
 }
 
+/* accion es ahora un CODIGO estable (clave de traduccion tipo 'auditUserDel',
+   o un codigo crudo tipo 'AUTO_RESTORE_BLOCKED' para eventos de sistema) —
+   nunca texto ya traducido. Se guarda dos veces: "tipo" (el codigo, para
+   colorear/filtrar sin depender del idioma) y "accion" (el texto resuelto
+   AHORA, en el idioma activo — queda congelado tal cual se ve hoy, igual
+   que antes). t() ya cae de vuelta al string original si no encuentra la
+   clave, asi que los codigos crudos (sin entrada en el diccionario) se
+   comportan exactamente igual que antes de este cambio. */
 function logAction(accion,detalle,antes,despues){
   if(!db.auditLog)db.auditLog=[];
   const now=new Date();
@@ -4821,7 +4829,8 @@ function logAction(accion,detalle,antes,despues){
     hora:now.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
     userId:curUser?curUser.id:'?',
     userName:curUser?curUser.name:'(sistema)',
-    accion:accion||'',
+    tipo:accion||'',
+    accion:t(accion)||accion||'',
     detalle:detalle||'',
     antes:(antes!==undefined&&antes!==null)?String(antes):'',
     despues:(despues!==undefined&&despues!==null)?String(despues):''
@@ -4833,7 +4842,7 @@ function delUser(id){
   if(!u)return;
   requireAdminCode(t('delUserPromptPre')+u.name+' ('+u.role+')',function(){
     confirm2(t('deleteUserConfirm')+u.name+'?',function(){
-      logAction(t('auditUserDel'),u.name+' ('+u.role+')');
+      logAction('auditUserDel',u.name+' ('+u.role+')');
       db.users=db.users.filter(function(x){return x.id!==id;});
       saveDB();renderUserList();renderLoginUsers();
     });
@@ -4863,11 +4872,19 @@ function renderAuditTable(){
   if(fUser)entries=entries.filter(function(e){return e.userName===fUser;});
   if(dFrom){const f=new Date(dFrom);entries=entries.filter(function(e){const ts=parseInt(e.id,36);return isNaN(ts)||new Date(ts)>=f;});}
   if(dTo){const t2=new Date(dTo);t2.setHours(23,59,59,999);entries=entries.filter(function(e){const ts=parseInt(e.id,36);return isNaN(ts)||new Date(ts)<=t2;});}
-  const acColors={'Venta anulada':'#ef4444','Login fallido':'#f97316','Usuario eliminado':'#f97316','Contraseña reseteada':'#f59e0b','Descuento aplicado':'#8b5cf6','Producto eliminado':'#ef4444','Usuario creado':'#10b981','Usuario editado':'#3b82f6','Abono de crédito':'#10b981','Cierre de turno':'#6366f1','Precio editado':'#f59e0b'};
+  /* Coloreado por CODIGO (e.tipo), no por el texto ya traducido (e.accion)
+     — asi funciona igual sin importar en que idioma se logueo la accion.
+     acColorsLegacy es solo para entradas guardadas ANTES de este cambio,
+     que no tienen "tipo": si quedaron logueadas en español matchean por
+     texto igual que hacia el sistema viejo; si quedaron en ingles no hay
+     forma de inferir el codigo con certeza, asi que quedan sin color en
+     vez de arriesgar un color incorrecto. */
+  const acColors={auditSaleVoided:'#ef4444',auditLoginFail:'#f97316',auditUserDel:'#f97316',auditPassReset:'#f59e0b',auditDiscountApplied:'#8b5cf6',auditProdDel:'#ef4444',auditUserCreate:'#10b981',auditUserEdit:'#3b82f6',auditAbonoReg:'#10b981',auditShiftClose:'#6366f1',auditPriceEdit:'#f59e0b'};
+  const acColorsLegacy={'Venta anulada':'#ef4444','Login fallido':'#f97316','Usuario eliminado':'#f97316','Contraseña reseteada':'#f59e0b','Descuento aplicado':'#8b5cf6','Producto eliminado':'#ef4444','Usuario creado':'#10b981','Usuario editado':'#3b82f6','Abono de crédito':'#10b981','Cierre de turno':'#6366f1','Precio editado':'#f59e0b'};
   const tbody=el('aud-tbody');if(!tbody)return;
   if(!entries.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--tx3)">'+t('auditNoRecords')+'</td></tr>';const cnt0=el('aud-count');if(cnt0)cnt0.textContent='';return;}
   tbody.innerHTML=entries.map(function(e){
-    const col=acColors[e.accion]||'var(--tx2)';
+    const col=(e.tipo&&acColors[e.tipo])||acColorsLegacy[e.accion]||'var(--tx2)';
     return '<tr style="border-bottom:1px solid var(--b1)">'
       +'<td style="padding:5px 8px;white-space:nowrap;color:var(--tx3)">'+escHtml(e.fecha||'')+'</td>'
       +'<td style="padding:5px 8px;white-space:nowrap;color:var(--tx3)">'+escHtml(e.hora||'')+'</td>'
@@ -5097,7 +5114,7 @@ function doLogout(){
   const _decl2=parseFloat((el('lo-declared-cash')||{}).value)||0;
   const _expCash2=(_bpS.cash||0)+(_aboS.cashPart||0);
   const _diff2=Math.round((_decl2-_expCash2)*100)/100;
-  logAction(t('auditShiftClose'),_shiftActive.length+' ventas · Efectivo: '+dolr(_bpS.cash||0)+(_diff2!==0?' · Descuadre: '+(_diff2<0?'-':'+')+'$'+Math.abs(_diff2).toFixed(2):''));
+  logAction('auditShiftClose',_shiftActive.length+' ventas · Efectivo: '+dolr(_bpS.cash||0)+(_diff2!==0?' · Descuadre: '+(_diff2<0?'-':'+')+'$'+Math.abs(_diff2).toFixed(2):''));
   const _noteVal=(el('lo-shift-note')||{}).value||'';
   if(!db.cfg)db.cfg={};
   db.cfg.pendingShiftNote=_noteVal.trim()||null;
@@ -5208,7 +5225,7 @@ function _invalidateAutoBackup(resetAt){
   try{localStorage.setItem('4kpos_backup_stale_before',resetAt);}catch(e){}
 }
 function _applyLocalReset(targets,resetAt){
-  logAction(t('auditDataReset'),targets.join(', '));
+  logAction('auditDataReset',targets.join(', '));
   var has=function(k){return targets.indexOf(k)!==-1;};
   if(has('ventas')){db.sales=[];db.returns=[];db.orderNum=0;}
   if(has('creditos')){db.credits=[];}
@@ -5244,7 +5261,7 @@ var _adminConfirmLabel='';
 
 function requireAdminCode(accionTexto,callback){
   if(curUser&&curUser.role==='admin'&&(db.settings&&db.settings.adminExemptFromConfirm)!==false){
-    logAction(t('auditAdminExempt'),accionTexto);
+    logAction('auditAdminExempt',accionTexto);
     callback();return;
   }
   _adminConfirmCb=callback;_adminConfirmLabel=accionTexto;
@@ -5267,7 +5284,7 @@ function saveAdminExemptCfg(){
   if(!db.settings)db.settings={};
   db.settings.adminExemptFromConfirm=(el('cfg-admin-exempt')||{}).checked!==false;
   saveDB();
-  logAction(t('auditAdminCfgExempt'),'adminExemptFromConfirm:'+db.settings.adminExemptFromConfirm);
+  logAction('auditAdminCfgExempt','adminExemptFromConfirm:'+db.settings.adminExemptFromConfirm);
   toast(t('configSaved'));
 }
 
@@ -5373,7 +5390,7 @@ function verifyPin(){
       _adminConfirmCb=null;_adminConfirmLabel='';
       const pt=el('pin-title');if(pt)pt.textContent=t('pinTitle');
       const pc=el('pin-action-ctx');if(pc){pc.textContent='';pc.style.display='none';}
-      logAction(t('auditAdminCode'),_lbl);
+      logAction('auditAdminCode',_lbl);
       _cb();
     }else{runTarget(pinTarget);}
   }else{el('pin-err').style.display='block';pinVal='';updatePinDisp();setTimeout(()=>el('pin-err').style.display='none',1500);}
@@ -5459,7 +5476,7 @@ function saveProd(){
   if(!name||!price){toast(t('prodNamePriceRequired'));return;}
   const eid=el('p-eid').value,imgData=el('p-data').value;
   const prod={id:eid||Date.now().toString(),name,cat:el('p-cat').value,price,cost:getNum('p-cost')||undefined,stock:getNum('p-stock'),minStock:getNum('p-minstock')||5,bc:el('p-bc').value.trim(),img:imgData};
-  if(eid){const i=db.products.findIndex(x=>x.id===eid);if(i>=0){if(db.products[i].price!==price)logAction(t('auditPriceEdit'),prod.name,dolr(db.products[i].price),dolr(price));if(!imgData)prod.img=db.products[i].img;db.products[i]=prod;}el('p-eid').value='';}
+  if(eid){const i=db.products.findIndex(x=>x.id===eid);if(i>=0){if(db.products[i].price!==price)logAction('auditPriceEdit',prod.name,dolr(db.products[i].price),dolr(price));if(!imgData)prod.img=db.products[i].img;db.products[i]=prod;}el('p-eid').value='';}
   else db.products.push(prod);
   saveDB();renderProdList();renderProds();clearProd();calcNotifs();toast('✓ '+name);
 }
@@ -5477,7 +5494,7 @@ function delProd(id){
   const _doDelProd=function(){
     confirm2(t('delProductConfirm')+_dp.name+'?',function(){
       db.products=db.products.filter(x=>x.id!==id);cart=cart.filter(x=>x.id!==id);
-      logAction(t('auditProdDel'),_dp.name+((_dp.bc)?' · #'+_dp.bc:'')+' · '+dolr(_dp.price||0));
+      logAction('auditProdDel',_dp.name+((_dp.bc)?' · #'+_dp.bc:'')+' · '+dolr(_dp.price||0));
       if(_invSelRow===id)_invSelRow=null;
       saveDB();renderProdList();renderProds();renderCart();calcNotifs();renderInv();
     });
@@ -6089,7 +6106,7 @@ function saveTaxCfg(){
   db.cfg.taxRate=Math.max(0,parseFloat((el('cfg-tax-rate')||{}).value)||0);
   db.cfg.taxIncluded=(el('cfg-tax-included')||{}).checked===true;
   saveDB();
-  logAction(t('auditTaxUpdate'),db.cfg.taxName+' '+db.cfg.taxRate+'% (activo:'+db.cfg.taxEnabled+')');
+  logAction('auditTaxUpdate',db.cfg.taxName+' '+db.cfg.taxRate+'% (activo:'+db.cfg.taxEnabled+')');
   toast(t('taxSaved'));
 }
 function npPress(k){
@@ -6314,7 +6331,7 @@ function saveBackupPass(){
     _bkpKey=_deriveBackupKey(p1,salt);
     if(el('cfg-bkp-pass1'))el('cfg-bkp-pass1').value='';
     if(el('cfg-bkp-pass2'))el('cfg-bkp-pass2').value='';
-    logAction(hadPass?t('auditBkpPassChange'):t('auditBkpPassSet'));
+    logAction(hadPass?'auditBkpPassChange':'auditBkpPassSet');
     saveDB();
     _updateBkpPassUI();
     toast(t('backupPassSaved'));
@@ -6326,7 +6343,7 @@ function removeBackupPass(){
     db.settings.backupPassHash=null;
     db.settings.backupKeySalt=null;
     _bkpKey=null;
-    logAction(t('auditBkpPassDel'));
+    logAction('auditBkpPassDel');
     saveDB();
     _updateBkpPassUI();
     toast(t('backupPassRemoved'));
@@ -6697,7 +6714,7 @@ function _onInactivityTimeout(){
     _oaList.push({id:Date.now().toString(),ref:_ref,name:_userName,table:'',date:new Date().toISOString(),items:JSON.parse(JSON.stringify(cart)),total:_tot,cashier:_userName});
     _saveOAs(_oaList);
   }
-  logAction(t('auditInactivityLock'),_userName+' · '+((db.settings&&db.settings.inactivityMinutes)||10)+' min sin actividad');
+  logAction('auditInactivityLock',_userName+' · '+((db.settings&&db.settings.inactivityMinutes)||10)+' min sin actividad');
   syncShiftStatusDirect({active:true,currentUser:_userName,lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg&&db.cfg.pendingShiftNote||null});
   _sessionLogout();
   toast(t('sessionLockedInactivity')+(cart&&cart.length?' '+t('cartSaved'):''));
@@ -6733,7 +6750,7 @@ function doQuickLock(){
     _oaList.push({id:Date.now().toString(),ref:_ref,name:_uName,table:'',date:new Date().toISOString(),items:JSON.parse(JSON.stringify(cart)),total:_tot,cashier:_uName});
     _saveOAs(_oaList);
   }
-  logAction(t('auditSessionLock'),_uName);
+  logAction('auditSessionLock',_uName);
   syncShiftStatusDirect({active:true,currentUser:_uName,lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg&&db.cfg.pendingShiftNote||null});
   _sessionLogout();
   toast(t('sessionLocked')+(_hadCart?' '+t('cartSaved'):''));
@@ -6915,7 +6932,7 @@ function discSetType(t2,btn){
 function applyDiscount(){
   const v=parseFloat(el('disc-val').value)||0;
   discount={type:discount.type,value:v,active:v>0};
-  if(v>0){const _ct=cart.reduce((s,c)=>s+c.price*c.qty,0);logAction(t('auditDiscountApplied'),(discount.type==='fix'?dolr(v):v+'%')+' · carrito '+dolr(_ct));}
+  if(v>0){const _ct=cart.reduce((s,c)=>s+c.price*c.qty,0);logAction('auditDiscountApplied',(discount.type==='fix'?dolr(v):v+'%')+' · carrito '+dolr(_ct));}
   renderCart();updateCobrar();closeOv('ov-discount');
   toast(v>0?'✓ '+t('discount')+' '+t('apply'):'✕ '+t('removeDiscount'));
 }
@@ -7315,7 +7332,7 @@ function doCreditPayment(full){
     cr.payments.push(payRec);
   }
   saveDB();
-  logAction(t('auditAbonoReg'),'Cliente: '+c.client+' · Monto: '+dolr(actual)+(actual<owed?' (parcial)':' (pago total)')+' · Usuario: '+(curUser?curUser.name:'—'));
+  logAction('auditAbonoReg','Cliente: '+c.client+' · Monto: '+dolr(actual)+(actual<owed?' (parcial)':' (pago total)')+' · Usuario: '+(curUser?curUser.name:'—'));
   closeOv('ov-credit-pay');
   renderCreditsPanel();
   renderAdmCredits();
@@ -7568,7 +7585,7 @@ function doCancel(id){
     confirm2(t('cancelConfirmPrefix')+(sale.rnum||id)+' ('+dolr(sale.total)+t('cancelConfirmSuffix'),()=>{
       sale.status='cancelled';sale.cancelDate=new Date().toISOString();
       sale.items.forEach(item=>{const p=db.products.find(x=>x.id===item.id);if(p)p.stock+=item.qty;});
-      logAction(t('auditSaleVoided'),'#'+(sale.rnum||sale.id)+' · '+dolr(sale.total));
+      logAction('auditSaleVoided','#'+(sale.rnum||sale.id)+' · '+dolr(sale.total));
       saveDB();renderActions('cancel');renderProds();toast(t('cancelDone'));
     });
   });
@@ -7783,7 +7800,7 @@ function saveUser(){
     u.role=role;
     u.perms=perms;
 
-    logAction(t('auditUserEdit'),name+' ('+role+')');
+    logAction('auditUserEdit',name+' ('+role+')');
     saveDB();
     renderUserList();
     renderLoginUsers();
@@ -7807,7 +7824,7 @@ function saveUser(){
       if(!db.employees.find(function(e){return e._userId===_newUid||e.name===name;})){
         db.employees.push({id:'emp_'+_newUid,_userId:_newUid,name:name,payType:'monthly',amount:0,useClockInOut:false,hourlyRate:0,clockEvents:[],pin:''});
       }
-      logAction(t('auditUserCreate'),name+' ('+role+')');
+      logAction('auditUserCreate',name+' ('+role+')');
       saveDB();
       renderUserList();
       renderLoginUsers();
@@ -7820,7 +7837,7 @@ function saveUser(){
       if(!db.employees.find(function(e){return e._userId===_newUid2||e.name===name;})){
         db.employees.push({id:'emp_'+_newUid2,_userId:_newUid2,name:name,payType:'monthly',amount:0,useClockInOut:false,hourlyRate:0,clockEvents:[],pin:''});
       }
-      logAction(t('auditUserCreate'),name+' ('+role+')');
+      logAction('auditUserCreate',name+' ('+role+')');
       saveDB();
       renderUserList();
       renderLoginUsers();
@@ -8760,11 +8777,11 @@ function _empSetHourAdjustment(empId,scope,dateKey,desiredTotal){
   var idx=emp.hourAdjustments.findIndex(function(a){return a.scope===scope&&a.date===dateKey;});
   var detail=emp.name+' · '+scope+' '+dateKey+' · '+real.toFixed(1)+'h → '+desiredTotal.toFixed(1)+'h ('+(delta>=0?'+':'')+delta.toFixed(1)+'h)';
   if(Math.abs(delta)<0.01){
-    if(idx>=0){emp.hourAdjustments.splice(idx,1);logAction(t('auditHourAdjRemoved'),detail);}
+    if(idx>=0){emp.hourAdjustments.splice(idx,1);logAction('auditHourAdjRemoved',detail);}
   }else{
     var adj={id:(idx>=0?emp.hourAdjustments[idx].id:'hadj_'+Date.now()),scope:scope,date:dateKey,deltaHours:delta,byUser:(curUser?curUser.name:''),at:new Date().toISOString()};
     if(idx>=0)emp.hourAdjustments[idx]=adj;else emp.hourAdjustments.push(adj);
-    logAction(t('auditHourAdj'),detail,real.toFixed(1)+'h',desiredTotal.toFixed(1)+'h');
+    logAction('auditHourAdj',detail,real.toFixed(1)+'h',desiredTotal.toFixed(1)+'h');
   }
   saveDB();renderEmployeeList();_renderCqHist();toast(t('toastHourAdjSaved'));
 }
@@ -8836,7 +8853,7 @@ function deleteClockEvent(empId,evId){
   var detail=emp.name+' · '+fmtTime(ev.in)+(ev.out?(' → '+fmtTime(ev.out)):' ('+t('empCurrentlyIn')+')');
   requireAdminCode(t('delClockEventTitle')+' — '+detail,function(){
     confirm2(t('delClockEventConfirm')+detail+'?',function(){
-      logAction(t('auditClockEventDel'),detail);
+      logAction('auditClockEventDel',detail);
       emp.clockEvents=(emp.clockEvents||[]).filter(function(e){return e.id!==evId;});
       if(emp.hourAdjustments&&emp.hourAdjustments.length){
         emp.hourAdjustments=emp.hourAdjustments.filter(function(a){return !(a.scope==='event'&&a.date===evId);});
@@ -9522,10 +9539,10 @@ function saveCombo(){
   if(eid){
     const i=db.combos.findIndex(function(x){return x.id===eid;});
     if(i>=0)db.combos[i]=combo;
-    logAction(t('auditComboEdit'),name+' \xb7 '+dolr(price));
+    logAction('auditComboEdit',name+' \xb7 '+dolr(price));
   }else{
     db.combos.push(combo);
-    logAction(t('auditComboCreate'),name+' \xb7 '+dolr(price));
+    logAction('auditComboCreate',name+' \xb7 '+dolr(price));
   }
   saveDB();clearCombo();renderComboList();renderCategories();
   toast(t('comboSaved'));
@@ -9545,7 +9562,7 @@ function deleteCombo(id){
   const c=(db.combos||[]).find(function(x){return x.id===id;});if(!c)return;
   confirm2(t('comboDelConfirm')+c.name+'?',function(){
     db.combos=db.combos.filter(function(x){return x.id!==id;});
-    logAction(t('auditComboDel'),c.name);
+    logAction('auditComboDel',c.name);
     saveDB();renderComboList();renderCategories();
     toast(t('comboDeleted'));
   });
@@ -9553,7 +9570,7 @@ function deleteCombo(id){
 function toggleCombo(id){
   const c=(db.combos||[]).find(function(x){return x.id===id;});if(!c)return;
   c.active=!c.active;
-  logAction(c.active?t('auditComboActivated'):t('auditComboDeactivated'),c.name);
+  logAction(c.active?'auditComboActivated':'auditComboDeactivated',c.name);
   saveDB();renderComboList();renderCategories();
 }
 function renderComboList(){
@@ -9622,10 +9639,10 @@ function saveSpecial(){
   const typeLabel={discount:t('auditSpcTypeDiscount'),bogo:_bogoLabel,qty_price:t('auditSpcTypeQtyPrice')}[_spcType]||_spcType;
   if(eid){
     const i=db.specials.findIndex(function(x){return x.id===eid;});if(i>=0)db.specials[i]=spc;
-    logAction(t('auditSpecialEdit'),typeLabel+' \xb7 '+(prod?prod.name:pid));
+    logAction('auditSpecialEdit',typeLabel+' \xb7 '+(prod?prod.name:pid));
   }else{
     db.specials.push(spc);
-    logAction(t('auditSpecialCreate'),typeLabel+' \xb7 '+(prod?prod.name:pid));
+    logAction('auditSpecialCreate',typeLabel+' \xb7 '+(prod?prod.name:pid));
   }
   saveDB();clearSpecial();renderSpecialList();renderProds();
   toast(t('specialSaved'));
@@ -9647,7 +9664,7 @@ function deleteSpecial(id){
   const prod=db.products.find(function(x){return x.id===s.productId;});
   confirm2(t('specialDelConfirm'),function(){
     db.specials=db.specials.filter(function(x){return x.id!==id;});
-    logAction(t('auditSpecialDel'),(prod?prod.name:s.productId));
+    logAction('auditSpecialDel',(prod?prod.name:s.productId));
     saveDB();renderSpecialList();renderProds();toast(t('specialDeleted'));
   });
 }
@@ -9655,7 +9672,7 @@ function toggleSpecial(id){
   const s=(db.specials||[]).find(function(x){return x.id===id;});if(!s)return;
   const prod=db.products.find(function(x){return x.id===s.productId;});
   s.active=!s.active;
-  logAction(s.active?t('auditSpecialActivated'):t('auditSpecialDeactivated'),(prod?prod.name:s.productId));
+  logAction(s.active?'auditSpecialActivated':'auditSpecialDeactivated',(prod?prod.name:s.productId));
   saveDB();renderSpecialList();renderProds();
 }
 function renderSpecialList(){
