@@ -6918,10 +6918,51 @@ function doUnlock(){
 // Ctrl+L bloquea al instante desde cualquier pantalla/overlay (el botón del
 // topbar queda tapado por cualquier modal abierto, ya que comparten stacking
 // context -- el atajo es el único disparador que funciona siempre).
+// Fase de captura: corre ANTES que cualquier otro keydown del documento (el
+// de la calculadora, los atajos de checkout, etc.), así "Escape mientras está
+// bloqueado" se anula acá sin depender de que ningún otro handler se porte
+// bien -- ningún atajo debe poder cerrar ov-lock, solo la contraseña correcta.
 document.addEventListener('keydown',function(e){
-  if(e.ctrlKey&&(e.key==='l'||e.key==='L')){
+  var _lockOv=el('ov-lock');
+  var _lockOpen=_lockOv&&_lockOv.classList.contains('open');
+  if(_lockOpen&&e.key==='Escape'){
+    e.preventDefault();e.stopPropagation();
+    return;
+  }
+  // Focus-trap del Tab: si dependiéramos del comportamiento nativo del
+  // navegador, tabular más allá del último elemento del modal a veces mueve
+  // el foco a <body> SIN disparar un evento 'focusin' (Chromium no siempre
+  // lo emite en ese caso) -- una trampa basada solo en 'focusin' puede fallar
+  // en silencio justo ahí. Por eso el Tab se intercepta acá directamente:
+  // preventDefault() cancela la navegación nativa y ciclamos el foco a mano
+  // entre los únicos elementos focuseables de ov-lock, nunca hacia afuera.
+  if(_lockOpen&&e.key==='Tab'){
+    e.preventDefault();
+    var _focusables=Array.prototype.filter.call(
+      _lockOv.querySelectorAll('input,button,a[href]'),
+      function(x){return !x.disabled&&x.offsetParent!==null;}
+    );
+    if(!_focusables.length)return;
+    var _idx=_focusables.indexOf(document.activeElement);
+    var _next;
+    if(e.shiftKey)_next=_focusables[_idx<=0?_focusables.length-1:_idx-1];
+    else _next=_focusables[(_idx===-1||_idx===_focusables.length-1)?0:_idx+1];
+    _next.focus();
+    return;
+  }
+  if(!_lockOpen&&e.ctrlKey&&(e.key==='l'||e.key==='L')){
     e.preventDefault();
     lockScreen();
+  }
+},true);
+// Focus-trap (respaldo): por si algo enfoca un elemento de atrás por otra vía
+// (no Tab -- ej. foco programático), lo que gane foco fuera de ov-lock se
+// redirige de inmediato a su campo de clave.
+document.addEventListener('focusin',function(e){
+  var _lockOv=el('ov-lock');
+  if(_lockOv&&_lockOv.classList.contains('open')&&!_lockOv.contains(e.target)){
+    var _lp=el('lock-pass');
+    if(_lp)_lp.focus();
   }
 });
 
@@ -9274,7 +9315,7 @@ document.addEventListener('keydown',function(e){
 // INIT
 document.querySelectorAll('.ov').forEach(m=>{
   m.addEventListener('click', e=>{
-    if(e.target===m && m.id!=='ov-pin'){
+    if(e.target===m && m.id!=='ov-pin' && m.id!=='ov-lock'){
       m.classList.remove('open');
     }
   });
