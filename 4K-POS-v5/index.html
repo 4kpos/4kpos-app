@@ -587,7 +587,7 @@ body.light #dashboard-screen{
 <!-- LANG SELECT -->
 <div id="lang-screen">
   <div class="lsbox">
-    <img src="assets/logo-192.png" alt="4K POS">
+    <img src="assets/icon-192.png" alt="4K POS">
     <h2 style="font-size:1.2rem;font-weight:800;margin-bottom:6px;">4K POS</h2>
     <p style="font-size:.85rem;color:var(--tx3)">Select your language / Selecciona tu idioma</p>
     <div class="ls-btns">
@@ -599,7 +599,7 @@ body.light #dashboard-screen{
 
 <!-- SPLASH -->
 <div id="splash">
-  <img src="assets/logo-192.png" alt="4K">
+  <img src="assets/icon-192.png" alt="4K">
   <h1><span class="c1">4K</span> <span class="c2">P</span><span class="c3">O</span><span class="c4">S</span></h1>
   <div id="splash-ver" style="font-size:.72rem;color:var(--tx3);letter-spacing:.4px;margin-top:-6px"></div>
   <div class="sbar"><div class="sfill"></div></div>
@@ -608,7 +608,7 @@ body.light #dashboard-screen{
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="lbox">
-    <img src="assets/logo-192.png" alt="4K">
+    <img src="assets/icon-192.png" alt="4K">
     <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:2px"><span style="color:#1e3a8a">4</span><span style="color:#1e3a8a">K</span> <span style="color:#1a7a3a">P</span><span style="color:#e6b800">O</span><span style="color:#cc1111">S</span></h2>
     <div style="font-size:.75rem;font-weight:600;letter-spacing:.6px;margin-bottom:8px"><span style="color:#1e3a8a">4K</span> <span style="color:#e6b800">Solutions</span></div>
     <div id="login-ver" style="font-size:.7rem;color:var(--tx3);margin-bottom:14px;letter-spacing:.3px"></div>
@@ -623,7 +623,7 @@ body.light #dashboard-screen{
 <!-- SHIFT OPEN -->
 <div id="shift-open-screen">
   <div class="sobox">
-    <img src="assets/logo-192.png" alt="4K">
+    <img src="assets/icon-192.png" alt="4K">
     <div style="font-size:1rem;font-weight:800;margin-bottom:4px;color:var(--tx)" id="so-title">Apertura de Turno</div>
     <div style="font-size:.82rem;color:var(--tx3);margin-bottom:14px" id="so-user">Bienvenido</div>
     <button class="btn btn-s" style="width:100%;margin-bottom:14px" onclick="openDrawer()">🔓 Abrir caja</button>
@@ -637,7 +637,7 @@ body.light #dashboard-screen{
 <!-- SIDEBAR -->
 <div id="sidebar" style="display:none">
   <div class="sb-brand">
-    <img id="sb-logo-img" src="assets/icon-512.png" width="30" height="30" style="border-radius:7px;object-fit:contain;flex-shrink:0">
+    <img id="sb-logo-img" src="assets/icon-192.png" width="30" height="30" style="border-radius:7px;object-fit:contain;flex-shrink:0">
     <div class="sb-brand-txt"><span class="c1">4K</span> <span class="c2">P</span><span class="c3">O</span><span class="c4">S</span><div style="font-size:10px;font-weight:600;letter-spacing:.5px;line-height:1;margin-top:2px"><span style="color:#1e3a8a">4K</span> <span style="color:#e6b800">Solutions</span></div></div>
   </div>
   <button id="sb-toggle-btn" onclick="toggleSidebar()" title="Plegar/expandir"><i class="ti ti-chevron-left"></i></button>
@@ -695,6 +695,7 @@ body.light #dashboard-screen{
     <button class="tbtn" id="calc-btn" onclick="toggleCalc()" title="Calculadora"><i class="ti ti-calculator"></i></button>
     <!-- Notificaciones: ícono propio en el topbar (antes vivía adentro del hamburgueso) -->
     <button class="tbtn" id="notif-btn" onclick="toggleNotifPanel()" title="Notificaciones" style="position:relative"><i class="ti ti-bell"></i><span id="notif-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border-radius:50%;font-size:.62rem;font-weight:800;min-width:16px;height:16px;align-items:center;justify-content:center;padding:0 3px;line-height:1;box-shadow:0 0 0 2px var(--bg)">0</span></button>
+    <button class="tbtn" id="lock-btn" onclick="lockScreen()" title="Bloquear">🔒</button>
     <div id="tb-user" style="display:none;padding:4px 8px;border-radius:var(--rs);font-size:.82rem;font-weight:700;color:var(--tx2);white-space:nowrap"></div>
   </div>
 </div>
@@ -2117,6 +2118,20 @@ body.light #dashboard-screen{
   </div>
 </div>
 
+<!-- LOCK SCREEN (bloqueo manual, conserva carrito/estado en curso) -->
+<div class="ov" id="ov-lock" style="z-index:9999">
+  <div class="modal mnarrow" style="text-align:center">
+    <div style="font-size:2rem;margin-bottom:6px">🔒</div>
+    <div style="font-size:1rem;font-weight:700;margin-bottom:6px" id="lock-title">Sesión bloqueada</div>
+    <div style="font-size:.78rem;color:var(--tx3);line-height:1.5;margin-bottom:14px" id="lock-subtitle">Ingresa tu contraseña para continuar</div>
+    <div style="font-size:.86rem;font-weight:700;margin-bottom:10px;color:var(--tx)" id="lock-username"></div>
+    <input class="fi sinp" type="password" id="lock-pass" placeholder="Contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter')doUnlock()">
+    <div id="lock-err" style="color:#ef4444;font-size:.76rem;margin-top:6px;min-height:18px"></div>
+    <div class="frow" style="margin-top:8px"><button class="btn btn-p" id="unlock-btn" onclick="doUnlock()" style="flex:1">🔓 Desbloquear</button></div>
+    <div style="margin-top:14px"><a href="#" id="lock-switch-user-link" onclick="event.preventDefault();doQuickLock();" style="font-size:.74rem;color:var(--tx3);text-decoration:underline">¿No sos vos? Cerrar sesión</a></div>
+  </div>
+</div>
+
 <!-- AUDITORÍA -->
 <div class="ov" id="ov-audit">
   <div class="modal mwide">
@@ -2433,6 +2448,10 @@ const T = {
     // Lock session / hamburger
     lockSession:'Bloquear sesión',sessionLocked:'🔒 Sesión bloqueada',cartSaved:'— carrito guardado',
     auditMenu:'Auditoría',
+    // Bloqueo manual (candado en topbar, conserva la orden en curso)
+    lockBtnTitle:'Bloquear',lockScreenTitle:'Sesión bloqueada',lockScreenSubtitle:'Ingresa tu contraseña para continuar',
+    unlockBtn:'🔓 Desbloquear',lockSwitchUserLink:'¿No sos vos? Cerrar sesión',
+    lockBlockedCritical:'Termina el cobro antes de bloquear',
     // Checkout
     exactPayment:'Pago exacto por defecto',insufficientPrefix:'⚠ Insuficiente — ',chargeOrderPrefix:'✓ Cobrar Orden #',
     taxSectionTitle:'Impuesto',taxEnabledLbl:'🧾 Cobrar impuesto',taxNameLbl:'Nombre del impuesto',
@@ -2703,6 +2722,7 @@ const T = {
     auditBkpPassChange:'Contraseña respaldo cambiada',auditBkpPassSet:'Contraseña respaldo configurada',
     auditBkpPassDel:'Contraseña respaldo eliminada',auditInactivityLock:'Cierre por inactividad',
     auditSessionLock:'Sesión bloqueada',auditDiscountApplied:'Descuento aplicado',
+    auditManualLock:'Bloqueo manual',auditManualUnlock:'Desbloqueo',
     auditAbonoReg:'Abono registrado',auditSaleVoided:'Venta anulada',
     auditUserEdit:'Usuario editado',auditUserCreate:'Usuario creado',
     auditComboEdit:'Combo editado',auditComboCreate:'Combo creado',
@@ -2998,6 +3018,10 @@ const T = {
     // Lock session / hamburger
     lockSession:'Lock session',sessionLocked:'🔒 Session locked',cartSaved:'— cart saved',
     auditMenu:'Audit',
+    // Manual lock (topbar lock button, keeps the current order intact)
+    lockBtnTitle:'Lock',lockScreenTitle:'Session locked',lockScreenSubtitle:'Enter your password to continue',
+    unlockBtn:'🔓 Unlock',lockSwitchUserLink:'Not you? Log out',
+    lockBlockedCritical:'Finish checkout before locking',
     // Checkout
     exactPayment:'Exact payment by default',insufficientPrefix:'⚠ Insufficient — ',chargeOrderPrefix:'✓ Charge Order #',
     taxSectionTitle:'Tax',taxEnabledLbl:'🧾 Charge tax',taxNameLbl:'Tax name',
@@ -3268,6 +3292,7 @@ const T = {
     auditBkpPassChange:'Backup password changed',auditBkpPassSet:'Backup password set',
     auditBkpPassDel:'Backup password removed',auditInactivityLock:'Locked by inactivity',
     auditSessionLock:'Session locked',auditDiscountApplied:'Discount applied',
+    auditManualLock:'Manual lock',auditManualUnlock:'Unlock',
     auditAbonoReg:'Payment recorded',auditSaleVoided:'Sale voided',
     auditUserEdit:'User edited',auditUserCreate:'User created',
     auditComboEdit:'Combo edited',auditComboCreate:'Combo created',
@@ -3815,6 +3840,12 @@ function applyLang(){
   // Hamburger extras
   const _hmAuditTxt=el('hm-audit-txt');if(_hmAuditTxt)_hmAuditTxt.textContent=t('auditMenu');
   const _hmLockTxt=el('hm-lock-txt');if(_hmLockTxt)_hmLockTxt.textContent=t('lockSession');
+  // Bloqueo manual (candado topbar + pantalla de lock)
+  const _lockBtn=el('lock-btn');if(_lockBtn)_lockBtn.title=t('lockBtnTitle');
+  const _lockTitle=el('lock-title');if(_lockTitle)_lockTitle.textContent=t('lockScreenTitle');
+  const _lockSubtitle=el('lock-subtitle');if(_lockSubtitle)_lockSubtitle.textContent=t('lockScreenSubtitle');
+  const _unlockBtn=el('unlock-btn');if(_unlockBtn)_unlockBtn.textContent=t('unlockBtn');
+  const _lockSwitchLink=el('lock-switch-user-link');if(_lockSwitchLink)_lockSwitchLink.textContent=t('lockSwitchUserLink');
   // Receipt received span
   const _rRecvSpan=el('r-recv-span');if(_rRecvSpan)_rRecvSpan.textContent=t('received');
   // Reset pass modal
@@ -6827,12 +6858,72 @@ function doQuickLock(){
   _sessionLogout();
   toast(t('sessionLocked')+(_hadCart?' '+t('cartSaved'):''));
 }
+// ── BLOQUEO MANUAL (candado topbar) ─────────────────────────────────────────
+// A diferencia de doQuickLock()/auto-lock por inactividad, esto NO hace
+// logout: no toca cart/curUser/discount/cashIn ni ninguna pantalla, solo tapa
+// todo con un overlay inescapable (sin botón cerrar, sin click-afuera, sin
+// Escape) hasta que se reingresa la contraseña del usuario actual. Al
+// desbloquear se vuelve exactamente a donde se estaba.
+function lockScreen(){
+  if(!curUser)return;
+  if(_isModalCritical()){toast(t('lockBlockedCritical'));return;}
+  _stopInactivityTimer();
+  logAction('auditManualLock',curUser.name);
+  var _lu=el('lock-username');if(_lu)_lu.textContent=curUser.name;
+  var _lp=el('lock-pass');if(_lp)_lp.value='';
+  var _le=el('lock-err');if(_le){_le.style.display='none';_le.textContent='';}
+  openOv('ov-lock');
+  if(_lp)setTimeout(function(){_lp.focus();},50);
+}
+function doUnlock(){
+  if(!curUser)return;
+  var errEl=el('lock-err');
+  var passEl=el('lock-pass');
+  if(curUser.lockedUntil&&new Date(curUser.lockedUntil)>new Date()){
+    var minsLeft=Math.max(1,Math.ceil((new Date(curUser.lockedUntil)-Date.now())/60000));
+    if(errEl){errEl.textContent=t('accountLockedPrefix')+minsLeft+t('accountLockedSuffix');errEl.style.display='block';}
+    if(passEl)passEl.value='';
+    return;
+  }
+  var p=(passEl||{}).value||'';
+  var ok=bcrypt?bcrypt.compareSync(p,curUser.pass):curUser.pass===p;
+  if(ok){
+    curUser.failedAttempts=0;curUser.lockedUntil=null;
+    saveDB();
+    if(passEl)passEl.value='';
+    closeOv('ov-lock');
+    logAction('auditManualUnlock',curUser.name);
+    _resetInactivityTimer();
+  }else{
+    curUser.failedAttempts=(curUser.failedAttempts||0)+1;
+    if(curUser.failedAttempts>=5){
+      curUser.lockedUntil=new Date(Date.now()+5*60*1000).toISOString();
+      curUser.failedAttempts=0;
+      logAction('auditLoginFail','BLOQUEADO tras 5 intentos (desbloqueo) · '+curUser.user);
+      if(errEl){errEl.textContent=t('tooManyAttempts');errEl.style.display='block';}
+    }else{
+      if(errEl){errEl.textContent=t('wrongPassPrefix')+curUser.failedAttempts+t('wrongPassSuffix');errEl.style.display='block';}
+    }
+    saveDB();
+    if(passEl)passEl.value='';
+  }
+}
 (function(){
   var _ev=['mousemove','click','keydown','touchstart'];
   function _act(){_resetInactivityTimer();}
   _ev.forEach(function(ev){document.addEventListener(ev,_act,{passive:true});});
 })();
 // ── FIN INACTIVIDAD ─────────────────────────────
+
+// Ctrl+L bloquea al instante desde cualquier pantalla/overlay (el botón del
+// topbar queda tapado por cualquier modal abierto, ya que comparten stacking
+// context -- el atajo es el único disparador que funciona siempre).
+document.addEventListener('keydown',function(e){
+  if(e.ctrlKey&&(e.key==='l'||e.key==='L')){
+    e.preventDefault();
+    lockScreen();
+  }
+});
 
 function restoreFromBackup(){
   try{
