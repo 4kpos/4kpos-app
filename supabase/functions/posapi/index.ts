@@ -207,7 +207,7 @@ serve(async (req) => {
       </p>
       <p style="color:#444;line-height:1.65;margin:0 0 24px">
         ¿Tienes preguntas? Escríbenos:<br>
-        <a href="mailto:soporte@4kpos.com" style="color:#00d4ff;text-decoration:none">soporte@4kpos.com</a>
+        <a href="mailto:get4ksupport@gmail.com" style="color:#00d4ff;text-decoration:none">get4ksupport@gmail.com</a>
       </p>
       <div style="background:#f8f9fb;border-radius:8px;padding:14px 16px;font-size:12px;color:#888;line-height:1.5">
         Este mensaje fue generado porque solicitaste una licencia desde la aplicación 4K POS.<br>

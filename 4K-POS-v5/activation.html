@@ -25,12 +25,14 @@
     font-family: 'Space Grotesk', sans-serif;
     background: var(--bg);
     color: var(--text);
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    overflow-y: auto;
+    padding: 24px 0;
+    box-sizing: border-box;
     user-select: none;
     -webkit-app-region: drag;
   }
@@ -97,28 +99,25 @@
   .logo-icon {
     width: 44px;
     height: 44px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    background: #fff;
     border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    font-weight: 700;
-    color: white;
-    letter-spacing: -1px;
+    object-fit: contain;
+    flex-shrink: 0;
   }
 
   .logo-text h1 {
     font-size: 18px;
-    font-weight: 700;
+    font-weight: 800;
     line-height: 1;
     color: var(--text);
+    margin-bottom: 2px;
   }
 
-  .logo-text span {
+  .logo-text > span {
     font-size: 11px;
     color: var(--muted);
     font-weight: 400;
+    letter-spacing: 0.3px;
   }
 
   .divider {
@@ -463,10 +462,10 @@
 
 <div class="card">
   <div class="logo-area">
-    <div class="logo-icon">4K</div>
+    <img class="logo-icon" src="assets/logo-192.png" alt="4K">
     <div class="logo-text">
-      <h1>4K POS</h1>
-      <span>Sistema de Punto de Venta</span>
+      <h1><span style="color:#1e3a8a">4</span><span style="color:#1e3a8a">K</span> <span style="color:#1a7a3a">P</span><span style="color:#e6b800">O</span><span style="color:#cc1111">S</span></h1>
+      <span><span style="color:#1e3a8a;font-weight:700">4K</span> <span style="color:#e6b800;font-weight:700">Solutions</span></span>
     </div>
   </div>
 
@@ -506,7 +505,7 @@
 
     <p class="footer-note">
       ¿No tienes una licencia? <a href="#" onclick="openPurchase()">Compra aquí</a><br>
-      ¿Problemas? Escríbenos a <a href="#">soporte@4kpos.com</a>
+      ¿Problemas? Escríbenos a <a href="mailto:get4ksupport@gmail.com">get4ksupport@gmail.com</a>
     </p>
 
     <div class="ext-divider" style="margin:22px 0 18px">o solicita acceso por email</div>
@@ -573,7 +572,7 @@
 
     <p class="footer-note" style="margin-top:20px">
       ¿Recuperaste internet? <a href="#" onclick="restartClean()">Reiniciar y verificar</a><br>
-      Soporte: <a href="#">soporte@4kpos.com</a>
+      Soporte: <a href="mailto:get4ksupport@gmail.com">get4ksupport@gmail.com</a>
     </p>
   </div>
 
