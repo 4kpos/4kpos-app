@@ -4593,7 +4593,7 @@ async function loadDB(){
 }
 function _buildSlim(){
   return {
-    products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat,minStock:p.minStock||5,cost:p.cost||0,barcode:p.barcode||''};}),
+    products:(db.products||[]).map(function(p){return {id:p.id,name:p.name,price:p.price,stock:p.stock,cat:p.cat,minStock:p.minStock||5,cost:p.cost||0,bc:p.bc||''};}),
     categories:(db.categories||[]).map(function(c){return {id:c.id,name:c.name,img:c.img||null};}),
     sales:(db.sales||[]).map(function(s){return {id:s.id,rnum:s.rnum,date:s.date,total:s.total,status:s.status,payMethod:s.payMethod,payLabel:_normPayLabel(s),cashier:s.cashier||'',creditClient:s.creditClient||null,creditStatus:s.creditStatus||null,creditPaid:s.creditPaid||null,creditDueDate:s.creditDueDate||null,creditPayments:(s.creditPayments&&s.creditPayments.length)?s.creditPayments:undefined,items:(s.items||[]).map(function(i){return {name:i.name,qty:i.qty,price:i.price};})};}),
     returns:(db.returns||[]).map(function(r){return {id:r.id,originalSaleId:r.originalSaleId,rnum:r.rnum,total:r.total,user:r.user,date:r.date,payMethod:r.payMethod};}),
