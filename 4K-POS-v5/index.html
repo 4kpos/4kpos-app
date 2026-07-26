@@ -310,11 +310,20 @@ body.light .chgbox{color:#15803d!important;border-color:#15803d!important;backgr
 .cmb-item-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;background:var(--s2);border-radius:6px;padding:6px 8px;}
 .spc-type-btn{flex:1;padding:8px 4px;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx2);cursor:pointer;font-size:.78rem;font-weight:600;transition:all .2s;text-align:center;}
 .spc-type-btn.on{background:var(--acg);border-color:var(--ac);color:var(--ac);}
-.lbl-prev-wrap{background:#e8e8e8;border:1.5px dashed var(--b2);border-radius:8px;padding:12px;display:flex;justify-content:center;align-items:flex-start;min-height:60px;overflow:auto;}
+.lbl-prev-wrap{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:20px;display:flex;justify-content:center;align-items:center;min-height:140px;overflow:auto;}
 .lbl-itm{display:flex;flex-direction:column;font-family:Arial,Helvetica,sans-serif;box-sizing:border-box;color:#111;}
 .lbl-sz-btn{flex:1;padding:8px 4px;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx2);cursor:pointer;font-size:.76rem;font-weight:600;transition:all .2s;text-align:center;line-height:1.3;}
 .lbl-sz-btn.on{background:var(--acg);border-color:var(--ac);color:var(--ac);}
-.inv-chk{width:15px;height:15px;cursor:pointer;accent-color:var(--ac);}
+.lbl-grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+@media (max-width:640px){.lbl-grid2{grid-template-columns:1fr;}}
+.lbl-step{margin-bottom:16px;}
+.lbl-step-lbl{font-size:.78rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.3px;margin-bottom:7px;}
+.lbl-type-toggle{display:flex;gap:6px;}
+.lbl-type-btn{flex:1;padding:10px 8px;border:1.5px solid var(--b1);border-radius:var(--rs);background:var(--s2);color:var(--tx2);cursor:pointer;font-size:.86rem;font-weight:700;transition:all .2s;}
+.lbl-type-btn.on{background:var(--ac);border-color:var(--ac);color:#fff;}
+.lbl-format-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.lbl-stats{display:flex;gap:14px;flex-wrap:wrap;font-size:.76rem;color:var(--tx3);margin-top:10px;padding-top:10px;border-top:1px solid var(--b1);}
+.lbl-stats b{color:var(--tx);font-weight:700;}
 @media print{body.lbl-pm>*:not(#lbl-print-area){display:none!important;}body.lbl-pm,body.lbl-pm #lbl-print-area{background:#fff!important;color:#000!important;}body.lbl-pm #lbl-print-area{display:block!important;}.lbl-grid{display:flex;flex-wrap:wrap;}.lbl-itm{background:#fff!important;color:#000!important;border:none!important;box-shadow:none!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;box-sizing:border-box;overflow:hidden;page-break-inside:avoid;display:flex;flex-direction:column;font-family:Arial,Helvetica,sans-serif;padding:2mm;}@page{size:8.5in 11in;margin:.25in;}}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;padding:10px;}
 .cat-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r-card);padding:8px 8px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .18s;text-align:center;min-height:150px;box-shadow:var(--sh-1);}
@@ -1197,7 +1206,6 @@ body.light #dashboard-screen{
         <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;align-items:center">
           <input type="text" class="sinp" id="inv-srch" placeholder="🔍 Nombre o código de barras..." oninput="renderInv()" style="flex:1;min-width:160px">
           <button class="btn btn-p" onclick="openInvCount()" id="inv-count-btn">📋 Contar</button>
-          <button class="btn btn-s" id="inv-lbl-sel-btn" style="display:none" onclick="printSelectedLabels()">🖨️ Seleccionados: <span id="inv-sel-cnt">0</span></button>
           <div style="display:flex;gap:4px;margin-left:auto">
             <button class="inv-view-btn on" id="inv-view-table" onclick="setInvView('table',this)" title="Vista tabla"><i class="ti ti-list"></i> Tabla</button>
             <button class="inv-view-btn" id="inv-view-grid" onclick="setInvView('grid',this)" title="Vista tarjetas"><i class="ti ti-grid-dots"></i> Tarjetas</button>
@@ -1209,7 +1217,6 @@ body.light #dashboard-screen{
           <button class="inv-tb-btn inv-tb-danger" id="inv-tb-del" disabled onclick="_invDelSel()">🗑️ Eliminar</button>
           <button class="inv-tb-btn" id="inv-tb-lbl" disabled onclick="_invLblSel()">🏷️ Etiqueta</button>
           <button class="inv-tb-btn" onclick="exportCSV()">📥 CSV</button>
-          <button class="btn btn-s" onclick="openLabelModal(null)" id="inv-lbl-btn" style="margin-left:auto">🏷️ Etiquetas múltiples</button>
         </div>
         <div id="inv-cat-chips" style="display:flex;gap:6px;overflow-x:auto;flex-wrap:wrap;margin-bottom:6px"></div>
         <div id="inv-list"></div>
@@ -1403,40 +1410,50 @@ body.light #dashboard-screen{
 
 <!-- LABELS -->
 <div class="ov" id="ov-labels">
-  <div class="modal">
-    <div class="mh"><h3>🏷️ <span id="lbl-modal-title">Imprimir Etiquetas</span></h3><button class="mx" onclick="closeOv('ov-labels')">✕</button></div>
+  <div class="modal mwide">
+    <div class="mh"><h3>🏷️ <span id="lbl-modal-title">Etiquetas</span></h3><button class="mx" onclick="closeOv('ov-labels')">✕</button></div>
     <div class="mb">
-      <div id="lbl-single-row" style="margin-bottom:10px">
-        <label class="lbl" id="lbl-prod-lbl">Producto</label>
-        <select class="fi" id="lbl-prod-sel" onchange="renderLabelPreview()"></select>
-      </div>
-      <div id="lbl-multi-row" style="display:none;margin-bottom:10px;padding:8px;background:var(--s2);border-radius:var(--rs);font-size:.82rem;color:var(--tx2)"></div>
-      <div style="margin-bottom:10px">
-        <label class="lbl" id="lbl-format-lbl" style="margin-bottom:5px;display:block">Formato</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-          <button class="lbl-sz-btn on" id="lbl-sz-1x2" onclick="setLblSize('1x2',this)">📋 1×2"<br><span id="lbl-sz-1x2-sub" style="font-size:.68rem;font-weight:400;opacity:.8">25×50mm · precio</span></button>
-          <button class="lbl-sz-btn" id="lbl-sz-2x2" onclick="setLblSize('2x2',this)">📋 2×2"<br><span id="lbl-sz-2x2-sub" style="font-size:.68rem;font-weight:400;opacity:.8">50×50mm · producto</span></button>
-          <button class="lbl-sz-btn" id="lbl-sz-t58" onclick="setLblSize('t58',this)">🧾 <span id="lbl-sz-t58-txt">Térmica 58mm</span><br><span id="lbl-sz-t58-sub" style="font-size:.68rem;font-weight:400;opacity:.8">58mm rollo</span></button>
-          <button class="lbl-sz-btn" id="lbl-sz-t80" onclick="setLblSize('t80',this)">🧾 <span id="lbl-sz-t80-txt">Térmica 80mm</span><br><span id="lbl-sz-t80-sub" style="font-size:.68rem;font-weight:400;opacity:.8">80mm rollo</span></button>
+      <div class="lbl-grid2">
+        <div class="lbl-col-cfg">
+          <div class="lbl-step">
+            <div class="lbl-step-lbl" id="lbl-type-lbl">1. Tipo de etiqueta</div>
+            <div class="lbl-type-toggle">
+              <button class="lbl-type-btn on" id="lbl-type-producto" onclick="setLblType('producto',this)">🏷️ <span id="lbl-type-producto-txt">Producto</span></button>
+              <button class="lbl-type-btn" id="lbl-type-gondola" onclick="setLblType('gondola',this)">🛒 <span id="lbl-type-gondola-txt">Góndola</span></button>
+            </div>
+          </div>
+          <div class="lbl-step">
+            <div class="lbl-step-lbl" id="lbl-prod-lbl">2. Seleccionar producto</div>
+            <select class="fi" id="lbl-prod-sel" onchange="renderLabelPreview()"></select>
+          </div>
+          <div class="lbl-step">
+            <div class="lbl-step-lbl" id="lbl-copies-lbl">3. Cantidad de etiquetas</div>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="fi" id="lbl-qty" value="1" onfocus="this.select()" oninput="var v=parseInt(this.value)||1;if(v>100)this.value=100;else if(v<1)this.value=1;renderLabelPreview()">
+          </div>
+          <div class="lbl-step">
+            <div class="lbl-step-lbl" id="lbl-format-lbl">4. Formato</div>
+            <div class="lbl-format-grid">
+              <button class="lbl-sz-btn" id="lbl-fmt-t58" onclick="setLblFormat('t58',this)">🧾 <span id="lbl-fmt-t58-txt">Térmica 58mm</span><br><span id="lbl-fmt-t58-sub" style="font-size:.68rem;font-weight:400;opacity:.8">rollo 58mm</span></button>
+              <button class="lbl-sz-btn" id="lbl-fmt-t80" onclick="setLblFormat('t80',this)">🧾 <span id="lbl-fmt-t80-txt">Térmica 80mm</span><br><span id="lbl-fmt-t80-sub" style="font-size:.68rem;font-weight:400;opacity:.8">rollo 80mm</span></button>
+              <button class="lbl-sz-btn on" id="lbl-fmt-avery1x2" onclick="setLblFormat('avery1x2',this)">📋 <span id="lbl-fmt-avery1x2-txt">Avery 1×2"</span><br><span id="lbl-fmt-avery1x2-sub" style="font-size:.68rem;font-weight:400;opacity:.8">hoja carta</span></button>
+              <button class="lbl-sz-btn" id="lbl-fmt-avery2x2" onclick="setLblFormat('avery2x2',this)">📋 <span id="lbl-fmt-avery2x2-txt">Avery 2×2"</span><br><span id="lbl-fmt-avery2x2-sub" style="font-size:.68rem;font-weight:400;opacity:.8">hoja carta</span></button>
+            </div>
+          </div>
+          <div id="lbl-thermal-info" style="display:none;background:var(--acg);color:var(--ac);border-radius:var(--rs);padding:7px 10px;font-size:.75rem">
+            ℹ Una etiqueta por hoja — la página se configura automáticamente al imprimir.
+          </div>
+        </div>
+        <div class="lbl-col-prev">
+          <div class="lbl-step-lbl" id="lbl-preview-title">Vista previa</div>
+          <div class="lbl-prev-wrap" id="lbl-preview"></div>
+          <div id="lbl-page-section">
+            <div class="lbl-step-lbl" id="lbl-page-title">Vista previa de hoja</div>
+            <div id="lbl-page-preview" style="display:flex;flex-direction:column;align-items:center;overflow-x:auto"></div>
+          </div>
+          <div id="lbl-pages-info" class="lbl-stats"></div>
         </div>
       </div>
-      <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:10px">
-        <div class="fg" style="flex:0 0 90px">
-          <label class="lbl" id="lbl-copies-lbl">Copias</label>
-          <input type="text" inputmode="numeric" pattern="[0-9]*" class="fi" id="lbl-qty" value="1" onfocus="this.select()" oninput="var v=parseInt(this.value)||1;if(v>100)this.value=100;else if(v<1)this.value=1;renderLabelPreview()">
-        </div>
-        <div id="lbl-pages-info" style="font-size:.78rem;color:var(--ac);font-weight:600;padding-bottom:10px;flex:1"></div>
-      </div>
-      <div id="lbl-thermal-info" style="display:none;background:var(--acg);color:var(--ac);border-radius:var(--rs);padding:7px 10px;font-size:.75rem;margin-bottom:8px">
-        ℹ Una etiqueta por hoja — la página se configura automáticamente al imprimir.
-      </div>
-      <div class="slbl" id="lbl-preview-title" style="margin-bottom:6px;font-size:.78rem">Vista previa de etiqueta</div>
-      <div class="lbl-prev-wrap" id="lbl-preview" style="margin-bottom:12px"></div>
-      <div id="lbl-page-section" style="margin-bottom:12px">
-        <div class="slbl" id="lbl-page-title" style="margin-bottom:6px;font-size:.78rem">Vista previa de hoja</div>
-        <div id="lbl-page-preview" style="display:flex;flex-direction:column;align-items:center;overflow-x:auto"></div>
-      </div>
-      <div style="display:flex;gap:8px">
+      <div style="display:flex;gap:8px;margin-top:14px">
         <button class="btn btn-s" id="lbl-dl-btn" onclick="downloadLabelsPDF()" style="flex:1">💾 Descargar PDF</button>
         <button class="btn btn-p" id="lbl-print-btn" onclick="printLabels()" style="flex:1">🖨️ Imprimir</button>
       </div>
@@ -2515,14 +2532,18 @@ const T = {
     invFooterCostTotal:'Costo total',invFooterSaleValue:'Valor en venta',
     // Inventario — toolbar y toggle
     invTbNew:'➕ Nuevo',invTbEdit:'✏️ Editar',invTbDel:'🗑️ Eliminar',
-    invTbLbl:'🏷️ Etiqueta',invTbMultiLbl:'🏷️ Etiquetas múltiples',
+    invTbLbl:'🏷️ Etiqueta',
     invViewTable:'Tabla',invViewCards:'Tarjetas',
     // Etiquetas — modal
-    lblPreviewTitle:'Vista previa de etiqueta',lblPageTitle:'Vista previa de hoja',
+    lblPreviewTitle:'Vista previa',lblPageTitle:'Vista previa de hoja',
     lblThermalInfo:'ℹ Una etiqueta por hoja — la página se configura automáticamente al imprimir.',
     lblDownloadBtn:'💾 Descargar PDF',lblPrintBtn:'🖨️ Imprimir',
     // Etiquetas modal — títulos y labels sin traducir
-    lblModalTitle:'Imprimir Etiquetas',lblProdLbl:'Producto',lblFormatLbl:'Formato',lblCopiesLbl:'Copias',
+    lblModalTitle:'Etiquetas',lblTypeLbl:'1. Tipo de etiqueta',lblTypeProducto:'Producto',lblTypeGondola:'Góndola',
+    lblProdLbl:'2. Seleccionar producto',lblCopiesLbl:'3. Cantidad de etiquetas',lblFormatLbl:'4. Formato',
+    lblFmtAvery1x2Txt:'Avery 1×2"',lblFmtAvery2x2Txt:'Avery 2×2"',lblFmtAverySub:'hoja carta',
+    lblFmtT58Sub:'rollo 58mm',lblFmtT80Sub:'rollo 80mm',
+    lblStatsPerPage:'Etiquetas por página:',lblStatsTotal:'Total de etiquetas:',lblCodePrefix:'Código: ',
     // Combos — form labels
     cmbNew:'Nuevo Combo',cmbEdit:'Editar Combo',
     cmbDescLbl:'Descripción',cmbDescPh:'Descripción opcional',
@@ -2741,13 +2762,8 @@ const T = {
     scanQR:'Escanea con tu celular\npara abrir el dashboard',
     // Credits — Abonar button
     abonar:'Abonar',
-    // Label modal — single/multi titles and dynamic text
-    lblSingleTitle:'Imprimir Etiqueta',lblMultiTitle:'Etiquetas múltiples',
-    lblSelectedProducts:'productos seleccionados para imprimir etiquetas.',
-    // Label size button descriptions
-    lblSz1x2Sub:'25×50mm · precio',lblSz2x2Sub:'50×50mm · producto',
-    lblSzT58Txt:'Térmica 58mm',lblSzT58Sub:'58mm rollo',
-    lblSzT80Txt:'Térmica 80mm',lblSzT80Sub:'80mm rollo',
+    // Label format button descriptions
+    lblSzT58Txt:'Térmica 58mm',lblSzT80Txt:'Térmica 80mm',
     // Nómina de empleados
     tabNomina:'Nómina',nominaFormTitle:'Nuevo Empleado',empNameLbl:'Nombre',empPayTypeLbl:'Tipo de pago',
     empAmountLbl:'Monto por período ($)',empClockLbl:'Usar Clock In/Out',empHourlyLbl:'Tarifa por hora ($)',
@@ -3085,14 +3101,18 @@ const T = {
     invFooterCostTotal:'Total cost',invFooterSaleValue:'Sale value',
     // Inventory — toolbar & toggle
     invTbNew:'➕ New',invTbEdit:'✏️ Edit',invTbDel:'🗑️ Delete',
-    invTbLbl:'🏷️ Label',invTbMultiLbl:'🏷️ Multiple labels',
+    invTbLbl:'🏷️ Label',
     invViewTable:'Table',invViewCards:'Cards',
     // Labels — modal
-    lblPreviewTitle:'Label preview',lblPageTitle:'Page preview',
+    lblPreviewTitle:'Preview',lblPageTitle:'Page preview',
     lblThermalInfo:'ℹ One label per page — page is configured automatically when printing.',
     lblDownloadBtn:'💾 Download PDF',lblPrintBtn:'🖨️ Print',
     // Labels modal — titles and unlabelled fields
-    lblModalTitle:'Print Labels',lblProdLbl:'Product',lblFormatLbl:'Format',lblCopiesLbl:'Copies',
+    lblModalTitle:'Labels',lblTypeLbl:'1. Label type',lblTypeProducto:'Product',lblTypeGondola:'Shelf',
+    lblProdLbl:'2. Select product',lblCopiesLbl:'3. Number of labels',lblFormatLbl:'4. Format',
+    lblFmtAvery1x2Txt:'Avery 1×2"',lblFmtAvery2x2Txt:'Avery 2×2"',lblFmtAverySub:'sheet paper',
+    lblFmtT58Sub:'58mm roll',lblFmtT80Sub:'80mm roll',
+    lblStatsPerPage:'Labels per page:',lblStatsTotal:'Total labels:',lblCodePrefix:'Code: ',
     // Combos — form labels
     cmbNew:'New Combo',cmbEdit:'Edit Combo',
     cmbDescLbl:'Description',cmbDescPh:'Optional description',
@@ -3311,13 +3331,8 @@ const T = {
     scanQR:'Scan with your phone\nto open the dashboard',
     // Credits — payment button
     abonar:'Add payment',
-    // Label modal — single/multi titles and dynamic text
-    lblSingleTitle:'Print Label',lblMultiTitle:'Multiple Labels',
-    lblSelectedProducts:'products selected for label printing.',
-    // Label size button descriptions
-    lblSz1x2Sub:'25×50mm · price',lblSz2x2Sub:'50×50mm · product',
-    lblSzT58Txt:'Thermal 58mm',lblSzT58Sub:'58mm roll',
-    lblSzT80Txt:'Thermal 80mm',lblSzT80Sub:'80mm roll',
+    // Label format button descriptions
+    lblSzT58Txt:'Thermal 58mm',lblSzT80Txt:'Thermal 80mm',
     // Payroll / Nómina
     tabNomina:'Payroll',nominaFormTitle:'New Employee',empNameLbl:'Name',empPayTypeLbl:'Pay type',
     empAmountLbl:'Amount per period ($)',empClockLbl:'Use Clock In/Out',empHourlyLbl:'Hourly rate ($)',
@@ -3996,17 +4011,28 @@ function applyLang(){
   const _invTbEdit=el('inv-tb-edit');if(_invTbEdit)_invTbEdit.textContent=t('invTbEdit');
   const _invTbDel=el('inv-tb-del');if(_invTbDel)_invTbDel.textContent=t('invTbDel');
   const _invTbLbl=el('inv-tb-lbl');if(_invTbLbl)_invTbLbl.textContent=t('invTbLbl');
-  const _invLblBtn=el('inv-lbl-btn');if(_invLblBtn)_invLblBtn.textContent=t('invTbMultiLbl');
   // Labels modal
   const _lblModalTitleEl=el('lbl-modal-title');if(_lblModalTitleEl)_lblModalTitleEl.textContent=t('lblModalTitle');
+  const _lblTypeLblEl=el('lbl-type-lbl');if(_lblTypeLblEl)_lblTypeLblEl.textContent=t('lblTypeLbl');
+  const _lblTypeProdTxt=el('lbl-type-producto-txt');if(_lblTypeProdTxt)_lblTypeProdTxt.textContent=t('lblTypeProducto');
+  const _lblTypeGondTxt=el('lbl-type-gondola-txt');if(_lblTypeGondTxt)_lblTypeGondTxt.textContent=t('lblTypeGondola');
   const _lblProdLblEl=el('lbl-prod-lbl');if(_lblProdLblEl)_lblProdLblEl.textContent=t('lblProdLbl');
-  const _lblFormatLblEl=el('lbl-format-lbl');if(_lblFormatLblEl)_lblFormatLblEl.textContent=t('lblFormatLbl');
   const _lblCopiesLblEl=el('lbl-copies-lbl');if(_lblCopiesLblEl)_lblCopiesLblEl.textContent=t('lblCopiesLbl');
+  const _lblFormatLblEl=el('lbl-format-lbl');if(_lblFormatLblEl)_lblFormatLblEl.textContent=t('lblFormatLbl');
+  const _lblFmtT58Txt=el('lbl-fmt-t58-txt');if(_lblFmtT58Txt)_lblFmtT58Txt.textContent=t('lblSzT58Txt');
+  const _lblFmtT58Sub=el('lbl-fmt-t58-sub');if(_lblFmtT58Sub)_lblFmtT58Sub.textContent=t('lblFmtT58Sub');
+  const _lblFmtT80Txt=el('lbl-fmt-t80-txt');if(_lblFmtT80Txt)_lblFmtT80Txt.textContent=t('lblSzT80Txt');
+  const _lblFmtT80Sub=el('lbl-fmt-t80-sub');if(_lblFmtT80Sub)_lblFmtT80Sub.textContent=t('lblFmtT80Sub');
+  const _lblFmtAv1Txt=el('lbl-fmt-avery1x2-txt');if(_lblFmtAv1Txt)_lblFmtAv1Txt.textContent=t('lblFmtAvery1x2Txt');
+  const _lblFmtAv1Sub=el('lbl-fmt-avery1x2-sub');if(_lblFmtAv1Sub)_lblFmtAv1Sub.textContent=t('lblFmtAverySub');
+  const _lblFmtAv2Txt=el('lbl-fmt-avery2x2-txt');if(_lblFmtAv2Txt)_lblFmtAv2Txt.textContent=t('lblFmtAvery2x2Txt');
+  const _lblFmtAv2Sub=el('lbl-fmt-avery2x2-sub');if(_lblFmtAv2Sub)_lblFmtAv2Sub.textContent=t('lblFmtAverySub');
   const _lblPrevTitleEl=el('lbl-preview-title');if(_lblPrevTitleEl)_lblPrevTitleEl.textContent=t('lblPreviewTitle');
   const _lblPageTitleEl=el('lbl-page-title');if(_lblPageTitleEl)_lblPageTitleEl.textContent=t('lblPageTitle');
   const _lblThermalInfoEl=el('lbl-thermal-info');if(_lblThermalInfoEl)_lblThermalInfoEl.textContent=t('lblThermalInfo');
   const _lblDlBtnEl=el('lbl-dl-btn');if(_lblDlBtnEl)_lblDlBtnEl.textContent=t('lblDownloadBtn');
   const _lblPrintBtnEl=el('lbl-print-btn');if(_lblPrintBtnEl)_lblPrintBtnEl.innerHTML='🖨️ '+t('lblPrintBtn');
+  if(typeof renderLabelPreview==='function'&&el('ov-labels')&&el('ov-labels').classList.contains('open'))renderLabelPreview();
   // Combos form
   const _cmbImgLbl=el('cmb-img-lbl');if(_cmbImgLbl)_cmbImgLbl.textContent=t('comboImg');
   const _cmbImgClearBtn=el('cmb-img-clear-btn');if(_cmbImgClearBtn)_cmbImgClearBtn.title=t('comboImgRemove');
@@ -4179,12 +4205,6 @@ function applyLang(){
   // QR dashboard scan text
   const _dashQrScanTxt=el('dash-qr-scan-txt');if(_dashQrScanTxt)_dashQrScanTxt.textContent=t('scanQR');
   // Label size button sub-descriptions
-  const _sz1x2Sub=el('lbl-sz-1x2-sub');if(_sz1x2Sub)_sz1x2Sub.textContent=t('lblSz1x2Sub');
-  const _sz2x2Sub=el('lbl-sz-2x2-sub');if(_sz2x2Sub)_sz2x2Sub.textContent=t('lblSz2x2Sub');
-  const _szT58Txt=el('lbl-sz-t58-txt');if(_szT58Txt)_szT58Txt.textContent=t('lblSzT58Txt');
-  const _szT58Sub=el('lbl-sz-t58-sub');if(_szT58Sub)_szT58Sub.textContent=t('lblSzT58Sub');
-  const _szT80Txt=el('lbl-sz-t80-txt');if(_szT80Txt)_szT80Txt.textContent=t('lblSzT80Txt');
-  const _szT80Sub=el('lbl-sz-t80-sub');if(_szT80Sub)_szT80Sub.textContent=t('lblSzT80Sub');
   // Nómina tab
   const _tabNomina=el('tab-nomina-txt');if(_tabNomina)_tabNomina.textContent=t('tabNomina');
   const _nominaFormTitle=el('nomina-form-title');if(_nominaFormTitle)_nominaFormTitle.textContent=t('nominaFormTitle');
@@ -5745,7 +5765,7 @@ function renderInv(){
           +'</div></div>';
       }).join('')+'</div>';
     if(ftEl)ftEl.style.display='none';
-    _updateInvSelUI();return;
+    return;
   }
   // TABLE VIEW
   const cats=db.categories||[];
@@ -5784,7 +5804,6 @@ function renderInv(){
       +(isAdm?' &nbsp;·&nbsp; '+t('invFooterCostTotal')+': <strong>'+dolr(totCost)+'</strong>':'')
       +' &nbsp;·&nbsp; '+t('invFooterSaleValue')+': <strong>'+dolr(totVal)+'</strong>';
   }
-  _updateInvSelUI();
 }
 function qkStock(id){qkStockModal(id);}
 function qkStockModal(id){
@@ -9937,55 +9956,39 @@ function _updateCmbCostTotal(){
   box.innerHTML=html+'</div>';
 }
 
-// =================== INVENTORY SELECTION ===================
-var _invSel=new Set();
-function invToggleSel(id){
-  if(_invSel.has(id))_invSel.delete(id);else _invSel.add(id);
-  _updateInvSelUI();
-}
-function invToggleAll(chk){
-  const q=(el('inv-srch').value||'').toLowerCase();
-  const list=db.products.filter(function(p){
-    if(invCatFilter&&(p.cat||'')!==invCatFilter)return false;
-    return !q||p.name.toLowerCase().includes(q)||(p.bc||'').toLowerCase().includes(q);
-  });
-  list.forEach(function(p){if(chk.checked)_invSel.add(p.id);else _invSel.delete(p.id);});
-  renderInv();_updateInvSelUI();
-}
-function _updateInvSelUI(){
-  const btn=el('inv-lbl-sel-btn'),cnt=el('inv-sel-cnt');
-  if(btn)btn.style.display=_invSel.size>0?'':'none';
-  if(cnt)cnt.textContent=_invSel.size;
-}
-
 // =================== LABEL MODAL ===================
-var _lblSize='1x2';
-var _lblPids=[];
-var _lblMulti=false;
+// Tipo (contenido) y formato (tamaño físico) son independientes: _lblType
+// decide qué diseño se dibuja, _lblFormat decide en qué soporte entra.
+var _lblType='producto';
+var _lblFormat='avery1x2';
 var _lblPrinter='normal';
-function setLblSize(size,btn){
-  _lblSize=size;
-  ['1x2','2x2','t58','t80'].forEach(function(k){var b=el('lbl-sz-'+k);if(b)b.classList.remove('on');});
+var _LBL_SHEET_LAYOUTS={avery1x2:{cols:4,rows:10},avery2x2:{cols:4,rows:5}};
+function setLblType(type,btn){
+  _lblType=type;
+  ['producto','gondola'].forEach(function(k){var b=el('lbl-type-'+k);if(b)b.classList.remove('on');});
   if(btn)btn.classList.add('on');
-  var thermal=(size==='t58'||size==='t80');
+  renderLabelPreview();
+}
+function setLblFormat(format,btn){
+  _lblFormat=format;
+  ['t58','t80','avery1x2','avery2x2'].forEach(function(k){var b=el('lbl-fmt-'+k);if(b)b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  var thermal=(format==='t58'||format==='t80');
   _lblPrinter=thermal?'thermal':'normal';
   var ti=el('lbl-thermal-info');if(ti)ti.style.display=thermal?'':'none';
   var ps=el('lbl-page-section');if(ps)ps.style.display=thermal?'none':'';
-  var pi=el('lbl-pages-info');if(pi&&thermal)pi.textContent='';
   renderLabelPreview();
 }
 function renderPagePreview(){
   var pgPrev=el('lbl-page-preview');if(!pgPrev)return;
-  var layouts={'1x2':{cols:4,rows:10},'2x2':{cols:4,rows:5}};
-  var layout=layouts[_lblSize];
-  if(!layout){pgPrev.innerHTML='';return;}
+  var layout=_LBL_SHEET_LAYOUTS[_lblFormat];
+  var infoEl=el('lbl-pages-info');
+  if(!layout){pgPrev.innerHTML='';if(infoEl)infoEl.innerHTML='';return;}
   var perPage=layout.cols*layout.rows;
   var qty=Math.max(1,parseInt((el('lbl-qty')||{}).value)||1);
-  var totalPids=_lblMulti?_lblPids.length:1;
-  var totalLabels=totalPids*qty;
+  var totalLabels=qty;
   var totalPages=Math.ceil(totalLabels/perPage);
-  var infoEl=el('lbl-pages-info');
-  if(infoEl)infoEl.textContent=totalLabels+' etiqueta'+(totalLabels!==1?'s':'')+' · '+totalPages+' hoja'+(totalPages!==1?'s':'')+' carta';
+  if(infoEl)infoEl.innerHTML='<span>'+t('lblStatsPerPage')+' <b>'+perPage+'</b></span><span>'+t('lblStatsTotal')+' <b>'+totalLabels+'</b></span>';
   // Preview dims: proporcional Letter (8.5×11), 240px ancho
   var pW=240;var pH=Math.round(pW*11/8.5);
   var mPx=Math.round(pW*8/210);
@@ -9993,10 +9996,7 @@ function renderPagePreview(){
   var cW=iW/layout.cols;var cH=iH/layout.rows;
   var nameSz=Math.max(5,Math.floor(cH*0.18));
   var priceSz=Math.max(7,Math.floor(cH*0.30));
-  var pid;
-  if(_lblMulti&&_lblPids.length)pid=_lblPids[0];
-  else{var sel=el('lbl-prod-sel');pid=sel?sel.value:null;}
-  if(!pid&&_lblPids.length)pid=_lblPids[0];
+  var sel=el('lbl-prod-sel');var pid=sel?sel.value:null;
   var p=db.products.find(function(x){return x.id===pid;});
   var cells='';
   for(var i=0;i<perPage;i++){
@@ -10017,39 +10017,19 @@ function renderPagePreview(){
 }
 
 function openLabelModal(pid){
-  _lblMulti=false;
-  _lblPids=pid?[pid]:[];
   const sel=el('lbl-prod-sel');
   if(sel){
     sel.innerHTML=db.products.map(function(p){return '<option value="'+p.id+'">'+p.name+' · '+dolr(p.price)+'</option>';}).join('');
     if(pid)sel.value=pid;
     else if(db.products.length)sel.value=db.products[0].id;
   }
-  const sr=el('lbl-single-row');if(sr)sr.style.display='';
-  const mr=el('lbl-multi-row');if(mr)mr.style.display='none';
-  el('lbl-modal-title').textContent=t('lblSingleTitle');
   el('lbl-qty').value='1';
-  _lblSize='1x2';_lblPrinter='normal';
-  ['1x2','2x2','t58','t80'].forEach(function(k){var b=el('lbl-sz-'+k);if(b)b.classList.toggle('on',k==='1x2');});
+  _lblType='producto';
+  ['producto','gondola'].forEach(function(k){var b=el('lbl-type-'+k);if(b)b.classList.toggle('on',k==='producto');});
+  _lblFormat='avery1x2';_lblPrinter='normal';
+  ['t58','t80','avery1x2','avery2x2'].forEach(function(k){var b=el('lbl-fmt-'+k);if(b)b.classList.toggle('on',k==='avery1x2');});
   var _ti=el('lbl-thermal-info');if(_ti)_ti.style.display='none';
   var _ps=el('lbl-page-section');if(_ps)_ps.style.display='';
-  renderLabelPreview();
-  openOv('ov-labels');
-}
-
-function printSelectedLabels(){
-  if(!_invSel.size){toast(t('toastSelectAtLeastOneProduct'));return;}
-  _lblMulti=true;
-  _lblPids=[..._invSel];
-  const sr=el('lbl-single-row');if(sr)sr.style.display='none';
-  const mr=el('lbl-multi-row');
-  if(mr){mr.style.display='';mr.innerHTML='<strong>'+_lblPids.length+'</strong> '+t('lblSelectedProducts');}
-  el('lbl-modal-title').textContent=t('lblMultiTitle');
-  el('lbl-qty').value='1';
-  _lblSize='1x2';_lblPrinter='normal';
-  ['1x2','2x2','t58','t80'].forEach(function(k){var b=el('lbl-sz-'+k);if(b)b.classList.toggle('on',k==='1x2');});
-  var _ti2=el('lbl-thermal-info');if(_ti2)_ti2.style.display='none';
-  var _ps2=el('lbl-page-section');if(_ps2)_ps2.style.display='';
   renderLabelPreview();
   openOv('ov-labels');
 }
@@ -10101,132 +10081,151 @@ function _barcodeSvg(code,W,H){
   return'<svg width="'+svgW+'" height="'+H+'" viewBox="0 0 '+svgW+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:100%">'+rects+'</svg>';
 }
 
-function _buildOneLabelHTML(p,size){
-  var cat=(db.categories||[]).find(function(c){return c.id===p.cat;});
-  var catName=cat?cat.name:'';
-  var price=dolr(p.price);
-  var bc=p.bc||'';
-  var biz=db.cfg||{};
-  var bizName=biz.bizName||'4K Negocio';
-
-  // 1×2" (50×25mm horizontal): centrado, sin colores
-  if(size==='1x2'){
-    return'<div class="lbl-itm" style="width:50mm;height:25mm;padding:.8mm 1.5mm;justify-content:space-evenly;align-items:center;text-align:center">'
-      +'<div style="font-size:7pt;color:#000;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
-      +'<div style="font-size:10.5pt;font-weight:800;line-height:1.1;color:#000;text-transform:uppercase;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
-      +'<div style="font-size:10pt;font-weight:800;line-height:1;color:#000">'+price+'</div>'
-      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,170,15)+'<div style="font-size:5.5pt;color:#000;margin-top:.2mm;line-height:1">'+_htmlEsc(bc)+'</div></div>':'')
+// PRODUCTO: distintivo simple para pegar en la caja del producto terminado.
+// Nombre protagonista, precio chico (no es de vitrina), código de barras.
+function _lblProductoHTML(p,format,unit){
+  var price=dolr(p.price);var bc=p.bc||'';
+  var biz=db.cfg||{};var bizName=biz.bizName||'4K Negocio';
+  var esc=_htmlEsc(p.name),escBiz=_htmlEsc(bizName);
+  if(format==='avery1x2'){
+    return(unit==='mm'
+      ?'<div class="lbl-itm" style="width:50mm;height:25mm;padding:.8mm 1.5mm;justify-content:space-evenly;align-items:center;text-align:center">'
+      :'<div style="width:200px;height:100px;padding:3px 4px;justify-content:space-evenly;align-items:center;text-align:center;display:flex;flex-direction:column">')
+      +'<div style="font-size:'+(unit==='mm'?'7pt':'9px')+';color:#000;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+escBiz+'</div>'
+      +'<div style="font-size:'+(unit==='mm'?'10.5pt':'14px')+';font-weight:800;line-height:1.1;color:#000;text-transform:uppercase;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+esc+'</div>'
+      +'<div style="font-size:'+(unit==='mm'?'8pt':'11px')+';font-weight:700;color:#555;line-height:1">'+price+'</div>'
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,unit==='mm'?170:190,unit==='mm'?15:20)+'<div style="font-size:'+(unit==='mm'?'5.5pt':'8px')+';color:#000;margin-top:1px;line-height:1">'+_htmlEsc(bc)+'</div></div>':'')
       +'</div>';
   }
-
-  // 2×2" (50×50mm): centrado, sin colores
-  if(size==='2x2'){
-    return'<div class="lbl-itm" style="width:50mm;height:50mm;padding:1.5mm 2mm;justify-content:space-evenly;align-items:center;text-align:center">'
-      +'<div style="font-size:8pt;color:#000;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
-      +'<div style="font-size:15pt;font-weight:800;line-height:1.1;color:#000;text-transform:uppercase;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
-      +'<div style="font-size:13.5pt;font-weight:800;line-height:1;color:#000">'+price+'</div>'
-      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,170,35)+'<div style="font-size:7pt;color:#000;margin-top:.5mm;line-height:1">'+_htmlEsc(bc)+'</div></div>':'')
+  if(format==='avery2x2'){
+    return(unit==='mm'
+      ?'<div class="lbl-itm" style="width:50mm;height:50mm;padding:1.5mm 2mm;justify-content:space-evenly;align-items:center;text-align:center">'
+      :'<div style="width:190px;height:190px;padding:5px 6px;justify-content:space-evenly;align-items:center;text-align:center;display:flex;flex-direction:column">')
+      +'<div style="font-size:'+(unit==='mm'?'8pt':'11px')+';color:#000;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+escBiz+'</div>'
+      +'<div style="font-size:'+(unit==='mm'?'15pt':'20px')+';font-weight:800;line-height:1.1;color:#000;text-transform:uppercase;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+esc+'</div>'
+      +'<div style="font-size:'+(unit==='mm'?'11pt':'15px')+';font-weight:700;color:#555;line-height:1">'+price+'</div>'
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,unit==='mm'?170:178,unit==='mm'?35:35)+'<div style="font-size:'+(unit==='mm'?'7pt':'9px')+';color:#000;margin-top:2px;line-height:1">'+_htmlEsc(bc)+'</div></div>':'')
       +'</div>';
   }
-
-  // Térmica 58mm (54mm usable)
-  if(size==='t58'){
-    return'<div class="lbl-itm" style="width:54mm;padding:2.5mm 2mm;text-align:center;box-sizing:border-box;align-items:center">'
-      +'<div style="font-size:10pt;font-weight:800;line-height:1.3;color:#111;margin-bottom:2mm;word-break:break-word">'+_htmlEsc(p.name)+'</div>'
-      +'<div style="font-size:19pt;font-weight:800;color:#000;line-height:1;margin-bottom:2mm">'+price+'</div>'
-      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,197,36)+'<div style="font-size:5.5pt;letter-spacing:1.5px;color:#666;margin-top:1mm">'+_htmlEsc(bc)+'</div></div>':'')
-      +'<div style="border-top:.4pt dashed #bbb;width:100%;margin-top:2.5mm"></div>'
+  if(format==='t58'){
+    return(unit==='mm'
+      ?'<div class="lbl-itm" style="width:54mm;padding:2.5mm 2mm;text-align:center;box-sizing:border-box;align-items:center">'
+      :'<div style="width:200px;padding:8px;align-items:center;text-align:center;display:flex;flex-direction:column">')
+      +'<div style="font-size:'+(unit==='mm'?'9pt':'9px')+';color:#555;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-bottom:4px">'+escBiz+'</div>'
+      +'<div style="font-size:'+(unit==='mm'?'10pt':'12px')+';font-weight:800;line-height:1.3;color:#111;margin-bottom:6px;word-break:break-word;width:100%">'+esc+'</div>'
+      +'<div style="font-size:'+(unit==='mm'?'12pt':'15px')+';font-weight:700;color:#555;line-height:1;margin-bottom:6px">'+price+'</div>'
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,unit==='mm'?197:170,unit==='mm'?32:26)+'<div style="font-size:'+(unit==='mm'?'5.5pt':'9px')+';letter-spacing:1.5px;color:#666;margin-top:2px">'+_htmlEsc(bc)+'</div></div>':'')
+      +'<div style="border-top:'+(unit==='mm'?'.4pt':'1px')+' dashed #bbb;width:100%;margin-top:6px"></div>'
       +'</div>';
   }
-
-  // Térmica 80mm (76mm usable)
-  return'<div class="lbl-itm" style="width:76mm;padding:3mm 2mm;text-align:center;box-sizing:border-box;align-items:center">'
-    +'<div style="font-size:12pt;font-weight:800;line-height:1.3;color:#111;margin-bottom:2.5mm;word-break:break-word">'+_htmlEsc(p.name)+'</div>'
-    +'<div style="font-size:22pt;font-weight:800;color:#000;line-height:1;margin-bottom:2.5mm">'+price+'</div>'
-    +(bc?'<div style="width:100%">'+_barcodeSvg(bc,265,42)+'<div style="font-size:6pt;letter-spacing:1.5px;color:#666;margin-top:1mm">'+_htmlEsc(bc)+'</div></div>':'')
-    +'<div style="border-top:.4pt dashed #bbb;width:100%;margin-top:3mm"></div>'
+  // t80
+  return(unit==='mm'
+    ?'<div class="lbl-itm" style="width:76mm;padding:3mm 2mm;text-align:center;box-sizing:border-box;align-items:center">'
+    :'<div style="width:280px;padding:10px 8px;align-items:center;text-align:center;display:flex;flex-direction:column">')
+    +'<div style="font-size:'+(unit==='mm'?'10pt':'10px')+';color:#555;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-bottom:4px">'+escBiz+'</div>'
+    +'<div style="font-size:'+(unit==='mm'?'12pt':'13px')+';font-weight:800;line-height:1.3;color:#111;margin-bottom:6px;word-break:break-word;width:100%">'+esc+'</div>'
+    +'<div style="font-size:'+(unit==='mm'?'14pt':'17px')+';font-weight:700;color:#555;line-height:1;margin-bottom:6px">'+price+'</div>'
+    +(bc?'<div style="width:100%">'+_barcodeSvg(bc,unit==='mm'?265:240,unit==='mm'?38:30)+'<div style="font-size:'+(unit==='mm'?'6pt':'10px')+';letter-spacing:1.5px;color:#666;margin-top:2px">'+_htmlEsc(bc)+'</div></div>':'')
+    +'<div style="border-top:'+(unit==='mm'?'.4pt':'1px')+' dashed #bbb;width:100%;margin-top:8px"></div>'
     +'</div>';
 }
 
-function _buildPreviewLabelHTML(p,size){
-  var cat=(db.categories||[]).find(function(c){return c.id===p.cat;});
-  var catName=cat?cat.name:'';
-  var price=dolr(p.price);
-  var bc=p.bc||'';
-  var biz=db.cfg||{};
-  var bizName=biz.bizName||'4K Negocio';
-  var base='font-family:Arial,Helvetica,sans-serif;box-sizing:border-box;background:#fff;color:#111;display:flex;flex-direction:column;border:1px solid #ccc;border-radius:3px;';
-
-  // 1×2": 200×100px (proporcional 50×25mm horizontal, escala 4×)
-  if(size==='1x2'){
-    return'<div style="'+base+'width:200px;height:100px;padding:3px 4px;justify-content:space-evenly;align-items:center;text-align:center">'
-      +'<div style="font-size:9px;color:#000;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
-      +'<div style="font-size:14px;font-weight:800;line-height:1.1;color:#000;text-transform:uppercase;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
-      +'<div style="font-size:13px;font-weight:800;line-height:1;color:#000">'+price+'</div>'
-      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,190,20)+'<div style="font-size:8px;color:#000;margin-top:1px;line-height:1">'+_htmlEsc(bc)+'</div></div>':'')
+// GÓNDOLA: de vitrina, nombre en mayúsculas + precio grande + código,
+// como la referencia (ARROZ SELECTO): precio dominante a la izquierda,
+// código a la derecha, barcode abajo. En avery1x2 (25mm de alto) el layout
+// se simplifica porque no entra todo con la misma jerarquía del original.
+function _lblGondolaHTML(p,format,unit){
+  var price=dolr(p.price);var bc=p.bc||'';
+  var esc=_htmlEsc(p.name);
+  var codeBlock=function(sz,lblSz){return bc?'<div style="font-size:'+lblSz+';color:#666;text-align:right;line-height:1.35;white-space:nowrap">'+t('lblCodePrefix')+'<br><b style="color:#000;font-size:'+sz+'">'+_htmlEsc(bc)+'</b></div>':'<div></div>';};
+  if(format==='avery1x2'){
+    return(unit==='mm'
+      ?'<div class="lbl-itm" style="width:50mm;height:25mm;padding:.9mm 1.6mm;justify-content:space-between;align-items:stretch;text-align:left">'
+      :'<div style="width:200px;height:100px;padding:5px 7px;justify-content:space-between;align-items:stretch;text-align:left;display:flex;flex-direction:column">')
+      +'<div style="font-size:'+(unit==='mm'?'8.5pt':'12px')+';font-weight:800;line-height:1.05;color:#000;text-transform:uppercase;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical">'+esc+'</div>'
+      +'<div style="display:flex;align-items:flex-end;justify-content:space-between;width:100%">'
+        +'<div style="font-size:'+(unit==='mm'?'16pt':'23px')+';font-weight:800;color:#000;line-height:1">'+price+'</div>'
+        +codeBlock(unit==='mm'?'6pt':'8px',unit==='mm'?'5pt':'7px')
+      +'</div>'
+      +(bc?_barcodeSvg(bc,unit==='mm'?160:185,unit==='mm'?12:16):'')
       +'</div>';
   }
-
-  // 2×2": 190×190px (proporcional 50×50mm escala 3.8×)
-  if(size==='2x2'){
-    return'<div style="'+base+'width:190px;height:190px;padding:5px 6px;justify-content:space-evenly;align-items:center;text-align:center">'
-      +'<div style="font-size:11px;color:#000;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+_htmlEsc(bizName)+'</div>'
-      +'<div style="font-size:20px;font-weight:800;line-height:1.1;color:#000;text-transform:uppercase;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+_htmlEsc(p.name)+'</div>'
-      +'<div style="font-size:18px;font-weight:800;line-height:1;color:#000">'+price+'</div>'
-      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,178,35)+'<div style="font-size:9px;color:#000;margin-top:2px;line-height:1">'+_htmlEsc(bc)+'</div></div>':'')
+  if(format==='avery2x2'){
+    return(unit==='mm'
+      ?'<div class="lbl-itm" style="width:50mm;height:50mm;padding:2mm;justify-content:space-between;align-items:stretch;text-align:left">'
+      :'<div style="width:190px;height:190px;padding:9px;justify-content:space-between;align-items:stretch;text-align:left;display:flex;flex-direction:column">')
+      +'<div style="font-size:'+(unit==='mm'?'11pt':'15px')+';font-weight:800;line-height:1.15;color:#000;text-transform:uppercase;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+esc+'</div>'
+      +'<div style="display:flex;align-items:flex-end;justify-content:space-between;width:100%;gap:4px">'
+        +'<div style="font-size:'+(unit==='mm'?'26pt':'36px')+';font-weight:800;color:#000;line-height:1">'+price+'</div>'
+        +codeBlock(unit==='mm'?'7pt':'9px',unit==='mm'?'6.5pt':'8px')
+      +'</div>'
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,unit==='mm'?170:170,unit==='mm'?32:32)+'</div>':'')
       +'</div>';
   }
-
-  // Térmica 58mm: 200px ancho
-  if(size==='t58'){
-    return'<div style="'+base+'width:200px;padding:8px;align-items:center;text-align:center">'
-      +'<div style="font-size:9px;color:#555;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-bottom:4px">'+_htmlEsc(bizName)+'</div>'
-      +'<div style="font-size:12px;font-weight:800;line-height:1.3;color:#111;margin-bottom:6px;word-break:break-word;width:100%">'+_htmlEsc(p.name)+'</div>'
-      +'<div style="font-size:20px;font-weight:800;color:#000;line-height:1;margin-bottom:6px">'+price+'</div>'
-      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,170,28)+'<div style="font-size:9px;letter-spacing:1.5px;color:#666;margin-top:2px">'+_htmlEsc(bc)+'</div></div>':'')
-      +'<div style="border-top:1px dashed #bbb;width:100%;margin-top:6px"></div>'
+  if(format==='t58'){
+    return(unit==='mm'
+      ?'<div class="lbl-itm" style="width:54mm;padding:2.5mm 2mm;text-align:center;box-sizing:border-box;align-items:center">'
+      :'<div style="width:200px;padding:9px;align-items:center;text-align:center;display:flex;flex-direction:column">')
+      +'<div style="font-size:'+(unit==='mm'?'11pt':'14px')+';font-weight:800;line-height:1.2;color:#000;text-transform:uppercase;margin-bottom:2mm;word-break:break-word;width:100%">'+esc+'</div>'
+      +'<div style="font-size:'+(unit==='mm'?'24pt':'32px')+';font-weight:800;color:#000;line-height:1;margin-bottom:1.5mm">'+price+'</div>'
+      +(bc?'<div style="font-size:'+(unit==='mm'?'6.5pt':'9px')+';color:#666;margin-bottom:2mm">'+t('lblCodePrefix')+'<b style="color:#000">'+_htmlEsc(bc)+'</b></div>':'')
+      +(bc?'<div style="width:100%">'+_barcodeSvg(bc,unit==='mm'?197:170,unit==='mm'?36:28)+'</div>':'')
+      +'<div style="border-top:'+(unit==='mm'?'.4pt':'1px')+' dashed #bbb;width:100%;margin-top:2.5mm"></div>'
       +'</div>';
   }
-
-  // Térmica 80mm: 280px ancho
-  return'<div style="'+base+'width:280px;padding:10px 8px;align-items:center;text-align:center">'
-    +'<div style="font-size:10px;color:#555;line-height:1;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-bottom:4px">'+_htmlEsc(bizName)+'</div>'
-    +'<div style="font-size:13px;font-weight:800;line-height:1.3;color:#111;margin-bottom:6px;word-break:break-word;width:100%">'+_htmlEsc(p.name)+'</div>'
-    +'<div style="font-size:22px;font-weight:800;color:#000;line-height:1;margin-bottom:6px">'+price+'</div>'
-    +(bc?'<div style="width:100%">'+_barcodeSvg(bc,240,30)+'<div style="font-size:10px;letter-spacing:1.5px;color:#666;margin-top:2px">'+_htmlEsc(bc)+'</div></div>':'')
-    +'<div style="border-top:1px dashed #bbb;width:100%;margin-top:8px"></div>'
+  // t80 — suficiente ancho para el layout de dos columnas fiel a la referencia
+  return(unit==='mm'
+    ?'<div class="lbl-itm" style="width:76mm;padding:3mm 2.5mm;text-align:left;box-sizing:border-box;align-items:stretch">'
+    :'<div style="width:280px;padding:11px 9px;text-align:left;box-sizing:border-box;align-items:stretch;display:flex;flex-direction:column">')
+    +'<div style="font-size:'+(unit==='mm'?'13pt':'16px')+';font-weight:800;line-height:1.2;color:#000;text-transform:uppercase;margin-bottom:2mm;word-break:break-word;width:100%">'+esc+'</div>'
+    +'<div style="display:flex;align-items:flex-end;justify-content:space-between;width:100%;margin-bottom:2.5mm">'
+      +'<div style="font-size:'+(unit==='mm'?'30pt':'40px')+';font-weight:800;color:#000;line-height:1">'+price+'</div>'
+      +codeBlock(unit==='mm'?'9pt':'12px',unit==='mm'?'7pt':'9px')
+    +'</div>'
+    +(bc?'<div style="width:100%">'+_barcodeSvg(bc,unit==='mm'?265:240,unit==='mm'?42:34)+'</div>':'')
+    +'<div style="border-top:'+(unit==='mm'?'.4pt':'1px')+' dashed #bbb;width:100%;margin-top:3mm"></div>'
     +'</div>';
+}
+
+// Impresión (unidades mm/pt, sale exactamente igual que antes para el mismo
+// contenido — ver test de diff byte-a-byte). Vista previa (unidades px, con
+// tarjeta blanca + sombra) es una función aparte a propósito: así ningún
+// cambio visual de la preview puede filtrarse a lo que efectivamente imprime.
+function _buildOneLabelHTML(p,format){
+  return _lblType==='gondola'?_lblGondolaHTML(p,format,'mm'):_lblProductoHTML(p,format,'mm');
+}
+function _buildPreviewLabelHTML(p,format){
+  var inner=_lblType==='gondola'?_lblGondolaHTML(p,format,'px'):_lblProductoHTML(p,format,'px');
+  return '<div style="font-family:Arial,Helvetica,sans-serif;background:#fff;border-radius:10px;box-shadow:0 3px 14px rgba(0,0,0,.14);color:#111;overflow:hidden">'+inner+'</div>';
 }
 
 function renderLabelPreview(){
   var prev=el('lbl-preview');if(!prev)return;
-  var pid;
-  if(_lblMulti&&_lblPids.length){pid=_lblPids[0];}
-  else{var sel=el('lbl-prod-sel');pid=sel?sel.value:null;}
-  if(!pid&&_lblPids.length)pid=_lblPids[0];
+  var sel=el('lbl-prod-sel');var pid=sel?sel.value:null;
   var p=db.products.find(function(x){return x.id===pid;});
-  if(!p){prev.innerHTML='<div style="color:var(--tx3);font-size:.82rem">Sin producto seleccionado</div>';return;}
-  prev.innerHTML=_buildPreviewLabelHTML(p,_lblSize);
-  prev.style.minHeight='';
+  if(!p){prev.innerHTML='<div style="color:var(--tx3);font-size:.82rem">'+t('toastNoProductSelected')+'</div>';return;}
+  prev.innerHTML=_buildPreviewLabelHTML(p,_lblFormat);
   if(_lblPrinter!=='thermal')renderPagePreview();
+  else{var pi=el('lbl-pages-info');if(pi)pi.innerHTML='';}
+}
+
+function _lblCollect(){
+  const qty=Math.max(1,Math.min(100,parseInt((el('lbl-qty')||{}).value)||1));
+  const sel=el('lbl-prod-sel');
+  const pid=sel?sel.value:null;
+  const p=pid?db.products.find(function(x){return x.id===pid;}):null;
+  if(!p)return null;
+  const labels=[];
+  for(var i=0;i<qty;i++)labels.push(_buildOneLabelHTML(p,_lblFormat));
+  return labels;
 }
 
 function printLabels(){
-  const qty=Math.max(1,Math.min(100,parseInt((el('lbl-qty')||{}).value)||1));
-  var pids;
-  if(_lblMulti&&_lblPids.length){pids=_lblPids;}
-  else{const sel=el('lbl-prod-sel');pids=sel&&sel.value?[sel.value]:(_lblPids.length?_lblPids:[]);}
-  if(!pids.length){toast(t('toastNoProductSelected'));return;}
-  const labels=[];
-  pids.forEach(function(pid){
-    const p=db.products.find(function(x){return x.id===pid;});
-    if(!p)return;
-    for(var i=0;i<qty;i++)labels.push(_buildOneLabelHTML(p,_lblSize));
-  });
-  if(!labels.length){toast(t('toastNoLabels'));return;}
+  const labels=_lblCollect();
+  if(!labels){toast(t('toastNoProductSelected'));return;}
   const printArea=el('lbl-print-area');
-  if(_lblSize==='t58'||_lblSize==='t80'){
-    var pgW=_lblSize==='t58'?'58mm':'80mm';
+  if(_lblFormat==='t58'||_lblFormat==='t80'){
+    var pgW=_lblFormat==='t58'?'58mm':'80mm';
     printArea.innerHTML='<style>@media print{@page{size:'+pgW+' auto;margin:0;}.lbl-itm{page-break-after:always;break-after:page;}}</style>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-start">'+labels.join('')+'</div>';
   }else{
@@ -10242,21 +10241,11 @@ function printLabels(){
 }
 
 async function downloadLabelsPDF(){
-  const qty=Math.max(1,Math.min(100,parseInt((el('lbl-qty')||{}).value)||1));
-  var pids;
-  if(_lblMulti&&_lblPids.length){pids=_lblPids;}
-  else{const sel=el('lbl-prod-sel');pids=sel&&sel.value?[sel.value]:(_lblPids.length?_lblPids:[]);}
-  if(!pids.length){toast(t('toastNoProductSelected'));return;}
-  const labels=[];
-  pids.forEach(function(pid){
-    const p=db.products.find(function(x){return x.id===pid;});
-    if(!p)return;
-    for(var i=0;i<qty;i++)labels.push(_buildOneLabelHTML(p,_lblSize));
-  });
-  if(!labels.length){toast(t('toastNoLabels'));return;}
+  const labels=_lblCollect();
+  if(!labels){toast(t('toastNoProductSelected'));return;}
   const printArea=el('lbl-print-area');
-  if(_lblSize==='t58'||_lblSize==='t80'){
-    var pgW=_lblSize==='t58'?'58mm':'80mm';
+  if(_lblFormat==='t58'||_lblFormat==='t80'){
+    var pgW=_lblFormat==='t58'?'58mm':'80mm';
     printArea.innerHTML='<style>@media print{@page{size:'+pgW+' auto;margin:0;}.lbl-itm{page-break-after:always;break-after:page;}}</style>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-start">'+labels.join('')+'</div>';
   }else{
