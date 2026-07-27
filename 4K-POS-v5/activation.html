@@ -5,20 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>4K POS — Activación</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --border: #1e1e2e;
-    --accent: #00d4ff;
+    --bg: #05070c;
+    --surface: #0d1220;
+    --border: #232a3d;
+    --accent: #3b82f6;
+    --accent-cyan: #22d3ee;
     --accent2: #7c3aed;
     --success: #00e676;
     --error: #ff4757;
-    --text: #e8e8f0;
-    --muted: #6b6b80;
+    --text: #e8ecf5;
+    --muted: #6b7488;
   }
 
   body {
@@ -35,6 +36,7 @@
     box-sizing: border-box;
     user-select: none;
     -webkit-app-region: drag;
+    position: relative;
   }
 
   /* Drag region only on top bar */
@@ -46,97 +48,127 @@
     z-index: 100;
   }
 
-  /* Background grid */
+  /* Mockup photo, heavily blurred+darkened: keeps the colored neon glow
+     around the card but erases any legibility of the fake UI baked into
+     the reference image (its own logo/ES-EN/card text). */
   body::before {
     content: '';
     position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
+    inset: -40px;
+    background: url('assets/activation-bg.png') center / cover no-repeat;
+    filter: blur(26px) brightness(0.55) saturate(1.2);
     pointer-events: none;
   }
 
-  /* Glow orbs */
-  .orb {
+  /* Vignette so the glow doesn't fight the card's contrast */
+  body::after {
+    content: '';
     position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.15;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 0%, rgba(5,7,12,0.45) 72%, rgba(5,7,12,0.75) 100%);
     pointer-events: none;
   }
-  .orb-1 { width: 300px; height: 300px; background: var(--accent); top: -100px; left: -80px; }
-  .orb-2 { width: 250px; height: 250px; background: var(--accent2); bottom: -80px; right: -60px; }
 
   .card {
     -webkit-app-region: no-drag;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 40px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 22px;
+    padding: 36px 36px 28px;
     width: 420px;
     position: relative;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    box-shadow:
+      0 24px 70px rgba(0,0,0,0.55),
+      0 0 0 1px rgba(59,130,246,0.08),
+      0 46px 60px -30px rgba(59,130,246,0.35);
+    z-index: 1;
   }
 
   .card::before {
     content: '';
     position: absolute;
     inset: -1px;
-    border-radius: 20px;
-    background: linear-gradient(135deg, rgba(0,212,255,0.15), transparent, rgba(124,58,237,0.1));
-    z-index: -1;
+    border-radius: 22px;
+    padding: 1px;
+    background: linear-gradient(160deg, rgba(59,130,246,0.45), rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.04) 70%, rgba(124,58,237,0.4));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    bottom: -14px;
+    height: 22px;
+    background: linear-gradient(90deg, transparent, rgba(59,130,246,0.55), rgba(124,58,237,0.5), transparent);
+    filter: blur(14px);
+    opacity: 0.6;
+    pointer-events: none;
   }
 
   .logo-area {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 28px;
+    justify-content: space-between;
+    margin-bottom: 24px;
   }
 
-  .logo-icon {
-    width: 44px;
-    height: 44px;
-    background: #fff;
-    border-radius: 12px;
-    object-fit: contain;
-    flex-shrink: 0;
-  }
-
-  .logo-text h1 {
-    font-size: 18px;
+  .logo-wordmark {
+    font-size: 22px;
     font-weight: 800;
     line-height: 1;
-    color: var(--text);
-    margin-bottom: 2px;
+    letter-spacing: -0.01em;
   }
 
-  .logo-text > span {
+  .logo-wordmark .logo-4k {
+    background: linear-gradient(135deg, var(--accent), var(--accent-cyan));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .logo-wordmark .logo-pos {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .logo-sub {
     font-size: 11px;
     color: var(--muted);
     font-weight: 400;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.02em;
+    margin-top: 3px;
   }
 
   .divider {
     height: 1px;
-    background: var(--border);
-    margin: 0 -40px 28px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 0 -36px 26px;
   }
 
   .title {
-    font-size: 22px;
-    font-weight: 600;
+    font-size: 23px;
+    font-weight: 700;
     margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .title .accent-word {
+    background: linear-gradient(120deg, #60a5fa, #93c5fd);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   .subtitle {
     font-size: 13px;
     color: var(--muted);
     line-height: 1.5;
-    margin-bottom: 28px;
+    margin-bottom: 26px;
   }
 
   /* Reason banner */
@@ -168,12 +200,22 @@
     margin-bottom: 20px;
   }
 
+  .input-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+    display: flex;
+  }
+
   input[type="text"] {
     width: 100%;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 12px 16px;
+    padding: 12px 42px 12px 16px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 15px;
     font-weight: 600;
@@ -194,7 +236,7 @@
 
   input[type="text"]:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
   }
 
   input.error {
@@ -224,16 +266,29 @@
     transition: all 0.2s;
     position: relative;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
   }
 
   .btn-primary {
-    background: linear-gradient(135deg, var(--accent), #0099cc);
-    color: #000;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    box-shadow: 0 10px 30px -8px rgba(59,130,246,0.5);
   }
+
+  .btn-primary::after {
+    content: '→';
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .btn.loading::after { display: none; }
 
   .btn-primary:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(0,212,255,0.3);
+    box-shadow: 0 12px 34px -6px rgba(59,130,246,0.55);
   }
 
   .btn-primary:active:not(:disabled) {
@@ -248,11 +303,10 @@
   .spinner {
     display: none;
     width: 18px; height: 18px;
-    border: 2px solid rgba(0,0,0,0.3);
-    border-top-color: #000;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
-    margin: 0 auto;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -285,17 +339,22 @@
 
   /* Hardware ID info */
   .hw-info {
-    margin-top: 24px;
-    padding: 12px 14px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--border);
+    margin-top: 22px;
+    padding: 13px 14px;
+    background: rgba(59,130,246,0.05);
+    border: 1px solid rgba(59,130,246,0.18);
     border-radius: 10px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
   }
 
-  .hw-info-icon { font-size: 16px; opacity: 0.5; }
+  .hw-info-icon {
+    color: var(--accent);
+    opacity: 0.85;
+    flex-shrink: 0;
+    display: flex;
+  }
 
   .hw-info-text {
     flex: 1;
@@ -313,19 +372,31 @@
 
   .hw-id {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
+    font-size: 12px;
+    color: var(--text);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .footer-note {
-    margin-top: 20px;
-    text-align: center;
-    font-size: 11px;
+    margin-top: 22px;
+    font-size: 12px;
     color: var(--muted);
     line-height: 1.5;
+  }
+
+  .footer-link-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+  }
+
+  .footer-link-row .icon {
+    color: var(--muted);
+    flex-shrink: 0;
+    display: flex;
   }
 
   .footer-note a {
@@ -333,10 +404,25 @@
     text-decoration: none;
   }
 
+  .brand-footer {
+    text-align: center;
+    margin-top: 22px;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .brand-footer .brand-4k {
+    background: linear-gradient(135deg, var(--accent), var(--accent-cyan));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .brand-footer .brand-solutions { color: var(--text); font-weight: 600; }
+
   /* ── Sección de extensión offline ── */
   .device-code-block {
-    background: rgba(0,212,255,0.05);
-    border: 1px solid rgba(0,212,255,0.2);
+    background: rgba(59,130,246,0.06);
+    border: 1px solid rgba(59,130,246,0.2);
     border-radius: 12px;
     padding: 16px 20px;
     margin-bottom: 24px;
@@ -457,22 +543,19 @@
 <body>
 
 <div class="drag-bar"></div>
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
 
 <div class="card">
   <div class="logo-area">
-    <img class="logo-icon" src="assets/icon-192.png" alt="4K">
-    <div class="logo-text">
-      <h1><span style="color:#1e3a8a">4</span><span style="color:#1e3a8a">K</span> <span style="color:#1a7a3a">P</span><span style="color:#e6b800">O</span><span style="color:#cc1111">S</span></h1>
-      <span><span style="color:#1e3a8a;font-weight:700">4K</span> <span style="color:#e6b800;font-weight:700">Solutions</span></span>
+    <div>
+      <div class="logo-wordmark"><span class="logo-4k">4K</span> <span class="logo-pos">POS</span></div>
+      <div class="logo-sub">Sistema de Punto de Venta</div>
     </div>
   </div>
 
   <div class="divider"></div>
 
   <div id="form-area">
-    <h2 class="title">Activar licencia</h2>
+    <h2 class="title">Activar <span class="accent-word">licencia</span></h2>
     <p class="subtitle">Ingresa tu clave de activación para comenzar a usar 4K POS en este equipo.</p>
 
     <div id="reason-banner" class="reason-banner"></div>
@@ -487,6 +570,9 @@
         autocomplete="off"
         spellcheck="false"
       >
+      <span class="input-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+      </span>
     </div>
     <div id="error-msg" class="error-msg"></div>
 
@@ -496,17 +582,25 @@
     </button>
 
     <div class="hw-info">
-      <div class="hw-info-icon">💻</div>
+      <div class="hw-info-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>
+      </div>
       <div class="hw-info-text">
         <small>Hardware ID de este equipo</small>
         <div class="hw-id" id="hw-id-display">Cargando...</div>
       </div>
     </div>
 
-    <p class="footer-note">
-      ¿No tienes una licencia? <a href="#" onclick="openPurchase()">Compra aquí</a><br>
-      ¿Problemas? Escríbenos a <a href="mailto:get4ksupport@gmail.com">get4ksupport@gmail.com</a>
-    </p>
+    <div class="footer-note">
+      <div class="footer-link-row">
+        <span class="icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
+        <span>¿No tienes una licencia? <a href="#" onclick="openPurchase()">Compra aquí</a></span>
+      </div>
+      <div class="footer-link-row">
+        <span class="icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+        <span>Soporte: <a href="mailto:get4ksupport@gmail.com">get4ksupport@gmail.com</a></span>
+      </div>
+    </div>
 
     <div class="ext-divider" style="margin:22px 0 18px">o solicita acceso por email</div>
 
@@ -570,10 +664,15 @@
       <div class="spinner"></div>
     </button>
 
-    <p class="footer-note" style="margin-top:20px">
-      ¿Recuperaste internet? <a href="#" onclick="restartClean()">Reiniciar y verificar</a><br>
-      Soporte: <a href="mailto:get4ksupport@gmail.com">get4ksupport@gmail.com</a>
-    </p>
+    <div class="footer-note" style="margin-top:20px">
+      <div class="footer-link-row">
+        <span>¿Recuperaste internet? <a href="#" onclick="restartClean()">Reiniciar y verificar</a></span>
+      </div>
+      <div class="footer-link-row">
+        <span class="icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+        <span>Soporte: <a href="mailto:get4ksupport@gmail.com">get4ksupport@gmail.com</a></span>
+      </div>
+    </div>
   </div>
 
   <div id="success-overlay" class="success-overlay">
@@ -581,6 +680,9 @@
     <h3>¡Activado!</h3>
     <p>Tu licencia fue activada correctamente.<br>Iniciando 4K POS...</p>
   </div>
+
+  <div class="divider" style="margin-top:24px;margin-bottom:0"></div>
+  <div class="brand-footer"><span class="brand-4k">4K</span> <span class="brand-solutions">Solutions</span></div>
 </div>
 
 <script>
@@ -773,7 +875,7 @@ function clearError() {
 }
 
 function openPurchase() {
-  shell.openExternal('https://4kpos.github.io/4kpos-dashboard/index.html');
+  shell.openExternal('https://get4ksolutions.com/');
 }
 
 // ── Solicitud de licencia por email ──────────────────────────
