@@ -1473,7 +1473,7 @@ body.light #dashboard-screen{
 <!-- SALES -->
 <div class="ov" id="ov-sales">
   <div class="modal">
-    <div class="mh"><h3 id="sales-title">📊 Ventas del Día</h3><button class="mx" onclick="closeOv('ov-sales')">✕</button></div>
+    <div class="mh"><h3 id="sales-title">📊 <span id="sales-title-txt">Ventas del Día</span></h3><button class="mx" onclick="closeOv('ov-sales')">✕</button></div>
     <div class="mb" id="sales-body"></div>
   </div>
 </div>
@@ -2312,6 +2312,7 @@ const T = {
     shiftOpen:'Apertura de Turno',shiftWelcome:'Bienvenido',shiftFund:'Fondo de caja:',shiftConfirm:'Confirma que recibiste este monto',shiftBtn:'✓ Confirmar y Abrir Turno',
     pinTitle:'Código de acceso',pinErr:'Código incorrecto',admTitle:'Administración',logoutTitle:'Cerrar Turno',
     adm:'Administración',ret:'Devoluciones',can:'Cancelar Venta',sal:'Ventas del día',conta:'Contabilidad',drawer:'Abrir Registradora',exit:'Salir del programa',
+    salesTitle:'Ventas del Día',statusCancelled:'Anulada',statusReturned:'Devuelta',
     payLabel:'Pago',cashier:'Cajero',cancelledLbl:'cancelada',returnedLbl:'devuelta',
     shiftReport:'Reporte del turno',totalBox:'💵 Efectivo esperado',
     // Pago / checkout
@@ -2882,6 +2883,7 @@ const T = {
     shiftOpen:'Shift Opening',shiftWelcome:'Welcome',shiftFund:'Cash fund:',shiftConfirm:'Confirm you received this amount',shiftBtn:'✓ Confirm & Open Shift',
     pinTitle:'Access code',pinErr:'Incorrect code',admTitle:'Administration',logoutTitle:'Close Shift',
     adm:'Administration',ret:'Returns',can:'Cancel Sale',sal:'Today Sales',conta:'Accounting',drawer:'Open Drawer',exit:'Exit program',
+    salesTitle:"Today's Sales",statusCancelled:'Cancelled',statusReturned:'Returned',
     payLabel:'Payment',cashier:'Cashier',cancelledLbl:'cancelled',returnedLbl:'returned',
     shiftReport:'Shift report',totalBox:'💵 Expected cash',
     // Payment / checkout
@@ -4062,6 +4064,7 @@ function applyLang(){
   const _spcSaveBtn=el('spc-save-btn');if(_spcSaveBtn)_spcSaveBtn.textContent=t('spcSaveBtn');
   const _spcListTitle=el('spc-list-title');if(_spcListTitle)_spcListTitle.textContent=t('specialList');
   // Dashboard KPIs
+  const _salesTitleTxt=el('sales-title-txt');if(_salesTitleTxt)_salesTitleTxt.textContent=t('salesTitle');
   const _dbH2Title=el('db-h2-title');if(_dbH2Title)_dbH2Title.textContent=t('hmDashboard');
   const _dbBtnSellTxt=el('db-btn-sell-txt');if(_dbBtnSellTxt)_dbBtnSellTxt.textContent=t('sbSell');
   const _dbKpiVentas=el('db-kpi-lbl-ventas');if(_dbKpiVentas)_dbKpiVentas.textContent=t('kpiVentasHoy');
@@ -7834,7 +7837,8 @@ function renderSales(){
     const color=s.status!=='active'?(s.status==='cancelled'?'var(--rd)':'var(--am)'):isCreditPend?'var(--am)':'var(--gn)';
     const deco=s.status!=='active'?'text-decoration:line-through;':'';
     const timeStr=fmtTime(s.date);
-    const stxt=s.status!=='active'?(' <span style="font-size:.7rem;color:var(--tx3)">('+s.status+')</span>'):'';
+    const statusLbl=s.status==='cancelled'?t('statusCancelled'):s.status==='returned'?t('statusReturned'):s.status;
+    const stxt=s.status!=='active'?(' <span style="font-size:.7rem;color:var(--tx3)">('+statusLbl+')</span>'):'';
     const xmark=s.status==='cancelled'?'❌ ':s.status==='returned'?'🔄 ':isCreditPend?'🏷️ ':'';
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--b1);font-size:.82rem;cursor:pointer" onclick="viewSaleReceipt(\''+s.id+'\')"><div><div style="font-weight:600">'+xmark+t('orderLbl')+(s.rnum||s.id)+stxt+'</div><div style="font-size:.72rem;color:var(--tx3)">'+timeStr+' '+pico(s.payMethod)+(s.cashier?' · '+s.cashier:'')+'</div></div><div style="text-align:right"><div style="font-family:Courier New,monospace;font-weight:700;color:'+color+';'+deco+'">'+dolr(s.total)+'</div><div style="font-size:.65rem;color:var(--tx3);margin-top:1px">🖨️ '+t('viewReceiptHint')+'</div></div></div>';
   }).join('');
