@@ -776,10 +776,10 @@ body.light #dashboard-screen{
 <!-- DASHBOARD -->
 <div id="dashboard-screen">
   <div class="db-hd">
-    <h2>📊 Dashboard</h2>
+    <h2>📊 <span id="db-h2-title">Dashboard</span></h2>
     <div style="display:flex;align-items:center;gap:10px">
       <span id="db-date" style="font-size:var(--fs-sm);color:var(--tx3)"></span>
-      <button class="btn btn-s" onclick="sbNav('pos')" style="padding:5px 13px;font-size:var(--fs-sm);background:var(--rd);border-color:var(--rd);color:#fff">← Vender</button>
+      <button class="btn btn-s" onclick="sbNav('pos')" style="padding:5px 13px;font-size:var(--fs-sm);background:var(--rd);border-color:var(--rd);color:#fff">← <span id="db-btn-sell-txt">Vender</span></button>
     </div>
   </div>
   <div class="db-kpis">
@@ -2572,6 +2572,7 @@ const T = {
     dbPeriodWeek:'7 días',dbPeriodMonth:'30 días',
     dbInvSummary:'Resumen de inventario',dbActiveProds:'Productos activos',dbInvValue:'Valor de inventario',
     dbLowStockTitle:'Productos con stock bajo',dbCategoryChart:'Ventas por categoría',dbRecentActivity:'Actividad reciente',
+    dbChartTotal:'TOTAL',
     // OA block
     oaViewAccounts:'📖 Ver cuentas',oaForceClose:'🔑 Forzar cierre',
     // Credit sale modal
@@ -3141,6 +3142,7 @@ const T = {
     dbPeriodWeek:'7 days',dbPeriodMonth:'30 days',
     dbInvSummary:'Inventory summary',dbActiveProds:'Active products',dbInvValue:'Inventory value',
     dbLowStockTitle:'Low stock products',dbCategoryChart:'Sales by category',dbRecentActivity:'Recent activity',
+    dbChartTotal:'TOTAL',
     // OA block
     oaViewAccounts:'📖 View accounts',oaForceClose:'🔑 Force close',
     // Credit sale modal
@@ -4060,6 +4062,8 @@ function applyLang(){
   const _spcSaveBtn=el('spc-save-btn');if(_spcSaveBtn)_spcSaveBtn.textContent=t('spcSaveBtn');
   const _spcListTitle=el('spc-list-title');if(_spcListTitle)_spcListTitle.textContent=t('specialList');
   // Dashboard KPIs
+  const _dbH2Title=el('db-h2-title');if(_dbH2Title)_dbH2Title.textContent=t('hmDashboard');
+  const _dbBtnSellTxt=el('db-btn-sell-txt');if(_dbBtnSellTxt)_dbBtnSellTxt.textContent=t('sbSell');
   const _dbKpiVentas=el('db-kpi-lbl-ventas');if(_dbKpiVentas)_dbKpiVentas.textContent=t('kpiVentasHoy');
   const _dbKpiTx=el('db-kpi-lbl-tx');if(_dbKpiTx)_dbKpiTx.textContent=t('kpiTx');
   const _dbKpiGanancia=el('db-kpi-lbl-ganancia');if(_dbKpiGanancia)_dbKpiGanancia.textContent=t('kpiGanancia');
@@ -10403,7 +10407,8 @@ function setDbPeriod(p,btn){
 }
 function refreshDashboard(){
   var _ds=el('dashboard-screen');
-  console.log('[Dashboard] refreshDashboard llamado, db.sales:',db&&db.sales?db.sales.length:'NO_DB','display:',_ds?_ds.style.display:'NO_EL','w:',_ds?_ds.offsetWidth:0,'h:',_ds?_ds.offsetHeight:0);
+  if(!_ds)return;
+  console.log('[Dashboard] refreshDashboard llamado, db.sales:',db&&db.sales?db.sales.length:'NO_DB','display:',_ds.style.display,'w:',_ds.offsetWidth,'h:',_ds.offsetHeight);
   if(!db||!Array.isArray(db.sales)){setTimeout(refreshDashboard,150);return;}
   var dateEl=el('db-date');
   if(dateEl)dateEl.textContent=new Date().toLocaleDateString(lang,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
@@ -10711,7 +10716,7 @@ function _renderDbPayMethods(){
     +'<div style="width:140px;height:140px;border-radius:50%;background:'+cg+';box-shadow:var(--glow-ac)"></div>'
     +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">'
     +'<div style="width:84px;height:84px;border-radius:50%;background:var(--s2);display:flex;flex-direction:column;align-items:center;justify-content:center">'
-    +'<div style="font-size:.6rem;color:var(--tx3);font-weight:600;letter-spacing:.4px">TOTAL</div>'
+    +'<div style="font-size:.6rem;color:var(--tx3);font-weight:600;letter-spacing:.4px">'+t('dbChartTotal')+'</div>'
     +'<div style="font-size:.88rem;font-weight:800;color:var(--tx)">'+dolr(total)+'</div>'
     +'</div></div></div>'
     +'<div style="flex:1">'+legend+'</div>'
@@ -10837,7 +10842,7 @@ function _renderDbCategoryChart(){
     +'<div style="width:140px;height:140px;border-radius:50%;background:conic-gradient('+stops+');box-shadow:var(--glow-ac)"></div>'
     +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">'
     +'<div style="width:84px;height:84px;border-radius:50%;background:var(--s2);display:flex;flex-direction:column;align-items:center;justify-content:center">'
-    +'<div style="font-size:.6rem;color:var(--tx3);font-weight:600;letter-spacing:.4px">TOTAL</div>'
+    +'<div style="font-size:.6rem;color:var(--tx3);font-weight:600;letter-spacing:.4px">'+t('dbChartTotal')+'</div>'
     +'<div style="font-size:.88rem;font-weight:800;color:var(--tx)">'+dolr(total)+'</div>'
     +'</div></div></div>'
     +'<div style="flex:1;min-width:120px">'+legend+'</div>'
