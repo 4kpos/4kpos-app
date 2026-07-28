@@ -5107,6 +5107,22 @@ function syncShiftStatusDirect(payload){
     }).catch(function(){});
   }catch(e){}
 }
+// Latido de "POS vivo" — independiente de si hay turno abierto (shift_status_*
+// solo reporta cuando hay un cajero fichado). Mismo id estable por PC
+// (getDeviceCode, vía _deviceCode) y mismo patrón de upsert que
+// syncShiftStatusDirect, en una fila aparte para no pisar shift_status_*.
+function syncPosAliveDirect(){
+  try{
+    if(!db._lic)return;
+    var id='pos_alive_'+(_deviceCode||'main');
+    var p={pcId:_deviceCode||'main',lastSeen:new Date().toISOString()};
+    fetch(SUPA_URL+'/rest/v1/categories',{
+      method:'POST',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify({id:id,name:JSON.stringify(p),license_key:db._lic||''})
+    }).catch(function(){});
+  }catch(e){}
+}
 function confirmShift(){
   el('shift-open-screen').classList.remove('show');
   syncShiftStatus('open');
@@ -5135,6 +5151,7 @@ function startApp(){
   if(!window._cdSyncInt){window._cdSyncInt=setInterval(syncCreditDirect,30000);setTimeout(syncCreditDirect,3000);}
   _startRealtimeSync();
   if(!window._shiftHbInt){window._shiftHbInt=setInterval(function(){if(db.cfg&&db.cfg.shiftOpen&&curUser){syncShiftStatusDirect({active:true,currentUser:curUser.name,shiftOpenedAt:db.cfg.shiftOpenAt||new Date().toISOString(),lastSeen:new Date().toISOString(),updatedAt:new Date().toISOString(),note:db.cfg.pendingShiftNote||null});}},5*60*1000);}
+  if(!window._aliveHbInt){syncPosAliveDirect();window._aliveHbInt=setInterval(syncPosAliveDirect,2*60*1000);}
   setEl('ord-lbl','#'+db.orderNum);
   updateClockQuickBtn();
   if(!window._hamClickOut){window._hamClickOut=true;document.addEventListener('click',function(ev){var m=el('ham-menu');if(m&&m.style.display==='block'){var hb=el('ham-btn');if(!m.contains(ev.target)&&(!hb||!hb.contains(ev.target)))m.style.display='none';}});}
