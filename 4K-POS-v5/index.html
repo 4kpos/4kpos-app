@@ -194,9 +194,9 @@ body.light #app-main{
 .pcard-img{width:100%;height:115px;border-radius:10px;object-fit:cover;}
 .pcard-ph{width:100%;height:115px;border-radius:10px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:700;color:var(--ac);}
 .pcard-name{font-size:14px;font-weight:600;color:var(--tx);line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2em;margin-top:5px;}
-.pcard-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:4px;padding-top:2px;}
-.pcard-price{font-family:'Consolas','Courier New',monospace;font-size:14px;font-weight:700;color:var(--gn);}
-.pcard-stk{font-size:var(--fs-2xs);color:var(--tx3);font-weight:600;}
+.pcard-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:4px;padding-top:2px;padding-right:30px;}
+.pcard-price{font-family:'Consolas','Courier New',monospace;font-size:14px;font-weight:700;color:var(--gn);flex-shrink:0;}
+.pcard-stk{font-size:var(--fs-2xs);color:var(--tx3);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:6px;}
 .pcard-stk.low{color:var(--am);}
 .pbadge{position:absolute;top:7px;right:7px;width:20px;height:20px;border-radius:50%;background:var(--gn);color:#000;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-1);}
 .pcard-add{position:absolute;bottom:8px;right:8px;width:22px;height:22px;border-radius:50%;background:var(--ac);color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:var(--sh-1);pointer-events:none;}
@@ -6330,7 +6330,7 @@ async function checkout(){
   showRcpt(sale);
   _checkPendingMerge();
   setEl('ord-lbl','#'+db.orderNum);
-  if(db.drawerAuto)openDrawer();
+  if(db.drawerAuto&&payMethod==='cash')openDrawer();
 }
 // CUENTAS ABIERTAS
 function _oaKey(){return '4kpos_open_accounts';}
@@ -10320,7 +10320,7 @@ function _sbUpdateCaja(){
   if(amtEl)amtEl.textContent=dolr(db.fundAmount||0);
   if(timeEl){
     if(db.cfg&&db.cfg.shiftOpen&&db.cfg.shiftOpenAt){
-      timeEl.textContent=t('sbShiftOpenedAt')+' '+new Date(db.cfg.shiftOpenAt).toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'});
+      timeEl.textContent=t('sbShiftOpenedAt')+' '+fmtTime(db.cfg.shiftOpenAt);
     }else{
       timeEl.textContent=t('sbNoShiftOpen');
     }
