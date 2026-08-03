@@ -56,6 +56,8 @@ body.sb-collapsed .sb-ico{width:auto;}
 .sb-subrow{display:flex;flex-direction:column;padding:0 10px 4px 38px;gap:1px;}
 .sb-sublink{background:none;border:none;color:var(--tx3);font-size:var(--fs-2xs);font-weight:600;text-align:left;cursor:pointer;padding:3px 0;}
 .sb-sublink:hover{color:var(--ac);}
+.sb-group-hdr .sb-caret{margin-left:auto;transition:transform .15s;font-size:.8rem;}
+.sb-group-hdr.open .sb-caret{transform:rotate(180deg);}
 .sb-footer{padding:8px 10px;border-top:1px solid var(--b1);display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
 .sb-caja-card{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:8px 10px;}
 .sb-caja-lbl{font-size:var(--fs-2xs);color:var(--tx3);text-transform:uppercase;letter-spacing:var(--ls-label);font-weight:var(--fw-bold);margin-bottom:3px;}
@@ -661,9 +663,29 @@ body.light #dashboard-screen{
     </div>
     <button class="sb-item" id="sbi-prods" onclick="sbNav('prods')"><span class="sb-ico"><i class="ti ti-box"></i></span><span class="sb-lbl" id="sbi-prods-lbl">Productos</span></button>
     <button class="sb-item" id="sbi-cust" onclick="sbNav('cust')"><span class="sb-ico"><i class="ti ti-users"></i></span><span class="sb-lbl" id="sbi-cust-lbl">Clientes</span></button>
-    <button class="sb-item" id="sbi-reportes" onclick="sbNav('reportes')"><span class="sb-ico"><i class="ti ti-chart-bar"></i></span><span class="sb-lbl" id="sbi-reportes-lbl">Reportes</span></button>
-    <button class="sb-item" id="sbi-adm" onclick="sbNav('adm')"><span class="sb-ico"><i class="ti ti-shield-lock"></i></span><span class="sb-lbl" id="sbi-adm-lbl">Administración</span></button>
-    <button class="sb-item" id="sbi-conta" onclick="sbNav('conta')"><span class="sb-ico"><i class="ti ti-report-money"></i></span><span class="sb-lbl" id="sbi-conta-lbl">Contabilidad</span></button>
+    <div class="sb-item-group" id="sbi-adm">
+      <button class="sb-item sb-group-hdr" onclick="toggleSbGroup('sbg-adm')"><span class="sb-ico"><i class="ti ti-shield-lock"></i></span><span class="sb-lbl" id="sbi-adm-lbl">Administración</span><i class="ti ti-chevron-down sb-caret"></i></button>
+      <div class="sb-subrow" id="sbg-adm-body" style="display:none">
+        <button class="sb-sublink" onclick="sbAdminGo('t-cats')" id="sbi-adm-cats-lbl">Categorías</button>
+        <button class="sb-sublink" onclick="sbAdminGo('t-inv')" id="sbi-adm-inv-lbl">Inventario</button>
+        <button class="sb-sublink" onclick="sbAdminGo('t-combos')" id="sbi-adm-combos-lbl">Combos</button>
+        <button class="sb-sublink" onclick="sbAdminGo('t-specials')" id="sbi-adm-specials-lbl">Especiales</button>
+        <button class="sb-sublink" onclick="sbAdminGo('t-labels')" id="sbi-adm-labels-lbl">Etiquetas</button>
+        <button class="sb-sublink" onclick="sbAdminGo('t-users')" id="sbi-adm-users-lbl">Usuarios</button>
+        <button class="sb-sublink" onclick="sbAdminGo('t-nomina')" id="sbi-adm-nomina-lbl">Nómina</button>
+        <button class="sb-sublink" onclick="sbAdminGo('t-audit')" id="sbi-adm-audit-lbl">Auditoría</button>
+        <button class="sb-sublink" onclick="sbAdminGo('t-shiftnote')" id="sbi-adm-shiftnote-lbl">Nota de turno</button>
+        <button class="sb-sublink" onclick="sbAdminGo('t-updates')" id="sbi-adm-updates-lbl">Actualizaciones</button>
+      </div>
+    </div>
+    <div class="sb-item-group" id="sbi-conta">
+      <button class="sb-item sb-group-hdr" onclick="toggleSbGroup('sbg-conta')"><span class="sb-ico"><i class="ti ti-report-money"></i></span><span class="sb-lbl" id="sbi-conta-lbl">Contabilidad</span><i class="ti ti-chevron-down sb-caret"></i></button>
+      <div class="sb-subrow" id="sbg-conta-body" style="display:none">
+        <button class="sb-sublink" onclick="sbContaGo('ct-res')" id="sbi-reportes-lbl">Reportes</button>
+        <button class="sb-sublink" onclick="sbContaGo('ct-gst')" id="sbi-conta-gst-lbl">Gastos</button>
+        <button class="sb-sublink" onclick="sbContaGo('ct-comp')" id="sbi-conta-comp-lbl">Compras</button>
+      </div>
+    </div>
     <button class="sb-item" id="sbi-cfg" onclick="sbNav('cfg')"><span class="sb-ico"><i class="ti ti-settings"></i></span><span class="sb-lbl" id="sbi-cfg-lbl">Configuración</span></button>
     <div class="sb-nav-sep"></div>
     <button class="sb-item" id="sbi-clock" onclick="sbNav('clock')" style="display:none"><span class="sb-ico"><i class="ti ti-clock"></i></span><span class="sb-lbl" id="sbi-clock-lbl">Clock In/Out</span></button>
@@ -939,10 +961,12 @@ body.light #dashboard-screen{
   <div class="modal mwide">
     <div class="mh"><h3>≡ <span id="uni-modal-title">Menú</span></h3><button class="mx" onclick="closeOv('ov-unified')">✕</button></div>
     <div class="mb" style="padding-top:0">
+      <!-- Ex "uni-top-tabs": tenía botones Administración/Contabilidad/Ajustes
+           que dejaban saltar entre secciones sin el candado (bug de
+           seguridad, ver reqPin/toggleSbGroup). Esos 3 botones se eliminaron
+           — la única entrada a estas secciones es ahora el slider. Se
+           conserva el acceso directo a Clock In/Out, que no es sensible. -->
       <div id="uni-top-tabs" style="display:flex;gap:6px;padding:12px 0 10px;border-bottom:2px solid var(--b1);margin-bottom:14px;flex-wrap:wrap;align-items:center">
-        <button class="btn btn-p" id="uni-btn-adm" onclick="uniTab('uni-adm',this)"><i class="ti ti-shield-lock"></i> <span id="uni-lbl-adm">Administración</span></button>
-        <button class="btn btn-s" id="uni-btn-conta" onclick="uniTab('uni-conta',this)"><i class="ti ti-report-money"></i> <span id="uni-lbl-conta">Contabilidad</span></button>
-        <button class="btn btn-s" id="uni-btn-ajustes" onclick="uniTab('uni-ajustes',this)"><i class="ti ti-settings"></i> <span id="uni-lbl-ajustes">Ajustes</span></button>
         <div id="uni-clock-btn" style="margin-left:auto;display:none"><button class="btn btn-s" style="color:#10b981" onclick="closeOv('ov-unified');setTimeout(openClockQuick,80)"><i class="ti ti-clock"></i> <span id="uni-lbl-clock">Clock In/Out</span></button></div>
       </div>
       <div id="uni-adm">
@@ -2611,6 +2635,7 @@ const T = {
     catNameRequired:'⚠ Nombre requerido',
     // Products
     prodNamePriceRequired:'⚠ Nombre y precio requeridos',
+    prodLockedMsg:'🔒 Desbloqueá Administración en el slider para editar o borrar productos',
     delProductConfirm:'¿Eliminar producto ',
     marginLbl:'Margen',
     // Inventory filter
@@ -3182,6 +3207,7 @@ const T = {
     catNameRequired:'⚠ Name required',
     // Products
     prodNamePriceRequired:'⚠ Name and price required',
+    prodLockedMsg:'🔒 Unlock Administración in the sidebar to edit or delete products',
     delProductConfirm:'Delete product ',
     marginLbl:'Margin',
     // Inventory filter
@@ -3467,6 +3493,12 @@ let currentView='categories',currentCategory=null;
 let editingAccountId=null;
 let curUser=null,curCat='all',pinTarget=null,pinVal='';
 let editingUserId=null;
+// Desbloqueo del candado de Administración/Contabilidad, por SESIÓN — no
+// persiste a disco a propósito: debe arrancar en false en cada boot y en
+// cada cambio de usuario (ver initSidebar/doLogout/_sessionLogout), sin
+// importar qué grupo del sidebar haya quedado expandido en el DOM.
+let adminUnlocked=false;
+let _pendingSbGroup=null;
 let confCb=null,fcExpr='',fcNum='0',fcNew=true;
 let _resetCountdownTimer=null,_resetCountdownLeft=0;
 let invCatFilter='',icCatFilter='';
@@ -5239,6 +5271,7 @@ function calcCashDiff(){
   }
 }
 function doLogout(){
+  adminUnlocked=false;
   _autoClockShift('out');
   _stopInactivityTimer();_bkpKey=null;
   if(window._shiftHbInt){clearInterval(window._shiftHbInt);window._shiftHbInt=null;}
@@ -5447,6 +5480,28 @@ function reqPin(target){
   if(target==='cancel'&&pm.can){runTarget(target);return;}
   pinTarget=target;pinVal='';updatePinDisp();el('pin-err').style.display='none';openOv('ov-pin');
 }
+// ── Sidebar jerárquico — Administración/Contabilidad como grupos colapsables ──
+// Reemplaza al viejo menú flotante #uni-top-tabs (Administración/Contabilidad/
+// Ajustes juntas dentro del mismo modal), que dejaba saltar de una sección a
+// otra sin pasar por el candado — uniTab() no chequeaba nada. Ahora el único
+// punto de entrada a estas secciones es expandir su grupo en el slider, lo
+// que sí pasa por reqPin/verifyPin (el candado de 4 dígitos ya existente).
+function toggleSbGroup(groupId){
+  var body=el(groupId+'-body');if(!body)return;
+  var isOpen=body.style.display==='block';
+  if(isOpen){body.style.display='none';return;}
+  var isProtected=(groupId==='sbg-adm'||groupId==='sbg-conta');
+  var alreadyAllowed=adminUnlocked||(curUser&&curUser.role==='admin');
+  if(isProtected&&!alreadyAllowed){
+    _pendingSbGroup=groupId;
+    reqPin('sb-group-unlock');
+    return;
+  }
+  body.style.display='block';
+  var hdr=body.previousElementSibling;if(hdr)hdr.classList.add('open');
+}
+function sbAdminGo(tabId){_sbNextAdmTab=tabId;openUnified('uni-adm');}
+function sbContaGo(tabId){_sbNextContaTab=tabId;openUnified('uni-conta');}
 var _sbNextAdmTab=null;
 var _sbNextContaTab=null;
 var _sbNextUniSection=null;
@@ -5462,9 +5517,7 @@ function _openContaDirect(){
   _hamDirectMode=true;
   reqPin('conta');
 }
-function uniTab(section,btn){
-  document.querySelectorAll('#uni-top-tabs .btn').forEach(function(b){b.className='btn btn-s';});
-  if(btn&&!btn.closest('#uni-clock-btn'))btn.className='btn btn-p';
+function uniTab(section){
   if(section==='uni-ajustes'){
     el('uni-adm').style.display='';
     el('uni-conta').style.display='none';
@@ -5482,12 +5535,12 @@ function uniTab(section,btn){
 function openUnified(section){
   loadAdminModal();
   openOv('ov-unified');
-  /* Restore nav bars (may have been hidden by _openDirect) */
-  var _tt=el('uni-top-tabs');if(_tt)_tt.style.display='';
+  /* Restore nav (may have been hidden by _openDirect) — #uni-top-tabs ya no
+     existe (era el menú flotante sin candado, eliminado); adm-tabs es la
+     navegación interna de Administración, sigue en pie. */
   var _at=el('adm-tabs');if(_at)_at.style.display='';
   var s=section||'uni-adm';
-  var btnMap={'uni-adm':'uni-btn-adm','uni-conta':'uni-btn-conta','uni-ajustes':'uni-btn-ajustes'};
-  uniTab(s,el(btnMap[s]||'uni-btn-adm'));
+  uniTab(s);
   if(_sbNextAdmTab){var _t=_sbNextAdmTab;_sbNextAdmTab=null;
     var _b=document.querySelector('#adm-tabs .btn[onclick*="'+_t+'"]');admTab(_t,_b||undefined);}
   if(_sbNextContaTab){var _ct=_sbNextContaTab;_sbNextContaTab=null;
@@ -5496,7 +5549,6 @@ function openUnified(section){
   if(cb)cb.style.display=(db&&db.settings&&db.settings.clockQuickEnabled&&db.employees&&db.employees.some(function(e){return e.useClockInOut;}))?'':'none';
   if(_hamDirectMode){
     _hamDirectMode=false;
-    if(_tt)_tt.style.display='none';
     if(_at)_at.style.display='none';
   }
 }
@@ -5514,6 +5566,14 @@ function runTarget(t2){
   else if(t2==='sales'){renderSales();openOv('ov-sales');}
   else if(t2==='conta'){openUnified('uni-conta');}
   else if(t2==='force-logout'){_execForceLogout();}
+  else if(t2==='sb-group-unlock'){
+    adminUnlocked=true;
+    if(_pendingSbGroup){
+      var body=el(_pendingSbGroup+'-body');
+      if(body){body.style.display='block';var hdr=body.previousElementSibling;if(hdr)hdr.classList.add('open');}
+      _pendingSbGroup=null;
+    }
+  }
 }
 function forceLogout(){
   closeOv('ov-oa-block');
@@ -5621,6 +5681,10 @@ function calcMargin(){
   row.style.display='';
 }
 function saveProd(){
+  // Productos es de consulta libre (sin candado) — pero guardar/crear/editar
+  // SÍ requiere haber desbloqueado Administración. Sin este guard, cualquier
+  // cajero podría editar precios libremente con solo abrir Productos.
+  if(!(curUser&&curUser.role==='admin')&&!adminUnlocked){toast(t('prodLockedMsg'));return;}
   const name=el('p-name').value.trim(),price=getNum('p-price');
   if(!name||!price){toast(t('prodNamePriceRequired'));return;}
   const eid=el('p-eid').value,imgData=el('p-data').value;
@@ -5639,6 +5703,9 @@ function editProd(id){
   admTab('t-prods',document.querySelector('#adm-tabs .btn'));
 }
 function delProd(id){
+  // Mismo guard que saveProd — el caso stock>0 ya re-pedía el código admin
+  // vía requireAdminCode, pero el de stock===0 no tenía NINGÚN chequeo.
+  if(!(curUser&&curUser.role==='admin')&&!adminUnlocked){toast(t('prodLockedMsg'));return;}
   const _dp=db.products.find(x=>x.id===id);if(!_dp)return;
   const _doDelProd=function(){
     confirm2(t('delProductConfirm')+_dp.name+'?',function(){
@@ -6868,6 +6935,7 @@ function _onInactivityTimeout(){
   toast(t('sessionLockedInactivity')+(cart&&cart.length?' '+t('cartSaved'):''));
 }
 function _sessionLogout(){
+  adminUnlocked=false;
   _stopInactivityTimer();_bkpKey=null;
   if(!curUser)return;
   if(_notifInterval){clearInterval(_notifInterval);_notifInterval=null;}
@@ -10304,6 +10372,17 @@ function _sbSetToggle(collapsed){
 }
 function initSidebar(){
   var sb=el('sidebar');if(!sb)return;
+  // Los grupos protegidos SIEMPRE arrancan colapsados y bloqueados acá —
+  // sin importar qué haya quedado en el DOM de una sesión anterior (esta
+  // app no recarga la página al cambiar de usuario, así que si no se
+  // fuerza esto, un cajero nuevo podría heredar Administración ya
+  // desplegada de quien usó el equipo antes).
+  adminUnlocked=false;
+  ['sbg-adm-body','sbg-conta-body'].forEach(function(id){
+    var body=el(id);if(!body)return;
+    body.style.display='none';
+    var hdr=body.previousElementSibling;if(hdr)hdr.classList.remove('open');
+  });
   var logoSrc=document.querySelector('#login-screen img');
   if(logoSrc){var sbi=el('sb-logo-img');if(sbi)sbi.src=logoSrc.src;}
   sb.style.display='flex';
@@ -10380,11 +10459,14 @@ function _sbUpdatePerms(){
   var isAdm=curUser.role==='admin';
   var pm=curUser.perms||{adm:true,ret:true,can:true,sal:true,conta:true};
   var show=function(id,v){var e=el(id);if(e)e.style.display=v?'flex':'none';};
+  // sbi-adm/sbi-conta ahora son los .sb-item-group envolventes (header +
+  // sub-items), no un solo <button> — 'block' porque .sb-item-group no
+  // tiene su propio display:flex (lo tiene el <button> de adentro).
+  var showGroup=function(id,v){var e=el(id);if(e)e.style.display=v?'block':'none';};
   show('sbi-prods',(isAdm||pm.adm));
   show('sbi-cust',(isAdm||pm.adm));
-  show('sbi-reportes',(isAdm||pm.conta));
-  show('sbi-adm',(isAdm||pm.adm));
-  show('sbi-conta',(isAdm||pm.conta));
+  showGroup('sbi-adm',(isAdm||pm.adm));
+  showGroup('sbi-conta',(isAdm||pm.conta));
   show('sbi-cfg',isAdm);
   var showBtn=function(id,v){var e=el(id);if(e)e.style.display=v?'':'none';};
   showBtn('sbi-ventasdia-lbl',(isAdm||pm.sal));
@@ -10401,7 +10483,7 @@ function sbNav(screen){
     if(mainEl)mainEl.style.display='none';
     if(dashEl)dashEl.style.display='flex';
     refreshDashboard();
-  }else if(screen==='prods'){_sbNextAdmTab='t-prods';reqPin('admin');}
+  }else if(screen==='prods'){sbAdminGo('t-prods');} // consulta libre — sin candado a propósito (ver guard en saveProd/editProd/delProd)
   else if(screen==='adm'){reqPin('admin');}
   else if(screen==='clock'){openClockQuick();}
   else if(screen==='inv'){_sbNextAdmTab='t-inv';reqPin('admin');}
