@@ -72,6 +72,7 @@ body.sb-collapsed .sb-ico{width:auto;}
 .sb-credits-amt{font-family:'Consolas','Courier New',monospace;}
 .sb-nav-sep{height:1px;background:var(--b1);margin:6px 10px;flex-shrink:0;}
 .sb-version{font-size:var(--fs-2xs);color:var(--tx3);text-align:center;padding:6px 10px 2px;letter-spacing:.3px;}
+.sb-lic-perm{font-size:var(--fs-2xs);color:var(--gn);text-align:center;padding:0 10px 6px;letter-spacing:.3px;font-weight:600;}
 ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:var(--s2);}::-webkit-scrollbar-thumb{background:var(--ac);border-radius:3px;}
 #lang-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:none;align-items:center;justify-content:center;}
 .lsbox{background:var(--s1);border:1.5px solid var(--b2);border-radius:16px;padding:36px 40px;width:360px;text-align:center;}
@@ -570,6 +571,7 @@ body.light #dashboard-screen{
 .db-mini-card .mn-val{font-size:1.05rem;font-weight:var(--fw-black);color:var(--tx);font-family:'Consolas','Courier New',monospace;}
 .db-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r-card);padding:var(--sp-4);box-shadow:var(--sh-1);}
 .db-card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.db-semaforo{width:10px;height:10px;border-radius:50%;display:inline-block;}
 .db-card-hd h4{font-size:var(--fs-sm);font-weight:var(--fw-bold);color:var(--tx2);}
 .db-toggle{display:flex;background:var(--s2);border-radius:var(--rs);border:1px solid var(--b1);padding:2px;gap:2px;}
 .db-toggle button{padding:3px 12px;font-size:var(--fs-2xs);border:none;border-radius:calc(var(--rs) - 2px);background:transparent;color:var(--tx3);cursor:pointer;transition:all .18s;font-weight:var(--fw-bold);}
@@ -678,6 +680,7 @@ body.light #dashboard-screen{
     <button class="sb-item" id="um-upd-btn" onclick="checkUpdates()"><span class="sb-ico"><i class="ti ti-refresh"></i></span><span class="sb-lbl" id="um-upd-txt">Buscar actualizaciones</span></button>
     <button class="sb-item" id="um-support-btn" onclick="openSupport()"><span class="sb-ico"><i class="ti ti-headset"></i></span><span class="sb-lbl" id="um-support-txt">Soporte</span></button>
     <div class="sb-version" id="hm-ver"></div>
+    <div class="sb-lic-perm" id="sb-lic-perm" style="display:none"></div>
   </nav>
   <div class="sb-footer">
     <div class="sb-caja-card">
@@ -864,7 +867,7 @@ body.light #dashboard-screen{
         <div id="db-recent-sales"></div>
       </div>
       <div class="db-card">
-        <div class="db-card-hd"><h4 id="db-h4-credits">Créditos pendientes</h4></div>
+        <div class="db-card-hd"><h4 id="db-h4-credits">Créditos pendientes</h4><span id="db-credits-semaforo" class="db-semaforo"></span></div>
         <div id="db-credits-list"></div>
       </div>
     </div>
@@ -2384,6 +2387,7 @@ const T = {
     creditPaymentsRcvd:'Pagos de crédito recibidos hoy',cashCreditPay:'Abonos en efectivo',cardCreditPay:'Abonos en tarjeta',
     newCredits:'Créditos nuevos (deuda)',incomeCollected:'Ventas cobradas',creditDebtCard:'Nuevo crédito (deuda)',totalCollected:'Total cobrado',
     creditDueDateLbl:'Fecha límite de pago',creditDueCustom:'Personalizado',creditOverdue:'VENCIDO',creditDueSoon:'Vence en',creditDueOn:'Vence el',
+    creditsSemRed:'Hay créditos vencidos',creditsSemYellow:'Hay créditos por vencer pronto',creditsSemGreen:'Todos los créditos al día',
     allowCashierDue:'Cajeros pueden fijar fecha límite',defaultDueDays:'Días límite por defecto',
     payMethodCash:'Efectivo',payMethodCard:'Tarjeta',payMethodTransf:'Transferencia',payMethodSplit:'Mixto',payMethodCredit:'Crédito',
     catNameLbl:'Nombre categoría',catListTitle:'Categorías',
@@ -2481,7 +2485,7 @@ const T = {
     taxRateLbl:'Tasa (%)',taxIncludedLbl:'Precio ya incluye impuesto (desglosar)',
     taxIncludedInfo:'Si activo: precio ya incluye impuesto y se desglosa. Si desactivado: se suma al precio.',
     taxSaveBtn:'💾 Guardar impuesto',taxDefaultName:'Impuesto',taxSaved:'✅ Impuesto guardado',
-    drawerOpened:'🗃️ Registradora abierta',exitConfirm:'¿Salir del programa?',noLicense:'⚠ Sin licencia',
+    drawerOpened:'🗃️ Registradora abierta',exitConfirm:'¿Salir del programa?',noLicense:'⚠ Sin licencia',licensePermanent:'Licencia permanente',
     cashInDrawer:'Efectivo en caja',abonosTitle:'💰 Abonos de Crédito',
     fcpTitle:'🔐 Cambia tu contraseña',fcpSubtitle:'Tu cuenta tiene una contraseña temporal. Debes establecer una nueva antes de continuar.',
     fcpNewPass:'Nueva contraseña',fcpNewPassPh:'Mínimo 4 caracteres',fcpConfirmPass:'Confirmar contraseña',
@@ -2956,6 +2960,7 @@ const T = {
     creditPaymentsRcvd:'Credit payments received today',cashCreditPay:'Cash credit payments',cardCreditPay:'Card credit payments',
     newCredits:'New credits (debt)',incomeCollected:'Collected sales',creditDebtCard:'New credit (debt)',totalCollected:'Total collected',
     creditDueDateLbl:'Payment due date',creditDueCustom:'Custom',creditOverdue:'OVERDUE',creditDueSoon:'Due in',creditDueOn:'Due on',
+    creditsSemRed:'There are overdue credits',creditsSemYellow:'There are credits due soon',creditsSemGreen:'All credits are up to date',
     allowCashierDue:'Cashiers can set due date',defaultDueDays:'Default due days',
     payMethodCash:'Cash',payMethodCard:'Card',payMethodTransf:'Transfer',payMethodSplit:'Mixed',payMethodCredit:'Credit',
     catNameLbl:'Category name',catListTitle:'Categories',
@@ -3053,7 +3058,7 @@ const T = {
     taxRateLbl:'Rate (%)',taxIncludedLbl:'Price already includes tax (itemize)',
     taxIncludedInfo:'When enabled: price already includes tax and it is itemized on receipt. When disabled: tax is added on top.',
     taxSaveBtn:'💾 Save tax',taxDefaultName:'Tax',taxSaved:'✅ Tax saved',
-    drawerOpened:'🗃️ Drawer opened',exitConfirm:'Exit program?',noLicense:'⚠ No license',
+    drawerOpened:'🗃️ Drawer opened',exitConfirm:'Exit program?',noLicense:'⚠ No license',licensePermanent:'Permanent license',
     cashInDrawer:'Cash in drawer',abonosTitle:'💰 Credit Payments',
     fcpTitle:'🔐 Change your password',fcpSubtitle:'Your account has a temporary password. You must set a new one before continuing.',
     fcpNewPass:'New password',fcpNewPassPh:'Minimum 4 characters',fcpConfirmPass:'Confirm password',
@@ -4333,17 +4338,24 @@ checkConn();
 // LICENSE BADGE
 function updateLicBadge(){
   ipcRenderer.invoke('get-license-info').then(function(info){
-    const badge=el('lic-badge');const cdown=el('offline-countdown');
+    const badge=el('lic-badge');const cdown=el('offline-countdown');const permEl=el('sb-lic-perm');
     if(cdown)cdown.style.display='none';
-    if(!info){if(badge){badge.textContent=t('noLicense');badge.className='lic-badge lic-err';badge.style.display='block';}return;}
+    if(!info){
+      if(badge){badge.textContent=t('noLicense');badge.className='lic-badge lic-err';badge.style.display='block';}
+      if(permEl)permEl.style.display='none';
+      return;
+    }
     const plan=(info.plan||'').toUpperCase();
     if(badge){
       if(info.expires_at){
         const days=Math.ceil((new Date(info.expires_at)-Date.now())/(864e5));
-        if(days<7){badge.textContent='⚠ '+plan+' · '+days+'d';badge.className='lic-badge lic-warn';}
-        else{badge.textContent='✓ '+plan+' · '+days+'d';badge.className='lic-badge lic-ok';}
-      }else{badge.textContent='✓ '+plan;badge.className='lic-badge lic-ok';}
-      badge.style.display='block';
+        if(days<7){badge.textContent='⚠ '+plan+' · '+days+'d';badge.className='lic-badge lic-warn';badge.style.display='block';}
+        else{badge.style.display='none';}
+      }else{badge.style.display='none';}
+    }
+    if(permEl){
+      if(!info.expires_at){permEl.textContent='✓ '+plan+' · '+t('licensePermanent');permEl.style.display='block';}
+      else{permEl.style.display='none';}
     }
     if(cdown&&info.last_verified&&!navigator.onLine){
       const diffDays=(Date.now()-new Date(info.last_verified).getTime())/(864e5);
@@ -10437,7 +10449,7 @@ function _sbUpdatePerms(){
   var pm=curUser.perms||{adm:true,ret:true,can:true,sal:true,conta:true};
   var show=function(id,v){var e=el(id);if(e)e.style.display=v?'flex':'none';};
   show('sbi-prods',(isAdm||pm.adm));
-  show('sbi-cust',(isAdm||pm.adm));
+  show('sbi-cust',true);
   show('sbi-adm',(isAdm||pm.adm));
   show('sbi-conta',(isAdm||pm.conta));
   show('sbi-cfg',isAdm);
@@ -10470,7 +10482,7 @@ function sbNav(screen){
   else if(screen==='conta'){reqPin('conta');}
   else if(screen==='compras'){_sbNextContaTab='ct-comp';reqPin('conta');}
   else if(screen==='audit'){openAudit();}
-  else if(screen==='cust'){_sbNextAdmTab='t-cust';reqPin('admin');}
+  else if(screen==='cust'){sbAdminGo('t-cust');} // consulta libre — sin candado a propósito, igual que Productos
   else if(screen==='gastos'){_sbNextContaTab='ct-gst';reqPin('conta');}
   else if(screen==='reportes'){_sbNextContaTab='ct-res';reqPin('conta');}
 }
@@ -10717,6 +10729,19 @@ function _renderDbTop5(){
 }
 function _renderDbCredits(){
   var el6=el('db-credits-list');if(!el6)return;
+  var semEl=el('db-credits-semaforo');
+  if(semEl){
+    var _now=new Date();_now.setHours(0,0,0,0);
+    var hasOverdue=false,hasDueSoon=false;
+    _getPendingCredits().forEach(function(c){
+      if(!c.dueDate)return;
+      var due=new Date(c.dueDate);due.setHours(0,0,0,0);
+      var diff=Math.round((due-_now)/(1000*60*60*24));
+      if(diff<0)hasOverdue=true;else if(diff<=3)hasDueSoon=true;
+    });
+    semEl.style.background=hasOverdue?'#ef4444':(hasDueSoon?'#fbbf24':'#22c55e');
+    semEl.title=hasOverdue?t('creditsSemRed'):(hasDueSoon?t('creditsSemYellow'):t('creditsSemGreen'));
+  }
   // Antes esta función solo miraba db.credits (créditos legacy) e ignoraba
   // las ventas a crédito (db.sales con payMethod='credit') — nunca se
   // notó porque el elemento #db-credits-list no existía en ningún HTML
