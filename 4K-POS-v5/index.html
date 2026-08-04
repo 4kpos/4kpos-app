@@ -666,24 +666,24 @@ body.light #dashboard-screen{
     <div class="sb-item-group" id="sbi-adm">
       <button class="sb-item sb-group-hdr" onclick="toggleSbGroup('sbg-adm')"><span class="sb-ico"><i class="ti ti-shield-lock"></i></span><span class="sb-lbl" id="sbi-adm-lbl">Administración</span><i class="ti ti-chevron-down sb-caret"></i></button>
       <div class="sb-subrow" id="sbg-adm-body" style="display:none">
-        <button class="sb-sublink" onclick="sbAdminGo('t-cats')" id="sbi-adm-cats-lbl">Categorías</button>
-        <button class="sb-sublink" onclick="sbAdminGo('t-inv')" id="sbi-adm-inv-lbl">Inventario</button>
-        <button class="sb-sublink" onclick="sbAdminGo('t-combos')" id="sbi-adm-combos-lbl">Combos</button>
-        <button class="sb-sublink" onclick="sbAdminGo('t-specials')" id="sbi-adm-specials-lbl">Especiales</button>
-        <button class="sb-sublink" onclick="sbAdminGo('t-labels')" id="sbi-adm-labels-lbl">Etiquetas</button>
-        <button class="sb-sublink" onclick="sbAdminGo('t-users')" id="sbi-adm-users-lbl">Usuarios</button>
-        <button class="sb-sublink" onclick="sbAdminGo('t-nomina')" id="sbi-adm-nomina-lbl">Nómina</button>
-        <button class="sb-sublink" onclick="sbAdminGo('t-audit')" id="sbi-adm-audit-lbl">Auditoría</button>
-        <button class="sb-sublink" onclick="sbAdminGo('t-shiftnote')" id="sbi-adm-shiftnote-lbl">Nota de turno</button>
-        <button class="sb-sublink" onclick="sbAdminGo('t-updates')" id="sbi-adm-updates-lbl">Actualizaciones</button>
+        <button class="sb-item" onclick="sbAdminGo('t-cats')" id="sbi-adm-cats-lbl">Categorías</button>
+        <button class="sb-item" onclick="sbAdminGo('t-inv')" id="sbi-adm-inv-lbl">Inventario</button>
+        <button class="sb-item" onclick="sbAdminGo('t-combos')" id="sbi-adm-combos-lbl">Combos</button>
+        <button class="sb-item" onclick="sbAdminGo('t-specials')" id="sbi-adm-specials-lbl">Especiales</button>
+        <button class="sb-item" onclick="sbAdminGo('t-labels')" id="sbi-adm-labels-lbl">Etiquetas</button>
+        <button class="sb-item" onclick="sbAdminGo('t-users')" id="sbi-adm-users-lbl">Usuarios</button>
+        <button class="sb-item" onclick="sbAdminGo('t-nomina')" id="sbi-adm-nomina-lbl">Nómina</button>
+        <button class="sb-item" onclick="sbAdminGo('t-audit')" id="sbi-adm-audit-lbl">Auditoría</button>
+        <button class="sb-item" onclick="sbAdminGo('t-shiftnote')" id="sbi-adm-shiftnote-lbl">Nota de turno</button>
+        <button class="sb-item" onclick="sbAdminGo('t-updates')" id="sbi-adm-updates-lbl">Actualizaciones</button>
       </div>
     </div>
     <div class="sb-item-group" id="sbi-conta">
       <button class="sb-item sb-group-hdr" onclick="toggleSbGroup('sbg-conta')"><span class="sb-ico"><i class="ti ti-report-money"></i></span><span class="sb-lbl" id="sbi-conta-lbl">Contabilidad</span><i class="ti ti-chevron-down sb-caret"></i></button>
       <div class="sb-subrow" id="sbg-conta-body" style="display:none">
-        <button class="sb-sublink" onclick="sbContaGo('ct-res')" id="sbi-reportes-lbl">Reportes</button>
-        <button class="sb-sublink" onclick="sbContaGo('ct-gst')" id="sbi-conta-gst-lbl">Gastos</button>
-        <button class="sb-sublink" onclick="sbContaGo('ct-comp')" id="sbi-conta-comp-lbl">Compras</button>
+        <button class="sb-item" onclick="sbContaGo('ct-res')" id="sbi-reportes-lbl">Reportes</button>
+        <button class="sb-item" onclick="sbContaGo('ct-gst')" id="sbi-conta-gst-lbl">Gastos</button>
+        <button class="sb-item" onclick="sbContaGo('ct-comp')" id="sbi-conta-comp-lbl">Compras</button>
       </div>
     </div>
     <button class="sb-item" id="sbi-cfg" onclick="sbNav('cfg')"><span class="sb-ico"><i class="ti ti-settings"></i></span><span class="sb-lbl" id="sbi-cfg-lbl">Configuración</span></button>
@@ -5489,7 +5489,7 @@ function reqPin(target){
 function toggleSbGroup(groupId){
   var body=el(groupId+'-body');if(!body)return;
   var isOpen=body.style.display==='block';
-  if(isOpen){body.style.display='none';return;}
+  if(isOpen){ body.style.display='none'; _sbCloseGroupHdr(groupId); return; }
   var isProtected=(groupId==='sbg-adm'||groupId==='sbg-conta');
   var alreadyAllowed=adminUnlocked||(curUser&&curUser.role==='admin');
   if(isProtected&&!alreadyAllowed){
@@ -5497,8 +5497,24 @@ function toggleSbGroup(groupId){
     reqPin('sb-group-unlock');
     return;
   }
+  _openSbGroupExclusive(groupId);
+}
+// Acordeón: abrir un grupo cierra cualquier otro que haya quedado abierto —
+// nunca los dos a la vez. _sbCloseGroupHdr saca la clase 'open' del header
+// (la flechita) para que no quede rotada al colapsar.
+function _openSbGroupExclusive(groupId){
+  ['sbg-adm-body','sbg-conta-body'].forEach(function(id){
+    if(id===groupId+'-body')return;
+    var b=el(id);
+    if(b&&b.style.display==='block'){ b.style.display='none'; _sbCloseGroupHdr(id.replace('-body','')); }
+  });
+  var body=el(groupId+'-body');if(!body)return;
   body.style.display='block';
   var hdr=body.previousElementSibling;if(hdr)hdr.classList.add('open');
+}
+function _sbCloseGroupHdr(groupId){
+  var body=el(groupId+'-body');if(!body)return;
+  var hdr=body.previousElementSibling;if(hdr)hdr.classList.remove('open');
 }
 function sbAdminGo(tabId){_sbNextAdmTab=tabId;openUnified('uni-adm');}
 function sbContaGo(tabId){_sbNextContaTab=tabId;openUnified('uni-conta');}
@@ -5578,8 +5594,7 @@ function runTarget(t2){
   else if(t2==='sb-group-unlock'){
     adminUnlocked=true;
     if(_pendingSbGroup){
-      var body=el(_pendingSbGroup+'-body');
-      if(body){body.style.display='block';var hdr=body.previousElementSibling;if(hdr)hdr.classList.add('open');}
+      _openSbGroupExclusive(_pendingSbGroup);
       _pendingSbGroup=null;
     }
   }
