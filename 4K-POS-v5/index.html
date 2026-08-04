@@ -5528,7 +5528,16 @@ function uniTab(section){
   }else{
     el('uni-adm').style.display=(section==='uni-adm')?'':'none';
     el('uni-conta').style.display=(section==='uni-conta')?'':'none';
-    if(section==='uni-adm'){var at=el('adm-tabs');if(at)at.style.display='';}
+    if(section==='uni-adm'){
+      // HOTFIX seguridad: antes esto mostraba #adm-tabs (Usuarios/Config/
+      // Nómina/Auditoría) SIEMPRE al entrar a uni-adm, sin importar la ruta.
+      // Rutas libres (Productos, Clientes) también abren uni-adm — así que
+      // un cajero sin Administración desbloqueada veía y podía clickear la
+      // barra completa. Ahora solo se muestra si ya está desbloqueada.
+      var at=el('adm-tabs');
+      var canSeeAdminTabs=adminUnlocked||(curUser&&curUser.role==='admin');
+      if(at) at.style.display=canSeeAdminTabs?'':'none';
+    }
     if(section==='uni-conta'){loadContaPerms();renderConta();}
   }
 }
