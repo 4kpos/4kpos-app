@@ -49,7 +49,7 @@ body.sb-collapsed #sb-toggle-btn{right:auto;left:50%;top:52px;transform:translat
 .sb-item.active{background:var(--ac);color:#fff;font-weight:var(--fw-bold);}
 .sb-ico{font-size:1.08rem;line-height:1;flex-shrink:0;width:20px;text-align:center;display:inline-flex;align-items:center;justify-content:center;}
 .sb-lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-body.sb-collapsed .sb-lbl,body.sb-collapsed .sb-subrow,body.sb-collapsed .sb-brand-txt,body.sb-collapsed .sb-caja-card,body.sb-collapsed .sb-status,body.sb-collapsed .sb-credits-card{display:none;}
+body.sb-collapsed .sb-lbl,body.sb-collapsed .sb-subrow,body.sb-collapsed .sb-brand-txt,body.sb-collapsed .sb-caja-card,body.sb-collapsed .sb-status,body.sb-collapsed .sb-credits-card,body.sb-collapsed .sb-sysinfo{display:none;}
 body.sb-collapsed .sb-item{justify-content:center;padding:9px 4px;}
 body.sb-collapsed .sb-footer{padding:10px 4px;}
 body.sb-collapsed .sb-ico{width:auto;}
@@ -665,6 +665,7 @@ body.light #dashboard-screen{
     </div>
     <button class="sb-item" id="sbi-prods" onclick="sbNav('prods')"><span class="sb-ico"><i class="ti ti-box"></i></span><span class="sb-lbl" id="sbi-prods-lbl">Productos</span></button>
     <button class="sb-item" id="sbi-cust" onclick="sbNav('cust')"><span class="sb-ico"><i class="ti ti-users"></i></span><span class="sb-lbl" id="sbi-cust-lbl">Clientes</span></button>
+    <button class="sb-item" id="sbi-fac" onclick="sbFacOpen()"><span class="sb-ico"><i class="ti ti-receipt"></i></span><span class="sb-lbl" id="sbi-fac-lbl">Agregar factura</span></button>
     <button class="sb-item" id="sbi-adm" onclick="sbAdminOpen()"><span class="sb-ico"><i class="ti ti-shield-lock"></i></span><span class="sb-lbl" id="sbi-adm-lbl">Administración</span></button>
     <button class="sb-item" id="sbi-conta" onclick="sbContaOpen()"><span class="sb-ico"><i class="ti ti-report-money"></i></span><span class="sb-lbl" id="sbi-conta-lbl">Contabilidad</span></button>
     <button class="sb-item" id="sbi-cfg" onclick="sbNav('cfg')"><span class="sb-ico"><i class="ti ti-settings"></i></span><span class="sb-lbl" id="sbi-cfg-lbl">Configuración</span></button>
@@ -679,8 +680,10 @@ body.light #dashboard-screen{
     <button class="sb-item" id="tbtn-theme" onclick="toggleTheme()"><span class="sb-ico" id="tbtn-theme-icon"><i class="ti ti-moon"></i></span><span class="sb-lbl" id="um-tema-txt">Tema</span></button>
     <button class="sb-item" id="um-upd-btn" onclick="checkUpdates()"><span class="sb-ico"><i class="ti ti-refresh"></i></span><span class="sb-lbl" id="um-upd-txt">Buscar actualizaciones</span></button>
     <button class="sb-item" id="um-support-btn" onclick="openSupport()"><span class="sb-ico"><i class="ti ti-headset"></i></span><span class="sb-lbl" id="um-support-txt">Soporte</span></button>
-    <div class="sb-version" id="hm-ver"></div>
-    <div class="sb-lic-perm" id="sb-lic-perm" style="display:none"></div>
+    <div class="sb-sysinfo">
+      <div class="sb-version" id="hm-ver"></div>
+      <div class="sb-lic-perm" id="sb-lic-perm" style="display:none"></div>
+    </div>
   </nav>
   <div class="sb-footer">
     <div class="sb-caja-card">
@@ -1047,7 +1050,7 @@ body.light #dashboard-screen{
           <div class="tog"><span class="tog-label" id="pm-sal-lbl">📊 Ventas del día</span><label class="tog-sw"><input type="checkbox" id="pm-sal" checked><span class="slider"></span></label></div>
           <div class="tog"><span class="tog-label" id="pm-conta-lbl">📒 Contabilidad</span><label class="tog-sw"><input type="checkbox" id="pm-conta" checked><span class="slider"></span></label></div>
           <div class="tog" style="padding-left:18px"><span class="tog-label" id="pm-contaFull-lbl" style="font-size:.82rem;color:var(--tx3)">↳ Ver contabilidad completa</span><label class="tog-sw"><input type="checkbox" id="pm-contaFull"><span class="slider"></span></label></div>
-          <div class="tog"><span class="tog-label" id="pm-fac-lbl">🧾 Facturas</span><label class="tog-sw"><input type="checkbox" id="pm-fac" checked><span class="slider"></span></label></div>
+          <div class="tog"><span class="tog-label" id="pm-fac-lbl">🧾 Agregar facturas/productos</span><label class="tog-sw"><input type="checkbox" id="pm-fac" checked><span class="slider"></span></label></div>
           <div class="tog"><span class="tog-label" id="pm-gst-lbl">💸 Gastos</span><label class="tog-sw"><input type="checkbox" id="pm-gst" checked><span class="slider"></span></label></div>
         </div>
         <div class="frow"><button class="btn btn-p" id="user-save-btn" onclick="saveUser()">💾 Guardar</button><button class="btn btn-s" onclick="clearUser()">↺</button></div>
@@ -2393,7 +2396,7 @@ const T = {
     catNameLbl:'Nombre categoría',catListTitle:'Categorías',
     userNameLbl:'Nombre',userUserLbl:'Usuario',userPassLbl:'Contraseña',userRoleLbl:'Rol',
     roleCashier:'💰 Cajero',permsLbl:'Permisos',userListTitle:'Usuarios',
-    permAdm:'🔐 Administración',permContaFull:'↳ Ver contabilidad completa',permFac:'🧾 Facturas',
+    permAdm:'🔐 Administración',permContaFull:'↳ Ver contabilidad completa',permFac:'🧾 Agregar facturas/productos',
     cfgAdminCode:'Código Admin',cfgCurCode:'Código actual',cfgNewCode:'Nuevo código',cfgChangeBtn:'🔑 Cambiar',
     cfgFundLbl:'Fondo de Caja',cfgAmountLbl:'Monto ($)',
     cfgPayMethods:'Métodos de Pago',cfgOpenAccounts:'📋 Cuentas Abiertas',cfgCreditOpts:'Opciones de Crédito',
@@ -2966,7 +2969,7 @@ const T = {
     catNameLbl:'Category name',catListTitle:'Categories',
     userNameLbl:'Name',userUserLbl:'Username',userPassLbl:'Password',userRoleLbl:'Role',
     roleCashier:'💰 Cashier',permsLbl:'Permissions',userListTitle:'Users',
-    permAdm:'🔐 Administration',permContaFull:'↳ Full accounting access',permFac:'🧾 Invoices',
+    permAdm:'🔐 Administration',permContaFull:'↳ Full accounting access',permFac:'🧾 Add invoices/products',
     cfgAdminCode:'Admin Code',cfgCurCode:'Current code',cfgNewCode:'New code',cfgChangeBtn:'🔑 Change',
     cfgFundLbl:'Cash Fund',cfgAmountLbl:'Amount ($)',
     cfgPayMethods:'Payment Methods',cfgOpenAccounts:'📋 Open Accounts',cfgCreditOpts:'Credit Options',
@@ -5487,6 +5490,15 @@ function sbContaOpen(){
   if(!alreadyAllowed){ _pendingSbOpen='conta'; reqPin('sb-group-unlock'); return; }
   sbContaGo('ct-res');
 }
+// Entrada acotada a Compras (agregar factura) para cajeros con perms.fac —
+// a propósito sin PIN, ese es el punto del permiso. No da acceso al resto
+// de Contabilidad (Resumen/Gastos/Gráficos/Mensual siguen ocultos, ver
+// loadContaPerms).
+function sbFacOpen(){
+  var allowed=(curUser&&curUser.role==='admin')||adminUnlocked||(curUser&&curUser.perms&&curUser.perms.fac);
+  if(!allowed){toast(t('prodLockedMsg'));return;}
+  sbContaGo('ct-comp');
+}
 function sbAdminGo(tabId){_sbNextAdmTab=tabId;openUnified('uni-adm');}
 function sbContaGo(tabId){_sbNextContaTab=tabId;openUnified('uni-conta');}
 var _sbNextAdmTab=null;
@@ -5678,10 +5690,20 @@ function saveProd(){
   // Productos es de consulta libre (sin candado) — pero guardar/crear/editar
   // SÍ requiere haber desbloqueado Administración. Sin este guard, cualquier
   // cajero podría editar precios libremente con solo abrir Productos.
-  if(!(curUser&&curUser.role==='admin')&&!adminUnlocked){toast(t('prodLockedMsg'));return;}
+  // Excepción: perms.fac permite CREAR productos nuevos (sin p-eid) para
+  // reponer mercancía sin admin presente — pero NO editar los existentes,
+  // eso sigue admin-only igual que siempre.
+  const eid=el('p-eid').value;
+  const isAdmOrUnlocked=(curUser&&curUser.role==='admin')||adminUnlocked;
+  const canAddOnly=!isAdmOrUnlocked&&curUser&&curUser.perms&&curUser.perms.fac;
+  if(eid){
+    if(!isAdmOrUnlocked){toast(t('prodLockedMsg'));return;}
+  }else{
+    if(!isAdmOrUnlocked&&!canAddOnly){toast(t('prodLockedMsg'));return;}
+  }
   const name=el('p-name').value.trim(),price=getNum('p-price');
   if(!name||!price){toast(t('prodNamePriceRequired'));return;}
-  const eid=el('p-eid').value,imgData=el('p-data').value;
+  const imgData=el('p-data').value;
   const prod={id:eid||Date.now().toString(),name,cat:el('p-cat').value,price,cost:getNum('p-cost')||undefined,stock:getNum('p-stock'),minStock:getNum('p-minstock')||5,bc:el('p-bc').value.trim(),img:imgData};
   if(eid){const i=db.products.findIndex(x=>x.id===eid);if(i>=0){if(db.products[i].price!==price)logAction('auditPriceEdit',prod.name,dolr(db.products[i].price),dolr(price));if(!imgData)prod.img=db.products[i].img;db.products[i]=prod;}el('p-eid').value='';}
   else db.products.push(prod);
@@ -5717,10 +5739,12 @@ function clearProd(){['p-eid','p-name','p-price','p-cost','p-stock','p-minstock'
 function renderProdList(){
   const e2=el('prod-list');if(!e2)return;
   if(!db.products.length){e2.innerHTML='<div style="color:var(--tx3);font-size:.82rem;padding:8px 0">'+t('noProducts')+'</div>';return;}
+  const canEdit=(curUser&&curUser.role==='admin')||adminUnlocked;
   e2.innerHTML=db.products.map(p=>{
     const th=p.img?('<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;border-radius:7px">'):p.name[0];
     const marginTxt=(curUser&&curUser.role==='admin'&&p.cost)?(' · '+t('marginLbl')+': '+((p.price-p.cost)/p.cost*100).toFixed(1)+'%'):'';
-    return '<div class="pli"><div class="pli-thumb">'+th+'</div><div class="pli-info"><div class="pli-name">'+p.name+'</div><div class="pli-meta">'+dolr(p.price)+' · Stock: '+(p.stock||0)+(p.bc?' · #'+p.bc:'')+marginTxt+'</div></div><div class="pli-price">'+dolr(p.price)+'</div><div style="display:flex;gap:4px"><button class="eb" onclick="editProd(\''+p.id+'\')">✏</button><button class="xb" onclick="delProd(\''+p.id+'\')">✕</button></div></div>';
+    const actions=canEdit?('<div style="display:flex;gap:4px"><button class="eb" onclick="editProd(\''+p.id+'\')">✏</button><button class="xb" onclick="delProd(\''+p.id+'\')">✕</button></div>'):'';
+    return '<div class="pli"><div class="pli-thumb">'+th+'</div><div class="pli-info"><div class="pli-name">'+p.name+'</div><div class="pli-meta">'+dolr(p.price)+' · Stock: '+(p.stock||0)+(p.bc?' · #'+p.bc:'')+marginTxt+'</div></div><div class="pli-price">'+dolr(p.price)+'</div>'+actions+'</div>';
   }).join('');
 }
 // "Más vendidos": suma qty vendida por producto en ventas reales de los
@@ -8268,9 +8292,14 @@ function loadContaPerms(){
   const isAdm=curUser&&curUser.role==='admin';
   const hasFullAccess=isAdm||!!pm.contaFull;
   // Hide restricted tabs for non-full users
-  ['ct-btn-res','ct-btn-fac','ct-btn-comp','ct-btn-gst','ct-btn-graf','ct-btn-monthly'].forEach(function(id){
+  ['ct-btn-res','ct-btn-fac','ct-btn-gst','ct-btn-graf','ct-btn-monthly'].forEach(function(id){
     const b=el(id);if(b)b.style.display=hasFullAccess?'':'none';
   });
+  // Compras tiene su propio permiso independiente (perms.fac) — no depende
+  // de contaFull, para que un cajero con solo ese permiso pueda volver a
+  // esta pestaña si navegó a Créditos.
+  const compBtn=el('ct-btn-comp');
+  if(compBtn)compBtn.style.display=(hasFullAccess||pm.fac)?'':'none';
   const compBlock=el('comp-block'),compContent=el('comp-content');
   if(compBlock&&compContent){
     if(!isAdm&&!pm.fac){compBlock.style.display='block';compContent.style.display='none';}
@@ -8417,6 +8446,10 @@ function clearCompForm(){
   renderCompItems();
 }
 function saveCompInvoice(){
+  // Guard real — antes solo dependía de que el botón estuviera oculto en
+  // loadContaPerms(). Cualquiera que llamara esta función directo podía
+  // agregar facturas sin permiso.
+  if(!(curUser&&curUser.role==='admin')&&!adminUnlocked&&!(curUser&&curUser.perms&&curUser.perms.fac)){toast(t('prodLockedMsg'));return;}
   const proveedor=el('comp-prov')?el('comp-prov').value.trim():'';
   if(!proveedor){toast(t('toastProviderRequired'));return;}
   const numFac=el('comp-num')?el('comp-num').value.trim():'';
@@ -10448,8 +10481,9 @@ function _sbUpdatePerms(){
   var isAdm=curUser.role==='admin';
   var pm=curUser.perms||{adm:true,ret:true,can:true,sal:true,conta:true};
   var show=function(id,v){var e=el(id);if(e)e.style.display=v?'flex':'none';};
-  show('sbi-prods',(isAdm||pm.adm));
+  show('sbi-prods',(isAdm||pm.adm||pm.fac));
   show('sbi-cust',true);
+  show('sbi-fac',(isAdm||pm.fac));
   show('sbi-adm',(isAdm||pm.adm));
   show('sbi-conta',(isAdm||pm.conta));
   show('sbi-cfg',isAdm);
