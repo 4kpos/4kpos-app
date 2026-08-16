@@ -58,3 +58,23 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Publish fixed-name installer to "download" release
+        working-directory: 4K-POS-v5
+        shell: bash
+        run: |
+          EXE_PATH=$(find dist -maxdepth 1 -name "*.exe" | head -n 1)
+          if [ -z "$EXE_PATH" ]; then
+            echo "No se encontró ningún .exe en dist/"
+            exit 1
+          fi
+          cp "$EXE_PATH" dist/4K-POS-Setup.exe
+
+          gh release delete download -y || true
+
+          gh release create download dist/4K-POS-Setup.exe \
+            -t "Descarga directa" \
+            --notes "Descarga directa - siempre apunta a la última versión publicada." \
+            || gh release upload download dist/4K-POS-Setup.exe --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
